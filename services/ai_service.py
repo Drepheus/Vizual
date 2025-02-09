@@ -27,7 +27,7 @@ def get_ai_response(query):
 
     try:
         response = client.chat.completions.create(
-            model="gpt-4",  # Using standard GPT-4 model
+            model="gpt-3.5-turbo",  # Using GPT-3.5-turbo as requested
             messages=[
                 {
                     "role": "system",
