@@ -58,6 +58,22 @@
                             <p><strong>API Key:</strong> Active</p>
                             <p><strong>Last Update:</strong> {{ sam_last_update }}</p>
                         </div>
+                        <div class="sam-data-content mt-3">
+                            {% if sam_data and not sam_data.get('error') %}
+                                {% for entity in sam_data %}
+                                <div class="card dashboard-card sam-data-card mb-2">
+                                    <div class="card-body py-2">
+                                        <p class="mb-1"><strong>Entity:</strong> {{ entity.entity_name }}</p>
+                                        <p class="mb-1"><strong>DUNS/UEI:</strong> {{ entity.duns }}</p>
+                                        <p class="mb-1"><strong>Status:</strong> {{ entity.status }}</p>
+                                        <p class="mb-0"><strong>Expires:</strong> {{ entity.expiration_date }}</p>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <p class="text-muted">No SAM.gov data available</p>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>
