@@ -102,7 +102,8 @@ def admin_upgrade(user_id):
 @login_required
 def dashboard():
     queries = Query.query.filter_by(user_id=current_user.id).order_by(Query.created_at.desc()).limit(5)
-    return render_template('dashboard.html', queries=queries)
+    sam_last_update = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    return render_template('dashboard.html', queries=queries, sam_last_update=sam_last_update)
 
 @app.route('/api/query', methods=['POST'])
 @login_required

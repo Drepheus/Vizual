@@ -79,6 +79,24 @@
     color: var(--gov-blue);
 }
 
+.sam-status-section {
+    padding: 1rem 0;
+}
+
+.sam-api-status {
+    display: flex;
+    align-items: center;
+    font-size: 1.1rem;
+}
+
+.sam-data-stats {
+    padding: 0.5rem 0;
+}
+
+.sam-data-stats p {
+    margin-bottom: 0.5rem;
+}
+
 .sam-data-header {
     display: flex;
     align-items: center;
