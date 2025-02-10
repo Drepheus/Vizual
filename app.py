@@ -105,7 +105,8 @@ def dashboard():
     queries = Query.query.filter_by(user_id=current_user.id).order_by(Query.created_at.desc()).limit(5)
     sam_last_update = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     sam_data = sam_service.get_relevant_data("contractor status")
-    return render_template('dashboard.html', queries=queries, sam_last_update=sam_last_update, sam_data=sam_data)
+    awarded_contracts = sam_service.get_awarded_contracts()
+    return render_template('dashboard.html', queries=queries, sam_last_update=sam_last_update, sam_data=sam_data, awarded_contracts=awarded_contracts)
 
 @app.route('/api/query', methods=['POST'])
 @login_required
