@@ -100,13 +100,13 @@ def dashboard():
 def process_query():
     data = request.get_json()
     query_text = data.get('query')
-    
-    if not current_user.is_premium and Query.query.filter_by(user_id=current_user.id).count() >= 5:
+
+    if not current_user.is_premium and Query.query.filter_by(user_id=current_user.id).count() >= 10:
         return jsonify({'error': 'Free tier limit reached. Please upgrade to premium.'}), 403
-    
+
     ai_response = ai_service.get_ai_response(query_text)
     sam_data = sam_service.get_relevant_data(query_text)
-    
+
     query = Query(
         user_id=current_user.id,
         query_text=query_text,
@@ -114,7 +114,7 @@ def process_query():
     )
     db.session.add(query)
     db.session.commit()
-    
+
     return jsonify({
         'ai_response': ai_response,
         'sam_data': sam_data
