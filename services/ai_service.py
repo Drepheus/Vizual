@@ -48,13 +48,18 @@ def get_local_response(query):
     return " ".join(response_parts)
 
 def get_ai_response(query):
+    if not OPENAI_API_KEY:
+        logger.error("OPENAI_API_KEY is not set in environment variables")
+        return "Error: OpenAI API key is not configured. Please set up your API key in Replit Secrets."
+
     if not client and not init_openai_client():
-        logger.warning("OpenAI API not configured, falling back to local processing")
-        return get_local_response(query)
+        logger.error("Failed to initialize OpenAI client")
+        return "Error: Could not initialize OpenAI client. Please check your API key."
 
     try:
+        logger.debug(f"Sending request to OpenAI API with query: {query[:50]}...")
         response = client.chat.completions.create(
-            model="gpt-3.5-turbo-0125",  # Latest GPT-3.5 model
+            model="gpt-3.5-turbo-0125",
             messages=[
                 {
                     "role": "system",
@@ -70,10 +75,7 @@ def get_ai_response(query):
     except Exception as e:
         error_msg = str(e)
         logger.error(f"OpenAI API error: {error_msg}")
-
-        # Fall back to local processing for any API errors
-        logger.info("Falling back to local processing")
-        return get_local_response(query)
+        return f"Error connecting to OpenAI API: {error_msg}"
 
 # Initialize the client when the module is imported
 init_openai_client()
