@@ -26,8 +26,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 const data = await response.json();
 
                 if (response.ok) {
-                    displayResponse(data);
-                    updateQueryHistory(query, data.ai_response);
+                    // Convert markdown to HTML before displaying
+                    const formattedResponse = data.ai_response
+                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                        .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank">$1</a>');
+                    
+                    displayResponse({...data, ai_response: formattedResponse});
+                    updateQueryHistory(query, formattedResponse);
                 } else {
                     throw new Error(data.error || 'Failed to process query');
                 }
