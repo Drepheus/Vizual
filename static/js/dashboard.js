@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     const formattedResponse = data.ai_response
                         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                         .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank">$1</a>');
-                    
+
                     displayResponse({...data, ai_response: formattedResponse});
                     updateQueryHistory(query, formattedResponse);
                 } else {
@@ -56,12 +56,14 @@ document.addEventListener('DOMContentLoaded', function() {
                         ${formatResponse(data.ai_response)}
                     </div>
 
-                    <div class="sam-data-header">
-                        <i class="fas fa-database fa-2x"></i>
-                        <h4 class="mb-0">SAM.gov Data</h4>
-                    </div>
-                    <div class="ai-response">
-                        ${formatSamData(data.sam_data)}
+                    <div class="sam-data-section mt-4">
+                        <div class="sam-data-header">
+                            <i class="fas fa-database fa-2x"></i>
+                            <h4 class="mb-0">SAM.gov Data</h4>
+                        </div>
+                        <div class="sam-data-content">
+                            ${formatSamData(data.sam_data)}
+                        </div>
                     </div>
                     <div class="response-metadata">
                         <i class="fas fa-info-circle me-2"></i>
