@@ -1,7 +1,7 @@
 
 import requests
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 
 def get_relevant_data(query):
     try:
@@ -10,11 +10,16 @@ def get_relevant_data(query):
             'Accept': 'application/json'
         }
         
+        today = datetime.now()
+        past = today - timedelta(days=30)
+        future = today + timedelta(days=30)
+        
         params = {
             'page': 0,
             'size': 3,  # Get last 3 entries
             'api_key': os.environ.get('SAM_API_KEY'),
-            'postedFrom': datetime.now().strftime("%Y-%m-%d"),
+            'postedFrom': past.strftime("%Y-%m-%d"),
+            'postedTo': future.strftime("%Y-%m-%d"),
             'limit': 3
         }
         
