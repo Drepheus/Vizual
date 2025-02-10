@@ -89,6 +89,15 @@ def logout():
     logout_user()
     return redirect(url_for('index'))
 
+@app.route('/admin/upgrade/<int:user_id>')
+def admin_upgrade(user_id):
+    user = User.query.get(user_id)
+    if user:
+        user.is_premium = True
+        db.session.commit()
+        return f"User {user.username} upgraded to premium!"
+    return "User not found", 404
+
 @app.route('/dashboard')
 @login_required
 def dashboard():
