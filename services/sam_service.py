@@ -3,16 +3,58 @@ import os
 from datetime import datetime, timedelta
 import logging
 from time import sleep
+import json
+from functools import lru_cache
 
 logger = logging.getLogger(__name__)
 
+# Cache responses for 5 minutes to avoid hitting rate limits
+@lru_cache(maxsize=128)
+def _cached_sam_request(endpoint, query_params_str):
+    """Make a cached request to SAM.gov API"""
+    base_url = 'https://api.sam.gov/opportunities/v2'
+    headers = {
+        'X-Api-Key': os.environ.get('SAM_API_KEY'),
+        'Accept': 'application/json'
+    }
+
+    # Convert query_params_str back to dict
+    params = json.loads(query_params_str)
+
+    # Implement exponential backoff
+    max_retries = 5
+    for attempt in range(max_retries):
+        try:
+            response = requests.get(
+                f'{base_url}/{endpoint}',
+                headers=headers,
+                params=params,
+                timeout=10
+            )
+
+            if response.status_code == 200:
+                return response.json()
+            elif response.status_code == 429:
+                wait_time = min(30, (2 ** attempt))  # Exponential backoff, max 30 seconds
+                logger.warning(f"Rate limit hit, waiting {wait_time} seconds before retry {attempt + 1}/{max_retries}")
+                sleep(wait_time)
+                continue
+            else:
+                logger.error(f"SAM.gov API error: {response.status_code} - {response.text}")
+                return None
+
+        except requests.Timeout:
+            logger.error("SAM.gov API request timed out")
+            return None
+        except Exception as e:
+            logger.error(f"Error making SAM.gov request: {str(e)}")
+            return None
+
+    logger.error("Max retries exceeded for SAM.gov API request")
+    return None
+
 def get_relevant_data(query):
     try:
-        headers = {
-            'X-Api-Key': os.environ.get('SAM_API_KEY'),
-            'Accept': 'application/json'
-        }
-
         today = datetime.now()
         future = today + timedelta(days=30)
 
@@ -27,40 +69,20 @@ def get_relevant_data(query):
         if query:
             params['q'] = query
 
-        # Add retry logic for rate limits
-        max_retries = 3
-        for attempt in range(max_retries):
-            response = requests.get(
-                'https://api.sam.gov/opportunities/v2/search',
-                headers=headers,
-                params=params,
-                timeout=10
-            )
+        # Convert params to string for caching
+        params_str = json.dumps(params, sort_keys=True)
 
-            if response.status_code == 200:
-                data = response.json()
-                return format_sam_data(data)
-            elif response.status_code == 429:  # Rate limit
-                if attempt < max_retries - 1:
-                    sleep(2)  # Wait before retrying
-                    continue
-            logger.error(f"SAM.gov API error: {response.status_code} - {response.text}")
-            return []
-
-    except requests.Timeout:
-        logger.error("SAM.gov API request timed out")
+        data = _cached_sam_request('search', params_str)
+        if data:
+            return format_sam_data(data)
         return []
+
     except Exception as e:
         logger.error(f"Error fetching SAM.gov data: {str(e)}")
         return []
 
 def get_awarded_contracts():
     try:
-        headers = {
-            'X-Api-Key': os.environ.get('SAM_API_KEY'),
-            'Accept': 'application/json'
-        }
-
         today = datetime.now()
         past = today - timedelta(days=30)
 
@@ -72,29 +94,14 @@ def get_awarded_contracts():
             'awardStatus': 'awarded'
         }
 
-        # Add retry logic for rate limits
-        max_retries = 3
-        for attempt in range(max_retries):
-            response = requests.get(
-                'https://api.sam.gov/opportunities/v2/search',
-                headers=headers,
-                params=params,
-                timeout=10
-            )
+        # Convert params to string for caching
+        params_str = json.dumps(params, sort_keys=True)
 
-            if response.status_code == 200:
-                data = response.json()
-                return format_awards_data(data)
-            elif response.status_code == 429:  # Rate limit
-                if attempt < max_retries - 1:
-                    sleep(2)  # Wait before retrying
-                    continue
-            logger.error(f"SAM.gov Awards API error: {response.status_code} - {response.text}")
-            return []
-
-    except requests.Timeout:
-        logger.error("SAM.gov Awards API request timed out")
+        data = _cached_sam_request('search', params_str)
+        if data:
+            return format_awards_data(data)
         return []
+
     except Exception as e:
         logger.error(f"Error fetching SAM.gov awards: {str(e)}")
         return []
@@ -116,7 +123,7 @@ def format_sam_data(data):
             'duns': opp.get('solicitationNumber', 'N/A'),
             'status': opp.get('status', 'N/A'),
             'expiration_date': opp.get('responseDeadLine', 'N/A'),
-            'url': f"https://sam.gov/opp/{notice_id}/view"  # Fixed URL format
+            'url': f"https://sam.gov/opp/{notice_id}/view"
         })
     return formatted_data
 
@@ -138,6 +145,6 @@ def format_awards_data(data):
             'award_amount': award.get('award', {}).get('amount', 'N/A'),
             'award_date': award.get('award', {}).get('date', 'N/A'),
             'awardee': award.get('award', {}).get('awardee', 'N/A'),
-            'url': f"https://sam.gov/opp/{notice_id}/view"  # Fixed URL format
+            'url': f"https://sam.gov/opp/{notice_id}/view"
         })
     return formatted_data

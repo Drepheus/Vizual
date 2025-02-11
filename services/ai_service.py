@@ -88,7 +88,7 @@ Response Format:
         else:
             messages.append({
                 "role": "system",
-                "content": "Note: SAM.gov data is currently unavailable. Provide alternative guidance and steps for finding opportunities."
+                "content": "Note: We're currently experiencing high traffic on SAM.gov API. I'll provide general guidance and alternative resources while the system recovers. You can try your search again in a few minutes."
             })
 
         messages.append({"role": "user", "content": query})
