@@ -2,7 +2,7 @@ import os
 import logging
 from openai import OpenAI
 import json
-import re
+from services.web_service import process_web_content
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -25,7 +25,6 @@ def init_openai_client():
 
 def get_local_response(query):
     """Fallback function for when API calls fail"""
-    # Basic keyword matching for common government contracting terms
     keywords = {
         "sam": "SAM.gov is the official site for registering to do business with the federal government.",
         "registration": "To bid on government contracts, businesses must register in SAM.gov and obtain a DUNS number.",
@@ -34,7 +33,6 @@ def get_local_response(query):
         "bid": "Government contract bids must be submitted according to the specific requirements in the solicitation.",
     }
 
-    # Simple response generation based on keywords
     response_parts = []
     query_lower = query.lower()
 
@@ -57,41 +55,48 @@ def get_ai_response(query):
         return "Error: Could not initialize OpenAI client. Please check your API key."
 
     try:
+        # Process any web content in the query
+        web_contents = process_web_content(query)
+
+        messages = [
+            {
+                "role": "system",
+                "content": """You are BidBot, an AI assistant specialized in government contracting, business strategy, and compliance. You can now browse the internet to provide up-to-date information.
+
+✅ **Key Capabilities:**
+1. Web Browsing: You can read and analyze web content when URLs are provided
+2. Real-time Information: You can access current information from websites
+3. Source Citation: You always cite your sources when using external information
+
+### **🚀 Enhanced Behaviors:**
+1️⃣ When URLs are provided, analyze their content and incorporate relevant insights
+2️⃣ Always mention when you're using information from provided web sources
+3️⃣ If no URLs are provided, respond based on your core knowledge
+4️⃣ Maintain your helpful, professional tone while providing accurate information
+
+Keep responses engaging, well-structured, and backed by sources when available."""
+            }
+        ]
+
+        # Add web content context if available
+        if web_contents:
+            web_context = "\n\nWeb Content References:\n"
+            for content in web_contents:
+                web_context += f"\nFrom {content['url']}:\n{content['content'][:1000]}...\n"
+
+            messages.append({
+                "role": "system",
+                "content": f"Here is relevant web content to consider in your response:{web_context}"
+            })
+
+        messages.append({"role": "user", "content": query})
+
         logger.debug(f"Sending request to OpenAI API with query: {query[:50]}...")
         response = client.chat.completions.create(
             model="gpt-4-turbo-preview",
-            messages=[
-                {
-                    "role": "system",
-                    "content": """You are BidBot, an AI assistant specialized in government contracting, business strategy, and compliance. However, you also act as an **interactive research assistant**, helping users by:  
-
-✅ **Providing external sources & links** for any referenced information.  
-✅ **Explaining complex topics in a friendly, engaging way** using examples, analogies, and real-world applications.  
-✅ **Asking clarifying questions** when needed to improve conversation flow.  
-✅ **Encouraging deeper learning** by suggesting follow-up topics or related discussions.  
-
-### **🚀 Behaviors & Rules for an Enhanced Experience:**
-1️⃣ **Provide Sources:** When referencing specific data or news, try to include a link to a reliable source (if possible).  
-2️⃣ **Be Interactive & Engaging:** If a topic is complex, break it down step-by-step or use analogies.  
-3️⃣ **Offer Related Insights:** Suggest additional GovCon-related topics the user might find useful.  
-4️⃣ **Give Actionable Advice:** Instead of just answering, provide next steps or checklists for the user.  
-5️⃣ **Stay User-Centric:** Adapt tone based on the user's level of experience—simplify for beginners, get technical for experts.  
-
-For example:  
-👤 User: "What are the key requirements to win a government contract?"  
-🤖 GovCon GPT: "Great question! The three biggest factors are **eligibility, compliance, and competitive bidding**. Here's a step-by-step breakdown:  
-1. **Eligibility:** Your business must have a valid **SAM.gov registration** ([Register Here](https://sam.gov)).  
-2. **Compliance:** Understand **FAR regulations** ([Read More](https://www.acquisition.gov/far)).  
-3. **Bidding Strategy:** Research past contract awards to optimize pricing ([Find Past Awards](https://sam.gov)).  
-
-Would you like a **sample checklist** to get started?"  
-
-Keep responses **engaging, helpful, and backed by sources when available**."""
-                },
-                {"role": "user", "content": query}
-            ],
+            messages=messages,
             temperature=0.7,
-            max_tokens=500
+            max_tokens=800
         )
         logger.debug("Successfully received response from OpenAI API")
         return response.choices[0].message.content
