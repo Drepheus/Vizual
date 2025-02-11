@@ -4,6 +4,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const responseArea = document.getElementById('responseArea');
     const loadingSpinner = document.getElementById('loadingSpinner');
 
+    // Initialize SAM.gov data loading
+    loadSamGovStatus();
+    loadContractAwards();
+
     if (queryForm) {
         queryForm.addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -26,7 +30,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 const data = await response.json();
 
                 if (response.ok) {
-                    // Convert markdown to HTML before displaying
                     const formattedResponse = data.ai_response
                         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                         .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank">$1</a>');
@@ -44,6 +47,94 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    async function loadSamGovStatus() {
+        const statusCard = document.getElementById('samStatusCard');
+        const loadingElement = document.getElementById('samStatusLoading');
+        const contentElement = document.getElementById('samStatusContent');
+        const dataContentElement = document.getElementById('samDataContent');
+
+        try {
+            const response = await fetch('/api/sam/status');
+            const data = await response.json();
+
+            if (response.ok && data.entities) {
+                dataContentElement.innerHTML = formatSamData(data.entities);
+                loadingElement.classList.add('d-none');
+                contentElement.classList.remove('d-none');
+            } else {
+                throw new Error(data.error || 'Failed to load SAM.gov status');
+            }
+        } catch (error) {
+            loadingElement.innerHTML = `
+                <div class="alert alert-warning" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    ${error.message}
+                </div>
+            `;
+        }
+    }
+
+    async function loadContractAwards() {
+        const awardsCard = document.getElementById('contractAwardsCard');
+        const loadingElement = document.getElementById('awardsLoading');
+        const contentElement = document.getElementById('awardsContent');
+
+        try {
+            const response = await fetch('/api/sam/awards');
+            const data = await response.json();
+
+            if (response.ok && data.awards) {
+                contentElement.innerHTML = formatAwards(data.awards);
+                loadingElement.classList.add('d-none');
+                contentElement.classList.remove('d-none');
+            } else {
+                throw new Error(data.error || 'Failed to load contract awards');
+            }
+        } catch (error) {
+            loadingElement.innerHTML = `
+                <div class="alert alert-warning" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    ${error.message}
+                </div>
+            `;
+        }
+    }
+
+    function formatSamData(entities) {
+        if (!entities || entities.length === 0) {
+            return '<p class="text-muted">No relevant SAM.gov data found</p>';
+        }
+
+        return entities.map(entity => `
+            <div class="card dashboard-card sam-data-card mb-3">
+                <div class="card-body">
+                    <p class="mb-1"><strong>Entity:</strong> ${entity.entity_name || 'N/A'}</p>
+                    <p class="mb-1"><strong>DUNS/UEI:</strong> ${entity.duns || 'N/A'}</p>
+                    <p class="mb-1"><strong>Status:</strong> ${entity.status || 'N/A'}</p>
+                    <p class="mb-0"><strong>Expires:</strong> ${entity.expiration_date || 'N/A'}</p>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function formatAwards(awards) {
+        if (!awards || awards.length === 0) {
+            return '<p class="text-muted">No recent contract awards available</p>';
+        }
+
+        return awards.map(award => `
+            <div class="card dashboard-card award-card mb-3">
+                <div class="card-body">
+                    <p class="mb-1"><strong>Title:</strong> ${award.title || 'N/A'}</p>
+                    <p class="mb-1"><strong>Solicitation #:</strong> ${award.solicitation_number || 'N/A'}</p>
+                    <p class="mb-1"><strong>Amount:</strong> $${award.award_amount || 'N/A'}</p>
+                    <p class="mb-1"><strong>Awardee:</strong> ${award.awardee || 'N/A'}</p>
+                    <p class="mb-0"><strong>Award Date:</strong> ${award.award_date || 'N/A'}</p>
+                </div>
+            </div>
+        `).join('');
+    }
+
     function displayResponse(data) {
         const responseHtml = `
             <div class="card dashboard-card response-card mb-4">
@@ -55,19 +146,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="ai-response">
                         ${formatResponse(data.ai_response)}
                     </div>
-
-                    <div class="sam-data-section mt-4">
-                        <div class="sam-data-header">
-                            <i class="fas fa-database fa-2x"></i>
-                            <h4 class="mb-0">SAM.gov Data</h4>
-                        </div>
-                        <div class="sam-data-content">
-                            ${formatSamData(data.sam_data)}
-                        </div>
-                    </div>
                     <div class="response-metadata">
                         <i class="fas fa-info-circle me-2"></i>
-                        Response generated using GPT-3.5 Turbo
+                        Response generated using GPT-4
                     </div>
                 </div>
             </div>
@@ -76,26 +157,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function formatResponse(text) {
-        // Convert newlines to <br> and wrap paragraphs
         return text.split('\n\n')
             .map(para => `<p>${para.replace(/\n/g, '<br>')}</p>`)
             .join('');
-    }
-
-    function formatSamData(samData) {
-        if (!samData || samData.error) {
-            return '<p class="text-muted">No relevant SAM.gov data found</p>';
-        }
-
-        return samData.map(entity => `
-            <div class="card dashboard-card sam-data-card mb-3">
-                <div class="card-body">
-                    <p><strong>Entity:</strong> ${entity.entity_name || 'N/A'}</p>
-                    <p><strong>DUNS:</strong> ${entity.duns || 'N/A'}</p>
-                    <p><strong>Status:</strong> ${entity.status || 'N/A'}</p>
-                </div>
-            </div>
-        `).join('');
     }
 
     function displayError(message) {

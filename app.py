@@ -114,9 +114,41 @@ def dashboard():
     logger.debug("Dashboard route accessed")
     queries = Query.query.filter_by(user_id=current_user.id).order_by(Query.created_at.desc()).limit(5)
     sam_last_update = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    sam_data = sam_service.get_relevant_data("contractor status")
-    awarded_contracts = sam_service.get_awarded_contracts()
-    return render_template('dashboard.html', queries=queries, sam_last_update=sam_last_update, sam_data=sam_data, awarded_contracts=awarded_contracts)
+    return render_template('dashboard.html', queries=queries, sam_last_update=sam_last_update)
+
+@app.route('/api/sam/status')
+@login_required
+def sam_status():
+    logger.debug("SAM.gov status API endpoint accessed")
+    try:
+        entities = sam_service.get_relevant_data("contractor status")
+        return jsonify({
+            'status': 'success',
+            'entities': entities
+        })
+    except Exception as e:
+        logger.error(f"Error fetching SAM.gov status: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'error': 'Could not fetch SAM.gov data. Please try again later.'
+        }), 500
+
+@app.route('/api/sam/awards')
+@login_required
+def sam_awards():
+    logger.debug("SAM.gov awards API endpoint accessed")
+    try:
+        awards = sam_service.get_awarded_contracts()
+        return jsonify({
+            'status': 'success',
+            'awards': awards
+        })
+    except Exception as e:
+        logger.error(f"Error fetching SAM.gov awards: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'error': 'Could not fetch contract awards. Please try again later.'
+        }), 500
 
 @app.route('/api/query', methods=['POST'])
 @login_required

@@ -3,6 +3,7 @@
 {% block content %}
 <div class="container py-4">
     <div class="row">
+        <!-- Left Column -->
         <div class="col-md-8">
             <div class="card dashboard-card mb-4">
                 <div class="card-body">
@@ -29,7 +30,9 @@
             <div id="responseArea"></div>
         </div>
 
+        <!-- Right Column -->
         <div class="col-md-4">
+            <!-- Account Status Card -->
             <div class="card dashboard-card mb-4">
                 <div class="card-body">
                     <h4 class="card-title">Account Status</h4>
@@ -46,61 +49,49 @@
                 </div>
             </div>
 
-            <div class="card dashboard-card mb-4">
+            <!-- SAM.gov Integration Status Card -->
+            <div class="card dashboard-card mb-4" id="samStatusCard">
                 <div class="card-body">
                     <h4 class="card-title">SAM.gov Integration Status</h4>
-                    <div class="sam-status-section">
+                    <div class="loading-placeholder" id="samStatusLoading">
+                        <div class="spinner-border spinner-border-sm text-primary" role="status">
+                            <span class="visually-hidden">Loading SAM.gov data...</span>
+                        </div>
+                        <p class="text-muted mt-2">Loading SAM.gov data...</p>
+                    </div>
+                    <div class="sam-status-section d-none" id="samStatusContent">
                         <div class="sam-api-status">
                             <i class="fas fa-check-circle text-success me-2"></i>
                             <span>API Connected</span>
                         </div>
                         <div class="sam-data-stats mt-3">
                             <p><strong>API Key:</strong> Active</p>
-                            <p><strong>Last Update:</strong> {{ sam_last_update }}</p>
+                            <p><strong>Last Update:</strong> <span id="samLastUpdate">{{ sam_last_update }}</span></p>
                         </div>
-                        <div class="sam-data-content mt-3">
-                            {% if sam_data and not sam_data.get('error') %}
-                                {% for entity in sam_data %}
-                                <div class="card dashboard-card sam-data-card mb-2">
-                                    <div class="card-body py-2">
-                                        <p class="mb-1"><strong>Entity:</strong> {{ entity.entity_name }}</p>
-                                        <p class="mb-1"><strong>DUNS/UEI:</strong> {{ entity.duns }}</p>
-                                        <p class="mb-1"><strong>Status:</strong> {{ entity.status }}</p>
-                                        <p class="mb-0"><strong>Expires:</strong> {{ entity.expiration_date }}</p>
-                                    </div>
-                                </div>
-                                {% endfor %}
-                            {% else %}
-                                <p class="text-muted">No SAM.gov data available</p>
-                            {% endif %}
+                        <div class="sam-data-content mt-3" id="samDataContent">
+                            <!-- SAM.gov data will be loaded here via JavaScript -->
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="card dashboard-card mb-4">
+            <!-- Recent Contract Awards Card -->
+            <div class="card dashboard-card mb-4" id="contractAwardsCard">
                 <div class="card-body">
                     <h4 class="card-title">Recent Contract Awards</h4>
-                    <div class="awards-content mt-3">
-                        {% if awarded_contracts %}
-                            {% for award in awarded_contracts %}
-                            <div class="card dashboard-card award-card mb-2">
-                                <div class="card-body py-2">
-                                    <p class="mb-1"><strong>Title:</strong> {{ award.title }}</p>
-                                    <p class="mb-1"><strong>Solicitation #:</strong> {{ award.solicitation_number }}</p>
-                                    <p class="mb-1"><strong>Amount:</strong> ${{ award.award_amount }}</p>
-                                    <p class="mb-1"><strong>Awardee:</strong> {{ award.awardee }}</p>
-                                    <p class="mb-0"><strong>Award Date:</strong> {{ award.award_date }}</p>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        {% else %}
-                            <p class="text-muted">No recent contract awards available</p>
-                        {% endif %}
+                    <div class="loading-placeholder" id="awardsLoading">
+                        <div class="spinner-border spinner-border-sm text-primary" role="status">
+                            <span class="visually-hidden">Loading awards...</span>
+                        </div>
+                        <p class="text-muted mt-2">Loading recent awards...</p>
+                    </div>
+                    <div class="awards-content mt-3 d-none" id="awardsContent">
+                        <!-- Awards will be loaded here via JavaScript -->
                     </div>
                 </div>
             </div>
 
+            <!-- Recent Queries Card -->
             <div class="card dashboard-card">
                 <div class="card-body">
                     <h4 class="card-title mb-3">Recent Queries</h4>
