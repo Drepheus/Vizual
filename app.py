@@ -58,20 +58,25 @@ def load_user(id):
 
 @app.route('/')
 def index():
+    logger.debug("Accessing index route")
     return render_template('index.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    logger.debug(f"Login route accessed with method: {request.method}")
     if request.method == 'POST':
         user = User.query.filter_by(email=request.form['email']).first()
         if user and user.check_password(request.form['password']):
             login_user(user)
+            logger.debug(f"User {user.email} logged in successfully")
             return redirect(url_for('dashboard'))
+        logger.warning("Invalid login attempt")
         flash('Invalid email or password')
     return render_template('login.html')
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    logger.debug(f"Register route accessed with method: {request.method}")
     if request.method == 'POST':
         user = User(
             username=request.form['username'],
@@ -80,6 +85,7 @@ def register():
         user.set_password(request.form['password'])
         db.session.add(user)
         db.session.commit()
+        logger.debug(f"New user registered: {user.email}")
         login_user(user)
         return redirect(url_for('dashboard'))
     return render_template('register.html')
@@ -87,6 +93,7 @@ def register():
 @app.route('/logout')
 @login_required
 def logout():
+    logger.debug("User logged out")
     logout_user()
     return redirect(url_for('index'))
 
@@ -96,12 +103,15 @@ def admin_upgrade(user_id):
     if user:
         user.is_premium = True
         db.session.commit()
+        logger.debug(f"User {user.id} upgraded to premium")
         return f"User {user.username} upgraded to premium!"
+    logger.warning(f"Attempt to upgrade non-existent user: {user_id}")
     return "User not found", 404
 
 @app.route('/dashboard')
 @login_required
 def dashboard():
+    logger.debug("Dashboard route accessed")
     queries = Query.query.filter_by(user_id=current_user.id).order_by(Query.created_at.desc()).limit(5)
     sam_last_update = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     sam_data = sam_service.get_relevant_data("contractor status")
@@ -111,10 +121,12 @@ def dashboard():
 @app.route('/api/query', methods=['POST'])
 @login_required
 def process_query():
+    logger.debug("Processing new query")
     data = request.get_json()
     query_text = data.get('query')
 
     if not current_user.is_premium and Query.query.filter_by(user_id=current_user.id).count() >= 10:
+        logger.warning(f"Free tier limit reached for user {current_user.id}")
         return jsonify({'error': 'Free tier limit reached. Please upgrade to premium.'}), 403
 
     ai_response = ai_service.get_ai_response(query_text)
@@ -127,6 +139,7 @@ def process_query():
     )
     db.session.add(query)
     db.session.commit()
+    logger.debug(f"Query saved for user {current_user.id}")
 
     return jsonify({
         'ai_response': ai_response,
@@ -136,16 +149,20 @@ def process_query():
 @app.route('/payment')
 @login_required
 def payment():
+    logger.debug("Payment route accessed")
     return render_template('payment.html')
 
 @app.route('/api/create-payment-intent', methods=['POST'])
 @login_required
 def create_payment():
+    logger.debug("Creating payment intent")
     try:
         intent = stripe_service.create_payment_intent()
         return jsonify({'clientSecret': intent.client_secret})
     except Exception as e:
+        logger.error(f"Payment intent creation failed: {e}")
         return jsonify({'error': str(e)}), 403
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    logger.info("Starting server...")
+    app.run(host='0.0.0.0', port=3000, debug=True)
