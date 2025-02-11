@@ -41,43 +41,6 @@ def format_web_content(web_contents):
 
     return formatted_content
 
-def get_sam_context(query):
-    """Get relevant SAM.gov data as context"""
-    try:
-        sam_context = "\nRecent SAM.gov Data:\n"
-
-        # Try to get relevant data with a timeout
-        try:
-            relevant_data = get_relevant_data(query)
-            if relevant_data and not isinstance(relevant_data, dict):
-                sam_context += "\nCurrent Active Opportunities:\n"
-                for opp in relevant_data:
-                    sam_context += f"- Title: {opp.get('entity_name')}\n"
-                    sam_context += f"  Solicitation Number: {opp.get('duns')}\n"
-                    sam_context += f"  Status: {opp.get('status')}\n"
-                    sam_context += f"  Response Due: {opp.get('expiration_date')}\n"
-                    sam_context += f"  View on SAM.gov: {opp.get('url')}\n\n"
-        except Exception as e:
-            logger.error(f"Error fetching relevant data: {e}")
-            sam_context += "\nNote: Unable to fetch current opportunities at this moment.\n"
-
-        # Try to get awarded contracts with a timeout
-        try:
-            awarded_contracts = get_awarded_contracts()
-            if awarded_contracts:
-                sam_context += "\nRecent Contract Awards:\n"
-                for award in awarded_contracts:
-                    sam_context += f"- Title: {award.get('title')}\n"
-                    sam_context += f"  Amount: {award.get('award_amount')}\n"
-                    sam_context += f"  Awardee: {award.get('awardee')}\n\n"
-        except Exception as e:
-            logger.error(f"Error fetching awarded contracts: {e}")
-
-        return sam_context
-    except Exception as e:
-        logger.error(f"Error getting SAM.gov context: {e}")
-        return "\nNote: SAM.gov data temporarily unavailable\n"
-
 def get_ai_response(query):
     if not OPENAI_API_KEY:
         logger.error("OPENAI_API_KEY is not set in environment variables")
@@ -88,45 +51,44 @@ def get_ai_response(query):
         return "Error: Could not initialize AI service. Please try again later."
 
     try:
-        # Process web content including SAM.gov data with timeout
-        try:
-            web_contents = process_web_content(query)
-            context = ""
-            if web_contents:
-                context = "\nRelevant Information:\n"
-                for content in web_contents:
-                    context += f"\nFrom {content['url']}:\n{content['content']}\n"
-        except Exception as e:
-            logger.error(f"Error processing web content: {e}")
-            context = "\nNote: Additional web content currently unavailable\n"
+        # Get SAM.gov data first
+        relevant_data = get_relevant_data(query)
 
-        # Get SAM.gov context
-        sam_context = get_sam_context(query)
-
-        messages = [
-            {
-                "role": "system",
-                "content": """You are BidBot, an AI assistant specialized in government contracting with advanced web browsing capabilities. Your responses should be immediate and actionable.
+        system_message = """You are BidBot, an AI assistant specialized in government contracting. Your responses should be immediate and actionable.
 
 Key Behaviors:
 1. Provide direct, concise answers
-2. Include relevant SAM.gov data when available
-3. Cite sources and provide working links
+2. When SAM.gov data is available, highlight opportunities with direct links
+3. When SAM.gov data is unavailable, provide alternative guidance
 4. Always maintain professional tone
 
-When SAM.gov data is available:
-- Present opportunities with direct links
-- Include key details like agency and dates
-- Highlight important deadlines
+Response Format:
+- Start with direct answer to query
+- If SAM.gov data available: List relevant opportunities
+- If no SAM.gov data: Provide alternative guidance
+- End with actionable next steps
+"""
 
-Keep responses focused on practical value for government contractors."""
-            }
-        ]
+        messages = [{"role": "system", "content": system_message}]
 
-        if context or sam_context:
+        # Add context about SAM.gov data availability
+        if relevant_data:
+            context = "\nCurrent Active Opportunities:\n"
+            for opp in relevant_data:
+                context += f"- Title: {opp['entity_name']}\n"
+                context += f"  Solicitation Number: {opp['duns']}\n"
+                context += f"  Status: {opp['status']}\n"
+                context += f"  Due Date: {opp['expiration_date']}\n"
+                context += f"  View on SAM.gov: {opp['url']}\n\n"
+
             messages.append({
                 "role": "system",
-                "content": f"Here is relevant context for your response:{context}{sam_context}"
+                "content": f"Here are relevant opportunities from SAM.gov:\n{context}"
+            })
+        else:
+            messages.append({
+                "role": "system",
+                "content": "Note: SAM.gov data is currently unavailable. Provide alternative guidance and steps for finding opportunities."
             })
 
         messages.append({"role": "user", "content": query})
