@@ -35,19 +35,19 @@ def get_sam_solicitations(query=None):
             'Accept': 'application/json'
         }
 
-        # Set up search parameters
         today = datetime.now()
-        past_date = today - timedelta(days=30)
-        future_date = today + timedelta(days=30)
+        past = today - timedelta(days=30)
+        future = today + timedelta(days=30)
 
         params = {
+            'page': 0,
+            'size': 3,  # Get last 3 entries
             'api_key': os.environ.get('SAM_API_KEY'),
-            'postedFrom': past_date.strftime("%Y-%m-%d"),
-            'postedTo': future_date.strftime("%Y-%m-%d"),
-            'limit': 10  # Get more results to filter
+            'postedFrom': past.strftime("%Y-%m-%d"),
+            'postedTo': future.strftime("%Y-%m-%d"),
+            'limit': 3
         }
 
-        # Add query parameter if provided
         if query:
             params['keywords'] = quote(query)
 
@@ -63,13 +63,12 @@ def get_sam_solicitations(query=None):
 
             solicitations = []
             for opp in opportunities[:3]:  # Only return top 3
-                # Construct the correct SAM.gov opportunity URL
                 notice_id = opp.get('noticeId', '')
-                # Ensure the notice ID is properly formatted
-                if notice_id:
-                    opportunity_url = f"https://sam.gov/opportunity/{notice_id}"
-                else:
-                    opportunity_url = "https://sam.gov/search/opportunities/active"
+                if not notice_id:
+                    continue
+
+                # Construct the proper SAM.gov opportunity URL
+                opportunity_url = f"https://sam.gov/opp/{notice_id}/view"
 
                 solicitation = {
                     'title': opp.get('title', 'N/A'),
@@ -95,12 +94,10 @@ def get_webpage_content(url):
     try:
         downloaded = trafilatura.fetch_url(url)
         if downloaded is None:
-            logger.error(f"Failed to download content from {url}")
             return None
 
         content = trafilatura.extract(downloaded, include_links=True, include_images=True)
         if content is None:
-            logger.error(f"Failed to extract content from {url}")
             return None
 
         return content
