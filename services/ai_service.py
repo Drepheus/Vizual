@@ -4,6 +4,7 @@ from openai import OpenAI
 import json
 from services.web_service import process_web_content
 from services.sam_service import get_relevant_data, get_awarded_contracts
+from datetime import datetime, timedelta
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -43,76 +44,89 @@ def format_web_content(web_contents):
 def get_sam_context(query):
     """Get relevant SAM.gov data as context"""
     try:
-        relevant_data = get_relevant_data(query)
-        awarded_contracts = get_awarded_contracts()
-
         sam_context = "\nRecent SAM.gov Data:\n"
 
-        if relevant_data and not isinstance(relevant_data, dict):  # Check if it's not an error response
-            sam_context += "\nRelevant Opportunities:\n"
-            for opp in relevant_data:
-                sam_context += f"- Title: {opp.get('entity_name')}\n"
-                sam_context += f"  Solicitation Number: {opp.get('duns')}\n"
-                sam_context += f"  Status: {opp.get('status')}\n"
-                sam_context += f"  Expiration: {opp.get('expiration_date')}\n\n"
+        # Try to get relevant data with a timeout
+        try:
+            relevant_data = get_relevant_data(query)
+            if relevant_data and not isinstance(relevant_data, dict):
+                sam_context += "\nCurrent Active Opportunities:\n"
+                for opp in relevant_data:
+                    sam_context += f"- Title: {opp.get('entity_name')}\n"
+                    sam_context += f"  Solicitation Number: {opp.get('duns')}\n"
+                    sam_context += f"  Status: {opp.get('status')}\n"
+                    sam_context += f"  Response Due: {opp.get('expiration_date')}\n"
+                    sam_context += f"  View on SAM.gov: {opp.get('url')}\n\n"
+        except Exception as e:
+            logger.error(f"Error fetching relevant data: {e}")
+            sam_context += "\nNote: Unable to fetch current opportunities at this moment.\n"
 
-        if awarded_contracts:
-            sam_context += "\nRecent Contract Awards:\n"
-            for award in awarded_contracts:
-                sam_context += f"- Title: {award.get('title')}\n"
-                sam_context += f"  Amount: {award.get('award_amount')}\n"
-                sam_context += f"  Awardee: {award.get('awardee')}\n\n"
+        # Try to get awarded contracts with a timeout
+        try:
+            awarded_contracts = get_awarded_contracts()
+            if awarded_contracts:
+                sam_context += "\nRecent Contract Awards:\n"
+                for award in awarded_contracts:
+                    sam_context += f"- Title: {award.get('title')}\n"
+                    sam_context += f"  Amount: {award.get('award_amount')}\n"
+                    sam_context += f"  Awardee: {award.get('awardee')}\n\n"
+        except Exception as e:
+            logger.error(f"Error fetching awarded contracts: {e}")
 
         return sam_context
     except Exception as e:
         logger.error(f"Error getting SAM.gov context: {e}")
-        return "\nNote: SAM.gov data currently unavailable\n"
+        return "\nNote: SAM.gov data temporarily unavailable\n"
 
 def get_ai_response(query):
     if not OPENAI_API_KEY:
         logger.error("OPENAI_API_KEY is not set in environment variables")
-        return "Error: OpenAI API key is not configured. Please set up your API key in Replit Secrets."
+        return "Error: OpenAI API key is not configured. Please contact support."
 
     if not client and not init_openai_client():
         logger.error("Failed to initialize OpenAI client")
-        return "Error: Could not initialize OpenAI client. Please check your API key."
+        return "Error: Could not initialize AI service. Please try again later."
 
     try:
-        # Process web content including SAM.gov data
-        web_contents = process_web_content(query)
+        # Process web content including SAM.gov data with timeout
+        try:
+            web_contents = process_web_content(query)
+            context = ""
+            if web_contents:
+                context = "\nRelevant Information:\n"
+                for content in web_contents:
+                    context += f"\nFrom {content['url']}:\n{content['content']}\n"
+        except Exception as e:
+            logger.error(f"Error processing web content: {e}")
+            context = "\nNote: Additional web content currently unavailable\n"
 
-        # Format web content
-        context = format_web_content(web_contents)
+        # Get SAM.gov context
+        sam_context = get_sam_context(query)
 
         messages = [
             {
                 "role": "system",
-                "content": """You are BidBot, an AI assistant specialized in government contracting with advanced web browsing capabilities. You can access and analyze web content in real-time, including SAM.gov solicitations.
+                "content": """You are BidBot, an AI assistant specialized in government contracting with advanced web browsing capabilities. Your responses should be immediate and actionable.
 
-✅ **Key Capabilities:**
-1. Real-time Web Access: Browse and analyze web content dynamically
-2. SAM.gov Integration: Direct access to contract opportunities
-3. Information Synthesis: Combine data from multiple sources
-4. Source Citation: Always cite sources and provide direct links
+Key Behaviors:
+1. Provide direct, concise answers
+2. Include relevant SAM.gov data when available
+3. Cite sources and provide working links
+4. Always maintain professional tone
 
-### **🚀 Enhanced Behaviors:**
-1️⃣ For SAM.gov requests: 
-   - Present recent solicitations with direct links
-   - Include key details like agency, dates, and solicitation numbers
-2️⃣ For web content:
-   - Analyze and summarize relevant information
-   - Provide direct quotes when applicable
-3️⃣ Always maintain professional tone and accuracy
-4️⃣ Cite sources and provide links for verification
+When SAM.gov data is available:
+- Present opportunities with direct links
+- Include key details like agency and dates
+- Highlight important deadlines
 
-Keep responses engaging and data-driven, focusing on practical value for government contractors."""
+Keep responses focused on practical value for government contractors."""
             }
         ]
 
-        if context:
+        if context or sam_context:
             messages.append({
                 "role": "system",
-                "content": f"Here is relevant web content to consider in your response:{context}"
+                "content": f"Here is relevant context for your response:{context}{sam_context}"
             })
 
         messages.append({"role": "user", "content": query})
@@ -129,7 +143,7 @@ Keep responses engaging and data-driven, focusing on practical value for governm
     except Exception as e:
         error_msg = str(e)
         logger.error(f"OpenAI API error: {error_msg}")
-        return f"Error connecting to OpenAI API: {error_msg}"
+        return f"I apologize, but I encountered an error processing your request. Please try again. If the issue persists, contact support."
 
 # Initialize the client when the module is imported
 init_openai_client()
