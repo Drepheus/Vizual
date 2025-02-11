@@ -24,6 +24,22 @@ def init_openai_client():
         logger.error(f"Failed to initialize OpenAI client: {e}")
         return False
 
+def format_web_content(web_contents):
+    """Format web content for AI context"""
+    if not web_contents:
+        return ""
+
+    formatted_content = "\nWeb Content:\n"
+    for content in web_contents:
+        # For SAM.gov solicitations, keep the full content
+        if 'sam.gov' in content['url'].lower():
+            formatted_content += f"\nFrom SAM.gov:\n{content['content']}\n"
+        else:
+            # For other web content, truncate to avoid token limits
+            formatted_content += f"\nFrom {content['url']}:\n{content['content'][:1000]}...\n"
+
+    return formatted_content
+
 def get_sam_context(query):
     """Get relevant SAM.gov data as context"""
     try:
@@ -62,47 +78,41 @@ def get_ai_response(query):
         return "Error: Could not initialize OpenAI client. Please check your API key."
 
     try:
-        # Process web content and get SAM.gov data
+        # Process web content including SAM.gov data
         web_contents = process_web_content(query)
-        sam_context = get_sam_context(query)
+
+        # Format web content
+        context = format_web_content(web_contents)
 
         messages = [
             {
                 "role": "system",
-                "content": """You are BidBot, an AI assistant specialized in government contracting, business strategy, and compliance. You have direct access to SAM.gov data and can browse the internet.
+                "content": """You are BidBot, an AI assistant specialized in government contracting with advanced web browsing capabilities. You can access and analyze web content in real-time, including SAM.gov solicitations.
 
 ✅ **Key Capabilities:**
-1. SAM.gov Integration: Direct access to opportunity and award data
-2. Web Browsing: Can read and analyze web content when URLs are provided
-3. Real-time Information: Access to current contracting information
-4. Source Citation: Always cite sources when using external information
+1. Real-time Web Access: Browse and analyze web content dynamically
+2. SAM.gov Integration: Direct access to contract opportunities
+3. Information Synthesis: Combine data from multiple sources
+4. Source Citation: Always cite sources and provide direct links
 
 ### **🚀 Enhanced Behaviors:**
-1️⃣ Provide specific SAM.gov opportunities when relevant
-2️⃣ Include direct references to contract opportunities
-3️⃣ Analyze web content when URLs are provided
-4️⃣ Maintain helpful, professional tone while providing accurate information
+1️⃣ For SAM.gov requests: 
+   - Present recent solicitations with direct links
+   - Include key details like agency, dates, and solicitation numbers
+2️⃣ For web content:
+   - Analyze and summarize relevant information
+   - Provide direct quotes when applicable
+3️⃣ Always maintain professional tone and accuracy
+4️⃣ Cite sources and provide links for verification
 
-Keep responses engaging, well-structured, and backed by real data when available."""
+Keep responses engaging and data-driven, focusing on practical value for government contractors."""
             }
         ]
 
-        # Add SAM.gov context
-        if sam_context:
+        if context:
             messages.append({
                 "role": "system",
-                "content": f"Here is relevant SAM.gov data to consider in your response:{sam_context}"
-            })
-
-        # Add web content context if available
-        if web_contents:
-            web_context = "\n\nWeb Content References:\n"
-            for content in web_contents:
-                web_context += f"\nFrom {content['url']}:\n{content['content'][:1000]}...\n"
-
-            messages.append({
-                "role": "system",
-                "content": f"Here is relevant web content to consider in your response:{web_context}"
+                "content": f"Here is relevant web content to consider in your response:{context}"
             })
 
         messages.append({"role": "user", "content": query})

@@ -2,9 +2,10 @@ import logging
 import re
 import trafilatura
 import requests
-from urllib.parse import urlparse
+from urllib.parse import urlparse, quote
 from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -26,44 +27,57 @@ def extract_urls(text):
         logger.error(f"Error extracting URLs: {str(e)}")
         return []
 
-def get_sam_solicitations():
-    """Fetch recent solicitations from SAM.gov"""
+def get_sam_solicitations(query=None):
+    """Fetch recent solicitations from SAM.gov API"""
     try:
-        base_url = "https://sam.gov/search/opportunities/active"
-        # Use today's date for the search
-        today = datetime.now()
-        formatted_date = today.strftime("%Y-%m-%d")
-
         headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            'X-Api-Key': os.environ.get('SAM_API_KEY'),
+            'Accept': 'application/json'
         }
 
-        # First get the search page
-        response = requests.get(base_url, headers=headers)
-        if response.status_code != 200:
-            logger.error(f"Failed to access SAM.gov: {response.status_code}")
+        # Set up search parameters
+        today = datetime.now()
+        past_date = today - timedelta(days=30)
+        future_date = today + timedelta(days=30)
+
+        params = {
+            'api_key': os.environ.get('SAM_API_KEY'),
+            'postedFrom': past_date.strftime("%Y-%m-%d"),
+            'postedTo': future_date.strftime("%Y-%m-%d"),
+            'limit': 10  # Get more results to filter
+        }
+
+        # Add query parameter if provided
+        if query:
+            params['keywords'] = quote(query)
+
+        response = requests.get(
+            'https://api.sam.gov/opportunities/v2/search',
+            headers=headers,
+            params=params
+        )
+
+        if response.status_code == 200:
+            data = response.json()
+            opportunities = data.get('opportunitiesData', [])
+
+            solicitations = []
+            for opp in opportunities[:3]:  # Only return top 3
+                solicitation = {
+                    'title': opp.get('title', 'N/A'),
+                    'agency': opp.get('organizationName', 'N/A'),
+                    'posted_date': opp.get('postedDate', 'N/A'),
+                    'due_date': opp.get('responseDeadLine', 'N/A'),
+                    'solicitation_number': opp.get('solicitationNumber', 'N/A'),
+                    'url': f"https://sam.gov/opp/{opp.get('noticeId')}/view"
+                }
+                solicitations.append(solicitation)
+
+            return solicitations
+        else:
+            logger.error(f"SAM.gov API error: {response.status_code} - {response.text}")
             return []
 
-        # Extract solicitation data using BeautifulSoup
-        soup = BeautifulSoup(response.text, 'html.parser')
-        solicitations = []
-
-        # Find all opportunity listings
-        listings = soup.find_all('div', class_='opportunity-listing')
-        for listing in listings[:3]:  # Get top 3 solicitations
-            title = listing.find('h3', class_='title')
-            agency = listing.find('span', class_='agency')
-            posted_date = listing.find('span', class_='posted-date')
-
-            if title and agency:
-                solicitations.append({
-                    'title': title.text.strip(),
-                    'agency': agency.text.strip(),
-                    'posted_date': posted_date.text.strip() if posted_date else 'N/A',
-                    'url': f"https://sam.gov{listing.find('a')['href']}" if listing.find('a') else base_url
-                })
-
-        return solicitations
     except Exception as e:
         logger.error(f"Error fetching SAM.gov solicitations: {str(e)}")
         return []
@@ -89,15 +103,24 @@ def get_webpage_content(url):
 def process_web_content(query):
     """Process query for web content and return relevant information"""
     try:
-        # First, check if it's a SAM.gov solicitation request
-        if 'solicitation' in query.lower() or 'sam.gov' in query.lower():
-            solicitations = get_sam_solicitations()
+        # Check for SAM.gov related queries
+        sam_keywords = ['solicitation', 'sam.gov', 'contract', 'opportunity', 'bid']
+        if any(keyword in query.lower() for keyword in sam_keywords):
+            solicitations = get_sam_solicitations(query)
             if solicitations:
                 web_contents = []
                 for sol in solicitations:
+                    content = (
+                        f"Title: {sol['title']}\n"
+                        f"Agency: {sol['agency']}\n"
+                        f"Solicitation Number: {sol['solicitation_number']}\n"
+                        f"Posted Date: {sol['posted_date']}\n"
+                        f"Response Due: {sol['due_date']}\n"
+                        f"Direct Link: {sol['url']}"
+                    )
                     web_contents.append({
                         'url': sol['url'],
-                        'content': f"Title: {sol['title']}\nAgency: {sol['agency']}\nPosted: {sol['posted_date']}"
+                        'content': content
                     })
                 return web_contents
 
