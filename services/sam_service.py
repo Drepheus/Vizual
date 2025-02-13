@@ -53,6 +53,10 @@ def _cached_sam_request(endpoint, query_params_str):
     logger.error("Max retries exceeded for SAM.gov API request")
     return None
 
+def format_date_for_sam(date_obj):
+    """Format date in MM/dd/yyyy format as required by SAM.gov API"""
+    return date_obj.strftime("%m/%d/%Y")
+
 def get_relevant_data(query):
     try:
         today = datetime.now()
@@ -60,8 +64,8 @@ def get_relevant_data(query):
 
         params = {
             'api_key': os.environ.get('SAM_API_KEY'),
-            'postedFrom': today.strftime("%Y-%m-%d"),
-            'postedTo': future.strftime("%Y-%m-%d"),
+            'postedFrom': format_date_for_sam(today),
+            'postedTo': format_date_for_sam(future),
             'limit': 3,
             'isActive': 'true'
         }
@@ -88,8 +92,8 @@ def get_awarded_contracts():
 
         params = {
             'api_key': os.environ.get('SAM_API_KEY'),
-            'postedFrom': past.strftime("%Y-%m-%d"),
-            'postedTo': today.strftime("%Y-%m-%d"),
+            'postedFrom': format_date_for_sam(past),
+            'postedTo': format_date_for_sam(today),
             'limit': 3,
             'awardStatus': 'awarded'
         }
