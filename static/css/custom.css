@@ -1,27 +1,48 @@
 /* Custom styles on top of Bootstrap dark theme */
 :root {
-    --gov-blue: #1a4480;
-    --gov-red: #d83933;
+    --gov-blue: #3b82f6;
+    --gov-red: #ef4444;
+    --dark-bg: #111827;
+    --card-bg: #1f2937;
+    --card-hover: #374151;
+    --text-primary: #f3f4f6;
+    --text-secondary: #9ca3af;
+}
+
+body {
+    background-color: var(--dark-bg);
+    color: var(--text-primary);
+}
+
+.navbar {
+    background-color: var(--card-bg);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .navbar-brand {
     font-weight: 600;
-    color: var(--bs-light) !important;
+    color: var(--text-primary) !important;
 }
 
 .hero-section {
     padding: 4rem 0;
-    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+    background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)),
                 url('https://images.unsplash.com/photo-1624472546960-b93c0cc89c0c?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
     background-size: cover;
     background-position: center;
 }
 
 .dashboard-card {
-    border: none;
-    border-radius: 8px;
-    background-color: var(--bs-gray-800);
-    transition: transform 0.2s ease-in-out;
+    background-color: var(--card-bg);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.dashboard-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
 .response-card {
@@ -36,47 +57,83 @@
 .query-history {
     max-height: 400px;
     overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--gov-blue) var(--card-bg);
+}
+
+.query-history::-webkit-scrollbar {
+    width: 6px;
+}
+
+.query-history::-webkit-scrollbar-track {
+    background: var(--card-bg);
+}
+
+.query-history::-webkit-scrollbar-thumb {
+    background-color: var(--gov-blue);
+    border-radius: 3px;
 }
 
 .premium-badge {
-    background-color: var(--gov-blue);
+    background: linear-gradient(135deg, var(--gov-blue), #60a5fa);
     color: white;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-.payment-form {
-    max-width: 500px;
-    margin: 0 auto;
+.form-control {
+    background-color: var(--dark-bg);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
 }
 
-#stripe-element {
-    padding: 1rem;
-    border: 1px solid var(--bs-gray-700);
-    border-radius: 4px;
-    background-color: var(--bs-gray-800);
+.form-control:focus {
+    background-color: var(--dark-bg);
+    border-color: var(--gov-blue);
+    color: var(--text-primary);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--gov-blue), #60a5fa);
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
 .loading-spinner {
     width: 3rem;
     height: 3rem;
+    color: var(--gov-blue);
 }
 
 .ai-response {
     font-size: 1.1rem;
     line-height: 1.6;
     padding: 1.5rem;
+    color: var(--text-primary);
 }
 
 .ai-response-header {
     display: flex;
     align-items: center;
     margin-bottom: 1rem;
+    color: var(--gov-blue);
 }
 
 .ai-response-header i {
     margin-right: 0.75rem;
-    color: var(--gov-blue);
 }
 
 .sam-status-section {
@@ -89,30 +146,33 @@
     font-size: 1.1rem;
 }
 
-.sam-data-stats {
-    padding: 0.5rem 0;
-}
-
-.sam-data-stats p {
-    margin-bottom: 0.5rem;
-}
-
-.sam-data-header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 1rem;
-    margin-top: 2rem;
-}
-
-.sam-data-header i {
-    margin-right: 0.75rem;
-    color: var(--gov-red);
+.sam-api-status i {
+    color: #10b981;
 }
 
 .response-metadata {
-    color: var(--bs-gray-600);
+    color: var(--text-secondary);
     font-size: 0.875rem;
     margin-top: 1rem;
     padding-top: 1rem;
-    border-top: 1px solid var(--bs-gray-700);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.alert {
+    background-color: var(--card-bg);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    border-radius: 8px;
+}
+
+.alert-warning {
+    background-color: rgba(245, 158, 11, 0.1);
+    border-color: rgba(245, 158, 11, 0.2);
+    color: #fcd34d;
+}
+
+.alert-danger {
+    background-color: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.2);
+    color: #fca5a5;
 }
