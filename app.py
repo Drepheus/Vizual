@@ -6,7 +6,9 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from sqlalchemy.orm import DeclarativeBase
 from config import Config
+from werkzeug.utils import secure_filename
 
+# Set up logging configuration
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
@@ -37,7 +39,7 @@ def create_app():
 
     with app.app_context():
         try:
-            from models import User, Query, Payment
+            from models import User, Query, Payment, Document # Added Document model import
             db.create_all()
             logger.debug("Database tables created successfully")
         except Exception as e:
@@ -49,8 +51,8 @@ def create_app():
 app = create_app()
 
 # Import routes after app creation to avoid circular imports
-from models import User, Query, Payment
-from services import ai_service, sam_service, stripe_service
+from models import User, Query, Payment, Document # Added Document model import
+from services import ai_service, sam_service, stripe_service, document_service
 
 @login_manager.user_loader
 def load_user(id):
@@ -194,6 +196,70 @@ def create_payment():
     except Exception as e:
         logger.error(f"Payment intent creation failed: {e}")
         return jsonify({'error': str(e)}), 403
+
+@app.route('/api/document/upload', methods=['POST'])
+@login_required
+def upload_document():
+    logger.debug("Document upload endpoint accessed")
+
+    if 'document' not in request.files:
+        logger.warning("No document file in request")
+        return jsonify({'error': 'No document file uploaded'}), 400
+
+    file = request.files['document']
+    if file.filename == '':
+        logger.warning("Empty filename submitted")
+        return jsonify({'error': 'No selected file'}), 400
+
+    if not document_service.allowed_file(file.filename):
+        logger.warning(f"Invalid file type: {file.filename}")
+        return jsonify({'error': 'Invalid file type. Allowed types are PDF, DOC, DOCX, and TXT'}), 400
+
+    try:
+        # Ensure upload directory exists
+        document_service.ensure_upload_directory()
+
+        # Secure the filename and save the file
+        filename = secure_filename(file.filename)
+        file_path = os.path.join(document_service.UPLOAD_FOLDER, filename)
+        file.save(file_path)
+
+        # Extract text content from the document
+        content = document_service.process_document(file_path)
+        if not content:
+            logger.error(f"Failed to extract content from document: {filename}")
+            return jsonify({'error': 'Failed to process document'}), 500
+
+        # Create document record in database
+        document = Document(
+            user_id=current_user.id,
+            filename=filename,
+            original_filename=file.filename,
+            file_type=file.filename.rsplit('.', 1)[1].lower(),
+            content=content
+        )
+        db.session.add(document)
+        db.session.commit()
+
+        # Get AI analysis if query was provided
+        query = request.form.get('query', '')
+        if query:
+            # Combine the query with document content for context
+            full_query = f"{query}\n\nDocument Content:\n{content}"
+            ai_response = ai_service.get_ai_response(full_query)
+        else:
+            ai_response = "Document uploaded successfully. What would you like to know about it?"
+
+        logger.debug(f"Document processed successfully: {filename}")
+        return jsonify({
+            'message': 'Document uploaded successfully',
+            'ai_response': ai_response,
+            'document_id': document.id
+        })
+
+    except Exception as e:
+        logger.error(f"Error processing document upload: {str(e)}")
+        return jsonify({'error': 'Error processing document'}), 500
 
 if __name__ == '__main__':
     logger.info("Starting server...")

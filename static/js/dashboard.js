@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const queryForm = document.getElementById('queryForm');
     const queryInput = document.getElementById('queryInput');
     const responseArea = document.getElementById('responseArea');
-    const loadingSpinner = document.getElementById('loadingSpinner');
+    const documentUploadForm = document.getElementById('documentUploadForm');
 
     // Initialize SAM.gov data loading
     loadSamGovStatus();
@@ -40,6 +40,53 @@ document.addEventListener('DOMContentLoaded', function() {
                     updateQueryHistory(query, formattedResponse);
                 } else {
                     throw new Error(data.error || 'Failed to process query');
+                }
+            } catch (error) {
+                displayError(error.message);
+            }
+        });
+    }
+
+    if (documentUploadForm) {
+        documentUploadForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const fileInput = document.getElementById('documentFile');
+
+            if (!fileInput.files.length) {
+                displayError('Please select a file to upload');
+                return;
+            }
+
+            try {
+                // Show typing indicator for document analysis
+                responseArea.innerHTML = createTypingCard();
+                const cursor = document.querySelector('.typing-cursor');
+                cursor.classList.remove('d-none');
+
+                const response = await fetch('/api/document/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    const formattedResponse = data.ai_response
+                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                        .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank">$1</a>');
+
+                    await displayResponseWithTyping(data.ai_response);
+                    updateQueryHistory(
+                        `Document Analysis: ${fileInput.files[0].name}`,
+                        formattedResponse
+                    );
+
+                    // Reset form
+                    documentUploadForm.reset();
+                } else {
+                    throw new Error(data.error || 'Failed to process document');
                 }
             } catch (error) {
                 displayError(error.message);
