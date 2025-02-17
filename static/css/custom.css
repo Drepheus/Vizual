@@ -123,6 +123,7 @@ body {
     line-height: 1.6;
     padding: 1.5rem;
     color: var(--text-primary);
+    min-height: 100px; /* Ensure minimum height for typing area */
 }
 
 .ai-response-header {
@@ -175,4 +176,19 @@ body {
     background-color: rgba(239, 68, 68, 0.1);
     border-color: rgba(239, 68, 68, 0.2);
     color: #fca5a5;
+}
+
+/* Add to the end of the existing CSS file */
+.typing-cursor {
+    display: inline-block;
+    width: 3px;
+    height: 1.2em;
+    background-color: var(--text-primary);
+    margin-left: 2px;
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
 }

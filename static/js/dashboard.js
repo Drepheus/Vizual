@@ -16,8 +16,10 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!query) return;
 
             try {
-                loadingSpinner.classList.remove('d-none');
-                responseArea.innerHTML = '';
+                // Clear previous response and show typing indicator
+                responseArea.innerHTML = createTypingCard();
+                const cursor = document.querySelector('.typing-cursor');
+                cursor.classList.remove('d-none');
 
                 const response = await fetch('/api/query', {
                     method: 'POST',
@@ -34,17 +36,55 @@ document.addEventListener('DOMContentLoaded', function() {
                         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                         .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank">$1</a>');
 
-                    displayResponse({...data, ai_response: formattedResponse});
+                    await displayResponseWithTyping(data.ai_response);
                     updateQueryHistory(query, formattedResponse);
                 } else {
                     throw new Error(data.error || 'Failed to process query');
                 }
             } catch (error) {
                 displayError(error.message);
-            } finally {
-                loadingSpinner.classList.add('d-none');
             }
         });
+    }
+
+    async function displayResponseWithTyping(response) {
+        const responseCard = document.querySelector('.response-card');
+        const responseContent = responseCard.querySelector('.ai-response');
+        const cursor = responseCard.querySelector('.typing-cursor');
+
+        // Split response into characters for typing effect
+        const characters = response.split('');
+        let currentText = '';
+
+        for (const char of characters) {
+            currentText += char;
+            responseContent.innerHTML = formatResponse(currentText);
+            // Random delay between 10ms and 30ms for natural typing feel
+            await new Promise(resolve => setTimeout(resolve, Math.random() * 20 + 10));
+        }
+
+        // Remove cursor after typing is complete
+        cursor.classList.add('d-none');
+    }
+
+    function createTypingCard() {
+        return `
+            <div class="card dashboard-card response-card mb-4">
+                <div class="card-body">
+                    <div class="ai-response-header">
+                        <i class="fas fa-robot fa-2x"></i>
+                        <h4 class="mb-0">AI Response</h4>
+                    </div>
+                    <div class="ai-response">
+                        <span class="typing-cursor">▎</span>
+                    </div>
+                    <div class="response-metadata">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Response generated using GPT-4
+                    </div>
+                </div>
+            </div>
+        `;
     }
 
     async function loadSamGovStatus() {
@@ -133,27 +173,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
             </div>
         `).join('');
-    }
-
-    function displayResponse(data) {
-        const responseHtml = `
-            <div class="card dashboard-card response-card mb-4">
-                <div class="card-body">
-                    <div class="ai-response-header">
-                        <i class="fas fa-robot fa-2x"></i>
-                        <h4 class="mb-0">AI Response</h4>
-                    </div>
-                    <div class="ai-response">
-                        ${formatResponse(data.ai_response)}
-                    </div>
-                    <div class="response-metadata">
-                        <i class="fas fa-info-circle me-2"></i>
-                        Response generated using GPT-4
-                    </div>
-                </div>
-            </div>
-        `;
-        responseArea.innerHTML = responseHtml;
     }
 
     function formatResponse(text) {
