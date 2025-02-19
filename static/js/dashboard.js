@@ -3,23 +3,38 @@ document.addEventListener('DOMContentLoaded', function() {
     const queryInput = document.getElementById('queryInput');
     const responseArea = document.getElementById('responseArea');
     const documentUploadForm = document.getElementById('documentUploadForm');
+    let isTyping = false;
+    let shouldStopTyping = false;
 
     // Initialize SAM.gov data loading
     loadSamGovStatus();
     loadContractAwards();
 
     if (queryForm) {
+        // Add stop button after the submit button
+        const submitButton = queryForm.querySelector('button[type="submit"]');
+        const stopButton = document.createElement('button');
+        stopButton.type = 'button';
+        stopButton.className = 'btn btn-danger ms-2 d-none';
+        stopButton.innerHTML = '<i class="fas fa-stop"></i> Stop';
+        stopButton.onclick = stopTyping;
+        submitButton.parentNode.insertBefore(stopButton, submitButton.nextSibling);
+
         queryForm.addEventListener('submit', async function(e) {
             e.preventDefault();
 
             const query = queryInput.value.trim();
             if (!query) return;
 
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const stopBtn = this.querySelector('.btn-danger');
+
             try {
                 // Clear previous response and show typing indicator
                 responseArea.innerHTML = createTypingCard();
-                const cursor = document.querySelector('.typing-cursor');
-                cursor.classList.remove('d-none');
+                submitBtn.disabled = true;
+                stopBtn.classList.remove('d-none');
+                shouldStopTyping = false;
 
                 const response = await fetch('/api/query', {
                     method: 'POST',
@@ -37,73 +52,52 @@ document.addEventListener('DOMContentLoaded', function() {
                         .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank">$1</a>');
 
                     await displayResponseWithTyping(data.ai_response);
-                    updateQueryHistory(query, formattedResponse);
+                    if (!shouldStopTyping) {
+                        updateQueryHistory(query, formattedResponse);
+                    }
                 } else {
                     throw new Error(data.error || 'Failed to process query');
                 }
             } catch (error) {
                 displayError(error.message);
+            } finally {
+                submitBtn.disabled = false;
+                stopBtn.classList.add('d-none');
+                shouldStopTyping = false;
             }
         });
     }
 
-    if (documentUploadForm) {
-        documentUploadForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
+    function stopTyping() {
+        shouldStopTyping = true;
+        const submitBtn = queryForm.querySelector('button[type="submit"]');
+        const stopBtn = queryForm.querySelector('.btn-danger');
+        submitBtn.disabled = false;
+        stopBtn.classList.add('d-none');
 
-            const formData = new FormData(this);
-            const fileInput = document.getElementById('documentFile');
-
-            if (!fileInput.files.length) {
-                displayError('Please select a file to upload');
-                return;
-            }
-
-            try {
-                // Show typing indicator for document analysis
-                responseArea.innerHTML = createTypingCard();
-                const cursor = document.querySelector('.typing-cursor');
-                cursor.classList.remove('d-none');
-
-                const response = await fetch('/api/document/upload', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    const formattedResponse = data.ai_response
-                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                        .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank">$1</a>');
-
-                    await displayResponseWithTyping(data.ai_response);
-                    updateQueryHistory(
-                        `Document Analysis: ${fileInput.files[0].name}`,
-                        formattedResponse
-                    );
-
-                    // Reset form
-                    documentUploadForm.reset();
-                } else {
-                    throw new Error(data.error || 'Failed to process document');
-                }
-            } catch (error) {
-                displayError(error.message);
-            }
-        });
+        // Clear the current response
+        const responseCard = document.querySelector('.response-card');
+        if (responseCard) {
+            responseCard.querySelector('.typing-cursor').classList.add('d-none');
+        }
     }
 
     async function displayResponseWithTyping(response) {
         const responseCard = document.querySelector('.response-card');
         const responseContent = responseCard.querySelector('.ai-response');
         const cursor = responseCard.querySelector('.typing-cursor');
+        isTyping = true;
 
         // Split response into characters for typing effect
         const characters = response.split('');
         let currentText = '';
 
         for (const char of characters) {
+            if (shouldStopTyping) {
+                cursor.classList.add('d-none');
+                isTyping = false;
+                return;
+            }
             currentText += char;
             responseContent.innerHTML = formatResponse(currentText);
             // Random delay between 10ms and 30ms for natural typing feel
@@ -112,6 +106,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Remove cursor after typing is complete
         cursor.classList.add('d-none');
+        isTyping = false;
     }
 
     function createTypingCard() {
