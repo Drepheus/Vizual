@@ -226,6 +226,8 @@ def upload_document():
         return jsonify({'error': 'No document file uploaded'}), 400
 
     file = request.files['document']
+    logger.debug(f"Received file: {file.filename}")
+
     if file.filename == '':
         logger.warning("Empty filename submitted")
         return jsonify({'error': 'No selected file'}), 400
@@ -237,17 +239,25 @@ def upload_document():
     try:
         # Ensure upload directory exists
         document_service.ensure_upload_directory()
+        logger.debug("Upload directory verified")
 
         # Secure the filename and save the file
         filename = secure_filename(file.filename)
         file_path = os.path.join(document_service.UPLOAD_FOLDER, filename)
+        logger.debug(f"Attempting to save file to: {file_path}")
+
         file.save(file_path)
+        logger.debug("File saved successfully")
 
         # Extract text content from the document
+        logger.debug("Starting document processing")
         content = document_service.process_document(file_path)
+
         if not content:
             logger.error(f"Failed to extract content from document: {filename}")
             return jsonify({'error': 'Failed to process document'}), 500
+
+        logger.debug(f"Successfully extracted content from document: {filename}")
 
         # Create document record in database
         document = Document(
@@ -259,10 +269,12 @@ def upload_document():
         )
         db.session.add(document)
         db.session.commit()
+        logger.debug(f"Document record created in database with ID: {document.id}")
 
         # Get AI analysis if query was provided
         query = request.form.get('query', '')
         if query:
+            logger.debug(f"Processing AI analysis for query: {query[:50]}...")
             # Combine the query with document content for context
             full_query = f"{query}\n\nDocument Content:\n{content}"
             ai_response = ai_service.get_ai_response(full_query)
@@ -278,7 +290,7 @@ def upload_document():
 
     except Exception as e:
         logger.error(f"Error processing document upload: {str(e)}")
-        return jsonify({'error': 'Error processing document'}), 500
+        return jsonify({'error': f'Error processing document: {str(e)}'}), 500
 
 if __name__ == '__main__':
     logger.info("Starting server...")

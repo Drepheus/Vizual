@@ -250,4 +250,59 @@ document.addEventListener('DOMContentLoaded', function() {
 
         historyContainer.insertBefore(historyItem, historyContainer.firstChild);
     }
+
+    if (documentUploadForm) {
+        documentUploadForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const fileInput = document.getElementById('documentFile');
+            const submitBtn = this.querySelector('button[type="submit"]');
+
+            if (!fileInput.files.length) {
+                displayError('Please select a file to upload');
+                return;
+            }
+
+            try {
+                // Show loading state
+                submitBtn.disabled = true;
+                responseArea.innerHTML = createTypingCard();
+
+                console.log('Uploading document:', fileInput.files[0].name); // Debug log
+
+                const response = await fetch('/api/document/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                console.log('Upload response status:', response.status); // Debug log
+
+                const data = await response.json();
+                console.log('Upload response data:', data); // Debug log
+
+                if (response.ok) {
+                    const formattedResponse = data.ai_response
+                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                        .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank">$1</a>');
+
+                    await displayResponseWithTyping(data.ai_response);
+                    updateQueryHistory(
+                        `Document Analysis: ${fileInput.files[0].name}`,
+                        formattedResponse
+                    );
+
+                    // Reset form
+                    documentUploadForm.reset();
+                } else {
+                    throw new Error(data.error || 'Failed to process document');
+                }
+            } catch (error) {
+                console.error('Document upload error:', error); // Debug log
+                displayError(error.message);
+            } finally {
+                submitBtn.disabled = false;
+            }
+        });
+    }
 });
