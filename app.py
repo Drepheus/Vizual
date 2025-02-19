@@ -100,14 +100,33 @@ def logout():
     return redirect(url_for('index'))
 
 @app.route('/admin/upgrade/<int:user_id>')
+@login_required
 def admin_upgrade(user_id):
+    if not current_user.is_premium:
+        return "Unauthorized", 403
+        
     user = User.query.get(user_id)
     if user:
         user.is_premium = True
         db.session.commit()
-        logger.debug(f"User {user.id} upgraded to premium")
+        logger.debug(f"User {user.id} upgraded to premium by {current_user.username}")
         return f"User {user.username} upgraded to premium!"
     logger.warning(f"Attempt to upgrade non-existent user: {user_id}")
+    return "User not found", 404
+
+@app.route('/admin/upgrade/email/<email>')
+@login_required
+def admin_upgrade_by_email(email):
+    if not current_user.is_premium:
+        return "Unauthorized", 403
+        
+    user = User.query.filter_by(email=email).first()
+    if user:
+        user.is_premium = True
+        db.session.commit()
+        logger.debug(f"User {user.id} upgraded to premium by {current_user.username}")
+        return f"User {user.username} upgraded to premium!"
+    logger.warning(f"Attempt to upgrade non-existent user email: {email}")
     return "User not found", 404
 
 @app.route('/dashboard')
