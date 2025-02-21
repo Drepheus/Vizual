@@ -183,7 +183,6 @@ def process_query():
         return jsonify({'error': 'Free tier limit reached. Please upgrade to premium.'}), 403
 
     ai_response = ai_service.get_ai_response(query_text)
-    sam_data = sam_service.get_relevant_data(query_text)
 
     query = Query(
         user_id=current_user.id,
