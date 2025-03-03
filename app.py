@@ -226,8 +226,7 @@ def process_query():
     logger.debug(f"Query saved for user {current_user.id}")
 
     return jsonify({
-        'ai_response': ai_response,
-        'sam_data': sam_data
+        'ai_response': ai_response
     })
 
 @app.route('/payment')
