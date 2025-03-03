@@ -51,24 +51,30 @@ document.addEventListener('DOMContentLoaded', function() {
                     throw new Error('Server returned non-JSON response. Please try again.');
                 }
 
-                const data = await response.json();
+                let data;
+                try {
+                    data = await response.json();
+                } catch (parseError) {
+                    console.error('JSON parse error:', parseError);
+                    throw new Error('Failed to parse server response');
+                }
 
-                if (response.ok) {
-                    if (!data.ai_response) {
-                        throw new Error('Invalid response format from server');
-                    }
+                if (!response.ok) {
+                    throw new Error(data.error || `Server error: ${response.status}`);
+                }
 
-                    const formattedResponse = data.ai_response
-                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                        .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank">$1</a>')
-                        .replace(/\n/g, '<br>');
+                if (!data.ai_response) {
+                    throw new Error('Invalid response format from server');
+                }
 
-                    await displayResponseWithTyping(data.ai_response);
-                    if (!shouldStopTyping) {
-                        updateQueryHistory(query, formattedResponse);
-                    }
-                } else {
-                    throw new Error(data.error || 'Failed to process query');
+                const formattedResponse = data.ai_response
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank">$1</a>')
+                    .replace(/\n/g, '<br>');
+
+                await displayResponseWithTyping(data.ai_response);
+                if (!shouldStopTyping) {
+                    updateQueryHistory(query, formattedResponse);
                 }
             } catch (error) {
                 console.error('Query error:', error);
@@ -142,6 +148,119 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
     }
 
+    function formatResponse(text) {
+        return text
+            .split('\n\n')
+            .map(para => `<p>${para.replace(/\n/g, '<br>')}</p>`)
+            .join('');
+    }
+
+    function displayError(message) {
+        responseArea.innerHTML = `
+            <div class="alert alert-danger" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                ${message}
+            </div>
+        `;
+    }
+
+    function updateQueryHistory(query, response) {
+        const historyContainer = document.getElementById('queryHistory');
+        if (!historyContainer) return;
+
+        const historyItem = document.createElement('div');
+        historyItem.className = 'card dashboard-card mb-3';
+        historyItem.innerHTML = `
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted">Query:</h6>
+                <p>${query}</p>
+                <h6 class="card-subtitle mb-2 text-muted">Response:</h6>
+                <p>${response}</p>
+                <small class="text-muted">${new Date().toLocaleString()}</small>
+            </div>
+        `;
+
+        historyContainer.insertBefore(historyItem, historyContainer.firstChild);
+    }
+
+    if (documentUploadForm) {
+        documentUploadForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const fileInput = document.getElementById('documentFile');
+            const submitBtn = this.querySelector('button[type="submit"]');
+
+            if (!fileInput.files.length) {
+                displayError('Please select at least one file to upload');
+                return;
+            }
+
+            try {
+                // Show loading state
+                submitBtn.disabled = true;
+                responseArea.innerHTML = createTypingCard();
+
+                console.log('Uploading documents:', fileInput.files.length, 'files'); // Debug log
+
+                const response = await fetch('/api/document/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                // Check if response is JSON
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error('Server returned non-JSON response. Please try again.');
+                }
+
+                let data;
+                try {
+                    data = await response.json();
+                } catch (parseError) {
+                    console.error('JSON parse error:', parseError);
+                    throw new Error('Failed to parse server response');
+                }
+
+                if (!response.ok) {
+                    throw new Error(data.error || `Server error: ${response.status}`);
+                }
+
+                let statusMessage = '';
+                if (data.uploaded_documents && data.uploaded_documents.length > 0) {
+                    statusMessage = `Successfully processed ${data.uploaded_documents.length} documents:\n`;
+                    data.uploaded_documents.forEach(doc => {
+                        statusMessage += `- ${doc.filename}\n`;
+                    });
+                }
+                if (data.failed_documents && data.failed_documents.length > 0) {
+                    statusMessage += `\nFailed to process ${data.failed_documents.length} documents:\n`;
+                    data.failed_documents.forEach(doc => {
+                        statusMessage += `- ${doc.filename}: ${doc.error}\n`;
+                    });
+                }
+
+                const formattedResponse = (data.ai_response + '\n\n' + statusMessage)
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank">$1</a>')
+                    .replace(/\n/g, '<br>');
+
+                await displayResponseWithTyping(data.ai_response + '\n\n' + statusMessage);
+                updateQueryHistory(
+                    `Document Analysis: ${fileInput.files.length} files`,
+                    formattedResponse
+                );
+
+                // Reset form
+                documentUploadForm.reset();
+            } catch (error) {
+                console.error('Document upload error:', error);
+                displayError(error.message || 'An unexpected error occurred. Please try again.');
+            } finally {
+                submitBtn.disabled = false;
+            }
+        });
+    }
     async function loadSamGovStatus() {
         const statusCard = document.getElementById('samStatusCard');
         const loadingElement = document.getElementById('samStatusLoading');
@@ -230,107 +349,4 @@ document.addEventListener('DOMContentLoaded', function() {
         `).join('');
     }
 
-    function formatResponse(text) {
-        return text.split('\n\n')
-            .map(para => `<p>${para.replace(/\n/g, '<br>')}</p>`)
-            .join('');
-    }
-
-    function displayError(message) {
-        responseArea.innerHTML = `
-            <div class="alert alert-danger" role="alert">
-                <i class="fas fa-exclamation-circle me-2"></i>
-                ${message}
-            </div>
-        `;
-    }
-
-    function updateQueryHistory(query, response) {
-        const historyContainer = document.getElementById('queryHistory');
-        if (!historyContainer) return;
-
-        const historyItem = document.createElement('div');
-        historyItem.className = 'card dashboard-card mb-3';
-        historyItem.innerHTML = `
-            <div class="card-body">
-                <h6 class="card-subtitle mb-2 text-muted">Query:</h6>
-                <p>${query}</p>
-                <h6 class="card-subtitle mb-2 text-muted">Response:</h6>
-                <p>${response}</p>
-                <small class="text-muted">${new Date().toLocaleString()}</small>
-            </div>
-        `;
-
-        historyContainer.insertBefore(historyItem, historyContainer.firstChild);
-    }
-
-    if (documentUploadForm) {
-        documentUploadForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            const formData = new FormData(this);
-            const fileInput = document.getElementById('documentFile');
-            const submitBtn = this.querySelector('button[type="submit"]');
-
-            if (!fileInput.files.length) {
-                displayError('Please select at least one file to upload');
-                return;
-            }
-
-            try {
-                // Show loading state
-                submitBtn.disabled = true;
-                responseArea.innerHTML = createTypingCard();
-
-                console.log('Uploading documents:', fileInput.files.length, 'files'); // Debug log
-
-                const response = await fetch('/api/document/upload', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                console.log('Upload response status:', response.status); // Debug log
-
-                const data = await response.json();
-                console.log('Upload response data:', data); // Debug log
-
-                if (response.ok) {
-                    let statusMessage = '';
-                    if (data.uploaded_documents.length > 0) {
-                        statusMessage = `Successfully processed ${data.uploaded_documents.length} documents:\n`;
-                        data.uploaded_documents.forEach(doc => {
-                            statusMessage += `- ${doc.filename}\n`;
-                        });
-                    }
-                    if (data.failed_documents.length > 0) {
-                        statusMessage += `\nFailed to process ${data.failed_documents.length} documents:\n`;
-                        data.failed_documents.forEach(doc => {
-                            statusMessage += `- ${doc.filename}: ${doc.error}\n`;
-                        });
-                    }
-
-                    const formattedResponse = (data.ai_response + '\n\n' + statusMessage)
-                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                        .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank">$1</a>')
-                        .replace(/\n/g, '<br>');
-
-                    await displayResponseWithTyping(data.ai_response + '\n\n' + statusMessage);
-                    updateQueryHistory(
-                        `Document Analysis: ${fileInput.files.length} files`,
-                        formattedResponse
-                    );
-
-                    // Reset form
-                    documentUploadForm.reset();
-                } else {
-                    throw new Error(data.error || 'Failed to process documents');
-                }
-            } catch (error) {
-                console.error('Document upload error:', error); // Debug log
-                displayError(error.message);
-            } finally {
-                submitBtn.disabled = false;
-            }
-        });
-    }
 });
