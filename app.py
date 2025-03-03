@@ -68,22 +68,23 @@ def create_app():
         logger.error(f"Failed to initialize login manager: {e}")
         raise
 
+    # Import models here to avoid circular imports
+    from models import User, Query, Payment, Document
+
     with app.app_context():
         try:
-            from models import User, Query, Payment, Document # Added Document model import
             db.create_all()
             logger.debug("Database tables created successfully")
         except Exception as e:
             logger.error(f"Failed to create database tables: {e}")
             raise
 
+    # Import routes after initializing the app
+    from services import ai_service, sam_service, stripe_service, document_service
+
     return app
 
 app = create_app()
-
-# Import routes after app creation to avoid circular imports
-from models import User, Query, Payment, Document # Added Document model import
-from services import ai_service, sam_service, stripe_service, document_service
 
 @login_manager.user_loader
 @retry_on_disconnect
