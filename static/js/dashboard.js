@@ -3,23 +3,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const queryInput = document.getElementById('queryInput');
     const responseArea = document.getElementById('responseArea');
     const documentUploadForm = document.getElementById('documentUploadForm');
-    let isTyping = false;
-    let shouldStopTyping = false;
+    let currentStreamResponse = '';
 
     // Initialize SAM.gov data loading
     loadSamGovStatus();
     loadContractAwards();
 
     if (queryForm) {
-        // Add stop button after the submit button
-        const submitButton = queryForm.querySelector('button[type="submit"]');
-        const stopButton = document.createElement('button');
-        stopButton.type = 'button';
-        stopButton.className = 'btn btn-danger ms-2 d-none';
-        stopButton.innerHTML = '<i class="fas fa-stop"></i> Stop';
-        stopButton.onclick = stopTyping;
-        submitButton.parentNode.insertBefore(stopButton, submitButton.nextSibling);
-
         queryForm.addEventListener('submit', async function(e) {
             e.preventDefault();
 
@@ -27,103 +17,59 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!query) return;
 
             const submitBtn = this.querySelector('button[type="submit"]');
-            const stopBtn = this.querySelector('.btn-danger');
 
             try {
-                // Clear previous response and show typing indicator
-                responseArea.innerHTML = createTypingCard();
+                // Clear previous response and show initial card
+                responseArea.innerHTML = createResponseCard();
                 submitBtn.disabled = true;
-                stopBtn.classList.remove('d-none');
-                shouldStopTyping = false;
+                currentStreamResponse = '';
 
-                const response = await fetch('/api/query', {
+                const response = await fetch('/api/query/stream', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Accept': 'application/json'
+                        'Accept': 'text/event-stream'
                     },
                     body: JSON.stringify({ query })
                 });
 
-                // Check if response is JSON
-                const contentType = response.headers.get('content-type');
-                if (!contentType || !contentType.includes('application/json')) {
-                    throw new Error('Server returned non-JSON response. Please try again.');
-                }
-
-                let data;
-                try {
-                    data = await response.json();
-                } catch (parseError) {
-                    console.error('JSON parse error:', parseError);
-                    throw new Error('Failed to parse server response');
-                }
-
                 if (!response.ok) {
-                    throw new Error(data.error || `Server error: ${response.status}`);
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `Server error: ${response.status}`);
                 }
 
-                if (!data.ai_response) {
-                    throw new Error('Invalid response format from server');
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+
+                while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) break;
+
+                    const chunk = decoder.decode(value);
+                    const lines = chunk.split('\n');
+
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            const content = line.slice(6);
+                            currentStreamResponse += content;
+                            updateResponseContent(currentStreamResponse);
+                        }
+                    }
                 }
 
-                await displayResponseWithTyping(data.ai_response);
-                if (!shouldStopTyping) {
-                    updateQueryHistory(query, data.ai_response);
-                }
+                // Update query history after streaming is complete
+                updateQueryHistory(query, currentStreamResponse);
+
             } catch (error) {
                 console.error('Query error:', error);
                 displayError(error.message || 'An unexpected error occurred. Please try again.');
             } finally {
                 submitBtn.disabled = false;
-                stopBtn.classList.add('d-none');
-                shouldStopTyping = false;
             }
         });
     }
 
-    function stopTyping() {
-        shouldStopTyping = true;
-        const submitBtn = queryForm.querySelector('button[type="submit"]');
-        const stopBtn = queryForm.querySelector('.btn-danger');
-        submitBtn.disabled = false;
-        stopBtn.classList.add('d-none');
-
-        // Clear the current response
-        const responseCard = document.querySelector('.response-card');
-        if (responseCard) {
-            responseCard.querySelector('.typing-cursor').classList.add('d-none');
-        }
-    }
-
-    async function displayResponseWithTyping(response) {
-        const responseCard = document.querySelector('.response-card');
-        const responseContent = responseCard.querySelector('.ai-response');
-        const cursor = responseCard.querySelector('.typing-cursor');
-        isTyping = true;
-
-        // Split response into characters for typing effect
-        const characters = response.split('');
-        let currentText = '';
-
-        for (const char of characters) {
-            if (shouldStopTyping) {
-                cursor.classList.add('d-none');
-                isTyping = false;
-                return;
-            }
-            currentText += char;
-            responseContent.innerHTML = formatResponse(currentText);
-            // Random delay between 10ms and 30ms for natural typing feel
-            await new Promise(resolve => setTimeout(resolve, Math.random() * 20 + 10));
-        }
-
-        // Remove cursor after typing is complete
-        cursor.classList.add('d-none');
-        isTyping = false;
-    }
-
-    function createTypingCard() {
+    function createResponseCard() {
         return `
             <div class="card dashboard-card response-card mb-4">
                 <div class="card-body">
@@ -131,9 +77,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <i class="fas fa-robot fa-2x"></i>
                         <h4 class="mb-0">AI Response</h4>
                     </div>
-                    <div class="ai-response">
-                        <span class="typing-cursor">▎</span>
-                    </div>
+                    <div class="ai-response"></div>
                     <div class="response-metadata">
                         <i class="fas fa-info-circle me-2"></i>
                         Response generated using GPT-4
@@ -143,9 +87,16 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
     }
 
+    function updateResponseContent(text) {
+        const responseContent = document.querySelector('.ai-response');
+        if (responseContent) {
+            responseContent.innerHTML = formatResponse(text);
+        }
+    }
+
     function formatResponse(text) {
         if (!text) return '<p>No response received. Please try again.</p>';
-        
+
         return text
             .split('\n\n')
             .map(para => {
@@ -161,7 +112,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // Format bullet points
                 para = para.replace(/•\s/g, '<span class="bullet-point">•</span> ');
-                
+
                 // Format URLs to be clickable
                 para = para.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>');
 
@@ -365,6 +316,53 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
             </div>
         `).join('');
+    }
+
+    async function displayResponseWithTyping(response) {
+        const responseCard = document.querySelector('.response-card');
+        const responseContent = responseCard.querySelector('.ai-response');
+        const cursor = responseCard.querySelector('.typing-cursor');
+        isTyping = true;
+
+        // Split response into characters for typing effect
+        const characters = response.split('');
+        let currentText = '';
+
+        for (const char of characters) {
+            if (shouldStopTyping) {
+                cursor.classList.add('d-none');
+                isTyping = false;
+                return;
+            }
+            currentText += char;
+            responseContent.innerHTML = formatResponse(currentText);
+            // Random delay between 10ms and 30ms for natural typing feel
+            await new Promise(resolve => setTimeout(resolve, Math.random() * 20 + 10));
+        }
+
+        // Remove cursor after typing is complete
+        cursor.classList.add('d-none');
+        isTyping = false;
+    }
+
+    function createTypingCard() {
+        return `
+            <div class="card dashboard-card response-card mb-4">
+                <div class="card-body">
+                    <div class="ai-response-header">
+                        <i class="fas fa-robot fa-2x"></i>
+                        <h4 class="mb-0">AI Response</h4>
+                    </div>
+                    <div class="ai-response">
+                        <span class="typing-cursor">▎</span>
+                    </div>
+                    <div class="response-metadata">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Response generated using GPT-4
+                    </div>
+                </div>
+            </div>
+        `;
     }
 
 });

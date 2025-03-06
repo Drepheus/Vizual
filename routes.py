@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime
-from flask import render_template, redirect, url_for, flash, request, jsonify
+from flask import render_template, redirect, url_for, flash, request, jsonify, Response, stream_with_context
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.utils import secure_filename
 from app import db
@@ -198,7 +198,7 @@ def register_routes(app):
                     'message': 'No solicitations found matching your criteria',
                     'results': []
                 })
-
+        
         except Exception as e:
             logger.error(f"Error searching SAM.gov: {str(e)}")
             return jsonify({
@@ -213,5 +213,50 @@ def register_routes(app):
         if request.path.startswith('/api/'):
             return jsonify(error=str(error)), getattr(error, 'code', 500)
         return render_template('error.html', error=error), 500
+
+    @app.route('/api/query/stream', methods=['POST'])
+    @login_required
+    def process_query_stream():
+        try:
+            if not request.is_json:
+                return jsonify(error="Invalid request format. Expected JSON."), 400
+
+            data = request.get_json()
+            if not data or 'query' not in data:
+                return jsonify(error="Missing query parameter"), 400
+
+            query_text = data['query']
+
+            if not current_user.is_premium and Query.query.filter_by(user_id=current_user.id).count() >= 10:
+                return jsonify(error='Free tier limit reached. Please upgrade to premium.'), 403
+
+            def generate():
+                response_chunks = []
+                for chunk in ai_service.get_ai_streaming_response(query_text):
+                    response_chunks.append(chunk)
+                    yield f"data: {chunk}\n\n"
+
+                # Save the complete response to the database
+                complete_response = ''.join(response_chunks)
+                query = Query(
+                    user_id=current_user.id,
+                    query_text=query_text,
+                    response=complete_response
+                )
+                db.session.add(query)
+                db.session.commit()
+
+            return Response(
+                stream_with_context(generate()),
+                mimetype='text/event-stream',
+                headers={
+                    'Cache-Control': 'no-cache',
+                    'Transfer-Encoding': 'chunked'
+                }
+            )
+
+        except Exception as e:
+            logger.error(f"Error processing streaming query: {str(e)}")
+            return jsonify(error=str(e)), 500
 
     return app
