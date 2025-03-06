@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const queryForm = document.getElementById('queryForm');
     const queryInput = document.getElementById('queryInput');
     const responseArea = document.getElementById('responseArea');
-    const documentUploadForm = document.getElementById('documentUploadForm');
     let currentStreamResponse = '';
 
     // Initialize SAM.gov data loading
@@ -28,7 +27,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Accept': 'text/event-stream'
                     },
                     body: JSON.stringify({ query })
                 });

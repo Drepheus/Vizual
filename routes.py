@@ -99,7 +99,7 @@ def register_routes(app):
         try:
             # Fetch SAM.gov entity status data
             entities = sam_service.get_relevant_data("contractor status")
-            
+
             # Create placeholder data if API call failed
             if not entities:
                 logger.warning("No SAM.gov entities found, providing placeholder data")
@@ -112,7 +112,7 @@ def register_routes(app):
                         'url': 'https://sam.gov/'
                     }
                 ]
-                
+
             return jsonify({
                 'status': 'success',
                 'entities': entities
@@ -130,7 +130,7 @@ def register_routes(app):
         logger.debug("SAM.gov awards API endpoint accessed")
         try:
             awards = sam_service.get_awarded_contracts()
-            
+
             # Create placeholder data if API call failed
             if not awards:
                 logger.warning("No SAM.gov awards found, providing placeholder data")
@@ -144,7 +144,7 @@ def register_routes(app):
                         'url': 'https://sam.gov/'
                     }
                 ]
-                
+
             return jsonify({
                 'status': 'success',
                 'awards': awards
@@ -155,7 +155,7 @@ def register_routes(app):
                 'status': 'error',
                 'error': 'Could not fetch contract awards. Please try again later.'
             }), 500
-            
+
     @app.route('/api/sam/search', methods=['POST'])
     @login_required
     def sam_search():
@@ -170,11 +170,11 @@ def register_routes(app):
 
             query_text = data['query']
             logger.info(f"Searching SAM.gov for: {query_text}")
-            
+
             # Get solicitations from SAM.gov
             from services.web_service import get_sam_solicitations
             solicitations = get_sam_solicitations(query_text)
-            
+
             if solicitations:
                 # Format for display
                 formatted_results = []
@@ -187,7 +187,7 @@ def register_routes(app):
                         'due_date': sol.get('due_date', 'N/A'),
                         'url': sol.get('url', '#')
                     })
-                
+
                 return jsonify({
                     'status': 'success',
                     'results': formatted_results,
@@ -199,7 +199,7 @@ def register_routes(app):
                     'message': 'No solicitations found matching your criteria',
                     'results': []
                 })
-        
+
         except Exception as e:
             logger.error(f"Error searching SAM.gov: {str(e)}")
             return jsonify({
@@ -234,11 +234,11 @@ def register_routes(app):
             def generate():
                 response_chunks = []
                 for chunk in ai_service.get_ai_streaming_response(query_text):
-                    response_chunks.append(json.loads(chunk))
-                    yield f"data: {json.dumps({'content': chunk})}\n\n"
+                    response_chunks.append(chunk)
+                    yield f"data: {chunk}\n\n"
 
                 # Save the complete response to the database
-                complete_response = ''.join([chunk.get('content', '') for chunk in response_chunks if 'content' in chunk])
+                complete_response = ''.join([json.loads(chunk).get('content', '') for chunk in response_chunks if 'content' in json.loads(chunk)])
                 query = Query(
                     user_id=current_user.id,
                     query_text=query_text,
