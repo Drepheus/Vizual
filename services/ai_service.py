@@ -2,7 +2,6 @@ import os
 import logging
 from openai import OpenAI
 from datetime import datetime
-import json
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -24,20 +23,31 @@ def init_openai_client():
         return False
 
 def get_ai_streaming_response(query):
-    """Get streaming response from OpenAI API"""
     if not OPENAI_API_KEY:
         logger.error("OPENAI_API_KEY is not set in environment variables")
-        yield json.dumps({"error": "OpenAI API key is not configured. Please contact support."})
-        return
+        return "Error: OpenAI API key is not configured. Please contact support."
 
     if not client and not init_openai_client():
         logger.error("Failed to initialize OpenAI client")
-        yield json.dumps({"error": "Could not initialize AI service. Please try again later."})
-        return
+        return "Error: Could not initialize AI service. Please try again later."
 
     try:
         today_date = datetime.today().strftime('%Y-%m-%d')
-        system_message = f"""You are BidBot, an AI assistant specialized in government contracting but also everything else. Today's date is {today_date}. You help users navigate processes step by step, providing clear and actionable guidance.
+        system_message = f"""You are BidBot, an AI assistant specialized in government contracting but also everything else. Today's date is {today_date}. You help users navigate processes step by step, providing clear and actionable guidance. You are an advanced AI assistant specializing in government contracting (GovCon) while being fully capable of assisting users with any other topic or inquiry. Your mission is to provide clear, actionable, and expert guidance on any subject while staying focused on where the user is in the GovCon process and what comes next.
+
+For government contracting, you:
+
+- Search SAM.gov for solicitations, RFQs, and bid opportunities.
+- Analyze RFPs & RFQs, summarize key requirements, and suggest winning strategies.
+- Guide users step-by-step through the entire GovCon lifecycle, ensuring compliance and strategic advantage.
+- Assist with proposal writing, compliance checks, pricing strategies, and risk mitigation.
+- Provide real-time updates on regulations, funding, and procurement trends.
+
+For non-GovCon topics, you:
+
+- Answer any general or specialized question across all domains.
+- Offer expert advice on business, technology, legal, finance, and more.
+- Provide step-by-step guidance on any process the user is navigating.
 
 Your responses should follow this structure:
 • Start with a direct answer to the query
@@ -58,25 +68,49 @@ Keep responses professional, concise, and immediately actionable."""
             {"role": "user", "content": query}
         ]
 
-        logger.debug(f"Sending streaming request to OpenAI API with query: {query[:50]}...")
+        # Check if this is a SAM.gov related query
+        sam_keywords = ['solicitation', 'sam.gov', 'contract', 'opportunity', 'bid', 'fetch', 'rfp', 'rfq']
+        is_sam_query = any(keyword in query.lower() for keyword in sam_keywords)
+
+        if is_sam_query:
+            # Try to get SAM.gov data
+            from services.web_service import process_web_content
+            sam_results = process_web_content(query)
+            if sam_results:
+                sam_data = "\n\nSAM.GOV DATA RETRIEVED:\n"
+                for result in sam_results:
+                    sam_data += f"\n{result['content']}\n"
+                # Add SAM data to user query
+                messages.append({"role": "system", "content": f"Here is real-time SAM.gov data that might be relevant: {sam_data}"})
+
+        logger.debug(f"Sending request to OpenAI API with query: {query[:50]}...")
         logger.debug("Using model: gpt-4o-2024-11-20")
 
-        stream = client.chat.completions.create(
+        # Enable streaming to receive real-time response
+        response = client.chat.completions.create(
             model="gpt-4o-2024-11-20",
             messages=messages,
             temperature=0.7,
             max_tokens=800,
-            stream=True
+            stream=True  # Enable real-time streaming
         )
 
-        for chunk in stream:
-            if chunk.choices[0].delta.content is not None:
-                yield json.dumps({"content": chunk.choices[0].delta.content})
+        # Handling the streamed response in chunks
+        full_response = ""
+        for chunk in response:
+            if chunk.get("choices"):
+                chunk_content = chunk["choices"][0].get("message", {}).get("content", "")
+                full_response += chunk_content
+                logger.debug(f"Streaming chunk: {chunk_content}")
+                print(chunk_content, end="")  # Print in real-time (optional, can be removed)
+
+        logger.debug("Successfully received full response from OpenAI API")
+        return full_response
 
     except Exception as e:
         error_msg = str(e)
         logger.error(f"OpenAI API error: {error_msg}")
-        yield json.dumps({"error": "I apologize, but I encountered an error processing your request. Please try again in a moment."})
+        return "I apologize, but I encountered an error processing your request. Please try again in a moment."
 
 # Initialize the client when the module is imported
 init_openai_client()
