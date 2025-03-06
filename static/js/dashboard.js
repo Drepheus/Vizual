@@ -151,7 +151,22 @@ document.addEventListener('DOMContentLoaded', function() {
     function formatResponse(text) {
         return text
             .split('\n\n')
-            .map(para => `<p>${para.replace(/\n/g, '<br>')}</p>`)
+            .map(para => {
+                // Add special styling for our formatted sections
+                para = para
+                    .replace(/🎯 Direct Answer:/g, '<div class="response-section direct-answer"><strong>Direct Answer:</strong>')
+                    .replace(/📝 Details:/g, '<div class="response-section details"><strong>Details:</strong>')
+                    .replace(/⚡ Next Steps:/g, '<div class="response-section next-steps"><strong>Next Steps:</strong>')
+                    // Close the div tags we opened
+                    .replace(/\n(?=🎯|📝|⚡)/g, '</div>')
+                    // Add closing div for the last section
+                    + (para.match(/🎯|📝|⚡/) ? '</div>' : '');
+
+                // Format bullet points
+                para = para.replace(/•\s/g, '<span class="bullet-point">•</span> ');
+
+                return `<p>${para}</p>`;
+            })
             .join('');
     }
 

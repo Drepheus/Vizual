@@ -192,3 +192,40 @@ body {
     0%, 100% { opacity: 1; }
     50% { opacity: 0; }
 }
+
+/* Add to the existing CSS file */
+.response-section {
+    margin: 1.2rem 0;
+    padding: 1rem;
+    border-radius: 8px;
+    background-color: var(--card-bg);
+    border-left: 4px solid;
+}
+
+.direct-answer {
+    border-left-color: #4CAF50;
+    background-color: rgba(76, 175, 80, 0.1);
+}
+
+.details {
+    border-left-color: #2196F3;
+    background-color: rgba(33, 150, 243, 0.1);
+}
+
+.next-steps {
+    border-left-color: #FFC107;
+    background-color: rgba(255, 193, 7, 0.1);
+}
+
+.bullet-point {
+    color: var(--gov-blue);
+    margin-right: 0.5rem;
+    font-weight: bold;
+}
+
+.response-section strong {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+    font-size: 1.1rem;
+}
