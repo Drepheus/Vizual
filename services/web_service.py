@@ -88,6 +88,67 @@ def extract_urls(text):
         logger.error(f"Error extracting URLs: {str(e)}")
         return []
 
+def process_web_content(query):
+    """Process query for web content and return relevant information"""
+    try:
+        # Check for SAM.gov related queries first
+        sam_keywords = ['solicitation', 'sam.gov', 'contract', 'opportunity', 'bid', 'rfp', 'rfq']
+        is_sam_query = any(keyword in query.lower() for keyword in sam_keywords)
+
+        web_contents = []
+
+        # Handle SAM.gov queries
+        if is_sam_query:
+            logger.info(f"Processing SAM.gov query: {query}")
+            solicitations = get_sam_solicitations(query)
+
+            if solicitations:
+                for sol in solicitations:
+                    content = (
+                        f"SAM.GOV SOLICITATION:\n"
+                        f"Title: {sol['title']}\n"
+                        f"Agency: {sol['agency']}\n"
+                        f"Solicitation Number: {sol['solicitation_number']}\n"
+                        f"Posted Date: {sol['posted_date']}\n"
+                        f"Response Deadline: {sol['due_date']}\n"
+                        f"Description: {sol['description'] if 'description' in sol else 'N/A'}\n"
+                        f"View on SAM.gov: {sol['url']}"
+                    )
+                    web_contents.append({
+                        'url': sol['url'],
+                        'content': content,
+                        'source': 'SAM.gov',
+                        'timestamp': datetime.now().isoformat()
+                    })
+                logger.info(f"Found {len(web_contents)} solicitations from SAM.gov")
+            else:
+                logger.warning("No SAM.gov solicitations found")
+
+        # Extract and process URLs from the query
+        urls = extract_urls(query)
+        for url in urls:
+            result = get_webpage_content(url)
+            if result:
+                web_contents.append({
+                    'url': url,
+                    'content': result['content'],
+                    'metadata': result.get('metadata', {}),
+                    'source': 'Web Scraping',
+                    'timestamp': result['timestamp']
+                })
+                logger.info(f"Successfully scraped content from {url}")
+
+        if web_contents:
+            logger.info(f"Successfully processed {len(web_contents)} sources")
+            return web_contents
+        else:
+            logger.warning(f"No content found for query: {query}")
+            return []
+
+    except Exception as e:
+        logger.error(f"Error processing web content: {str(e)}")
+        return []
+
 def get_sam_solicitations(query=None):
     """Fetch recent solicitations from SAM.gov API"""
     try:
@@ -166,51 +227,4 @@ def get_sam_solicitations(query=None):
 
     except Exception as e:
         logger.error(f"Error fetching SAM.gov solicitations: {str(e)}")
-        return []
-
-def process_web_content(query):
-    """Process query for web content and return relevant information"""
-    try:
-        # Check for SAM.gov related queries first
-        sam_keywords = ['solicitation', 'sam.gov', 'contract', 'opportunity', 'bid', 'rfp', 'rfq']
-        is_sam_query = any(keyword in query.lower() for keyword in sam_keywords)
-
-        web_contents = []
-
-        # Handle SAM.gov queries
-        if is_sam_query:
-            logger.info(f"Processing SAM.gov query: {query}")
-            solicitations = get_sam_solicitations(query)
-
-            if solicitations:
-                for sol in solicitations:
-                    content = (
-                        f"SAM.GOV SOLICITATION:\n"
-                        f"Title: {sol['title']}\n"
-                        f"Agency: {sol['agency']}\n"
-                        f"Solicitation Number: {sol['solicitation_number']}\n"
-                        f"Posted Date: {sol['posted_date']}\n"
-                        f"Response Deadline: {sol['due_date']}\n"
-                        f"Description: {sol['description'] if 'description' in sol else 'N/A'}\n"
-                        f"View on SAM.gov: {sol['url']}"
-                    )
-                    web_contents.append({
-                        'url': sol['url'],
-                        'content': content,
-                        'source': 'SAM.gov',
-                        'timestamp': datetime.now().isoformat()
-                    })
-                logger.info(f"Found {len(web_contents)} solicitations from SAM.gov")
-            else:
-                logger.warning("No SAM.gov solicitations found")
-
-        if web_contents:
-            logger.info(f"Successfully processed {len(web_contents)} sources")
-            return web_contents
-        else:
-            logger.warning(f"No content found for query: {query}")
-            return []
-
-    except Exception as e:
-        logger.error(f"Error processing web content: {str(e)}")
         return []
