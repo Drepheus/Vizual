@@ -1,11 +1,12 @@
 import logging
-import re
-import trafilatura
-import requests
+from services.sam_service import get_relevant_data
 from urllib.parse import urlparse, quote
 from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
 import os
+import re
+import trafilatura
+import requests
 
 logger = logging.getLogger(__name__)
 
@@ -126,79 +127,41 @@ def get_webpage_content(url):
 def process_web_content(query):
     """Process query for web content and return relevant information"""
     try:
-        # Extended list of SAM.gov related keywords
+        # Check for SAM.gov related queries
         sam_keywords = ['solicitation', 'sam.gov', 'contract', 'opportunity', 'bid', 'rfp', 'rfq', 
-                       'proposal', 'federal', 'government contract', 'award', 'tender', 'procurement']
-                       
-        # Check for SAM.gov related queries - more comprehensive check
+                       'proposal', 'federal', 'government contract']
+
         is_sam_query = any(keyword in query.lower() for keyword in sam_keywords)
-        
+
         if is_sam_query:
-            logger.info(f"Detected SAM.gov related query: {query}")
-            # Get solicitations from SAM.gov
-            solicitations = get_sam_solicitations(query)
-            
-            if solicitations:
+            logger.info(f"Processing SAM.gov query: {query}")
+            opportunities = get_relevant_data(query)
+
+            if opportunities:
                 web_contents = []
-                for sol in solicitations:
-                    # More comprehensive content formatting
+                for opp in opportunities:
                     content = (
-                        f"Title: {sol['title']}\n"
-                        f"Agency: {sol['agency']}\n"
-                        f"Solicitation Number: {sol['solicitation_number']}\n"
-                        f"Posted Date: {sol['posted_date']}\n"
-                        f"Response Due: {sol['due_date']}\n"
-                        f"Status: Active\n"
-                        f"View on SAM.gov: {sol['url']}"
+                        f"Title: {opp['title']}\n"
+                        f"Agency: {opp['agency']}\n"
+                        f"Solicitation Number: {opp['solicitation_number']}\n"
+                        f"Response Deadline: {opp['response_deadline']}\n"
+                        f"Status: {opp['status']}\n"
+                        f"Description: {opp['description']}\n"
+                        f"View on SAM.gov: {opp['url']}"
                     )
                     web_contents.append({
-                        'url': sol['url'],
+                        'url': opp['url'],
                         'content': content
                     })
-                
-                logger.info(f"Found {len(web_contents)} solicitations from SAM.gov")
+
+                logger.info(f"Found {len(web_contents)} opportunities from SAM.gov")
                 return web_contents
             else:
-                logger.warning(f"No solicitations found for query: {query}")
-                # Try with a more generic search if specific search returns nothing
-                simplified_query = ' '.join([word for word in query.split() if len(word) > 3 and word.lower() not in 
-                                          ['find', 'get', 'for', 'the', 'and', 'with', 'solicitation', 'contract']])
-                if simplified_query:
-                    logger.info(f"Trying simplified query: {simplified_query}")
-                    solicitations = get_sam_solicitations(simplified_query)
-                    if solicitations:
-                        web_contents = []
-                        for sol in solicitations:
-                            content = (
-                                f"Title: {sol['title']}\n"
-                                f"Agency: {sol['agency']}\n"
-                                f"Solicitation Number: {sol['solicitation_number']}\n"
-                                f"Posted Date: {sol['posted_date']}\n"
-                                f"Response Due: {sol['due_date']}\n"
-                                f"Status: Active\n"
-                                f"View on SAM.gov: {sol['url']}"
-                            )
-                            web_contents.append({
-                                'url': sol['url'],
-                                'content': content
-                            })
-                        logger.info(f"Found {len(web_contents)} solicitations with simplified query")
-                        return web_contents
+                logger.warning(f"No opportunities found for query: {query}")
+                return []
 
-        # Process regular URLs
-        urls = extract_urls(query)
-        web_contents = []
+        return []
 
-        for url in urls:
-            if is_valid_url(url):
-                content = get_webpage_content(url)
-                if content:
-                    web_contents.append({
-                        'url': url,
-                        'content': content
-                    })
-
-        return web_contents
     except Exception as e:
         logger.error(f"Error processing web content: {str(e)}")
         return []

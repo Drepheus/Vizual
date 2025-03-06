@@ -1,7 +1,7 @@
 import requests
 import os
-from datetime import datetime, timedelta
 import logging
+from datetime import datetime, timedelta
 from time import sleep
 import json
 from functools import lru_cache
@@ -14,8 +14,14 @@ logger = logging.getLogger(__name__)
 def _cached_sam_request(endpoint, query_params_str):
     """Make a cached request to SAM.gov API"""
     base_url = 'https://api.sam.gov/opportunities/v2'
+    api_key = os.environ.get('SAM_API_KEY')
+
+    if not api_key:
+        logger.error("SAM_API_KEY environment variable is not set")
+        return None
+
     headers = {
-        'X-Api-Key': os.environ.get('SAM_API_KEY'),
+        'X-Api-Key': api_key,
         'Accept': 'application/json'
     }
 
@@ -24,20 +30,19 @@ def _cached_sam_request(endpoint, query_params_str):
     logger.debug(f"Making SAM.gov API request to {endpoint} with params: {params}")
 
     # Implement exponential backoff
-    max_retries = 5
+    max_retries = 3
     for attempt in range(max_retries):
         try:
             response = requests.get(
                 f'{base_url}/{endpoint}',
                 headers=headers,
                 params=params,
-                timeout=10
+                timeout=30  # Increased timeout
             )
 
-            logger.debug(f"SAM.gov API response status: {response.status_code}")
             if response.status_code == 200:
                 return response.json()
-            elif response.status_code == 429:
+            elif response.status_code == 429:  # Rate limit hit
                 wait_time = min(30, (2 ** attempt))  # Exponential backoff, max 30 seconds
                 logger.warning(f"Rate limit hit, waiting {wait_time} seconds before retry {attempt + 1}/{max_retries}")
                 sleep(wait_time)
@@ -46,12 +51,11 @@ def _cached_sam_request(endpoint, query_params_str):
                 logger.error(f"SAM.gov API error: {response.status_code} - {response.text}")
                 return None
 
-        except requests.Timeout:
-            logger.error("SAM.gov API request timed out")
-            return None
-        except Exception as e:
+        except requests.exceptions.RequestException as e:
             logger.error(f"Error making SAM.gov request: {str(e)}")
-            return None
+            if attempt < max_retries - 1:  # Don't sleep on the last attempt
+                sleep(min(30, (2 ** attempt)))
+            continue
 
     logger.error("Max retries exceeded for SAM.gov API request")
     return None
@@ -60,30 +64,39 @@ def format_date_for_sam(date_obj):
     """Format date in MM/dd/yyyy format as required by SAM.gov API"""
     return date_obj.strftime("%m/%d/%Y")
 
-def get_relevant_data(query):
+def get_relevant_data(query=None):
+    """Get relevant contract data from SAM.gov"""
     try:
         today = datetime.now()
-        future = today + timedelta(days=30)
+        past = today - timedelta(days=7)  # Reduced from 30 to 7 days to get more recent data
+
+        # Format dates in MM/dd/yyyy as required by SAM API
+        formatted_past = past.strftime("%m/%d/%Y")
+        formatted_today = today.strftime("%m/%d/%Y")
 
         params = {
-            'api_key': os.environ.get('SAM_API_KEY'),
-            'postedFrom': format_date_for_sam(today),
-            'postedTo': format_date_for_sam(future),
-            'limit': 3,
+            'postedFrom': formatted_past,
+            'postedTo': formatted_today,
+            'limit': 5,
             'isActive': 'true'
         }
 
         if query:
-            # Properly encode the keywords parameter
-            params['keywords'] = quote(query)
+            # Clean and format the query
+            search_terms = query.lower()
+            for term in ['fetch', 'get', 'find', 'search for', 'solicitation for']:
+                search_terms = search_terms.replace(term, '')
+            search_terms = search_terms.strip()
+            if search_terms:
+                params['keywords'] = quote(search_terms)
 
         # Convert params to string for caching
         params_str = json.dumps(params, sort_keys=True)
-        logger.debug(f"Querying SAM.gov with parameters: {params_str}")
 
         data = _cached_sam_request('search', params_str)
-        if data:
+        if data and 'opportunitiesData' in data:
             return format_sam_data(data)
+
         return []
 
     except Exception as e:
@@ -116,6 +129,7 @@ def get_awarded_contracts():
         return []
 
 def format_sam_data(data):
+    """Format SAM.gov data for display"""
     formatted_data = []
     opportunities = data.get('opportunitiesData', [])
 
@@ -128,12 +142,15 @@ def format_sam_data(data):
             continue
 
         formatted_data.append({
-            'entity_name': opp.get('title', 'N/A'),
-            'duns': opp.get('solicitationNumber', 'N/A'),
+            'title': opp.get('title', 'N/A'),
+            'agency': opp.get('organizationName', 'N/A'),
+            'solicitation_number': opp.get('solicitationNumber', 'N/A'),
+            'response_deadline': opp.get('responseDeadLine', 'N/A'),
             'status': opp.get('status', 'N/A'),
-            'expiration_date': opp.get('responseDeadLine', 'N/A'),
+            'description': opp.get('description', 'N/A')[:500] + '...' if opp.get('description') else 'N/A',
             'url': f"https://sam.gov/opp/{notice_id}/view"
         })
+
     return formatted_data
 
 def format_awards_data(data):
