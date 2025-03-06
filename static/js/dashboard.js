@@ -144,6 +144,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function formatResponse(text) {
+        if (!text) return '<p>No response received. Please try again.</p>';
+        
         return text
             .split('\n\n')
             .map(para => {
@@ -159,6 +161,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // Format bullet points
                 para = para.replace(/•\s/g, '<span class="bullet-point">•</span> ');
+                
+                // Format URLs to be clickable
+                para = para.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>');
+
+                // Format SAM.gov data sections
+                if (para.includes('SAM.GOV DATA RETRIEVED') || para.includes('Title:') && para.includes('Solicitation Number:')) {
+                    para = `<div class="sam-data-section">${para}</div>`;
+                }
 
                 // Remove any remaining markdown-style bold formatting
                 para = para.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');

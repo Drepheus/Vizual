@@ -30,31 +30,49 @@ def extract_urls(text):
 def get_sam_solicitations(query=None):
     """Fetch recent solicitations from SAM.gov API"""
     try:
+        # Make sure we have the API key
+        api_key = os.environ.get('SAM_API_KEY')
+        if not api_key:
+            logger.error("SAM_API_KEY environment variable is not set")
+            return []
+            
         headers = {
-            'X-Api-Key': os.environ.get('SAM_API_KEY'),
+            'X-Api-Key': api_key,
             'Accept': 'application/json'
         }
 
         today = datetime.now()
         future = today + timedelta(days=30)
 
+        # Format dates in MM/dd/yyyy as required by SAM API
+        formatted_today = today.strftime("%m/%d/%Y")
+        formatted_future = future.strftime("%m/%d/%Y")
+
         params = {
-            'page': 0,
-            'size': 3,
-            'api_key': os.environ.get('SAM_API_KEY'),
-            'postedFrom': today.strftime("%Y-%m-%d"),
-            'postedTo': future.strftime("%Y-%m-%d"),
-            'limit': 3,
+            'api_key': api_key,
+            'postedFrom': formatted_today,
+            'postedTo': formatted_future,
+            'limit': 5,  # Increased limit
             'isActive': 'true'
         }
 
+        # Clean and format the query for the search
         if query:
-            params['keywords'] = quote(query)
+            # Extract only the relevant search terms
+            search_terms = query.lower()
+            for term in ['fetch', 'get', 'find', 'search for', 'solicitation for', 'contract for']:
+                search_terms = search_terms.replace(term, '')
+            search_terms = search_terms.strip()
+            params['keywords'] = quote(search_terms)
 
+        # Log the attempt with query
+        logger.info(f"Querying SAM.gov with search terms: {search_terms if query else 'None'}")
+        
         response = requests.get(
             'https://api.sam.gov/opportunities/v2/search',
             headers=headers,
-            params=params
+            params=params,
+            timeout=15  # Adding a timeout
         )
 
         if response.status_code == 200:
@@ -108,26 +126,64 @@ def get_webpage_content(url):
 def process_web_content(query):
     """Process query for web content and return relevant information"""
     try:
-        # Check for SAM.gov related queries
-        sam_keywords = ['solicitation', 'sam.gov', 'contract', 'opportunity', 'bid']
-        if any(keyword in query.lower() for keyword in sam_keywords):
+        # Extended list of SAM.gov related keywords
+        sam_keywords = ['solicitation', 'sam.gov', 'contract', 'opportunity', 'bid', 'rfp', 'rfq', 
+                       'proposal', 'federal', 'government contract', 'award', 'tender', 'procurement']
+                       
+        # Check for SAM.gov related queries - more comprehensive check
+        is_sam_query = any(keyword in query.lower() for keyword in sam_keywords)
+        
+        if is_sam_query:
+            logger.info(f"Detected SAM.gov related query: {query}")
+            # Get solicitations from SAM.gov
             solicitations = get_sam_solicitations(query)
+            
             if solicitations:
                 web_contents = []
                 for sol in solicitations:
+                    # More comprehensive content formatting
                     content = (
                         f"Title: {sol['title']}\n"
                         f"Agency: {sol['agency']}\n"
                         f"Solicitation Number: {sol['solicitation_number']}\n"
                         f"Posted Date: {sol['posted_date']}\n"
                         f"Response Due: {sol['due_date']}\n"
+                        f"Status: Active\n"
                         f"View on SAM.gov: {sol['url']}"
                     )
                     web_contents.append({
                         'url': sol['url'],
                         'content': content
                     })
+                
+                logger.info(f"Found {len(web_contents)} solicitations from SAM.gov")
                 return web_contents
+            else:
+                logger.warning(f"No solicitations found for query: {query}")
+                # Try with a more generic search if specific search returns nothing
+                simplified_query = ' '.join([word for word in query.split() if len(word) > 3 and word.lower() not in 
+                                          ['find', 'get', 'for', 'the', 'and', 'with', 'solicitation', 'contract']])
+                if simplified_query:
+                    logger.info(f"Trying simplified query: {simplified_query}")
+                    solicitations = get_sam_solicitations(simplified_query)
+                    if solicitations:
+                        web_contents = []
+                        for sol in solicitations:
+                            content = (
+                                f"Title: {sol['title']}\n"
+                                f"Agency: {sol['agency']}\n"
+                                f"Solicitation Number: {sol['solicitation_number']}\n"
+                                f"Posted Date: {sol['posted_date']}\n"
+                                f"Response Due: {sol['due_date']}\n"
+                                f"Status: Active\n"
+                                f"View on SAM.gov: {sol['url']}"
+                            )
+                            web_contents.append({
+                                'url': sol['url'],
+                                'content': content
+                            })
+                        logger.info(f"Found {len(web_contents)} solicitations with simplified query")
+                        return web_contents
 
         # Process regular URLs
         urls = extract_urls(query)

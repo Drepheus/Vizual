@@ -70,6 +70,21 @@ Keep responses professional, concise, and immediately actionable."""
             {"role": "user", "content": query}
         ]
 
+        # Check if this is a SAM.gov related query
+        sam_keywords = ['solicitation', 'sam.gov', 'contract', 'opportunity', 'bid', 'fetch', 'rfp', 'rfq']
+        is_sam_query = any(keyword in query.lower() for keyword in sam_keywords)
+        
+        if is_sam_query:
+            # Try to get SAM.gov data
+            from services.web_service import process_web_content
+            sam_results = process_web_content(query)
+            if sam_results:
+                sam_data = "\n\nSAM.GOV DATA RETRIEVED:\n"
+                for result in sam_results:
+                    sam_data += f"\n{result['content']}\n"
+                # Add SAM data to user query
+                messages.append({"role": "system", "content": f"Here is real-time SAM.gov data that might be relevant: {sam_data}"})
+        
         logger.debug(f"Sending request to OpenAI API with query: {query[:50]}...")
         logger.debug("Using model: gpt-4o-2024-11-20")
 
