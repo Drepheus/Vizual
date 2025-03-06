@@ -119,14 +119,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Format bullet points
                 para = para.replace(/•\s/g, '<span class="bullet-point">•</span> ');
 
-                // Format URLs to be clickable
-                para = para.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>');
-
-                // Format SAM.gov data sections
-                if (para.includes('SAM.GOV DATA RETRIEVED') || para.includes('Title:') && para.includes('Solicitation Number:')) {
-                    para = `<div class="sam-data-section">${para}</div>`;
-                }
-
                 // Remove any remaining markdown-style bold formatting
                 para = para.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
 
@@ -161,80 +153,6 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
 
         historyContainer.insertBefore(historyItem, historyContainer.firstChild);
-    }
-
-    if (documentUploadForm) {
-        documentUploadForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            const formData = new FormData(this);
-            const fileInput = document.getElementById('documentFile');
-            const submitBtn = this.querySelector('button[type="submit"]');
-
-            if (!fileInput.files.length) {
-                displayError('Please select at least one file to upload');
-                return;
-            }
-
-            try {
-                // Show loading state
-                submitBtn.disabled = true;
-                responseArea.innerHTML = createTypingCard();
-
-                console.log('Uploading documents:', fileInput.files.length, 'files'); // Debug log
-
-                const response = await fetch('/api/document/upload', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                // Check if response is JSON
-                const contentType = response.headers.get('content-type');
-                if (!contentType || !contentType.includes('application/json')) {
-                    throw new Error('Server returned non-JSON response. Please try again.');
-                }
-
-                let data;
-                try {
-                    data = await response.json();
-                } catch (parseError) {
-                    console.error('JSON parse error:', parseError);
-                    throw new Error('Failed to parse server response');
-                }
-
-                if (!response.ok) {
-                    throw new Error(data.error || `Server error: ${response.status}`);
-                }
-
-                let statusMessage = '';
-                if (data.uploaded_documents && data.uploaded_documents.length > 0) {
-                    statusMessage = `Successfully processed ${data.uploaded_documents.length} documents:\n`;
-                    data.uploaded_documents.forEach(doc => {
-                        statusMessage += `- ${doc.filename}\n`;
-                    });
-                }
-                if (data.failed_documents && data.failed_documents.length > 0) {
-                    statusMessage += `\nFailed to process ${data.failed_documents.length} documents:\n`;
-                    data.failed_documents.forEach(doc => {
-                        statusMessage += `- ${doc.filename}: ${doc.error}\n`;
-                    });
-                }
-
-                await displayResponseWithTyping(data.ai_response + '\n\n' + statusMessage);
-                updateQueryHistory(
-                    `Document Analysis: ${fileInput.files.length} files`,
-                    data.ai_response + '\n\n' + statusMessage
-                );
-
-                // Reset form
-                documentUploadForm.reset();
-            } catch (error) {
-                console.error('Document upload error:', error);
-                displayError(error.message || 'An unexpected error occurred. Please try again.');
-            } finally {
-                submitBtn.disabled = false;
-            }
-        });
     }
     async function loadSamGovStatus() {
         const statusCard = document.getElementById('samStatusCard');
@@ -371,4 +289,77 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
     }
 
+    if (documentUploadForm) {
+        documentUploadForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const fileInput = document.getElementById('documentFile');
+            const submitBtn = this.querySelector('button[type="submit"]');
+
+            if (!fileInput.files.length) {
+                displayError('Please select at least one file to upload');
+                return;
+            }
+
+            try {
+                // Show loading state
+                submitBtn.disabled = true;
+                responseArea.innerHTML = createTypingCard();
+
+                console.log('Uploading documents:', fileInput.files.length, 'files'); // Debug log
+
+                const response = await fetch('/api/document/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                // Check if response is JSON
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error('Server returned non-JSON response. Please try again.');
+                }
+
+                let data;
+                try {
+                    data = await response.json();
+                } catch (parseError) {
+                    console.error('JSON parse error:', parseError);
+                    throw new Error('Failed to parse server response');
+                }
+
+                if (!response.ok) {
+                    throw new Error(data.error || `Server error: ${response.status}`);
+                }
+
+                let statusMessage = '';
+                if (data.uploaded_documents && data.uploaded_documents.length > 0) {
+                    statusMessage = `Successfully processed ${data.uploaded_documents.length} documents:\n`;
+                    data.uploaded_documents.forEach(doc => {
+                        statusMessage += `- ${doc.filename}\n`;
+                    });
+                }
+                if (data.failed_documents && data.failed_documents.length > 0) {
+                    statusMessage += `\nFailed to process ${data.failed_documents.length} documents:\n`;
+                    data.failed_documents.forEach(doc => {
+                        statusMessage += `- ${doc.filename}: ${doc.error}\n`;
+                    });
+                }
+
+                await displayResponseWithTyping(data.ai_response + '\n\n' + statusMessage);
+                updateQueryHistory(
+                    `Document Analysis: ${fileInput.files.length} files`,
+                    data.ai_response + '\n\n' + statusMessage
+                );
+
+                // Reset form
+                documentUploadForm.reset();
+            } catch (error) {
+                console.error('Document upload error:', error);
+                displayError(error.message || 'An unexpected error occurred. Please try again.');
+            } finally {
+                submitBtn.disabled = false;
+            }
+        });
+    }
 });

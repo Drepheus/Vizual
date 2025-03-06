@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask import render_template, redirect, url_for, flash, request, jsonify, Response, stream_with_context
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.utils import secure_filename
@@ -233,28 +233,35 @@ def register_routes(app):
 
             def generate():
                 response_chunks = []
-                for chunk in ai_service.get_ai_streaming_response(query_text):
-                    response_chunks.append(chunk)
-                    yield f"data: {chunk}\n\n"
+                try:
+                    for chunk in ai_service.get_ai_streaming_response(query_text):
+                        response_chunks.append(chunk)
+                        yield f"data: {chunk}\n\n"
 
-                # Save the complete response to the database
-                complete_response = ''.join([json.loads(chunk).get('content', '') for chunk in response_chunks if 'content' in json.loads(chunk)])
-                query = Query(
-                    user_id=current_user.id,
-                    query_text=query_text,
-                    response=complete_response
-                )
-                db.session.add(query)
-                db.session.commit()
+                    # Save the complete response to the database
+                    complete_response = ''.join([json.loads(chunk).get('content', '') for chunk in response_chunks if 'content' in json.loads(chunk)])
+                    query = Query(
+                        user_id=current_user.id,
+                        query_text=query_text,
+                        response=complete_response
+                    )
+                    db.session.add(query)
+                    db.session.commit()
+                except Exception as e:
+                    logger.error(f"Error in stream generation: {str(e)}")
+                    yield f"data: {json.dumps({'error': str(e)})}\n\n"
 
-            return Response(
+            response = Response(
                 stream_with_context(generate()),
                 mimetype='text/event-stream',
                 headers={
                     'Cache-Control': 'no-cache',
-                    'Transfer-Encoding': 'chunked'
+                    'Transfer-Encoding': 'chunked',
+                    'Access-Control-Allow-Origin': '*',
+                    'X-Accel-Buffering': 'no'
                 }
             )
+            return response
 
         except Exception as e:
             logger.error(f"Error processing streaming query: {str(e)}")
