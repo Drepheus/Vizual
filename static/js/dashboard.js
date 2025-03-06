@@ -67,14 +67,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     throw new Error('Invalid response format from server');
                 }
 
-                const formattedResponse = data.ai_response
-                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                    .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank">$1</a>')
-                    .replace(/\n/g, '<br>');
-
                 await displayResponseWithTyping(data.ai_response);
                 if (!shouldStopTyping) {
-                    updateQueryHistory(query, formattedResponse);
+                    updateQueryHistory(query, data.ai_response);
                 }
             } catch (error) {
                 console.error('Query error:', error);
@@ -164,6 +159,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // Format bullet points
                 para = para.replace(/•\s/g, '<span class="bullet-point">•</span> ');
+
+                // Remove any remaining markdown-style bold formatting
+                para = para.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
 
                 return `<p>${para}</p>`;
             })
@@ -255,15 +253,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
                 }
 
-                const formattedResponse = (data.ai_response + '\n\n' + statusMessage)
-                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                    .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank">$1</a>')
-                    .replace(/\n/g, '<br>');
-
                 await displayResponseWithTyping(data.ai_response + '\n\n' + statusMessage);
                 updateQueryHistory(
                     `Document Analysis: ${fileInput.files.length} files`,
-                    formattedResponse
+                    data.ai_response + '\n\n' + statusMessage
                 );
 
                 // Reset form
