@@ -51,10 +51,10 @@ Response Format:
         ]
 
         logger.debug(f"Sending request to OpenAI API with query: {query[:50]}...")
-        logger.debug("Using model: o3-mini")
+        logger.debug("Using model: gpt-4o-2024-11-20")
 
         response = client.chat.completions.create(
-            model="o3-mini",
+            model="gpt-4o-2024-11-20",
             messages=messages,
             temperature=0.7,
             max_tokens=800
