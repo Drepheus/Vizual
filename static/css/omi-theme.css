@@ -1,11 +1,11 @@
 
 :root {
-  --bg-dark: #1f1f1f;
-  --bg-darker: #2d2d2d;
-  --card-bg: #303030;
+  --bg-dark: #000000;
+  --bg-darker: #0a0a0a;
+  --card-bg: #121212;
   --text-primary: #ffffff;
-  --text-secondary: #a8c7fa;
-  --accent-gradient: linear-gradient(90deg, #8ab4f8 0%, #a771d6 50%, #8ab4f8 100%);
+  --text-secondary: #cccccc;
+  --accent-gradient: linear-gradient(90deg, #ffffff 0%, #aaaaaa 50%, #ffffff 100%);
 }
 
 body {
