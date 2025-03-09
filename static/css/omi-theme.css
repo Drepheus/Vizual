@@ -5,7 +5,7 @@
   --card-bg: #303030;
   --text-primary: #ffffff;
   --text-secondary: #a8c7fa;
-  --accent-gradient: linear-gradient(90deg, #8ab4f8 0%, #c58af9 50%, #8ab4f8 100%);
+  --accent-gradient: linear-gradient(90deg, #8ab4f8 0%, #a771d6 50%, #8ab4f8 100%);
 }
 
 body {
