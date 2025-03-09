@@ -1,0 +1,77 @@
+
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 375 800">
+  <!-- Background -->
+  <rect width="375" height="800" fill="#121212"/>
+
+  <!-- Status Bar -->
+  <rect width="375" height="44" fill="#1e1e1e"/>
+  <text x="30" y="26" font-family="Arial" font-size="14" fill="#ffffff">9:41</text>
+  <text x="315" y="26" font-family="Arial" font-size="14" fill="#ffffff">100%</text>
+
+  <!-- Header -->
+  <rect y="44" width="375" height="60" fill="#1e1e1e"/>
+  <text x="187.5" y="79" font-family="Arial" font-weight="bold" font-size="18" fill="#ffffff" text-anchor="middle">Omi AI</text>
+
+  <!-- Omi Logo with Pulse Effect -->
+  <circle cx="50" cy="74" r="18" fill="none" stroke="#00FFFF" stroke-width="2">
+    <animate attributeName="opacity" values="0.6;1;0.6" dur="2s" repeatCount="indefinite"/>
+    <animate attributeName="r" values="18;20;18" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  <text x="50" y="78" font-family="Arial" font-size="12" fill="#00FFFF" text-anchor="middle">Omi</text>
+
+  <!-- Quick Action Bar -->
+  <rect x="16" y="650" width="345" height="44" rx="22" ry="22" fill="#000000"/>
+  <text x="95" y="675" font-family="Arial" font-size="14" fill="#00FFFF" text-anchor="middle">Voice Input</text>
+  <text x="187.5" y="675" font-family="Arial" font-size="14" fill="#00FFFF" text-anchor="middle">Reminders</text>
+  <text x="280" y="675" font-family="Arial" font-size="14" fill="#00FFFF" text-anchor="middle">Settings</text>
+
+  <!-- Messages Container -->
+  <rect y="104" width="375" height="536" fill="#1a1a1a"/>
+
+  <!-- AI Message -->
+  <rect x="16" y="120" width="270" height="90" rx="20" ry="20" fill="#000000"/>
+  <text x="32" y="144" font-family="Arial" font-size="14" fill="#ffffff">Hello! How can I help you today?</text>
+  <text x="32" y="169" font-family="Arial" font-size="14" fill="#ffffff">I can answer questions, provide</text>
+  <text x="32" y="194" font-family="Arial" font-size="14" fill="#ffffff">information, or just chat with you.</text>
+  <circle cx="40" cy="226" r="16" fill="#000000" stroke="#ffffff" stroke-width="1.5"/>
+  <text x="40" y="232" font-family="Arial" font-size="16" fill="#ffffff" text-anchor="middle">AI</text>
+  <text x="70" y="230" font-family="Arial" font-size="12" fill="#909090">11:30 AM</text>
+
+  <!-- User Message -->
+  <rect x="89" y="260" width="270" height="65" rx="20" ry="20" fill="#000000"/>
+  <text x="109" y="284" font-family="Arial" font-size="14" fill="#00FFFF">Can you tell me about the weather?</text>
+  <text x="305" y="340" font-family="Arial" font-size="12" fill="#909090" text-anchor="end">11:31 AM</text>
+
+  <!-- AI Typing Indicator with Pulse -->
+  <rect x="16" y="370" width="120" height="46" rx="23" ry="23" fill="#000000"/>
+  <circle cx="46" cy="393" r="5" fill="#ffffff">
+    <animate attributeName="opacity" values="0.4;1;0.4" dur="1.5s" repeatCount="indefinite"/>
+    <animate attributeName="r" values="4;5;4" dur="1.5s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="76" cy="393" r="5" fill="#ffffff">
+    <animate attributeName="opacity" values="0.4;1;0.4" dur="1.5s" repeatCount="indefinite" begin="0.2s"/>
+    <animate attributeName="r" values="4;5;4" dur="1.5s" repeatCount="indefinite" begin="0.2s"/>
+  </circle>
+  <circle cx="106" cy="393" r="5" fill="#ffffff">
+    <animate attributeName="opacity" values="0.4;1;0.4" dur="1.5s" repeatCount="indefinite" begin="0.4s"/>
+    <animate attributeName="r" values="4;5;4" dur="1.5s" repeatCount="indefinite" begin="0.4s"/>
+  </circle>
+
+  <!-- Scroll Indicator with Soft Pulse -->
+  <rect x="368" y="120" width="3" height="400" rx="1.5" fill="#00FFFF" opacity="0.6">
+    <animate attributeName="opacity" values="0.3;0.7;0.3" dur="3s" repeatCount="indefinite"/>
+  </rect>
+
+  <!-- Input Field with Soft Glow Effect -->
+  <rect y="730" width="375" height="70" fill="#1e1e1e"/>
+  <rect x="16" y="742" width="290" height="46" rx="23" ry="23" fill="#2d2d2d">
+    <animate attributeName="opacity" values="0.8;1;0.8" dur="2.5s" repeatCount="indefinite"/>
+  </rect>
+  <text x="40" y="768" font-family="Arial" font-size="14" fill="#808080">Ask Omi anything...</text>
+
+  <!-- Send Button with Pulse Effect -->
+  <circle cx="335" cy="765" r="22" fill="#00FFFF">
+    <animate attributeName="opacity" values="1;0.8;1" dur="1.5s" repeatCount="indefinite"/>
+  </circle>
+  <path d="M325 765 L345 765 M335 755 L335 775" stroke="#121212" stroke-width="2.5" stroke-linecap="round"/>
+</svg>

@@ -1,17 +1,21 @@
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Omi</title>
+    <title>Omi AI</title>
     <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/custom.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/omi-theme.css') }}" rel="stylesheet">
     <script src="https://kit.fontawesome.com/4c02e9d8bf.js" crossorigin="anonymous"></script>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg">
         <div class="container">
-            <a class="navbar-brand" href="{{ url_for('index') }}">BidBot</a>
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <span class="omi-pulse d-inline-block me-2" style="width: 16px; height: 16px; border-radius: 50%; background-color: #00FFFF;"></span>
+                Omi AI
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
