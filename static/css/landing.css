@@ -12,20 +12,7 @@
                     radial-gradient(circle at 80% 60%, rgba(138, 180, 248, 0.03) 0%, transparent 30%);
 }
 
-/* Corner Pulse Circle */
-.landing-container::before {
-  content: "";
-  position: absolute;
-  top: 30px;
-  left: 30px;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: none;
-  border: 2px solid #8ab4f8;
-  animation: pulse 2s infinite ease-in-out;
-  z-index: 10;
-}
+/* Corner Pulse Circle - Removed */
 
 /* Logo and Animation */
 .logo-container {
