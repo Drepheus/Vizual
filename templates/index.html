@@ -3,13 +3,12 @@
 {% block content %}
 <div class="hero-section text-center text-white">
     <div class="container">
-        <div class="omi-pulse d-inline-block mb-4" style="width: 60px; height: 60px; border-radius: 50%; background-color: #00FFFF;"></div>
-        <h1 class="display-4 mb-4">Omi AI</h1>
+        <h1 class="display-4 mb-4">BidBot</h1>
         <p class="lead mb-4">Your intelligent partner for government contracting insights and automation</p>
         {% if not current_user.is_authenticated %}
             <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
                 <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg px-4 gap-3">Get Started</a>
-                <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-lg px-4" style="border-radius: 23px;">Login</a>
+                <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-lg px-4">Login</a>
             </div>
         {% else %}
             <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg px-4">Go to Dashboard</a>
