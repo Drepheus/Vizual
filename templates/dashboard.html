@@ -108,12 +108,12 @@
                     </div>
                     <div class="sam-status-section d-none" id="samStatusContent">
                         <div class="sam-api-status">
-                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <i class="fas fa-check-circle text-info me-2"></i>
                             <span>API Connected</span>
                         </div>
                         <div class="sam-data-stats mt-3">
-                            <p><strong>API Key:</strong> Active</p>
-                            <p><strong>Last Update:</strong> <span id="samLastUpdate">{{ sam_last_update }}</span></p>
+                            <p><strong>API Key:</strong> <span class="text-info">Active</span></p>
+                            <p><strong>Last Update:</strong> <span id="samLastUpdate" class="text-secondary">{{ sam_last_update }}</span></p>
                         </div>
                         <div class="sam-data-content mt-3" id="samDataContent">
                             <!-- SAM.gov data will be loaded here via JavaScript -->
@@ -127,8 +127,10 @@
                 <div class="card-body">
                     <h4 class="card-title">Recent Contract Awards</h4>
                     <div class="loading-placeholder" id="awardsLoading">
-                        <div class="spinner-border spinner-border-sm text-primary" role="status">
-                            <span class="visually-hidden">Loading awards...</span>
+                        <div class="typing-indicator">
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
                         </div>
                         <p class="text-muted mt-2">Loading recent awards...</p>
                     </div>
