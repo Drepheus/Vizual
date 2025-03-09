@@ -1,0 +1,279 @@
+
+/* Omi AI Theme CSS - Modern AI Interface Design */
+:root {
+  --omi-dark-bg: #121212;
+  --omi-dark-surface: #1a1a1a;
+  --omi-card-bg: #2C2C2C;
+  --omi-card-hover: #333333;
+  --omi-text-primary: #ffffff;
+  --omi-text-secondary: #9ca3af;
+  
+  /* Gemini gradient colors */
+  --omi-gradient-blue: #1E88E5;
+  --omi-gradient-purple: #8E24AA;
+  --omi-gradient-pink: #D81B60;
+  --omi-gradient-amber: #FFA000;
+}
+
+body {
+  background: linear-gradient(to bottom, var(--omi-dark-bg), var(--omi-dark-surface));
+  color: var(--omi-text-primary);
+  font-family: Arial, sans-serif;
+}
+
+.navbar {
+  background-color: #1e1e1e;
+  border-bottom: none;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.navbar-brand {
+  font-weight: 600;
+  color: var(--omi-text-primary) !important;
+  display: flex;
+  align-items: center;
+}
+
+.navbar-brand::before {
+  content: '';
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--omi-gradient-blue), var(--omi-gradient-purple), var(--omi-gradient-pink), var(--omi-gradient-amber));
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+
+/* Dynamic wave animation for page background */
+.container {
+  position: relative;
+  z-index: 1;
+}
+
+.container::after {
+  content: '';
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 150px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 100% 100% 0 0;
+  transform: scaleX(1.5);
+  z-index: -1;
+  animation: wave 5s infinite alternate ease-in-out;
+}
+
+@keyframes wave {
+  0% { transform: scaleX(1.5) translateY(0); }
+  100% { transform: scaleX(1.5) translateY(10px); }
+}
+
+/* Card styling */
+.dashboard-card {
+  background-color: var(--omi-card-bg);
+  border: none;
+  border-radius: 20px;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.card-body {
+  padding: 1.5rem;
+}
+
+.card-title {
+  color: var(--omi-text-primary);
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+/* Form controls */
+.form-control {
+  background-color: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--omi-text-primary);
+  border-radius: 20px;
+  padding: 12px 20px;
+  transition: all 0.3s ease;
+}
+
+.form-control:focus {
+  background-color: rgba(0, 0, 0, 0.3);
+  border-color: transparent;
+  box-shadow: 0 0 0 3px rgba(142, 36, 170, 0.3);
+  color: var(--omi-text-primary);
+}
+
+.form-label {
+  color: var(--omi-text-secondary);
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Buttons */
+.btn-primary {
+  background: linear-gradient(135deg, var(--omi-gradient-blue), var(--omi-gradient-purple), var(--omi-gradient-pink));
+  border: none;
+  padding: 10px 24px;
+  border-radius: 20px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(142, 36, 170, 0.4);
+}
+
+.btn-primary::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.2);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.btn-primary:hover::after {
+  opacity: 1;
+}
+
+/* AI response card */
+.response-card {
+  border-left: none;
+  border-radius: 20px;
+  background-color: var(--omi-card-bg);
+  overflow: hidden;
+  position: relative;
+}
+
+.response-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(to bottom, var(--omi-gradient-blue), var(--omi-gradient-purple));
+}
+
+.ai-response {
+  font-size: 1rem;
+  line-height: 1.6;
+  padding: 1.2rem;
+  color: var(--omi-text-primary);
+}
+
+.ai-response-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.ai-response-header i {
+  background: linear-gradient(135deg, var(--omi-gradient-blue), var(--omi-gradient-purple));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-right: 0.75rem;
+}
+
+.typing-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1.2em;
+  background: linear-gradient(to bottom, var(--omi-gradient-blue), var(--omi-gradient-purple));
+  margin-left: 2px;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* Login/Register form */
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 160px);
+}
+
+.auth-card {
+  max-width: 400px;
+  width: 100%;
+  padding: 2rem;
+  border-radius: 20px;
+  background-color: var(--omi-card-bg);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  border: none;
+}
+
+.auth-card .card-title {
+  text-align: center;
+  font-size: 1.8rem;
+  margin-bottom: 2rem;
+  background: linear-gradient(135deg, var(--omi-gradient-blue), var(--omi-gradient-purple), var(--omi-gradient-pink));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.auth-brand {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.auth-brand-circle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid transparent;
+  background: linear-gradient(#2C2C2C, #2C2C2C) padding-box,
+              linear-gradient(135deg, var(--omi-gradient-blue), var(--omi-gradient-purple), var(--omi-gradient-pink), var(--omi-gradient-amber)) border-box;
+  animation: pulse 2s infinite;
+}
+
+.auth-brand-text {
+  font-weight: bold;
+  font-size: 1.2rem;
+  background: linear-gradient(135deg, var(--omi-gradient-blue), var(--omi-gradient-purple), var(--omi-gradient-pink));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Make links more visible */
+a {
+  color: var(--omi-gradient-blue);
+  transition: color 0.3s ease;
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--omi-gradient-purple);
+  text-decoration: none;
+}
