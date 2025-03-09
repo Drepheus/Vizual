@@ -101,8 +101,16 @@ document.addEventListener('DOMContentLoaded', function() {
         const responseContent = responseCard.querySelector('.ai-response');
         const cursor = responseCard.querySelector('.typing-cursor');
         isTyping = true;
+        
+        responseContent.style.opacity = "0";
+        responseContent.style.transform = "translateY(10px)";
+        responseContent.style.transition = "opacity 0.3s ease, transform 0.3s ease";
+        setTimeout(() => {
+            responseContent.style.opacity = "1";
+            responseContent.style.transform = "translateY(0)";
+        }, 100);
 
-        // Split response into characters for typing effect
+        // Split response into characters for typing effect with variable speed
         const characters = response.split('');
         let currentText = '';
 
