@@ -1,0 +1,326 @@
+Dre.io
+dregp
+Sharing their screen
+
+Dre.io — Today at 4:46 PM
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 375 800">
+  <!-- Background -->
+  <rect width="375" height="800" fill="#121212"/>
+  
+  <!-- Status Bar -->
+  <rect width="375" height="44" fill="#1e1e1e"/>
+Expand
+message.txt
+7 KB
+[biZ] iD0this — Today at 4:49 PM
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 375 800">
+  <!-- Background -->
+  <rect width="375" height="800" fill="#121212"/>
+
+  <!-- Status Bar -->
+  <rect width="375" height="44" fill="#1e1e1e"/>
+  <text x="30" y="26" font-family="Arial" font-size="14" fill="#ffffff">9:41</text>
+  <text x="315" y="26" font-family="Arial" font-size="14" fill="#ffffff">100%</text>
+
+  <!-- Header -->
+  <rect y="44" width="375" height="60" fill="#1e1e1e"/>
+  <text x="187.5" y="79" font-family="Arial" font-weight="bold" font-size="18" fill="#ffffff" text-anchor="middle">Omi AI</text>
+
+  <!-- Omi Logo -->
+  <circle cx="50" cy="74" r="18" fill="none" stroke="#00FFFF" stroke-width="2"/>
+  <text x="50" y="78" font-family="Arial" font-size="12" fill="#00FFFF" text-anchor="middle">Omi</text>
+
+  <!-- Quick Action Bar -->
+  <rect x="16" y="650" width="345" height="44" rx="22" ry="22" fill="#000000"/>
+  <text x="95" y="675" font-family="Arial" font-size="14" fill="#00FFFF" text-anchor="middle">Voice Input</text>
+  <text x="187.5" y="675" font-family="Arial" font-size="14" fill="#00FFFF" text-anchor="middle">Reminders</text>
+  <text x="280" y="675" font-family="Arial" font-size="14" fill="#00FFFF" text-anchor="middle">Settings</text>
+
+  <!-- Messages Container with better spacing -->
+  <rect y="104" width="375" height="536" fill="#1a1a1a"/>
+
+  <!-- AI Message -->
+  <rect x="16" y="120" width="270" height="90" rx="20" ry="20" fill="#000000"/>
+  <text x="32" y="144" font-family="Arial" font-size="14" fill="#ffffff">Hello! How can I help you today?</text>
+  <text x="32" y="169" font-family="Arial" font-size="14" fill="#ffffff">I can answer questions, provide</text>
+  <text x="32" y="194" font-family="Arial" font-size="14" fill="#ffffff">information, or just chat with you.</text>
+  <circle cx="40" cy="226" r="16" fill="#000000" stroke="#ffffff" stroke-width="1.5"/>
+  <text x="40" y="232" font-family="Arial" font-size="16" fill="#ffffff" text-anchor="middle">AI</text>
+  <text x="70" y="230" font-family="Arial" font-size="12" fill="#909090">11:30 AM</text>
+
+  <!-- User Message -->
+  <rect x="89" y="260" width="270" height="65" rx="20" ry="20" fill="#000000"/>
+  <text x="109" y="284" font-family="Arial" font-size="14" fill="#00FFFF">Can you tell me about the weather?</text>
+  <text x="305" y="340" font-family="Arial" font-size="12" fill="#909090" text-anchor="end">11:31 AM</text>
+
+  <!-- AI Message Typing Indicator -->
+  <rect x="16" y="370" width="120" height="46" rx="23" ry="23" fill="#000000"/>
+  <circle cx="46" cy="393" r="5" fill="#ffffff">
+    <animate attributeName="opacity" values="0.4;1;0.4" dur="1.5s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="76" cy="393" r="5" fill="#ffffff">
+    <animate attributeName="opacity" values="0.4;1;0.4" dur="1.5s" repeatCount="indefinite" begin="0.2s"/>
+  </circle>
+  <circle cx="106" cy="393" r="5" fill="#ffffff">
+    <animate attributeName="opacity" values="0.4;1;0.4" dur="1.5s" repeatCount="indefinite" begin="0.4s"/>
+  </circle>
+
+  <!-- Scroll Indicator -->
+  <rect x="368" y="120" width="3" height="400" rx="1.5" fill="#00FFFF" opacity="0.6"/>
+
+  <!-- Input Area with glowing effect -->
+  <rect y="730" width="375" height="70" fill="#1e1e1e"/>
+  <rect x="16" y="742" width="290" height="46" rx="23" ry="23" fill="#2d2d2d"/>
+  <text x="40" y="768" font-family="Arial" font-size="14" fill="#808080">Ask Omi anything...</text>
+
+  <!-- Send Button (Enhanced) -->
+  <circle cx="335" cy="765" r="22" fill="#00FFFF"/>
+  <path d="M325 765 L345 765 M335 755 L335 775" stroke="#121212" stroke-width="2.5" stroke-linecap="round"/>
+
+</svg>
+Dre.io — Today at 4:53 PM
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 375 800">
+  <!-- Background -->
+  <rect width="375" height="800" fill="#121212"/>
+  
+  <!-- Status Bar -->
+  <rect width="375" height="44" fill="#1e1e1e"/>
+  <text x="30" y="26" font-family="Arial" font-size="14" fill="#ffffff">9:41</text>
+  <text x="315" y="26" font-family="Arial" font-size="14" fill="#ffffff">100%</text>
+  
+  <!-- Header -->
+  <rect y="44" width="375" height="60" fill="#1e1e1e"/>
+  <text x="187.5" y="79" font-family="Arial" font-weight="bold" font-size="18" fill="#ffffff" text-anchor="middle">Nova AI</text>
+  
+  <!-- Menu Button with Modern Hamburger -->
+  <circle cx="40" cy="74" r="18" fill="#2d2d2d"/>
+  <line x1="30" y1="70" x2="50" y2="70" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+  <line x1="30" y1="74" x2="50" y2="74" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+  <line x1="30" y1="78" x2="50" y2="78" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+  
+  <!-- Settings Button -->
+  <circle cx="335" cy="74" r="18" fill="#2d2d2d"/>
+  <circle cx="335" cy="74" r="10" stroke="#ffffff" stroke-width="1.5" fill="none"/>
+  <line x1="343" y1="66" x2="348" y2="61" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>
+  
+  <!-- Messages Container with subtle gradient -->
+  <defs>
+    <linearGradient id="chatBg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a1a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#121212;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect y="104" width="375" height="636" fill="url(#chatBg)"/>
+  
+  <!-- Colorful Gradient for borders -->
+  <defs>
+    <linearGradient id="geminiGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#1E88E5;stop-opacity:1" /> <!-- Blue -->
+      <stop offset="33%" style="stop-color:#8E24AA;stop-opacity:1" /> <!-- Purple -->
+      <stop offset="66%" style="stop-color:#D81B60;stop-opacity:1" /> <!-- Pink -->
+      <stop offset="100%" style="stop-color:#FFA000;stop-opacity:1" /> <!-- Amber/Gold -->
+    </linearGradient>
+  </defs>
+  
+  <!-- AI Message - Pure Black with White Text -->
+  <rect x="16" y="120" width="270" height="90" rx="20" ry="20" fill="#000000"/>
+  <text x="32" y="144" font-family="Arial" font-size="14" fill="#ffffff">Hello! How can I help you today?</text>
+  <text x="32" y="169" font-family="Arial" font-size="14" fill="#ffffff">I can answer questions, provide</text>
+  <text x="32" y="194" font-family="Arial" font-size="14" fill="#ffffff">information, or just chat with you.</text>
+  <circle cx="40" cy="226" r="16" fill="#000000" stroke="#ffffff" stroke-width="1.5"/>
+  <text x="40" y="232" font-family="Arial" font-size="16" fill="#ffffff" text-anchor="middle">AI</text>
+  <text x="70" y="230" font-family="Arial" font-size="12" fill="#909090">11:30 AM</text>
+  
+  <!-- User Message with BLACK bubble and WHITE TEXT with GEMINI GRADIENT BORDER -->
+  <rect x="89" y="260" width="270" height="65" rx="20" ry="20" fill="#000000" stroke="url(#geminiGradient)" stroke-width="2"/>
+  <!-- White text for user message -->
+  <text x="109" y="284" font-family="Arial" font-size="14" fill="#ffffff">Can you tell me about the weather</text>
+  <text x="109" y="309" font-family="Arial" font-size="14" fill="#ffffff">forecast for today?</text>
+  <text x="305" y="340" font-family="Arial" font-size="12" fill="#909090" text-anchor="end">11:31 AM</text>
+  
+  <!-- AI Response with Weather Card -->
+  <rect x="16" y="370" width="270" height="200" rx="20" ry="20" fill="#000000"/>
+  
+  <!-- Weather Card Header -->
+  <text x="32" y="394" font-family="Arial" font-size="14" fill="#ffffff">Here's today's weather forecast:</text>
+  
+  <!-- Weather Card Content -->
+  <rect x="32" y="405" width="238" height="140" rx="10" ry="10" fill="#1a1a1a"/>
+  
+  <!-- Weather Icon -->
+  <circle cx="76" cy="440" r="25" fill="url(#geminiGradient)" opacity="0.8"/>
+  <text x="76" y="447" font-family="Arial" font-size="16" fill="#ffffff" text-anchor="middle">☀️</text>
+  
+  <!-- Weather Info -->
+  <text x="130" y="430" font-family="Arial" font-weight="bold" font-size="18" fill="#ffffff">72°F</text>
+  <text x="130" y="450" font-family="Arial" font-size="14" fill="#b0b0b0">Sunny</text>
+  
+  <!-- Weather Details -->
+  <line x1="32" y1="470" x2="270" y2="470" stroke="#333333" stroke-width="1"/>
+  
+  <text x="50" y="490" font-family="Arial" font-size="12" fill="#b0b0b0">Humidity</text>
+  <text x="50" y="510" font-family="Arial" font-size="14" fill="#ffffff">45%</text>
+  
+  <text x="130" y="490" font-family="Arial" font-size="12" fill="#b0b0b0">Wind</text>
+  <text x="130" y="510" font-family="Arial" font-size="14" fill="#ffffff">8 mph</text>
+  
+  <text x="210" y="490" font-family="Arial" font-size="12" fill="#b0b0b0">UV Index</text>
+  <text x="210" y="510" font-family="Arial" font-size="14" fill="#ffffff">High</text>
+  
+  <circle cx="40" cy="586" r="16" fill="#000000" stroke="#ffffff" stroke-width="1.5"/>
+  <text x="40" y="592" font-family="Arial" font-size="16" fill="#ffffff" text-anchor="middle">AI</text>
+  <text x="70" y="590" font-family="Arial" font-size="12" fill="#909090">11:32 AM</text>
+  
+  <!-- User Message with BLACK bubble and WHITE TEXT with GEMINI GRADIENT BORDER -->
+  <rect x="89" y="620" width="270" height="65" rx="20" ry="20" fill="#000000" stroke="url(#geminiGradient)" stroke-width="2"/>
+  <!-- White text for user message -->
+  <text x="109" y="644" font-family="Arial" font-size="14" fill="#ffffff">Thanks! Will it rain later this</text>
+  <text x="109" y="669" font-family="Arial" font-size="14" fill="#ffffff">week?</text>
+  <text x="305" y="700" font-family="Arial" font-size="12" fill="#909090" text-anchor="end">11:33 AM</text>
+  
+  <!-- Input Area with floating effect -->
+... (18 lines left)
+Collapse
+message.txt
+7 KB
+[biZ] iD0this — Today at 4:53 PM
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 375 800">
+  <!-- Background -->
+  <rect width="375" height="800" fill="#121212"/>
+
+  <!-- Status Bar -->
+  <rect width="375" height="44" fill="#1e1e1e"/>
+Expand
+message.txt
+5 KB
+[biZ] iD0this — Today at 5:07 PM
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 375 800">
+  <!-- Background with AI Motion Effect -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#121212;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1a1a1a;stop-opacity:1" />
+Expand
+message.txt
+5 KB
+﻿
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 375 800">
+  <!-- Background -->
+  <rect width="375" height="800" fill="#121212"/>
+  
+  <!-- Status Bar -->
+  <rect width="375" height="44" fill="#1e1e1e"/>
+  <text x="30" y="26" font-family="Arial" font-size="14" fill="#ffffff">9:41</text>
+  <text x="315" y="26" font-family="Arial" font-size="14" fill="#ffffff">100%</text>
+  
+  <!-- Header -->
+  <rect y="44" width="375" height="60" fill="#1e1e1e"/>
+  <text x="187.5" y="79" font-family="Arial" font-weight="bold" font-size="18" fill="#ffffff" text-anchor="middle">Nova AI</text>
+  
+  <!-- Menu Button with Modern Hamburger -->
+  <circle cx="40" cy="74" r="18" fill="#2d2d2d"/>
+  <line x1="30" y1="70" x2="50" y2="70" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+  <line x1="30" y1="74" x2="50" y2="74" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+  <line x1="30" y1="78" x2="50" y2="78" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+  
+  <!-- Settings Button -->
+  <circle cx="335" cy="74" r="18" fill="#2d2d2d"/>
+  <circle cx="335" cy="74" r="10" stroke="#ffffff" stroke-width="1.5" fill="none"/>
+  <line x1="343" y1="66" x2="348" y2="61" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>
+  
+  <!-- Messages Container with subtle gradient -->
+  <defs>
+    <linearGradient id="chatBg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a1a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#121212;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect y="104" width="375" height="636" fill="url(#chatBg)"/>
+  
+  <!-- Colorful Gradient for borders -->
+  <defs>
+    <linearGradient id="geminiGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#1E88E5;stop-opacity:1" /> <!-- Blue -->
+      <stop offset="33%" style="stop-color:#8E24AA;stop-opacity:1" /> <!-- Purple -->
+      <stop offset="66%" style="stop-color:#D81B60;stop-opacity:1" /> <!-- Pink -->
+      <stop offset="100%" style="stop-color:#FFA000;stop-opacity:1" /> <!-- Amber/Gold -->
+    </linearGradient>
+  </defs>
+  
+  <!-- AI Message - Pure Black with White Text -->
+  <rect x="16" y="120" width="270" height="90" rx="20" ry="20" fill="#000000"/>
+  <text x="32" y="144" font-family="Arial" font-size="14" fill="#ffffff">Hello! How can I help you today?</text>
+  <text x="32" y="169" font-family="Arial" font-size="14" fill="#ffffff">I can answer questions, provide</text>
+  <text x="32" y="194" font-family="Arial" font-size="14" fill="#ffffff">information, or just chat with you.</text>
+  <circle cx="40" cy="226" r="16" fill="#000000" stroke="#ffffff" stroke-width="1.5"/>
+  <text x="40" y="232" font-family="Arial" font-size="16" fill="#ffffff" text-anchor="middle">AI</text>
+  <text x="70" y="230" font-family="Arial" font-size="12" fill="#909090">11:30 AM</text>
+  
+  <!-- User Message with BLACK bubble and WHITE TEXT with GEMINI GRADIENT BORDER -->
+  <rect x="89" y="260" width="270" height="65" rx="20" ry="20" fill="#000000" stroke="url(#geminiGradient)" stroke-width="2"/>
+  <!-- White text for user message -->
+  <text x="109" y="284" font-family="Arial" font-size="14" fill="#ffffff">Can you tell me about the weather</text>
+  <text x="109" y="309" font-family="Arial" font-size="14" fill="#ffffff">forecast for today?</text>
+  <text x="305" y="340" font-family="Arial" font-size="12" fill="#909090" text-anchor="end">11:31 AM</text>
+  
+  <!-- AI Response with Weather Card -->
+  <rect x="16" y="370" width="270" height="200" rx="20" ry="20" fill="#000000"/>
+  
+  <!-- Weather Card Header -->
+  <text x="32" y="394" font-family="Arial" font-size="14" fill="#ffffff">Here's today's weather forecast:</text>
+  
+  <!-- Weather Card Content -->
+  <rect x="32" y="405" width="238" height="140" rx="10" ry="10" fill="#1a1a1a"/>
+  
+  <!-- Weather Icon -->
+  <circle cx="76" cy="440" r="25" fill="url(#geminiGradient)" opacity="0.8"/>
+  <text x="76" y="447" font-family="Arial" font-size="16" fill="#ffffff" text-anchor="middle">☀️</text>
+  
+  <!-- Weather Info -->
+  <text x="130" y="430" font-family="Arial" font-weight="bold" font-size="18" fill="#ffffff">72°F</text>
+  <text x="130" y="450" font-family="Arial" font-size="14" fill="#b0b0b0">Sunny</text>
+  
+  <!-- Weather Details -->
+  <line x1="32" y1="470" x2="270" y2="470" stroke="#333333" stroke-width="1"/>
+  
+  <text x="50" y="490" font-family="Arial" font-size="12" fill="#b0b0b0">Humidity</text>
+  <text x="50" y="510" font-family="Arial" font-size="14" fill="#ffffff">45%</text>
+  
+  <text x="130" y="490" font-family="Arial" font-size="12" fill="#b0b0b0">Wind</text>
+  <text x="130" y="510" font-family="Arial" font-size="14" fill="#ffffff">8 mph</text>
+  
+  <text x="210" y="490" font-family="Arial" font-size="12" fill="#b0b0b0">UV Index</text>
+  <text x="210" y="510" font-family="Arial" font-size="14" fill="#ffffff">High</text>
+  
+  <circle cx="40" cy="586" r="16" fill="#000000" stroke="#ffffff" stroke-width="1.5"/>
+  <text x="40" y="592" font-family="Arial" font-size="16" fill="#ffffff" text-anchor="middle">AI</text>
+  <text x="70" y="590" font-family="Arial" font-size="12" fill="#909090">11:32 AM</text>
+  
+  <!-- User Message with BLACK bubble and WHITE TEXT with GEMINI GRADIENT BORDER -->
+  <rect x="89" y="620" width="270" height="65" rx="20" ry="20" fill="#000000" stroke="url(#geminiGradient)" stroke-width="2"/>
+  <!-- White text for user message -->
+  <text x="109" y="644" font-family="Arial" font-size="14" fill="#ffffff">Thanks! Will it rain later this</text>
+  <text x="109" y="669" font-family="Arial" font-size="14" fill="#ffffff">week?</text>
+  <text x="305" y="700" font-family="Arial" font-size="12" fill="#909090" text-anchor="end">11:33 AM</text>
+  
+  <!-- Input Area with floating effect -->
+  <rect y="730" width="375" height="70" fill="#1e1e1e"/>
+  <rect x="16" y="742" width="290" height="46" rx="23" ry="23" fill="#2d2d2d"/>
+  <text x="40" y="768" font-family="Arial" font-size="14" fill="#808080">Type a message...</text>
+  
+  <!-- Modern send button with black background and colorful icon -->
+  <circle cx="335" cy="765" r="22" fill="#000000"/>
+  
+  <!-- Modern send icon with colorful gradient -->
+  <path d="M325 765 L345 765 M335 755 L335 775" stroke="url(#geminiGradient)" stroke-width="2.5" stroke-linecap="round"/>
+
+  <!-- Subtle pattern overlay -->
+  <rect width="375" height="800" fill="#ffffff" opacity="0.02">
+    <pattern id="pattern" width="20" height="20" patternUnits="userSpaceOnUse">
+      <rect width="20" height="20" fill="none"/>
+      <circle cx="10" cy="10" r="1" fill="#ffffff"/>
+    </pattern>
+  </rect>
+</svg>
+message.txt
+7 KB
