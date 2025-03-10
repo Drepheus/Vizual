@@ -37,31 +37,21 @@
                         <form id="query-form">
                             <div class="input-group">
                                 <input type="text" id="query-input" class="form-control" placeholder="Ask a question...">
-                                <button class="btn btn-secondary" type="button" id="mobile-upload-btn">
-                                    <i class="fas fa-paperclip"></i>
-                                </button>
                                 <button class="btn btn-primary" type="submit" id="submit-query">
                                     <i class="fas fa-paper-plane"></i>
                                 </button>
                             </div>
-                            <input type="file" id="file-upload" style="display: none;">
-                            <div id="file-info" class="text-muted small mt-1"></div>
                         </form>
                         
                         <script src="{{ url_for('static', filename='js/query-examples.js') }}"></script>
                         
-                        <div class="file-upload-section mt-3 d-flex flex-wrap gap-2">
-                            <button type="button" id="file-upload-button" class="btn btn-primary">
-                                <i class="fas fa-paperclip me-1"></i> Upload File
-                            </button>
+                        <div class="mt-3 d-flex flex-wrap gap-2">
                             <button type="button" id="voice-mode-button" class="btn btn-primary">
                                 <i class="fas fa-microphone me-1"></i> Voice Mode
                             </button>
                             <button type="button" id="image-creation-button" class="btn btn-primary">
                                 <i class="fas fa-image me-1"></i> Instant Image Creation
                             </button>
-                            <input type="file" id="file-upload-input" class="d-none" accept=".pdf,.doc,.docx,.txt">
-                            <div id="file-upload-status" class="text-muted w-100 mt-2"></div>
                         </div>
                     </div>
                 </div>

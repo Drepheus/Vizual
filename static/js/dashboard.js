@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Clear input and show typing indicator
             queryInput.value = '';
-            typingIndicator.style.display = 'flex';
+            typingIndicator.style.display = 'block';
 
             // Add user message to UI
             const userMsg = `
@@ -46,43 +46,36 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 body: JSON.stringify({ query: query })
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    if (response.status === 429) {
+                        return response.json().then(data => {
+                            throw new Error(data.message || 'Free tier query limit reached');
+                        });
+                    }
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
             .then(data => {
-                // Mark that we received a response
-                aiResponseReceived = true;
+                // Hide typing indicator
+                typingIndicator.style.display = 'none';
 
                 if (data.error) {
-                    // Handle any errors from the API
-                    console.error('API Error:', data.error);
+                    // Handle error response
+                    let errorMessage = data.message || 'Sorry, I encountered an error. Please try again.';
 
-                    // Check for subscription limit error
-                    if (data.message && data.message.includes('query limit')) {
-                        const errorMsg = `
-                            <div class="message-bubble ai">
-                                <div class="message-content">
-                                    <div class="ai-response-header">
-                                        Omi
-                                    </div>
-                                    <p>${data.message}</p>
-                                    <p><a href="${data.upgrade_url}" class="btn btn-primary btn-sm mt-2">Upgrade Now</a></p>
+                    const errorMsg = `
+                        <div class="message-bubble ai error">
+                            <div class="message-content">
+                                <div class="ai-response-header">
+                                    Error
                                 </div>
+                                <p>${errorMessage}</p>
                             </div>
-                        `;
-                        messagesContainer.innerHTML += errorMsg;
-                    } else {
-                        // Generic error
-                        const errorMsg = `
-                            <div class="message-bubble ai">
-                                <div class="message-content">
-                                    <div class="ai-response-header">
-                                        Omi
-                                    </div>
-                                    <p>I'm sorry, but there was an error: ${data.error}</p>
-                                </div>
-                            </div>
-                        `;
-                        messagesContainer.innerHTML += errorMsg;
-                    }
+                        </div>
+                    `;
+                    messagesContainer.innerHTML += errorMsg;
                 } else {
                     // Process successful response
                     const formattedResponse = data.ai_response.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>');
@@ -104,70 +97,29 @@ document.addEventListener('DOMContentLoaded', function() {
                     messagesContainer.innerHTML += aiMsg;
                 }
 
-                // Hide typing indicator and scroll to bottom
-                typingIndicator.style.display = 'none';
+                // Scroll to bottom
                 messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
-                // Refresh conversation history
-                loadConversationHistory();
+                // Update recent conversations
+                loadRecentConversations();
             })
             .catch(error => {
-                console.error('Error:', error);
+                console.error('API Error:', error.message);
                 typingIndicator.style.display = 'none';
 
-                // Only show error message if no AI response was received
-                if (!aiResponseReceived) {
-                    const errorMsg = `
-                        <div class="message-bubble ai">
-                            <div class="message-content">
-                                <div class="ai-response-header">
-                                    Omi
-                                </div>
-                                <p>Sorry, I encountered an error. Please try again.</p>
+                const errorMsg = `
+                    <div class="message-bubble ai error">
+                        <div class="message-content">
+                            <div class="ai-response-header">
+                                Error
                             </div>
+                            <p>${error.message || 'Sorry, I encountered an error. Please try again.'}</p>
                         </div>
-                    `;
-                    messagesContainer.innerHTML += errorMsg;
-                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
-                }
+                    </div>
+                `;
+                messagesContainer.innerHTML += errorMsg;
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
             });
-        });
-    }
-
-    // Handle file upload if available
-    const fileUploadInput = document.getElementById('file-upload');
-    if (fileUploadInput) {
-        fileUploadInput.addEventListener('change', function() {
-            if (this.files.length > 0) {
-                const fileName = this.files[0].name;
-                const fileInfo = document.getElementById('file-info');
-                if (fileInfo) {
-                    fileInfo.textContent = fileName;
-                }
-            }
-        });
-    }
-
-    // Add mobile-friendly file upload trigger
-    const mobileUploadBtn = document.getElementById('mobile-upload-btn');
-    if (mobileUploadBtn && fileUploadInput) {
-        mobileUploadBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            fileUploadInput.click();
-        });
-    }
-
-    // SAM.gov search form handler if available
-    const samSearchForm = document.getElementById('sam-search-form');
-    if (samSearchForm) {
-        samSearchForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const searchInput = document.getElementById('sam-search-input');
-            if (!searchInput || searchInput.value.trim() === '') return;
-
-            // Handle SAM.gov search logic here
-            // This is just a placeholder
-            console.log('Searching SAM.gov for:', searchInput.value);
         });
     }
 
@@ -280,31 +232,23 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!recentConversationsContainer) return;
 
         fetch('/api/recent_conversations')
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.status === 'success' && data.conversations && data.conversations.length > 0) {
                     recentConversationsContainer.innerHTML = '';
 
                     data.conversations.forEach(conv => {
-                        const previewText = conv.response.substring(0, 60) + '...';
-                        const item = document.createElement('div');
-                        item.className = 'conversation-preview';
-                        item.innerHTML = `
-                            <div class="preview-title">${conv.query_text}</div>
-                            <div class="preview-snippet">${previewText}</div>
-                            <div class="conversation-time">${new Date(conv.created_at).toLocaleString()}</div>
-                        `;
-                        item.addEventListener('click', function() {
-                            // Add the conversation to the current chat
-                            const userMsg = `
-                                <div class="message-bubble user">
-                                    <div class="message-content">
-                                        <p>${conv.query_text}</p>
-                                    </div>
+                        const convHtml = `
+                            <div class="conversation-item mb-3">
+                                <div class="query-bubble">
+                                    <div class="query-text">${conv.query_text}</div>
+                                    <div class="query-time small text-muted">${new Date(conv.created_at).toLocaleString()}</div>
                                 </div>
-                            `;
-
-                            const aiMsg = `
                                 <div class="message-bubble ai">
                                     <div class="message-content">
                                         <div class="ai-response-header">
@@ -313,15 +257,9 @@ document.addEventListener('DOMContentLoaded', function() {
                                         <div class="formatted-content">${conv.response.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>')}</div>
                                     </div>
                                 </div>
-                            `;
-
-                            const messagesContainer = document.querySelector('.messages-container');
-                            if (messagesContainer) {
-                                messagesContainer.innerHTML += userMsg + aiMsg;
-                                messagesContainer.scrollTop = messagesContainer.scrollHeight;
-                            }
-                        });
-                        recentConversationsContainer.appendChild(item);
+                            </div>
+                        `;
+                        recentConversationsContainer.innerHTML += convHtml;
                     });
                 } else {
                     recentConversationsContainer.innerHTML = `
@@ -332,24 +270,29 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             })
             .catch(error => {
-                console.error('Error loading recent conversations:', error);
+                console.error('Error loading conversations:', error);
+                const recentConversationsContainer = document.getElementById('recent-conversations');
                 if (recentConversationsContainer) {
-                    recentConversationsContainer.innerHTML = '<p class="text-danger">Failed to load recent conversations.</p>';
+                    recentConversationsContainer.innerHTML = `
+                        <div class="text-center py-3 text-danger">
+                            <small>Error loading conversations: ${error.message}</small>
+                        </div>
+                    `;
                 }
             });
     }
 
-    // Initialize on page load
-    //document.addEventListener('DOMContentLoaded', function() {
-    //    initializeChat();
-    //    initializeFileUpload();
-    //    loadRecentConversations();
+    // SAM.gov search form handler if available
+    const samSearchForm = document.getElementById('sam-search-form');
+    if (samSearchForm) {
+        samSearchForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const searchInput = document.getElementById('sam-search-input');
+            if (!searchInput || searchInput.value.trim() === '') return;
 
-        // Load modules based on page
-    //    if (window.location.pathname === '/dashboard') {
-    //        loadSAMData();
-    //        loadContractAwards();
-    //    }
-    //});
-
+            // Handle SAM.gov search logic here
+            // This is just a placeholder
+            console.log('Searching SAM.gov for:', searchInput.value);
+        });
+    }
 });
