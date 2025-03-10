@@ -50,7 +50,7 @@ def register_routes(app):
             db.session.add(user)
             db.session.commit()
             login_user(user)
-            return redirect(url_for('dashboard'))
+            return redirect(url_for('simple_dashboard'))
         return render_template('register.html')
 
     @app.route('/logout')
