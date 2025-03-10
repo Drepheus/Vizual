@@ -43,7 +43,7 @@ def create_app():
         logger.info("Initializing Flask extensions...")
         db.init_app(app)
         login_manager.init_app(app)
-        login_manager.login_view = 'auth.login'
+        login_manager.login_view = 'login'
 
         # Register routes and initialize database
         with app.app_context():
@@ -85,12 +85,3 @@ def create_app():
 
 # Create the Flask application instance
 app = create_app()
-
-if __name__ == '__main__':
-    try:
-        logger.info("Starting Flask development server...")
-        app.run(host='0.0.0.0', port=5000, debug=True)
-    except Exception as e:
-        logger.error(f"Failed to start Flask server: {e}")
-        logger.exception("Full traceback:")
-        exit(1)
