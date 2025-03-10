@@ -65,6 +65,7 @@ button.file-upload:hover {
   }
 }
 
+body {
     background-position: center;
 }
 
@@ -113,9 +114,47 @@ button.file-upload:hover {
     opacity: 0.3;
 }
 
-
 .query-history .accordion-button::after {
     filter: invert(1);
+}
+
+/* SAM.gov search results styling */
+.search-result-card {
+    background-color: var(--card-bg);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.search-results-container {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+/* SAM.gov entity and awards styling */
+.sam-entity-card, .award-card {
+    background-color: rgba(0, 0, 0, 0.2);
+    transition: background-color 0.2s ease;
+}
+
+.sam-entity-card:hover, .award-card:hover {
+    background-color: rgba(0, 0, 0, 0.3);
+}
+
+/* Make sure buttons are properly styled */
+.btn-primary {
+    background: linear-gradient(135deg, #000000, #444444) !important;
+    border: none !important;
+    color: white !important;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #222222, #555555) !important;
+}
+
+/* Fix mobile touch target sizes */
+@media (max-width: 768px) {
+    .btn, button, input[type="submit"], input[type="button"] {
+        min-height: 44px;
+    }
 }
 
 .query-history .accordion-item {

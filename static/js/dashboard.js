@@ -1,298 +1,602 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Get references to DOM elements
-    const queryForm = document.getElementById('query-form');
-    const queryInput = document.getElementById('query-input');
-    const messagesContainer = document.getElementById('messages-container');
-    const typingIndicator = document.getElementById('typing-indicator');
+    // Common elements
+    const queryForm = document.getElementById('queryForm');
+    const queryInput = document.getElementById('queryInput');
+    const responseArea = document.getElementById('responseArea');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const recentConversationsList = document.getElementById('recentConversationsList');
 
-    // Track AI response status
-    let aiResponseReceived = false;
+    // Gov Dashboard specific elements
+    const samSearchForm = document.getElementById('samSearchForm');
+    const searchResults = document.getElementById('searchResults');
+    const samStatusCard = document.getElementById('samStatusCard');
+    const contractAwardsCard = document.getElementById('contractAwardsCard');
 
-    // Initialize conversation history display
-    loadConversationHistory();
-    loadRecentConversations(); // Added to load conversations on page load
+    // Initialize recent conversations
+    fetchRecentConversations();
 
-    // Handle query submission
+    // Initialize Gov Dashboard components if they exist
+    if (window.location.pathname.includes('dashboard') && !window.location.pathname.includes('simple')) {
+        initGovDashboard();
+    }
+
+    // Query form submission
     if (queryForm) {
-        queryForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            // Reset response status for new query
-            aiResponseReceived = false;
-
+        queryForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
             const query = queryInput.value.trim();
-            if (query === '') return;
 
-            // Clear input and show typing indicator
-            queryInput.value = '';
-            typingIndicator.style.display = 'block';
+            if (!query) return;
 
-            // Add user message to UI
-            const userMsg = `
-                <div class="message-bubble user">
-                    <div class="message-content">
-                        <p>${query}</p>
-                    </div>
-                </div>
-            `;
-            messagesContainer.innerHTML += userMsg;
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            // Show loading spinner
+            if (loadingSpinner) {
+                loadingSpinner.classList.remove('d-none');
+            }
 
-            // Send API request
-            fetch('/api/query', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ query: query })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    if (response.status === 429) {
-                        return response.json().then(data => {
-                            throw new Error(data.message || 'Free tier query limit reached');
-                        });
-                    }
-                    throw new Error('Network response was not ok');
+            try {
+                const response = await fetch('/api/query', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ query: query })
+                });
+
+                const data = await response.json();
+
+                // Hide loading spinner
+                if (loadingSpinner) {
+                    loadingSpinner.classList.add('d-none');
                 }
-                return response.json();
-            })
-            .then(data => {
-                // Hide typing indicator
-                typingIndicator.style.display = 'none';
 
                 if (data.error) {
-                    // Handle error response
-                    let errorMessage = data.message || 'Sorry, I encountered an error. Please try again.';
+                    console.log("API Error:", data.error);
 
-                    const errorMsg = `
-                        <div class="message-bubble ai error">
-                            <div class="message-content">
-                                <div class="ai-response-header">
-                                    Error
-                                </div>
-                                <p>${errorMessage}</p>
-                            </div>
-                        </div>
-                    `;
-                    messagesContainer.innerHTML += errorMsg;
+                    // Check if it's a rate limit error
+                    if (data.error === 'Free tier query limit reached') {
+                        showUpgradeModal(data.message, data.subscription_options, data.upgrade_url);
+                    } else {
+                        // Show error message
+                        displayAIResponse({
+                            role: 'assistant',
+                            content: `Sorry, I encountered an error. Please try again.`,
+                            error: true
+                        });
+                    }
                 } else {
-                    // Process successful response
-                    const formattedResponse = data.ai_response.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>');
+                    // Display AI response
+                    displayAIResponse({
+                        role: 'assistant',
+                        content: data.ai_response
+                    });
 
-                    const aiMsg = `
-                        <div class="message-bubble ai">
-                            <div class="message-content">
-                                <div class="ai-response-header">
-                                    Omi
-                                </div>
-                                <div class="formatted-content">${formattedResponse}</div>
-                                ${data.queries_remaining !== undefined ? 
-                                `<div class="queries-remaining mt-2 text-muted">
-                                    <small>Queries remaining today: ${data.queries_remaining}</small>
-                                </div>` : ''}
-                            </div>
-                        </div>
-                    `;
-                    messagesContainer.innerHTML += aiMsg;
+                    // Clear input
+                    queryInput.value = '';
+
+                    // Update recent conversations
+                    fetchRecentConversations();
+                }
+            } catch (error) {
+                console.log("Error:", error);
+
+                // Hide loading spinner
+                if (loadingSpinner) {
+                    loadingSpinner.classList.add('d-none');
                 }
 
-                // Scroll to bottom
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
-
-                // Update recent conversations
-                loadRecentConversations();
-            })
-            .catch(error => {
-                console.error('API Error:', error.message);
-                typingIndicator.style.display = 'none';
-
-                const errorMsg = `
-                    <div class="message-bubble ai error">
-                        <div class="message-content">
-                            <div class="ai-response-header">
-                                Error
-                            </div>
-                            <p>${error.message || 'Sorry, I encountered an error. Please try again.'}</p>
-                        </div>
-                    </div>
-                `;
-                messagesContainer.innerHTML += errorMsg;
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            });
+                // Show error message
+                displayAIResponse({
+                    role: 'assistant',
+                    content: 'Sorry, there was an error processing your request. Please try again.',
+                    error: true
+                });
+            }
         });
     }
 
-    // Load conversation history
-    function loadConversationHistory() {
-        const historyContainer = document.getElementById('conversation-history');
-        if (!historyContainer) return;
+    function displayAIResponse(message) {
+        if (!responseArea) return;
+
+        const responseCard = document.createElement('div');
+        responseCard.className = 'card dashboard-card response-card mb-4';
+
+        const timestamp = new Date().toLocaleTimeString();
+
+        // Create a formatted display for the AI response with Markdown-like formatting
+        const formattedContent = formatMessageContent(message.content);
+
+        responseCard.innerHTML = `
+            <div class="card-body">
+                <div class="d-flex align-items-start mb-3">
+                    <div class="me-3">
+                        <div class="avatar">
+                            <i class="fas ${message.error ? 'fa-exclamation-circle text-danger' : 'fa-robot text-primary'}"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <h5 class="mb-1">Omi AI ${message.error ? '(Error)' : ''}</h5>
+                        <div class="text-muted small">${timestamp}</div>
+                    </div>
+                </div>
+                <div class="ai-response formatted-content">
+                    ${formattedContent}
+                </div>
+            </div>
+        `;
+
+        responseArea.appendChild(responseCard);
+
+        // Scroll to the latest response
+        responseCard.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }
+
+    function formatMessageContent(content) {
+        if (!content) return '';
+
+        // Convert URLs to links
+        content = content.replace(/https?:\/\/\S+/g, url => `<a href="${url}" target="_blank">${url}</a>`);
+
+        // Convert markdown-style formatting to HTML
+        content = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'); // Bold
+        content = content.replace(/\*(.*?)\*/g, '<em>$1</em>'); // Italic
+        content = content.replace(/`([^`]+)`/g, '<code>$1</code>'); // Inline code
+
+        // Convert line breaks to <br> tags
+        content = content.replace(/\n/g, '<br>');
+
+        return content;
+    }
+
+    function fetchRecentConversations() {
+        if (!recentConversationsList) return;
 
         fetch('/api/recent_conversations')
             .then(response => response.json())
             .then(data => {
-                if (data.status === 'success' && data.conversations && data.conversations.length > 0) {
-                    historyContainer.innerHTML = '';
-
-                    data.conversations.forEach(conv => {
-                        const item = document.createElement('div');
-                        item.className = 'history-item';
-                        item.innerHTML = `
-                            <div class="history-query">${conv.query_text}</div>
-                            <div class="history-date">${new Date(conv.created_at).toLocaleString()}</div>
-                        `;
-                        item.addEventListener('click', function() {
-                            // Add the conversation to the current chat
-                            const userMsg = `
-                                <div class="message-bubble user">
-                                    <div class="message-content">
-                                        <p>${conv.query_text}</p>
-                                    </div>
-                                </div>
-                            `;
-
-                            const aiMsg = `
-                                <div class="message-bubble ai">
-                                    <div class="message-content">
-                                        <div class="ai-response-header">
-                                            Omi
-                                        </div>
-                                        <div class="formatted-content">${conv.response.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>')}</div>
-                                    </div>
-                                </div>
-                            `;
-
-                            const messagesContainer = document.querySelector('.messages-container');
-                            if (messagesContainer) {
-                                messagesContainer.innerHTML += userMsg + aiMsg;
-                                messagesContainer.scrollTop = messagesContainer.scrollHeight;
-                            }
-                        });
-
-                        historyContainer.appendChild(item);
-                    });
-                } else {
-                    historyContainer.innerHTML = '<p class="text-muted">No conversation history yet.</p>';
+                if (data.status === 'success' && data.conversations) {
+                    updateRecentConversations(data.conversations);
                 }
             })
             .catch(error => {
-                console.error('Error loading conversation history:', error);
-                if (historyContainer) {
-                    historyContainer.innerHTML = '<p class="text-danger">Failed to load conversation history.</p>';
-                }
+                console.error('Error fetching recent conversations:', error);
             });
     }
 
-    function addMessageToUI(text, isUser) {
-        const messageDiv = document.createElement('div');
-        messageDiv.className = `message-bubble ${isUser ? 'user' : 'ai'}`;
+    function updateRecentConversations(conversations) {
+        if (!recentConversationsList) return;
 
-        const messageContent = document.createElement('div');
-        messageContent.className = 'message-content';
+        // Clear existing items
+        recentConversationsList.innerHTML = '';
 
-        if (!isUser) {
-            const aiHeader = document.createElement('div');
-            aiHeader.className = 'ai-response-header';
-            aiHeader.textContent = 'Omi';
-            messageContent.appendChild(aiHeader);
+        if (conversations.length === 0) {
+            const emptyItem = document.createElement('li');
+            emptyItem.className = 'list-group-item bg-dark border-0 text-muted';
+            emptyItem.textContent = 'No conversations yet';
+            recentConversationsList.appendChild(emptyItem);
+            return;
         }
 
-        const messagePara = document.createElement('p');
-        messagePara.textContent = text;
-        messageContent.appendChild(messagePara);
+        // Add conversations to the list
+        conversations.forEach(conversation => {
+            const item = document.createElement('li');
+            item.className = 'list-group-item bg-dark border-0 conversation-item';
 
-        messageDiv.appendChild(messageContent);
-        messagesContainer.appendChild(messageDiv);
+            // Format timestamp
+            const date = new Date(conversation.created_at);
+            const formattedDate = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-        // Scroll to the bottom of the messages container
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
-    }
+            item.innerHTML = `
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="conversation-preview">
+                        <div class="conversation-text">${conversation.query_text.substring(0, 50)}${conversation.query_text.length > 50 ? '...' : ''}</div>
+                        <div class="text-muted small">${formattedDate}</div>
+                    </div>
+                    <button class="btn btn-sm conversation-button" data-query="${conversation.query_text}">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+            `;
 
-    function truncateText(text, maxLength) {
-        if (!text) return '';
-        return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
-    }
-
-    function formatDate(date) {
-        const now = new Date();
-        const diff = now - date;
-
-        // If less than 24 hours, show time
-        if (diff < 86400000) {
-            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        } else {
-            return date.toLocaleDateString();
-        }
-    }
-
-
-    // Fetch recent conversations
-    function loadRecentConversations() {
-        const recentConversationsContainer = document.getElementById('recent-conversations');
-        if (!recentConversationsContainer) return;
-
-        fetch('/api/recent_conversations')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
+            // Add event listener to retry this query
+            const retryButton = item.querySelector('.conversation-button');
+            retryButton.addEventListener('click', function() {
+                if (queryInput) {
+                    queryInput.value = this.dataset.query;
+                    queryForm.dispatchEvent(new Event('submit'));
                 }
-                return response.json();
-            })
-            .then(data => {
-                if (data.status === 'success' && data.conversations && data.conversations.length > 0) {
-                    recentConversationsContainer.innerHTML = '';
+            });
 
-                    data.conversations.forEach(conv => {
-                        const convHtml = `
-                            <div class="conversation-item mb-3">
-                                <div class="query-bubble">
-                                    <div class="query-text">${conv.query_text}</div>
-                                    <div class="query-time small text-muted">${new Date(conv.created_at).toLocaleString()}</div>
-                                </div>
-                                <div class="message-bubble ai">
-                                    <div class="message-content">
-                                        <div class="ai-response-header">
-                                            Omi
+            recentConversationsList.appendChild(item);
+        });
+    }
+
+    // Show upgrade modal
+    function showUpgradeModal(message, options, upgradeUrl) {
+        const modalHTML = `
+            <div class="modal fade" id="upgradeModal" tabindex="-1" aria-labelledby="upgradeModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content bg-dark text-light">
+                        <div class="modal-header border-0">
+                            <h5 class="modal-title" id="upgradeModalLabel">Upgrade Your Account</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="alert alert-warning" role="alert">
+                                ${message}
+                            </div>
+                            <div class="row g-4 mt-2">
+                                ${Object.entries(options).map(([plan, details]) => `
+                                    <div class="col-md-6">
+                                        <div class="card bg-dark border">
+                                            <div class="card-body text-center">
+                                                <h5 class="card-title">${plan.charAt(0).toUpperCase() + plan.slice(1)}</h5>
+                                                <div class="price-tag mb-3">${details.price}</div>
+                                                <p class="card-text">${details.features}</p>
+                                            </div>
                                         </div>
-                                        <div class="formatted-content">${conv.response.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>')}</div>
                                     </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        <div class="modal-footer border-0">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No Thanks</button>
+                            <a href="${upgradeUrl}" class="btn btn-primary">Upgrade Now</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Add modal to the DOM
+        const modalContainer = document.createElement('div');
+        modalContainer.innerHTML = modalHTML;
+        document.body.appendChild(modalContainer);
+
+        // Initialize and show the modal
+        const modal = new bootstrap.Modal(document.getElementById('upgradeModal'));
+        modal.show();
+
+        // Clean up when the modal is hidden
+        document.getElementById('upgradeModal').addEventListener('hidden.bs.modal', function() {
+            document.body.removeChild(modalContainer);
+        });
+    }
+
+    // Initialize Government Dashboard functionality
+    function initGovDashboard() {
+        // Load SAM.gov status
+        loadSamGovStatus();
+
+        // Load recent contract awards
+        loadContractAwards();
+
+        // Setup SAM.gov search form
+        if (samSearchForm) {
+            samSearchForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+                const searchInput = document.getElementById('searchInput');
+                if (searchInput && searchInput.value.trim()) {
+                    performSamSearch(searchInput.value.trim());
+                }
+            });
+        }
+
+        // Setup document upload if it exists
+        const documentUploadForm = document.getElementById('documentUploadForm');
+        if (documentUploadForm) {
+            documentUploadForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+
+                const fileInput = document.getElementById('documentFile');
+                const documentQuery = document.getElementById('documentQuery');
+
+                if (fileInput && fileInput.files.length > 0) {
+                    uploadAndAnalyzeDocuments(fileInput.files, documentQuery ? documentQuery.value : '');
+                }
+            });
+        }
+    }
+
+    // Load SAM.gov Status
+    function loadSamGovStatus() {
+        if (!samStatusCard) return;
+
+        const samStatusLoading = document.getElementById('samStatusLoading');
+        const samStatusContent = document.getElementById('samStatusContent');
+        const samDataContent = document.getElementById('samDataContent');
+
+        if (!samStatusLoading || !samStatusContent || !samDataContent) return;
+
+        // Show loading state
+        samStatusLoading.classList.remove('d-none');
+        samStatusContent.classList.add('d-none');
+
+        // Fetch SAM.gov status
+        fetch('/api/sam/status')
+            .then(response => response.json())
+            .then(data => {
+                // Hide loading state
+                samStatusLoading.classList.add('d-none');
+                samStatusContent.classList.remove('d-none');
+
+                if (data.status === 'success' && data.entities) {
+                    // Format and display entities
+                    samDataContent.innerHTML = '';
+
+                    data.entities.forEach(entity => {
+                        const entityCard = document.createElement('div');
+                        entityCard.className = 'sam-entity-card p-2 mb-2 border-bottom';
+
+                        entityCard.innerHTML = `
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <strong>${entity.entity_name}</strong>
+                                    <div class="small">DUNS: ${entity.duns}</div>
+                                </div>
+                                <div>
+                                    <span class="badge bg-success">${entity.status}</span>
+                                    <div class="small">Expires: ${entity.expiration_date}</div>
                                 </div>
                             </div>
                         `;
-                        recentConversationsContainer.innerHTML += convHtml;
+
+                        samDataContent.appendChild(entityCard);
                     });
                 } else {
-                    recentConversationsContainer.innerHTML = `
-                        <div class="text-center py-3 text-muted">
-                            <small>No recent conversations</small>
-                        </div>
-                    `;
+                    samDataContent.innerHTML = '<div class="alert alert-warning">Unable to fetch SAM.gov data</div>';
+                }
+
+                // Update last updated timestamp
+                const samLastUpdate = document.getElementById('samLastUpdate');
+                if (samLastUpdate) {
+                    samLastUpdate.textContent = new Date().toLocaleString();
                 }
             })
             .catch(error => {
-                console.error('Error loading conversations:', error);
-                const recentConversationsContainer = document.getElementById('recent-conversations');
-                if (recentConversationsContainer) {
-                    recentConversationsContainer.innerHTML = `
-                        <div class="text-center py-3 text-danger">
-                            <small>Error loading conversations: ${error.message}</small>
-                        </div>
-                    `;
-                }
+                console.error('Error fetching SAM.gov status:', error);
+
+                // Hide loading state
+                samStatusLoading.classList.add('d-none');
+                samStatusContent.classList.remove('d-none');
+
+                // Show error message
+                samDataContent.innerHTML = '<div class="alert alert-danger">Failed to connect to SAM.gov</div>';
             });
     }
 
-    // SAM.gov search form handler if available
-    const samSearchForm = document.getElementById('sam-search-form');
-    if (samSearchForm) {
-        samSearchForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const searchInput = document.getElementById('sam-search-input');
-            if (!searchInput || searchInput.value.trim() === '') return;
+    // Load Contract Awards
+    function loadContractAwards() {
+        if (!contractAwardsCard) return;
 
-            // Handle SAM.gov search logic here
-            // This is just a placeholder
-            console.log('Searching SAM.gov for:', searchInput.value);
+        const awardsLoading = document.getElementById('awardsLoading');
+        const awardsContent = document.getElementById('awardsContent');
+
+        if (!awardsLoading || !awardsContent) return;
+
+        // Show loading state
+        awardsLoading.classList.remove('d-none');
+        awardsContent.classList.add('d-none');
+
+        // Fetch recent contract awards
+        fetch('/api/sam/awards')
+            .then(response => response.json())
+            .then(data => {
+                // Hide loading state
+                awardsLoading.classList.add('d-none');
+                awardsContent.classList.remove('d-none');
+
+                if (data.status === 'success' && data.awards) {
+                    // Format and display awards
+                    awardsContent.innerHTML = '';
+
+                    data.awards.forEach(award => {
+                        const awardCard = document.createElement('div');
+                        awardCard.className = 'award-card p-2 mb-2 border-bottom';
+
+                        const formattedAmount = parseInt(award.award_amount).toLocaleString('en-US', {
+                            style: 'currency',
+                            currency: 'USD',
+                            maximumFractionDigits: 0
+                        });
+
+                        awardCard.innerHTML = `
+                            <div>
+                                <strong>${award.title}</strong>
+                                <div class="d-flex justify-content-between mt-1">
+                                    <div class="small">${award.awardee}</div>
+                                    <div class="small fw-bold">${formattedAmount}</div>
+                                </div>
+                                <div class="d-flex justify-content-between mt-1">
+                                    <div class="small text-muted">${award.solicitation_number}</div>
+                                    <div class="small text-muted">${award.award_date}</div>
+                                </div>
+                            </div>
+                        `;
+
+                        awardsContent.appendChild(awardCard);
+                    });
+                } else {
+                    awardsContent.innerHTML = '<div class="alert alert-warning">No recent awards found</div>';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching contract awards:', error);
+
+                // Hide loading state
+                awardsLoading.classList.add('d-none');
+                awardsContent.classList.remove('d-none');
+
+                // Show error message
+                awardsContent.innerHTML = '<div class="alert alert-danger">Failed to load contract awards</div>';
+            });
+    }
+
+    // Perform SAM.gov Search
+    function performSamSearch(query) {
+        if (!searchResults) return;
+
+        // Show loading state in the search results area
+        searchResults.innerHTML = `
+            <div class="text-center p-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Searching...</span>
+                </div>
+                <p class="mt-3 text-muted">Searching SAM.gov for "${query}"...</p>
+            </div>
+        `;
+
+        // Send search query to the backend
+        fetch('/api/sam/search', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ query: query })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success' && data.results && data.results.length > 0) {
+                // Format and display search results
+                searchResults.innerHTML = `
+                    <h5 class="mb-3">Search Results (${data.count})</h5>
+                    <div class="search-results-container"></div>
+                `;
+
+                const resultsContainer = searchResults.querySelector('.search-results-container');
+
+                data.results.forEach(result => {
+                    const resultCard = document.createElement('div');
+                    resultCard.className = 'card mb-3 search-result-card';
+
+                    resultCard.innerHTML = `
+                        <div class="card-body">
+                            <h6 class="card-title mb-2">${result.title}</h6>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted small">${result.agency}</span>
+                                <span class="text-muted small">${result.solicitation_number}</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <span class="badge bg-info me-2">Posted: ${result.posted_date}</span>
+                                    <span class="badge bg-warning">Due: ${result.due_date}</span>
+                                </div>
+                                <a href="${result.url}" target="_blank" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-external-link-alt me-1"></i> View
+                                </a>
+                            </div>
+                        </div>
+                    `;
+
+                    resultsContainer.appendChild(resultCard);
+                });
+            } else if (data.status === 'warning') {
+                // No results found
+                searchResults.innerHTML = `
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        ${data.message}
+                    </div>
+                    <p class="text-muted">Try a different search term or browse categories instead.</p>
+                `;
+            } else {
+                // Error occurred
+                searchResults.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        An error occurred during your search
+                    </div>
+                    <p class="text-muted">Please try again in a moment.</p>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Error performing SAM.gov search:', error);
+
+            // Show error message
+            searchResults.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    Search request failed
+                </div>
+                <p class="text-muted">Please check your connection and try again.</p>
+            `;
+        });
+    }
+
+    // Upload and Analyze Documents
+    function uploadAndAnalyzeDocuments(files, query) {
+        if (!responseArea) return;
+
+        // Show loading state
+        if (loadingSpinner) {
+            loadingSpinner.classList.remove('d-none');
+        }
+
+        // Create a FormData object to send files
+        const formData = new FormData();
+        for (let i = 0; i < files.length; i++) {
+            formData.append('file', files[i]);
+        }
+
+        if (query) {
+            formData.append('query', query);
+        }
+
+        // Upload files
+        fetch('/api/upload', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Display a success message
+                displayAIResponse({
+                    role: 'assistant',
+                    content: `I've successfully received your document${files.length > 1 ? 's' : ''}. I'll analyze ${files.length > 1 ? 'them' : 'it'} and provide insights based on your request: "${query || 'Analyze the document contents'}".`
+                });
+
+                // In a real implementation, you would now query the AI with the uploaded document content
+                // But for this demo, we'll just show a confirmation
+
+                // Clear file input
+                const fileInput = document.getElementById('documentFile');
+                if (fileInput) {
+                    fileInput.value = '';
+                }
+
+                const documentQuery = document.getElementById('documentQuery');
+                if (documentQuery) {
+                    documentQuery.value = '';
+                }
+            } else {
+                // Display error message
+                displayAIResponse({
+                    role: 'assistant',
+                    content: `Sorry, there was an error uploading your document${files.length > 1 ? 's' : ''}. ${data.error || 'Please try again.'}`,
+                    error: true
+                });
+            }
+
+            // Hide loading spinner
+            if (loadingSpinner) {
+                loadingSpinner.classList.add('d-none');
+            }
+        })
+        .catch(error => {
+            console.error('Error uploading documents:', error);
+
+            // Display error message
+            displayAIResponse({
+                role: 'assistant',
+                content: 'Sorry, there was an error uploading your documents. Please try again later.',
+                error: true
+            });
+
+            // Hide loading spinner
+            if (loadingSpinner) {
+                loadingSpinner.classList.add('d-none');
+            }
         });
     }
 });
