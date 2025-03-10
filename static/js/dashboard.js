@@ -1,7 +1,21 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Check if we're on the dashboard or simple dashboard
     const isDashboard = document.getElementById('response-area') !== null;
-    const isSimpleDashboard = document.getElementById('ai-response-display') !== null;
+    const isSimpleDashboard = document.getElementById('messages-container') !== null;
+
+    // Store conversation history
+    let currentConversationId = null;
+    let conversations = [];
+    
+    // Load conversations from localStorage
+    if (localStorage.getItem('conversations')) {
+        try {
+            conversations = JSON.parse(localStorage.getItem('conversations'));
+        } catch (e) {
+            console.error('Error parsing conversations from localStorage:', e);
+            conversations = [];
+        }
+    }
 
     if (isDashboard) {
         const queryInput = document.getElementById('query-input');
@@ -205,8 +219,206 @@ document.addEventListener('DOMContentLoaded', function() {
     if (isSimpleDashboard) {
         const queryForm = document.getElementById('query-form');
         const queryInput = document.getElementById('query-input');
-        const aiResponseContent = document.getElementById('ai-response-content');
+        const messagesContainer = document.getElementById('messages-container');
         const typingIndicator = document.getElementById('typing-indicator');
+        const recentConversationsContainer = document.getElementById('recent-conversations');
+
+        // Function to format date
+        function formatDate(date) {
+            const now = new Date();
+            const messageDate = new Date(date);
+            
+            if (now.toDateString() === messageDate.toDateString()) {
+                return messageDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            } else {
+                return messageDate.toLocaleDateString([], { month: 'short', day: 'numeric' });
+            }
+        }
+
+        // Load and display recent conversations
+        function loadRecentConversations() {
+            if (conversations.length === 0) {
+                recentConversationsContainer.innerHTML = `
+                    <div class="text-center py-3 text-muted">
+                        <small>No recent conversations</small>
+                    </div>
+                `;
+                return;
+            }
+
+            recentConversationsContainer.innerHTML = '';
+            
+            // Sort conversations by last message date
+            const sortedConversations = [...conversations].sort((a, b) => {
+                const aLastDate = a.messages.length > 0 ? new Date(a.messages[a.messages.length - 1].timestamp) : new Date(a.createdAt);
+                const bLastDate = b.messages.length > 0 ? new Date(b.messages[b.messages.length - 1].timestamp) : new Date(b.createdAt);
+                return bLastDate - aLastDate;
+            });
+
+            sortedConversations.forEach(conv => {
+                const lastMessage = conv.messages.length > 0 ? conv.messages[conv.messages.length - 1] : null;
+                const previewTitle = conv.title || 'Conversation';
+                const previewText = lastMessage ? (lastMessage.content.length > 40 ? lastMessage.content.substring(0, 40) + '...' : lastMessage.content) : 'No messages';
+                const timestamp = lastMessage ? formatDate(lastMessage.timestamp) : formatDate(conv.createdAt);
+                
+                const conversationEl = document.createElement('div');
+                conversationEl.className = 'conversation-preview';
+                conversationEl.dataset.id = conv.id;
+                conversationEl.innerHTML = `
+                    <div class="preview-title">${previewTitle}</div>
+                    <div class="preview-snippet">${previewText}</div>
+                    <div class="conversation-time">${timestamp}</div>
+                `;
+                
+                conversationEl.addEventListener('click', () => {
+                    loadConversation(conv.id);
+                });
+                
+                recentConversationsContainer.appendChild(conversationEl);
+            });
+        }
+
+        // Load a conversation by ID
+        function loadConversation(conversationId) {
+            const conversation = conversations.find(c => c.id === conversationId);
+            if (!conversation) return;
+            
+            currentConversationId = conversationId;
+            messagesContainer.innerHTML = '';
+            
+            // Display all messages in the conversation
+            conversation.messages.forEach(message => {
+                const messageEl = document.createElement('div');
+                messageEl.className = `message-bubble ${message.role}`;
+                
+                messageEl.innerHTML = `
+                    <div class="message-content">
+                        ${message.role === 'ai' ? '<div class="ai-response-header">Omi</div>' : ''}
+                        <p>${message.content}</p>
+                    </div>
+                `;
+                
+                messagesContainer.appendChild(messageEl);
+            });
+            
+            // Scroll to bottom of messages
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            // Update active conversation in UI
+            document.querySelectorAll('.conversation-preview').forEach(el => {
+                el.classList.remove('active');
+                if (el.dataset.id === conversationId) {
+                    el.classList.add('active');
+                }
+            });
+        }
+
+        // Create a new conversation
+        function createNewConversation(firstMessage, response) {
+            const conversationId = 'conv_' + Date.now();
+            const conversation = {
+                id: conversationId,
+                title: firstMessage.substring(0, 30) + (firstMessage.length > 30 ? '...' : ''),
+                createdAt: new Date().toISOString(),
+                messages: [
+                    {
+                        role: 'user',
+                        content: firstMessage,
+                        timestamp: new Date().toISOString()
+                    },
+                    {
+                        role: 'ai',
+                        content: response,
+                        timestamp: new Date().toISOString()
+                    }
+                ]
+            };
+            
+            conversations.push(conversation);
+            saveConversations();
+            currentConversationId = conversationId;
+            
+            return conversation;
+        }
+
+        // Add message to current conversation
+        function addMessageToConversation(role, content) {
+            if (!currentConversationId) {
+                // If no conversation is active, create one
+                if (role === 'user') {
+                    // We'll add the AI response later
+                    const conversation = {
+                        id: 'conv_' + Date.now(),
+                        title: content.substring(0, 30) + (content.length > 30 ? '...' : ''),
+                        createdAt: new Date().toISOString(),
+                        messages: [
+                            {
+                                role: 'user',
+                                content: content,
+                                timestamp: new Date().toISOString()
+                            }
+                        ]
+                    };
+                    
+                    conversations.push(conversation);
+                    currentConversationId = conversation.id;
+                    saveConversations();
+                }
+                return;
+            }
+            
+            const conversation = conversations.find(c => c.id === currentConversationId);
+            if (!conversation) return;
+            
+            conversation.messages.push({
+                role: role,
+                content: content,
+                timestamp: new Date().toISOString()
+            });
+            
+            saveConversations();
+        }
+
+        // Save conversations to localStorage
+        function saveConversations() {
+            try {
+                localStorage.setItem('conversations', JSON.stringify(conversations));
+            } catch (e) {
+                console.error('Error saving conversations to localStorage:', e);
+            }
+            loadRecentConversations();
+        }
+
+        // Add a message to the UI
+        function addMessageToUI(role, content) {
+            const messageEl = document.createElement('div');
+            messageEl.className = `message-bubble ${role}`;
+            
+            messageEl.innerHTML = `
+                <div class="message-content">
+                    ${role === 'ai' ? '<div class="ai-response-header">Omi</div>' : ''}
+                    <p>${content}</p>
+                </div>
+            `;
+            
+            messagesContainer.appendChild(messageEl);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Initialize
+        loadRecentConversations();
+        
+        // If no conversation is loaded, show the welcome message
+        if (!currentConversationId) {
+            messagesContainer.innerHTML = `
+                <div class="message-bubble ai">
+                    <div class="message-content">
+                        <div class="ai-response-header">Omi</div>
+                        <p>Hello! How can I assist you today?</p>
+                    </div>
+                </div>
+            `;
+        }
 
         queryForm.addEventListener('submit', function(e) {
             e.preventDefault();
@@ -214,9 +426,16 @@ document.addEventListener('DOMContentLoaded', function() {
             const query = queryInput.value.trim();
             if (!query) return;
 
+            // Add user message to UI
+            addMessageToUI('user', query);
+            addMessageToConversation('user', query);
+            
+            // Clear input
+            queryInput.value = '';
+
             // Show typing indicator
-            aiResponseContent.style.display = 'none';
-            typingIndicator.style.display = 'block';
+            typingIndicator.style.display = 'flex';
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
             // Send query to API
             fetch('/api/query', {
@@ -233,9 +452,27 @@ document.addEventListener('DOMContentLoaded', function() {
                 return response.json();
             })
             .then(data => {
-                // Hide typing indicator and show response
+                // Hide typing indicator
                 typingIndicator.style.display = 'none';
-                aiResponseContent.style.display = 'block';
+                
+                if (data.error) {
+                    addMessageToUI('ai', 'Error: ' + data.error);
+                    addMessageToConversation('ai', 'Error: ' + data.error);
+                } else {
+                    addMessageToUI('ai', data.ai_response);
+                    addMessageToConversation('ai', data.ai_response);
+                }
+                
+                // Update recent conversations
+                loadRecentConversations();
+            })
+            .catch(error => {
+                typingIndicator.style.display = 'none';
+                addMessageToUI('ai', 'Sorry, there was an error processing your request.');
+                addMessageToConversation('ai', 'Sorry, there was an error processing your request.');
+                console.error('Error:', error);
+            });
+        });
 
                 if (data.error) {
                     aiResponseContent.textContent = 'Error: ' + data.error;
