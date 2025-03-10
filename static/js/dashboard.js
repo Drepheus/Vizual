@@ -1,33 +1,28 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const queryForm = document.getElementById('queryForm');
-    const queryInput = document.getElementById('queryInput');
-    const responseArea = document.getElementById('responseArea');
-    const documentUploadForm = document.getElementById('documentUploadForm');
-    let isTyping = false;
-    let shouldStopTyping = false;
+    // Check if we're on the dashboard or simple dashboard
+    const isDashboard = document.getElementById('response-area') !== null;
+    const isSimpleDashboard = document.getElementById('ai-response-display') !== null;
 
-    // Initialize SAM.gov data loading
-    loadSamGovStatus();
-    loadContractAwards();
+    if (isDashboard) {
+        const queryInput = document.getElementById('query-input');
+        const responseArea = document.getElementById('response-area');
+        const submitBtn = document.getElementById('submit-query');
+        const stopBtn = document.getElementById('stop-generation');
+        let shouldStopTyping = false;
+        let isTyping = false;
 
-    if (queryForm) {
-        // Add stop button after the submit button
-        const submitButton = queryForm.querySelector('button[type="submit"]');
-        const stopButton = document.createElement('button');
-        stopButton.type = 'button';
-        stopButton.className = 'btn btn-danger ms-2 d-none';
-        stopButton.innerHTML = '<i class="fas fa-stop"></i> Stop';
-        stopButton.onclick = stopTyping;
-        submitButton.parentNode.insertBefore(stopButton, submitButton.nextSibling);
+        // Handle stop button
+        stopBtn.addEventListener('click', function() {
+            shouldStopTyping = true;
+            stopBtn.classList.add('d-none');
+            submitBtn.disabled = false;
+        });
 
-        queryForm.addEventListener('submit', async function(e) {
+        // Handle form submission
+        document.getElementById('query-form').addEventListener('submit', async function(e) {
             e.preventDefault();
-
             const query = queryInput.value.trim();
             if (!query) return;
-
-            const submitBtn = this.querySelector('button[type="submit"]');
-            const stopBtn = this.querySelector('.btn-danger');
 
             try {
                 // Clear previous response and show typing indicator
@@ -67,20 +62,214 @@ document.addEventListener('DOMContentLoaded', function() {
                     throw new Error('Invalid response format from server');
                 }
 
-                await displayResponseWithTyping(data.ai_response);
-                if (!shouldStopTyping) {
-                    updateQueryHistory(query, data.ai_response);
-                }
+                // Type out the response gradually
+                typeResponse(data.ai_response, query);
+                queryInput.value = '';
+
             } catch (error) {
-                console.error('Query error:', error);
-                displayError(error.message || 'An unexpected error occurred. Please try again.');
-            } finally {
+                console.error('Error:', error);
+                responseArea.innerHTML = createErrorCard(error.message);
                 submitBtn.disabled = false;
                 stopBtn.classList.add('d-none');
-                shouldStopTyping = false;
             }
         });
+
+        // Function to type response gradually
+        function typeResponse(text, query) {
+            isTyping = true;
+            let i = 0;
+            const typingSpeed = 20; // ms per character
+            const htmlContent = formatResponseToHTML(text);
+
+            const responseHTML = `
+                <div class="card dashboard-card response-card mb-4">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="response-icon me-2"><i class="fas fa-robot"></i></div>
+                            <h5 class="card-title mb-0">Omi</h5>
+                        </div>
+                        <div class="query-text mb-3">
+                            <strong>Query:</strong> ${query}
+                        </div>
+                        <div class="ai-response-content"></div>
+                    </div>
+                </div>
+            `;
+
+            responseArea.innerHTML = responseHTML;
+            const responseContentEl = responseArea.querySelector('.ai-response-content');
+
+            function typeNextChar() {
+                if (i < htmlContent.length && !shouldStopTyping) {
+                    responseContentEl.innerHTML = htmlContent.substring(0, i + 1);
+                    i++;
+                    setTimeout(typeNextChar, typingSpeed);
+                } else {
+                    // Complete the response immediately if stopped
+                    if (shouldStopTyping) {
+                        responseContentEl.innerHTML = htmlContent;
+                    }
+
+                    submitBtn.disabled = false;
+                    stopBtn.classList.add('d-none');
+                    isTyping = false;
+
+                    // Update query history if it exists
+                    const queryHistory = document.getElementById('query-history');
+                    if (queryHistory) {
+                        updateQueryHistory();
+                    }
+                }
+            }
+
+            typeNextChar();
+        }
+
+        function formatResponseToHTML(text) {
+            // Convert markdown-like text to HTML
+            return text
+                .replace(/\n\n/g, '<br><br>')
+                .replace(/\n/g, '<br>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>');
+        }
+
+        function createTypingCard() {
+            return `
+                <div class="card dashboard-card response-card mb-4">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="response-icon me-2"><i class="fas fa-robot"></i></div>
+                            <h5 class="card-title mb-0">Omi</h5>
+                        </div>
+                        <div class="typing-indicator">
+                            <span class="typing-dot"></span>
+                            <span class="typing-dot"></span>
+                            <span class="typing-dot"></span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function createErrorCard(errorMessage) {
+            return `
+                <div class="card dashboard-card response-card mb-4">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="response-icon me-2"><i class="fas fa-exclamation-triangle text-danger"></i></div>
+                            <h5 class="card-title mb-0">Error</h5>
+                        </div>
+                        <div class="error-message text-danger">
+                            ${errorMessage}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateQueryHistory() {
+            fetch('/api/history')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.queries && data.queries.length > 0) {
+                        const queryHistoryEl = document.getElementById('query-history');
+                        queryHistoryEl.innerHTML = '';
+
+                        data.queries.forEach(query => {
+                            const accordionItem = document.createElement('div');
+                            accordionItem.className = 'accordion-item';
+                            accordionItem.innerHTML = `
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#query-${query.id}">
+                                        ${query.query_text.substring(0, 50)}${query.query_text.length > 50 ? '...' : ''}
+                                    </button>
+                                </h2>
+                                <div id="query-${query.id}" class="accordion-collapse collapse">
+                                    <div class="accordion-body">
+                                        <p><strong>Query:</strong> ${query.query_text}</p>
+                                        <p><strong>Response:</strong> ${query.response.replace(/\n/g, '<br>')}</p>
+                                        <p class="text-muted small">Asked on ${new Date(query.created_at).toLocaleString()}</p>
+                                    </div>
+                                </div>
+                            `;
+                            queryHistoryEl.appendChild(accordionItem);
+                        });
+                    }
+                })
+                .catch(error => console.error('Error fetching history:', error));
+        }
     }
+
+    // Simple Dashboard chat functionality
+    if (isSimpleDashboard) {
+        const queryForm = document.getElementById('query-form');
+        const queryInput = document.getElementById('query-input');
+        const aiResponseContent = document.getElementById('ai-response-content');
+        const typingIndicator = document.getElementById('typing-indicator');
+
+        queryForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const query = queryInput.value.trim();
+            if (!query) return;
+
+            // Show typing indicator
+            aiResponseContent.style.display = 'none';
+            typingIndicator.style.display = 'block';
+
+            // Send query to API
+            fetch('/api/query', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ query: query })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Hide typing indicator and show response
+                typingIndicator.style.display = 'none';
+                aiResponseContent.style.display = 'block';
+
+                if (data.error) {
+                    aiResponseContent.textContent = 'Error: ' + data.error;
+                } else {
+                    aiResponseContent.textContent = data.ai_response;
+                }
+
+                // Clear input
+                queryInput.value = '';
+            })
+            .catch(error => {
+                typingIndicator.style.display = 'none';
+                aiResponseContent.style.display = 'block';
+                aiResponseContent.textContent = 'Sorry, there was an error processing your request.';
+                console.error('Error:', error);
+            });
+        });
+    }
+    // Initialize SAM.gov data loading
+    loadSamGovStatus();
+    loadContractAwards();
+
+    if (queryForm) {
+        // Add stop button after the submit button
+        const submitButton = queryForm.querySelector('button[type="submit"]');
+        const stopButton = document.createElement('button');
+        stopButton.type = 'button';
+        stopButton.className = 'btn btn-danger ms-2 d-none';
+        stopButton.innerHTML = '<i class="fas fa-stop"></i> Stop';
+        stopButton.onclick = stopTyping;
+        submitButton.parentNode.insertBefore(stopButton, submitButton.nextSibling);
+
+    }
+
 
     function stopTyping() {
         shouldStopTyping = true;
@@ -101,7 +290,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const responseContent = responseCard.querySelector('.ai-response');
         const cursor = responseCard.querySelector('.typing-cursor');
         isTyping = true;
-        
+
         responseContent.style.opacity = "0";
         responseContent.style.transform = "translateY(10px)";
         responseContent.style.transition = "opacity 0.3s ease, transform 0.3s ease";
@@ -131,60 +320,7 @@ document.addEventListener('DOMContentLoaded', function() {
         isTyping = false;
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
-    // Check if we're on the simple dashboard
-    const isSimpleDashboard = document.getElementById('ai-response-display') !== null;
-    
-    if (isSimpleDashboard) {
-        const queryForm = document.getElementById('query-form');
-        const queryInput = document.getElementById('query-input');
-        const aiResponseContent = document.getElementById('ai-response-content');
-        const typingIndicator = document.getElementById('typing-indicator');
-        
-        queryForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const query = queryInput.value.trim();
-            if (!query) return;
-            
-            // Show typing indicator
-            aiResponseContent.style.display = 'none';
-            typingIndicator.style.display = 'block';
-            
-            // Send query to API
-            fetch('/api/query', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ query: query })
-            })
-            .then(response => response.json())
-            .then(data => {
-                // Hide typing indicator and show response
-                typingIndicator.style.display = 'none';
-                aiResponseContent.style.display = 'block';
-                
-                if (data.error) {
-                    aiResponseContent.textContent = 'Error: ' + data.error;
-                } else {
-                    aiResponseContent.textContent = data.ai_response;
-                }
-                
-                // Clear input
-                queryInput.value = '';
-            })
-            .catch(error => {
-                typingIndicator.style.display = 'none';
-                aiResponseContent.style.display = 'block';
-                aiResponseContent.textContent = 'Sorry, there was an error processing your request.';
-                console.error('Error:', error);
-            });
-        });
-    }
-});
-
-function createTypingCard() {
+    function createTypingCard() {
         return `
             <div class="card dashboard-card response-card mb-4">
                 <div class="card-body">
