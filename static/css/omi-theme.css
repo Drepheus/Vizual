@@ -371,7 +371,7 @@ body {
 
 .file-upload-section button {
   color: #ffffff;
-  background-color: #0097FB;
+  background-color: #000000;
   border-radius: 6px;
   padding: 8px 15px;
   visibility: visible !important;
@@ -383,7 +383,7 @@ body {
 }
 
 .file-upload-section button:hover {
-  background-color: #0078c8;
+  background-color: #333333;
   transform: translateY(-2px);
 }
 
