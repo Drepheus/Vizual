@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 from flask import render_template, redirect, url_for, flash, request, jsonify
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.utils import secure_filename
@@ -14,7 +14,7 @@ def register_routes(app):
 
     @app.route('/')
     def index():
-        return render_template('intro.html')
+        return render_template('landing.html')
 
     @app.route('/home')
     def home():
