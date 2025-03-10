@@ -24,7 +24,7 @@
                     </li>
                     {% if current_user.is_authenticated %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a>
+                            <a class="nav-link" href="{{ url_for('dashboard') }}">Gov Con Dashboard</a>
                         </li>
                         {% if not current_user.is_premium %}
                             <li class="nav-item">
