@@ -1,28 +1,28 @@
 
-// Example queries to show in the animation
-const exampleQueries = [
-    "What is machine learning and how does it work?",
-    "Can you help me write a professional email template?",
-    "Explain quantum computing in simple terms",
-    "How do I create an effective marketing strategy?",
-    "What are the best practices for web development?"
-];
-
-// Government contracting examples (for the main dashboard)
-const govConExampleQueries = [
-    "Search for cybersecurity contracts in SAM.gov",
-    "Analyze and summarize this IT RFP requirements",
-    "How do I register as a government contractor?",
-    "What certifications do I need for federal contracts?",
-    "Guide me through creating a winning proposal"
-];
-
 document.addEventListener('DOMContentLoaded', function() {
     const queryInput = document.getElementById('query-input');
     const isSimpleDashboard = document.querySelector('.simple-dashboard') !== null || 
                             window.location.pathname.includes('simple-dashboard');
     
     if (!queryInput) return; // Exit if query input doesn't exist on this page
+    
+    // Example queries for simple dashboard
+    const exampleQueries = [
+        "Help me set up a digital marketing strategy for my small business",
+        "What are some effective ways to improve team productivity?",
+        "Explain quantum computing in simple terms",
+        "Give me tips for improving my public speaking skills",
+        "How can I optimize my LinkedIn profile?"
+    ];
+    
+    // Example queries for GovCon dashboard
+    const govConExampleQueries = [
+        "Find open IT service solicitations on SAM.gov",
+        "What are the steps to register as a government contractor?",
+        "Explain the differences between RFI, RFP, and RFQ",
+        "How can I find subcontracting opportunities?",
+        "What is the NAICS code for cybersecurity services?"
+    ];
     
     // Choose which set of examples to use based on dashboard type
     const queriesForThisPage = isSimpleDashboard ? exampleQueries : govConExampleQueries;
@@ -57,9 +57,9 @@ document.addEventListener('DOMContentLoaded', function() {
             if (currentCharIndex < currentExample.length) {
                 currentCharIndex++;
                 queryInput.placeholder = currentExample.substring(0, currentCharIndex);
-                typingTimeout = setTimeout(typeNextCharacter, 70);
+                typingTimeout = setTimeout(typeNextCharacter, 100);
             } else {
-                // Pause at the end before deleting
+                // Wait before starting to delete
                 isDeleting = true;
                 typingTimeout = setTimeout(typeNextCharacter, 2000);
             }
@@ -69,15 +69,15 @@ document.addEventListener('DOMContentLoaded', function() {
     // Start the typing animation
     typeNextCharacter();
     
-    // Clear animation when user focuses on the input
+    // Stop animation when input field is focused
     queryInput.addEventListener('focus', function() {
         clearTimeout(typingTimeout);
         queryInput.placeholder = '';
     });
     
-    // Restart animation when user blurs the input if it's empty
+    // Restart animation when input field loses focus and is empty
     queryInput.addEventListener('blur', function() {
-        if (queryInput.value === '') {
+        if (!queryInput.value) {
             currentCharIndex = 0;
             isDeleting = false;
             typeNextCharacter();
