@@ -26,11 +26,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const stopBtn = document.getElementById('stop-generation');
 
         // Handle stop button
-        stopBtn.addEventListener('click', function() {
-            shouldStopTyping = true;
-            stopBtn.classList.add('d-none');
-            submitBtn.disabled = false;
-        });
+        if (stopBtn) {
+            stopBtn.addEventListener('click', function() {
+                shouldStopTyping = true;
+                stopBtn.classList.add('d-none');
+                if (submitBtn) submitBtn.disabled = false;
+            });
+        }
 
         // Dashboard query handling
         if (queryInput && submitBtn) {
@@ -50,7 +52,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (!query || isTyping) return;
 
                 submitBtn.disabled = true;
-                stopBtn.classList.remove('d-none');
+                if (stopBtn) stopBtn.classList.remove('d-none');
                 shouldStopTyping = false;
 
                 // Append user query card
@@ -70,6 +72,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Append typing indicator
                 responseArea.innerHTML += createTypingCard();
 
+                // Add message to current conversation
+                if (currentConversationId && conversations) {
+                    const conversation = conversations.find(c => c.id === currentConversationId);
+                    if (conversation) {
+                        conversation.messages.push({
+                            role: 'user',
+                            content: query,
+                            timestamp: new Date().toISOString()
+                        });
+                        saveConversations();
+                    }
+                }
+
                 // Send query to API
                 fetch('/api/query', {
                     method: 'POST',
@@ -79,9 +94,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 .then(response => response.json())
                 .then(data => {
                     // Remove typing indicator
-                    const typingCard = document.querySelector('.typing-indicator').closest('.card');
-                    if (typingCard) {
-                        responseArea.removeChild(typingCard);
+                    const typingCard = document.querySelector('.typing-indicator');
+                    if (typingCard && typingCard.closest('.card')) {
+                        responseArea.removeChild(typingCard.closest('.card'));
                     }
 
                     // Append AI response
@@ -100,7 +115,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     responseArea.innerHTML += responseCard;
 
                     submitBtn.disabled = false;
-                    stopBtn.classList.add('d-none');
+                    if (stopBtn) stopBtn.classList.add('d-none');
                     queryInput.value = '';
 
                     // Auto-scroll to bottom
@@ -116,13 +131,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     console.error('Error:', error);
 
                     // Remove typing indicator
-                    const typingCard = document.querySelector('.typing-indicator').closest('.card');
-                    if (typingCard) {
-                        responseArea.removeChild(typingCard);
+                    const typingCard = document.querySelector('.typing-indicator');
+                    if (typingCard && typingCard.closest('.card')) {
+                        responseArea.removeChild(typingCard.closest('.card'));
                     }
 
                     // Show error message
-                    const errorCard = `
+                    responseArea.innerHTML += `
                         <div class="card dashboard-card response-card mb-4">
                             <div class="card-body">
                                 <div class="d-flex align-items-center mb-3">
@@ -133,91 +148,245 @@ document.addEventListener('DOMContentLoaded', function() {
                             </div>
                         </div>
                     `;
-                    responseArea.innerHTML += errorCard;
 
                     submitBtn.disabled = false;
-                    stopBtn.classList.add('d-none');
+                    if (stopBtn) stopBtn.classList.add('d-none');
                 });
+            }
+
+            function createTypingCard() {
+                return `
+                    <div class="card dashboard-card response-card mb-4">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="response-icon me-2"><i class="fas fa-robot"></i></div>
+                                <h5 class="card-title mb-0">Omi</h5>
+                            </div>
+                            <div class="typing-indicator">
+                                <div class="typing-dot"></div>
+                                <div class="typing-dot"></div>
+                                <div class="typing-dot"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Helper function to format AI responses (convert linebreaks, URLs, etc.)
+            function formatResponseToHTML(text) {
+                if (!text) return '';
+
+                // Convert URLs to clickable links
+                text = text.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
+
+                // Convert line breaks to <br>
+                text = text.replace(/\n/g, '<br>');
+
+                return text;
+            }
+
+            // Function to update query history (if it exists)
+            function updateQueryHistory() {
+                fetch('/api/history')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.queries && data.queries.length > 0) {
+                            const queryHistory = document.getElementById('query-history');
+                            if (queryHistory) {
+                                queryHistory.innerHTML = '';
+                                data.queries.forEach(query => {
+                                    const accordion = document.createElement('div');
+                                    accordion.className = 'accordion-item';
+                                    accordion.innerHTML = `
+                                        <h2 class="accordion-header" id="heading-${query.id}">
+                                            <button class="accordion-button collapsed" type="button" 
+                                                data-bs-toggle="collapse" data-bs-target="#collapse-${query.id}">
+                                                ${query.query_text.substring(0, 50)}${query.query_text.length > 50 ? '...' : ''}
+                                            </button>
+                                        </h2>
+                                        <div id="collapse-${query.id}" class="accordion-collapse collapse" 
+                                            data-bs-parent="#query-history">
+                                            <div class="accordion-body">
+                                                <div class="query-details">
+                                                    <h6 class="text-muted mb-2">Query:</h6>
+                                                    <p>${query.query_text}</p>
+                                                    <h6 class="text-muted mb-2">Response:</h6>
+                                                    <p>${formatResponseToHTML(query.response)}</p>
+                                                    <small class="text-muted d-block mt-2">
+                                                        <i class="fas fa-clock me-1"></i>
+                                                        ${new Date(query.created_at).toLocaleString()}
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `;
+                                    queryHistory.appendChild(accordion);
+                                });
+                            }
+                        }
+                    })
+                    .catch(error => console.error('Error updating query history:', error));
             }
         }
     }
 
-    // Handle simple dashboard chat functionality
-    if (document.getElementById('messages-container')) {
-        const messagesContainer = document.getElementById('messages-container');
+    // Simple dashboard functionality
+    if (isSimpleDashboard) {
         const queryForm = document.getElementById('query-form');
         const queryInput = document.getElementById('query-input');
-        const conversationsContainer = document.getElementById('recent-conversations');
-        const fileUploadInput = document.getElementById('file-upload-input');
-        const fileUploadButton = document.getElementById('file-upload-button');
-        const voiceModeButton = document.getElementById('voice-mode-button');
-        const imageCreationButton = document.getElementById('image-creation-button');
-        const fileUploadStatus = document.getElementById('file-upload-status');
-        
-        // Initialize file upload functionality
-        if (fileUploadButton && fileUploadInput) {
-            fileUploadButton.addEventListener('click', function(e) {
-                e.preventDefault();
-                fileUploadInput.click();
-            });
-            
-            fileUploadInput.addEventListener('change', function() {
-                if (this.files.length > 0) {
-                    fileUploadStatus.textContent = `Selected: ${this.files[0].name}`;
-                    
-                    // Create form data for upload
-                    const formData = new FormData();
-                    formData.append('file', this.files[0]);
-                    
-                    // Show loading state
-                    fileUploadStatus.textContent = `Uploading ${this.files[0].name}...`;
-                    
-                    // Send file to server
-                    fetch('/api/upload', {
-                        method: 'POST',
-                        body: formData
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.error) {
-                            fileUploadStatus.textContent = `Error: ${data.error}`;
-                        } else {
-                            fileUploadStatus.textContent = `Uploaded: ${this.files[0].name}`;
-                            // Add a message in the chat
-                            addMessage(`File "${this.files[0].name}" uploaded successfully.`, 'system');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        fileUploadStatus.textContent = 'Error uploading file.';
+        const messagesContainer = document.getElementById('messages-container');
+        const stopBtn = document.getElementById('stop-generation');
+
+        // Handle message display
+        function addMessage(content, role) {
+            const messageClass = role === 'user' ? 'user' : 'ai';
+            const message = document.createElement('div');
+            message.className = `message-bubble ${messageClass}`;
+
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+
+            if (role === 'assistant') {
+                const header = document.createElement('div');
+                header.className = 'ai-response-header';
+                header.textContent = 'Omi';
+                messageContent.appendChild(header);
+            }
+
+            const contentDiv = document.createElement('div');
+            contentDiv.innerHTML = formatMessage(content);
+            messageContent.appendChild(contentDiv);
+
+            message.appendChild(messageContent);
+            messagesContainer.appendChild(message);
+
+            // Add to conversation history
+            if (currentConversationId && conversations) {
+                const conversation = conversations.find(c => c.id === currentConversationId);
+                if (conversation) {
+                    conversation.messages.push({
+                        role: role,
+                        content: content,
+                        timestamp: new Date().toISOString()
                     });
+                    saveConversations();
                 }
+            }
+
+            // Scroll to bottom
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function formatMessage(text) {
+            if (!text) return '';
+
+            // Convert URLs to links
+            text = text.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>');
+
+            // Convert newlines to <br>
+            text = text.replace(/\n/g, '<br>');
+
+            return text;
+        }
+
+        function showTypingIndicator() {
+            const typingIndicator = document.createElement('div');
+            typingIndicator.className = 'message-bubble ai typing';
+            typingIndicator.innerHTML = `
+                <div class="message-content">
+                    <div class="typing-dots">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                </div>
+            `;
+            messagesContainer.appendChild(typingIndicator);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function processQuery(query) {
+            isTyping = true;
+
+            // Add user message
+            addMessage(query, 'user');
+
+            // Show typing indicator
+            showTypingIndicator();
+
+            // Create a new conversation if none exists
+            if (!currentConversationId) {
+                currentConversationId = 'conv_' + Date.now();
+                conversations.push({
+                    id: currentConversationId,
+                    title: query.substring(0, 30) + (query.length > 30 ? '...' : ''),
+                    messages: [{
+                        role: 'user',
+                        content: query,
+                        timestamp: new Date().toISOString()
+                    }],
+                    created_at: new Date().toISOString()
+                });
+                saveConversations();
+            }
+
+            // Send query to API
+            fetch('/api/query', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query: query })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Remove typing indicator
+                const typingMsg = messagesContainer.querySelector('.message.typing');
+                if (typingMsg) {
+                    messagesContainer.removeChild(typingMsg);
+                }
+
+                // Add response to UI
+                if (data.error) {
+                    addMessage('Error: ' + data.error, 'assistant');
+                } else {
+                    addMessage(data.ai_response, 'assistant');
+                }
+
+                isTyping = false;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+
+                // Remove typing indicator
+                const typingMsg = messagesContainer.querySelector('.message.typing');
+                if (typingMsg) {
+                    messagesContainer.removeChild(typingMsg);
+                }
+
+                // Show error message
+                addMessage('Sorry, there was an error processing your request. Please try again.', 'assistant');
+                isTyping = false;
             });
         }
 
-        // Initialize or get current conversation
-        if (!currentConversationId && conversations.length > 0) {
-            currentConversationId = conversations[0].id;
-            renderCurrentConversation();
-        } else if (!currentConversationId) {
-            // Create a new conversation
-            createNewConversation();
+        // Save conversations to localStorage
+        function saveConversations() {
+            try {
+                localStorage.setItem('conversations', JSON.stringify(conversations));
+            } catch (e) {
+                console.error('Error saving conversations to localStorage:', e);
+            }
         }
 
-        // Handle file uploads
-        if (fileUploadInput && uploadButton) {
-            uploadButton.addEventListener('click', function(e) {
-                e.preventDefault();
-                fileUploadInput.click();
-            });
-
+        // Handle file upload
+        const fileUploadInput = document.getElementById('file-upload');
+        if (fileUploadInput) {
             fileUploadInput.addEventListener('change', function() {
                 if (fileUploadInput.files.length > 0) {
                     const formData = new FormData();
                     formData.append('file', fileUploadInput.files[0]);
 
                     // Show uploading message
-                    addMessage('Uploading file...', 'user');
+                    addMessage(`Uploading file "${fileUploadInput.files[0].name}"...`, 'system');
 
                     fetch('/api/upload', {
                         method: 'POST',
@@ -248,6 +417,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (queryForm) {
             queryForm.addEventListener('submit', function(e) {
                 e.preventDefault();
+                if (!queryInput) return;
+
                 const query = queryInput.value.trim();
                 if (!query || isTyping) return;
 
@@ -256,213 +427,14 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
-        // Handle conversation selection
-        if (conversationsContainer) {
-            renderConversationsList();
-
-            // Add new conversation button
-            const newConvoBtn = document.getElementById('new-conversation-btn');
-            if (newConvoBtn) {
-                newConvoBtn.addEventListener('click', function() {
-                    createNewConversation();
-                });
-            }
-        }
-
-        function processQuery(query) {
-            // Add user message to UI
-            addMessage(query, 'user');
-
-            // Show typing indicator
-            const typingIndicator = document.createElement('div');
-            typingIndicator.className = 'message assistant typing';
-            typingIndicator.innerHTML = `
-                <div class="message-content">
-                    <div class="typing-indicator">
-                        <span class="typing-dot"></span>
-                        <span class="typing-dot"></span>
-                        <span class="typing-dot"></span>
-                    </div>
-                </div>
-            `;
-            messagesContainer.appendChild(typingIndicator);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-
-            // Add message to current conversation
-            const conversation = conversations.find(c => c.id === currentConversationId);
-            if (conversation) {
-                conversation.messages.push({
-                    role: 'user',
-                    content: query,
-                    timestamp: new Date().toISOString()
-                });
-                saveConversations();
-            }
-
-            // Send query to API
-            fetch('/api/query', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ query: query })
-            })
-            .then(response => response.json())
-            .then(data => {
-                // Remove typing indicator
-                const typingMsg = messagesContainer.querySelector('.message.typing');
-                if (typingMsg) {
-                    messagesContainer.removeChild(typingMsg);
-                }
-
-                // Add response to UI
-                if (data.error) {
-                    addMessage('Error: ' + data.error, 'assistant');
-                } else {
-                    addMessage(data.ai_response, 'assistant');
-
-                    // Add message to current conversation
-                    const conversation = conversations.find(c => c.id === currentConversationId);
-                    if (conversation) {
-                        conversation.messages.push({
-                            role: 'assistant',
-                            content: data.ai_response,
-                            timestamp: new Date().toISOString()
-                        });
-                        // Update conversation preview
-                        conversation.preview = data.ai_response.substring(0, 60) + '...';
-                        saveConversations();
-                        renderConversationsList();
-                    }
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-
-                // Remove typing indicator
-                const typingMsg = messagesContainer.querySelector('.message.typing');
-                if (typingMsg) {
-                    messagesContainer.removeChild(typingMsg);
-                }
-
-                addMessage('Sorry, there was an error processing your request.', 'assistant');
+        // Handle stop button if it exists
+        if (stopBtn) {
+            stopBtn.addEventListener('click', function() {
+                shouldStopTyping = true;
+                stopBtn.classList.add('d-none');
             });
         }
-
-        function addMessage(content, role) {
-            const message = document.createElement('div');
-            message.className = `message-bubble ${role}`;
-
-            if (role === 'user') {
-                message.innerHTML = `<div class="message-content">${formatResponseToHTML(content)}</div>`;
-            } else {
-                message.innerHTML = `<div class="message-content"><div class="ai-response-header">Omi</div>${formatResponseToHTML(content)}</div>`;
-            }
-
-            messagesContainer.appendChild(message);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }
-
-        function createNewConversation() {
-            const newId = 'conv_' + Date.now();
-            const newConversation = {
-                id: newId,
-                title: 'New Conversation',
-                preview: 'Start a new conversation',
-                created: new Date().toISOString(),
-                messages: []
-            };
-
-            // Add to beginning of array
-            conversations.unshift(newConversation);
-            currentConversationId = newId;
-
-            saveConversations();
-            renderConversationsList();
-            renderCurrentConversation();
-        }
-
-        function renderConversationsList() {
-            if (!conversationsContainer) return;
-
-            conversationsContainer.innerHTML = '';
-
-            conversations.forEach(conv => {
-                const convEl = document.createElement('div');
-                convEl.className = `conversation-preview ${conv.id === currentConversationId ? 'active' : ''}`;
-                convEl.dataset.id = conv.id;
-
-                // Format date
-                const date = new Date(conv.created);
-                const formattedDate = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-
-                convEl.innerHTML = `
-                    <div class="preview-title">${conv.title}</div>
-                    <div class="preview-snippet">${conv.preview || 'No messages'}</div>
-                    <div class="conversation-time">${formattedDate}</div>
-                `;
-
-                convEl.addEventListener('click', function() {
-                    currentConversationId = conv.id;
-                    // Update active class
-                    document.querySelectorAll('.conversation-preview').forEach(el => {
-                        el.classList.remove('active');
-                    });
-                    convEl.classList.add('active');
-                    renderCurrentConversation();
-                });
-
-                conversationsContainer.appendChild(convEl);
-            });
-        }
-
-        function renderCurrentConversation() {
-            if (!messagesContainer) return;
-
-            messagesContainer.innerHTML = '';
-
-            const conversation = conversations.find(c => c.id === currentConversationId);
-            if (conversation && conversation.messages.length > 0) {
-                conversation.messages.forEach(msg => {
-                    addMessage(msg.content, msg.role);
-                });
-            } else {
-                // Empty state
-                addMessage('Hello! How can I help you today?', 'assistant');
-            }
-        }
-
-        function saveConversations() {
-            localStorage.setItem('conversations', JSON.stringify(conversations));
-        }
     }
-
-    function formatResponseToHTML(text) {
-        if (!text) return '';
-        // Convert markdown-like text to HTML
-        return text
-            .replace(/\n\n/g, '<br><br>')
-            .replace(/\n/g, '<br>')
-            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-            .replace(/\*(.*?)\*/g, '<em>$1</em>');
-    }
-
-    function createTypingCard() {
-        return `
-            <div class="card dashboard-card response-card mb-4">
-                <div class="card-body">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="response-icon me-2"><i class="fas fa-robot"></i></div>
-                        <h5 class="card-title mb-0">Omi</h5>
-                    </div>
-                    <div class="typing-indicator">
-                        <span class="typing-dot"></span>
-                        <span class="typing-dot"></span>
-                        <span class="typing-dot"></span>
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-
     // Initialize SAM.gov data loading
     loadSamGovStatus();
     loadContractAwards();
