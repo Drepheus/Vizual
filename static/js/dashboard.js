@@ -93,19 +93,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 })
                 .then(response => response.json())
                 .then(data => {
-                    // Remove typing indicator
-                    const typingIndicator = document.querySelector('.message-bubble.ai.typing');
-                    if (typingIndicator) {
-                        typingIndicator.remove();
-                    }
+                    // Remove all typing indicators completely
+                    clearAllTypingIndicators();
                     
-                    // Also check for any other typing indicators that might be present
-                    const typingDots = document.querySelectorAll('.typing-dots');
-                    typingDots.forEach(dot => {
-                        const bubbleContainer = dot.closest('.message-bubble.ai.typing');
-                        if (bubbleContainer) {
-                            bubbleContainer.remove();
-                        }
+                    // Additional cleanup for any remaining elements
+                    document.querySelectorAll('.typing-indicator, .typing-dots, .message-bubble.ai.typing').forEach(el => {
+                        el.remove();
                     });
 
                     // Append AI response
@@ -314,13 +307,32 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         function clearAllTypingIndicators() {
-            // Clear any existing typing indicators
-            const typingIndicators = document.querySelectorAll('.message-bubble.ai.typing, .typing-indicator');
-            typingIndicators.forEach(indicator => indicator.remove());
+            // Clear ALL possible typing indicators
+            const typingSelectors = [
+                '.message-bubble.ai.typing',
+                '.typing-indicator',
+                '.typing-dots',
+                '.card .typing-indicator',
+                '.card-body .typing-indicator',
+                '.message-content .typing-dots'
+            ];
             
-            // Also clear any typing cursors
-            const typingCursors = document.querySelectorAll('.typing-cursor:not(.d-none)');
-            typingCursors.forEach(cursor => cursor.classList.add('d-none'));
+            typingSelectors.forEach(selector => {
+                document.querySelectorAll(selector).forEach(el => {
+                    // Try to remove the entire bubble if possible
+                    const bubble = el.closest('.message-bubble');
+                    if (bubble) {
+                        bubble.remove();
+                    } else {
+                        el.remove();
+                    }
+                });
+            });
+            
+            // Also hide any typing cursors
+            document.querySelectorAll('.typing-cursor').forEach(cursor => {
+                cursor.classList.add('d-none');
+            });
         }
         
         function processQuery(query) {
