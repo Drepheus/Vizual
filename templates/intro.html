@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="intro-container">
-    <video id="intro-video" class="intro-video">
+    <video id="intro-video" class="intro-video" muted playsinline>
         <source src="{{ url_for('static', filename='videos/intro.mp4') }}" type="video/mp4">
         Your browser does not support the video tag.
     </video>
@@ -53,13 +53,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const landingContainer = document.querySelector('.landing-container');
 
     // Play video when loaded
-    video.play();
+    video.play().catch(function(error) {
+        console.log("Video play failed:", error);
+        // If video fails to play, show landing page
+        skipToLanding();
+    });
 
     // When video ends
     video.addEventListener('ended', function() {
         // Fade out intro
         introContainer.classList.add('fade-out');
-        
+
         // Show landing page
         landingContainer.style.display = 'block';
         setTimeout(() => {
@@ -70,6 +74,12 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 500);
         }, 50);
     });
+
+    function skipToLanding() {
+        introContainer.style.display = 'none';
+        landingContainer.style.display = 'block';
+        landingContainer.classList.add('fade-in');
+    }
 });
 </script>
 {% endblock %}
