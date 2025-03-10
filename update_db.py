@@ -3,6 +3,16 @@ from app import app, db
 from datetime import datetime
 from sqlalchemy import text
 
+# This file can be used to perform database migrations and updates
+# Add your database update logic here
+
+with app.app_context():
+    # Example of how to execute a raw SQL query
+    # db.session.execute(text("ALTER TABLE users ADD COLUMN new_column TEXT"))
+    # db.session.commit()
+    
+    print("Database is up to date")
+
 def update_database():
     with app.app_context():
         try:

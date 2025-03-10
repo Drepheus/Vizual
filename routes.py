@@ -1,5 +1,6 @@
+
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask import render_template, redirect, url_for, flash, request, jsonify
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.utils import secure_filename
@@ -165,6 +166,14 @@ def register_routes(app):
 
             return jsonify({
                 'status': 'success',
+                'entities': entities
+            })
+        except Exception as e:
+            logger.error(f"Error fetching SAM.gov status: {str(e)}")
+            return jsonify({
+                'status': 'error',
+                'error': 'Could not fetch SAM.gov data. Please try again later.'
+            }), 500
 
     @app.route('/api/recent_conversations')
     @login_required
@@ -195,15 +204,6 @@ def register_routes(app):
             return jsonify({
                 'status': 'error',
                 'error': str(e)
-            }), 500
-
-                'entities': entities
-            })
-        except Exception as e:
-            logger.error(f"Error fetching SAM.gov status: {str(e)}")
-            return jsonify({
-                'status': 'error',
-                'error': 'Could not fetch SAM.gov data. Please try again later.'
             }), 500
 
     @app.route('/api/sam/awards')
