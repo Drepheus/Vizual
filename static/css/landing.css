@@ -19,7 +19,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  margin-top: 15vh;
+  margin-top: 10vh;
   position: relative;
 }
 
@@ -53,6 +53,31 @@
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+.action-buttons {
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.btn-use-omi {
+  display: inline-block;
+  padding: 12px 30px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #ffffff;
+  background-color: #1A1A1A;
+  border: 2px solid #888888;
+  border-radius: 30px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.btn-use-omi:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+  border-color: #cccccc;
 }
 
 /* Action Buttons */
