@@ -2,31 +2,22 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container-fluid py-4">
+<div class="container py-4">
     <div class="row">
-        <!-- Sidebar - Recent Conversations -->
-        <div class="col-md-3 conversation-sidebar" id="conversation-sidebar">
-            <div class="sidebar-header">
-                <h5 class="mb-0">Recent Conversations</h5>
-                <button class="btn btn-sm sidebar-toggle" id="sidebar-toggle">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-            </div>
-            <div id="recent-conversations" class="recent-conversations">
-                <!-- Recent conversations will be loaded here -->
-                <div class="text-center py-3 text-muted">
-                    <small>No recent conversations</small>
+        <div class="col-md-4 mb-4">
+            <div class="card dashboard-card">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Recent Conversations</h5>
+                    <div id="recent-conversations" class="recent-conversations">
+                        <!-- Recent conversations will be loaded here -->
+                        <div class="text-center py-3 text-muted">
+                            <small>No recent conversations</small>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="sidebar-footer">
-                <button class="btn btn-outline-light btn-sm w-100" id="new-chat-btn">
-                    <i class="fas fa-plus me-2"></i>New Chat
-                </button>
-            </div>
         </div>
-
-        <!-- Main Chat Area -->
-        <div class="col-md-9 chat-main-area" id="chat-main-area">
+        <div class="col-md-8">
             <div class="card dashboard-card mb-4">
                 <div class="card-body">
                     <h4 class="card-title mb-3">Ask Omi</h4>
@@ -57,19 +48,12 @@
                         </div>
                         
                         <form id="query-form">
-                            <div class="input-wrapper">
-                                <label for="file-upload" class="file-upload-label">
-                                    <i class="fas fa-paperclip"></i>
-                                </label>
-                                <input type="file" id="file-upload" class="file-upload-input" multiple accept=".pdf,.doc,.docx,.txt" style="display: none;">
-                                <div class="input-group">
-                                    <input type="text" id="query-input" class="form-control" placeholder="Ask a question...">
-                                    <button class="btn btn-primary" type="submit" id="submit-query">
-                                        <i class="fas fa-paper-plane"></i>
-                                    </button>
-                                </div>
+                            <div class="input-group">
+                                <input type="text" id="query-input" class="form-control" placeholder="Ask a question...">
+                                <button class="btn btn-primary" type="submit" id="submit-query">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
                             </div>
-                            <div id="file-list" class="file-list"></div>
                         </form>
                     </div>
                 </div>
