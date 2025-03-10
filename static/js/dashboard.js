@@ -44,6 +44,9 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .then(response => response.json())
             .then(data => {
+                // Mark that we received a response
+                aiResponseReceived = true;
+
                 if (data.error) {
                     // Handle any errors from the API
                     console.error('API Error:', data.error);
@@ -71,18 +74,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('Error:', error);
                 typingIndicator.style.display = 'none';
 
-                const errorMsg = `
-                    <div class="message-bubble ai">
-                        <div class="message-content">
-                            <div class="ai-response-header">
-                                Omi
+                // Only show error message if no AI response was received
+                if (!aiResponseReceived) {
+                    const errorMsg = `
+                        <div class="message-bubble ai">
+                            <div class="message-content">
+                                <div class="ai-response-header">
+                                    Omi
+                                </div>
+                                <p>Sorry, there was an error processing your request. Please try again.</p>
                             </div>
-                            <p>Sorry, there was an error processing your request. Please try again.</p>
                         </div>
-                    </div>
-                `;
-                messagesContainer.innerHTML += errorMsg;
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                    `;
+                    messagesContainer.innerHTML += errorMsg;
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                }
             });
         });
     }
