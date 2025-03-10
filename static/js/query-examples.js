@@ -3,8 +3,28 @@ document.addEventListener('DOMContentLoaded', function() {
   const queryInput = document.getElementById('query-input');
   if (!queryInput) return;
   
-  // Example queries that will be shown in rotation
-  const exampleQueries = [
+  // Check which dashboard we're on
+  const isSimpleDashboard = document.querySelector('.simple-dashboard') !== null || 
+                          (!document.querySelector('.gov-dashboard') && 
+                           window.location.pathname.includes('simple-dashboard'));
+  
+  // Different sets of example queries based on dashboard type
+  const generalExampleQueries = [
+    "How do I create a personal budget?",
+    "Help me write a professional email",
+    "What are some healthy meal prep ideas?",
+    "Explain quantum computing in simple terms",
+    "Write a Python function to sort a list",
+    "Give me workout routine suggestions",
+    "How can I improve my public speaking?",
+    "Tell me about climate change",
+    "Generate a creative story prompt",
+    "Recommend books on leadership",
+    "Help me plan a vacation itinerary",
+    "Write a regex pattern to validate emails"
+  ];
+  
+  const govConExampleQueries = [
     "Find government contracting opportunities in healthcare",
     "How do I respond to an RFP?",
     "Explain SAM.gov registration process",
@@ -18,6 +38,9 @@ document.addEventListener('DOMContentLoaded', function() {
     "Guide me through bid/no-bid decision process",
     "Search for cybersecurity contracts"
   ];
+  
+  // Select the appropriate query set
+  const exampleQueries = isSimpleDashboard ? generalExampleQueries : govConExampleQueries;
   
   let currentIndex = 0;
   let currentTypingIndex = 0;
