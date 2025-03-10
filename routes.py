@@ -5,6 +5,7 @@ from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.utils import secure_filename
 from app import db
 from services import ai_service, sam_service
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -14,11 +15,11 @@ def register_routes(app):
     @app.route('/')
     def index():
         return render_template('landing.html')
-        
+
     @app.route('/home')
     def home():
         return render_template('index.html')
-        
+
     @app.route('/simple-dashboard')
     @login_required
     def simple_dashboard():
@@ -111,7 +112,7 @@ def register_routes(app):
         try:
             # Fetch SAM.gov entity status data
             entities = sam_service.get_relevant_data("contractor status")
-            
+
             # Create placeholder data if API call failed
             if not entities:
                 logger.warning("No SAM.gov entities found, providing placeholder data")
@@ -124,7 +125,7 @@ def register_routes(app):
                         'url': 'https://sam.gov/'
                     }
                 ]
-                
+
             return jsonify({
                 'status': 'success',
                 'entities': entities
@@ -142,7 +143,7 @@ def register_routes(app):
         logger.debug("SAM.gov awards API endpoint accessed")
         try:
             awards = sam_service.get_awarded_contracts()
-            
+
             # Create placeholder data if API call failed
             if not awards:
                 logger.warning("No SAM.gov awards found, providing placeholder data")
@@ -156,7 +157,7 @@ def register_routes(app):
                         'url': 'https://sam.gov/'
                     }
                 ]
-                
+
             return jsonify({
                 'status': 'success',
                 'awards': awards
@@ -167,7 +168,7 @@ def register_routes(app):
                 'status': 'error',
                 'error': 'Could not fetch contract awards. Please try again later.'
             }), 500
-            
+
     @app.route('/api/sam/search', methods=['POST'])
     @login_required
     def sam_search():
@@ -185,34 +186,6 @@ def register_routes(app):
 
             # Get solicitations from SAM.gov
             from services.web_service import get_sam_solicitations
-
-    @app.route('/api/upload', methods=['POST'])
-    @login_required
-    def upload_file():
-        """Endpoint for handling file uploads"""
-        try:
-            if 'file' not in request.files:
-                return jsonify(error="No file part"), 400
-                
-            file = request.files['file']
-            
-            if file.filename == '':
-                return jsonify(error="No selected file"), 400
-                
-            if file:
-                filename = secure_filename(file.filename)
-                file_path = os.path.join('uploads', filename)
-                os.makedirs('uploads', exist_ok=True)
-                file.save(file_path)
-                
-                # Here you would typically process the file with your AI service
-                # For now, just return success
-                return jsonify(success=True, filename=filename)
-                
-        except Exception as e:
-            logger.error(f"Error uploading file: {str(e)}")
-            return jsonify(error=str(e)), 500
-
             solicitations = get_sam_solicitations(query_text)
 
             if solicitations:
@@ -246,6 +219,33 @@ def register_routes(app):
                 'status': 'error',
                 'error': 'Failed to search SAM.gov. Please try again later.'
             }), 500
+
+    @app.route('/api/upload', methods=['POST'])
+    @login_required
+    def upload_file():
+        """Endpoint for handling file uploads"""
+        try:
+            if 'file' not in request.files:
+                return jsonify(error="No file part"), 400
+
+            file = request.files['file']
+
+            if file.filename == '':
+                return jsonify(error="No selected file"), 400
+
+            if file:
+                filename = secure_filename(file.filename)
+                file_path = os.path.join('uploads', filename)
+                os.makedirs('uploads', exist_ok=True)
+                file.save(file_path)
+
+                # Here you would typically process the file with your AI service
+                # For now, just return success
+                return jsonify(success=True, filename=filename)
+
+        except Exception as e:
+            logger.error(f"Error uploading file: {str(e)}")
+            return jsonify(error=str(e)), 500
 
     # Error handler for API routes
     @app.errorhandler(Exception)
