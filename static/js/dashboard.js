@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize conversation history display
     loadConversationHistory();
+    loadRecentConversations(); // Added to load conversations on page load
 
     // Handle query submission
     if (queryForm) {
@@ -209,6 +210,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 </div>
                             `;
 
+                            const messagesContainer = document.querySelector('.messages-container');
                             if (messagesContainer) {
                                 messagesContainer.innerHTML += userMsg + aiMsg;
                                 messagesContainer.scrollTop = messagesContainer.scrollHeight;
@@ -270,4 +272,84 @@ document.addEventListener('DOMContentLoaded', function() {
             return date.toLocaleDateString();
         }
     }
+
+
+    // Fetch recent conversations
+    function loadRecentConversations() {
+        const recentConversationsContainer = document.getElementById('recent-conversations');
+        if (!recentConversationsContainer) return;
+
+        fetch('/api/recent_conversations')
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success' && data.conversations && data.conversations.length > 0) {
+                    recentConversationsContainer.innerHTML = '';
+
+                    data.conversations.forEach(conv => {
+                        const previewText = conv.response.substring(0, 60) + '...';
+                        const item = document.createElement('div');
+                        item.className = 'conversation-preview';
+                        item.innerHTML = `
+                            <div class="preview-title">${conv.query_text}</div>
+                            <div class="preview-snippet">${previewText}</div>
+                            <div class="conversation-time">${new Date(conv.created_at).toLocaleString()}</div>
+                        `;
+                        item.addEventListener('click', function() {
+                            // Add the conversation to the current chat
+                            const userMsg = `
+                                <div class="message-bubble user">
+                                    <div class="message-content">
+                                        <p>${conv.query_text}</p>
+                                    </div>
+                                </div>
+                            `;
+
+                            const aiMsg = `
+                                <div class="message-bubble ai">
+                                    <div class="message-content">
+                                        <div class="ai-response-header">
+                                            Omi
+                                        </div>
+                                        <p>${conv.response.replace(/\n/g, '<br>')}</p>
+                                    </div>
+                                </div>
+                            `;
+
+                            const messagesContainer = document.querySelector('.messages-container');
+                            if (messagesContainer) {
+                                messagesContainer.innerHTML += userMsg + aiMsg;
+                                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                            }
+                        });
+                        recentConversationsContainer.appendChild(item);
+                    });
+                } else {
+                    recentConversationsContainer.innerHTML = `
+                        <div class="text-center py-3 text-muted">
+                            <small>No recent conversations</small>
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('Error loading recent conversations:', error);
+                if (recentConversationsContainer) {
+                    recentConversationsContainer.innerHTML = '<p class="text-danger">Failed to load recent conversations.</p>';
+                }
+            });
+    }
+
+    // Initialize on page load
+    //document.addEventListener('DOMContentLoaded', function() {
+    //    initializeChat();
+    //    initializeFileUpload();
+    //    loadRecentConversations();
+
+        // Load modules based on page
+    //    if (window.location.pathname === '/dashboard') {
+    //        loadSAMData();
+    //        loadContractAwards();
+    //    }
+    //});
+
 });
