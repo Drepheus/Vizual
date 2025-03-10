@@ -111,6 +111,8 @@ document.addEventListener('DOMContentLoaded', function() {
   // Add event listeners to handle focus state
   queryInput.addEventListener('focus', function() {
     stopTypingAnimation();
+    // Make sure the input is enabled
+    queryInput.readOnly = false;
   });
   
   queryInput.addEventListener('blur', function() {
@@ -124,5 +126,10 @@ document.addEventListener('DOMContentLoaded', function() {
     if (queryInput.value.trim()) {
       stopTypingAnimation();
     }
+  });
+  
+  // Ensure the input is always enabled when clicked
+  queryInput.addEventListener('click', function() {
+    queryInput.readOnly = false;
   });
 });

@@ -173,6 +173,8 @@ button.file-upload:hover {
     color: var(--text-primary);
     border-radius: 8px;
     padding: 0.75rem 1rem;
+    pointer-events: auto !important;
+    opacity: 1 !important;
 }
 
 .form-control:focus {
@@ -180,6 +182,12 @@ button.file-upload:hover {
     border-color: var(--gov-blue);
     color: var(--text-primary);
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    pointer-events: auto !important;
+}
+
+#query-input {
+    cursor: text !important;
+    user-select: text !important;
 }
 
 .btn-primary {
