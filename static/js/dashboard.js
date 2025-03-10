@@ -14,26 +14,20 @@ document.addEventListener('DOMContentLoaded', function() {
         // Simple dashboard elements
         queryInput = document.getElementById('query-input');
         submitBtn = document.getElementById('submit-query');
+        stopBtn = document.getElementById('stop-generation');
     } else {
         // Full dashboard elements
         queryInput = document.getElementById('queryInput');
         submitBtn = document.querySelector('#queryForm button[type="submit"]');
         stopBtn = document.getElementById('stopResponseBtn');
         
-        // Only define these elements if we're on the full dashboard
-        const searchInput = document.getElementById('searchInput');
-        const searchResults = document.getElementById('searchResults');
+        // References to other elements in the full dashboard
+        let searchInput = document.getElementById('searchInput');
+        let searchResults = document.getElementById('searchResults');
         
         // Only initialize forms if they exist
-        const samSearchForm = document.getElementById('samSearchForm');
-        if (samSearchForm) {
-            // SAM search form initialization code would go here
-        }
-        
-        const documentUploadForm = document.getElementById('documentUploadForm');
-        if (documentUploadForm) {
-            // Document upload form initialization code would go here
-        }
+        let samSearchForm = document.getElementById('samSearchForm');
+        let documentUploadForm = document.getElementById('documentUploadForm');
     }
 
     // Flag to track if typing animation is in progress
@@ -54,7 +48,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    if (isSimpleDashboard || (queryInput && submitBtn)) {
+    if (queryInput && submitBtn) {
         // Handle query submission for both dashboards
         submitBtn.addEventListener('click', function() {
             sendQuery();
@@ -66,6 +60,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 sendQuery();
             }
         });
+        
         function sendQuery() {
             const query = queryInput.value.trim();
             if (!query || isTyping) return;
@@ -285,14 +280,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Function to update query history (if it exists)
         function updateQueryHistory() {
+            const queryHistory = document.getElementById('query-history');
+            if (!queryHistory) return; // Skip if element doesn't exist
+            
             fetch('/api/history')
                 .then(response => response.json())
                 .then(data => {
                     if (data.queries && data.queries.length > 0) {
-                        const queryHistory = document.getElementById('query-history');
-                        if (queryHistory) {
-                            queryHistory.innerHTML = '';
-                            data.queries.forEach(query => {
+                        queryHistory.innerHTML = '';
+                        data.queries.forEach(query => {
                                 const accordion = document.createElement('div');
                                 accordion.className = 'accordion-item';
                                 accordion.innerHTML = `
