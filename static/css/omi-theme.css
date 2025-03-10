@@ -369,12 +369,15 @@ body {
   display: block !important;
 }
 
-.file-upload-section button {
-  color: #ffffff;
-  background-color: #000000;
+.file-upload-section button,
+.file-upload-section #file-upload-button,
+.file-upload-section .btn {
+  color: #ffffff !important;
+  background-color: #000000 !important;
   border-radius: 6px;
   padding: 8px 15px;
   visibility: visible !important;
+  border: 1px solid #333333;
   opacity: 1 !important;
   display: flex !important;
   align-items: center;
@@ -382,8 +385,10 @@ body {
   margin: 5px 0;
 }
 
-.file-upload-section button:hover {
-  background-color: #333333;
+.file-upload-section button:hover,
+.file-upload-section #file-upload-button:hover,
+.file-upload-section .btn:hover {
+  background-color: #333333 !important;
   transform: translateY(-2px);
 }
 
