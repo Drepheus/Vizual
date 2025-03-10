@@ -1,15 +1,33 @@
+
 {% extends "base.html" %}
 
 {% block content %}
 <div class="intro-container">
     <video id="intro-video" class="intro-video" muted playsinline>
-        <source src="{{ url_for('static', filename='videos/intro.mp4') }}" type="video/mp4">
+        <source src="{{ url_for('static', filename='videos/Standard_Mode_add_a_pulse_effect_to_the_middle.mp4') }}" type="video/mp4">
         Your browser does not support the video tag.
     </video>
 </div>
 
 <div class="landing-content" style="display: none; opacity: 0;">
-    {% include "landing.html" %}
+    <div class="landing-container">
+        <div class="container d-flex flex-column justify-content-center align-items-center" style="height: 100%;">
+            <!-- Logo Animation Container -->
+            <div class="logo-container">
+                <div class="logo-pulse"></div>
+                <h1 class="logo-text">Omi AI</h1>
+            </div>
+            
+            <!-- Navigation Buttons -->
+            <div class="action-buttons">
+                <a href="{{ url_for('simple_dashboard') }}" class="btn-use-omi">Use Omi</a>
+            </div>
+        </div>
+        
+        <div class="corner-text">
+            <a href="{{ url_for('dashboard') }}">Government Contractors -> </a>
+        </div>
+    </div>
 </div>
 {% endblock %}
 
@@ -26,6 +44,7 @@
     justify-content: center;
     align-items: center;
     z-index: 1000;
+    transition: opacity 0.5s ease-out;
 }
 
 .intro-video {
