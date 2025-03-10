@@ -222,6 +222,58 @@ document.addEventListener('DOMContentLoaded', function() {
         const messagesContainer = document.getElementById('messages-container');
         const typingIndicator = document.getElementById('typing-indicator');
         const recentConversationsContainer = document.getElementById('recent-conversations');
+        const fileUploadButton = document.getElementById('file-upload-button');
+        const fileUploadInput = document.getElementById('file-upload-input');
+        const fileUploadStatus = document.getElementById('file-upload-status');
+        
+        // Handle file upload button click
+        if (fileUploadButton && fileUploadInput) {
+            fileUploadButton.addEventListener('click', () => {
+                fileUploadInput.click();
+            });
+            
+            // Handle file selection
+            fileUploadInput.addEventListener('change', (e) => {
+                const files = e.target.files;
+                if (files.length > 0) {
+                    const fileNames = Array.from(files).map(file => file.name).join(', ');
+                    fileUploadStatus.textContent = `Selected: ${fileNames}`;
+                    
+                    // Create FormData object to upload files
+                    const formData = new FormData();
+                    Array.from(files).forEach(file => {
+                        formData.append('document', file);
+                    });
+                    
+                    // Show typing indicator
+                    typingIndicator.style.display = 'block';
+                    
+                    // Upload files to server
+                    fetch('/api/document/upload', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        typingIndicator.style.display = 'none';
+                        if (data.error) {
+                            addMessageToUI('ai', `Error uploading files: ${data.error}`);
+                        } else {
+                            addMessageToUI('user', `Uploaded: ${fileNames}`);
+                            addMessageToUI('ai', `I've received your files: ${fileNames}. How would you like me to help with these documents?`);
+                        }
+                        fileUploadStatus.textContent = '';
+                        fileUploadInput.value = '';
+                    })
+                    .catch(error => {
+                        typingIndicator.style.display = 'none';
+                        addMessageToUI('ai', 'Sorry, there was an error uploading your files.');
+                        fileUploadStatus.textContent = '';
+                        fileUploadInput.value = '';
+                    });
+                }
+            });
+        }
 
         // Function to format date
         function formatDate(date) {
