@@ -37,10 +37,15 @@
                         <form id="query-form">
                             <div class="input-group">
                                 <input type="text" id="query-input" class="form-control" placeholder="Ask a question...">
+                                <button class="btn btn-secondary" type="button" id="mobile-upload-btn">
+                                    <i class="fas fa-paperclip"></i>
+                                </button>
                                 <button class="btn btn-primary" type="submit" id="submit-query">
                                     <i class="fas fa-paper-plane"></i>
                                 </button>
                             </div>
+                            <input type="file" id="file-upload" style="display: none;">
+                            <div id="file-info" class="text-muted small mt-1"></div>
                         </form>
                         
                         <script src="{{ url_for('static', filename='js/query-examples.js') }}"></script>

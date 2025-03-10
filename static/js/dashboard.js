@@ -1,40 +1,43 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // Get references to DOM elements
     const queryForm = document.getElementById('query-form');
     const queryInput = document.getElementById('query-input');
     const messagesContainer = document.getElementById('messages-container');
     const typingIndicator = document.getElementById('typing-indicator');
-    const recentConversationsContainer = document.getElementById('recent-conversations'); // Added element for recent conversations
 
+    // Track AI response status
+    let aiResponseReceived = false;
+
+    // Initialize conversation history display
+    loadConversationHistory();
+
+    // Handle query submission
     if (queryForm) {
         queryForm.addEventListener('submit', function(e) {
             e.preventDefault();
 
+            // Reset response status for new query
+            aiResponseReceived = false;
+
             const query = queryInput.value.trim();
-            if (!query) return;
+            if (query === '') return;
+
+            // Clear input and show typing indicator
+            queryInput.value = '';
+            typingIndicator.style.display = 'flex';
 
             // Add user message to UI
-            const userMessageHtml = `
+            const userMsg = `
                 <div class="message-bubble user">
                     <div class="message-content">
-                        <div class="user-response-header">
-                            You
-                        </div>
                         <p>${query}</p>
                     </div>
                 </div>
             `;
-            messagesContainer.innerHTML += userMessageHtml;
-
-            // Clear input
-            queryInput.value = '';
-
-            // Show typing indicator
-            typingIndicator.style.display = 'block';
-
-            // Scroll to bottom
+            messagesContainer.innerHTML += userMsg;
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
-            // Send query to server
+            // Send API request
             fetch('/api/query', {
                 method: 'POST',
                 headers: {
@@ -51,24 +54,61 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Handle any errors from the API
                     console.error('API Error:', data.error);
 
-                    // Show a message to the user
-                    addMessageToUI('Sorry, I encountered an error. Please try again.', false);
-                    return;
+                    // Check for subscription limit error
+                    if (data.message && data.message.includes('query limit')) {
+                        const errorMsg = `
+                            <div class="message-bubble ai">
+                                <div class="message-content">
+                                    <div class="ai-response-header">
+                                        Omi
+                                    </div>
+                                    <p>${data.message}</p>
+                                    <p><a href="${data.upgrade_url}" class="btn btn-primary btn-sm mt-2">Upgrade Now</a></p>
+                                </div>
+                            </div>
+                        `;
+                        messagesContainer.innerHTML += errorMsg;
+                    } else {
+                        // Generic error
+                        const errorMsg = `
+                            <div class="message-bubble ai">
+                                <div class="message-content">
+                                    <div class="ai-response-header">
+                                        Omi
+                                    </div>
+                                    <p>I'm sorry, but there was an error: ${data.error}</p>
+                                </div>
+                            </div>
+                        `;
+                        messagesContainer.innerHTML += errorMsg;
+                    }
+                } else {
+                    // Process successful response
+                    const formattedResponse = data.ai_response.replace(/\n/g, '<br>');
+
+                    const aiMsg = `
+                        <div class="message-bubble ai">
+                            <div class="message-content">
+                                <div class="ai-response-header">
+                                    Omi
+                                </div>
+                                <p>${formattedResponse}</p>
+                                ${data.queries_remaining !== undefined ? 
+                                `<div class="queries-remaining mt-2 text-muted">
+                                    <small>Queries remaining today: ${data.queries_remaining}</small>
+                                </div>` : ''}
+                            </div>
+                        </div>
+                    `;
+                    messagesContainer.innerHTML += aiMsg;
                 }
 
+                // Hide typing indicator and scroll to bottom
                 typingIndicator.style.display = 'none';
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
-                // Add the AI response to the UI
-                addMessageToUI(data.ai_response, false);
-
-                // Clear the input field for the next query
-                queryInput.value = '';
-
-                // Enable the form for the next query
-                enableForm();
-
-                // Reload recent conversations to show the new one
-                loadRecentConversations();
+                // Refresh conversation history
+                loadConversationHistory();
             })
             .catch(error => {
                 console.error('Error:', error);
@@ -82,7 +122,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <div class="ai-response-header">
                                     Omi
                                 </div>
-                                <p>Sorry, there was an error processing your request. Please try again.</p>
+                                <p>Sorry, I encountered an error. Please try again.</p>
                             </div>
                         </div>
                     `;
@@ -93,65 +133,100 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // File upload button functionality
-    const fileUploadButton = document.getElementById('file-upload-button');
-    const fileUploadInput = document.getElementById('file-upload-input');
-    const fileUploadStatus = document.getElementById('file-upload-status');
-
-    if (fileUploadButton && fileUploadInput) {
-        // Use touchstart and click events for better mobile compatibility
-        ['touchstart', 'click'].forEach(eventType => {
-            fileUploadButton.addEventListener(eventType, function(e) {
-                e.preventDefault(); // Prevent default behavior
-                fileUploadInput.click();
-            }, { passive: false });
-        });
-
+    // Handle file upload if available
+    const fileUploadInput = document.getElementById('file-upload');
+    if (fileUploadInput) {
         fileUploadInput.addEventListener('change', function() {
-            if (fileUploadInput.files.length > 0) {
-                const file = fileUploadInput.files[0];
-                if (fileUploadStatus) {
-                    fileUploadStatus.textContent = `Uploading: ${file.name}...`;
+            if (this.files.length > 0) {
+                const fileName = this.files[0].name;
+                const fileInfo = document.getElementById('file-info');
+                if (fileInfo) {
+                    fileInfo.textContent = fileName;
                 }
-
-                const formData = new FormData();
-                formData.append('file', file);
-
-                fetch('/api/upload', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        fileUploadStatus.textContent = `File uploaded: ${file.name}`;
-                        queryInput.value = `I've uploaded ${file.name}. Please analyze this document.`;
-                    } else {
-                        fileUploadStatus.textContent = `Error: ${data.error}`;
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    fileUploadStatus.textContent = 'Error uploading file. Please try again.';
-                });
             }
         });
     }
 
-    // Voice mode button - placeholder
-    const voiceModeButton = document.getElementById('voice-mode-button');
-    if (voiceModeButton) {
-        voiceModeButton.addEventListener('click', function() {
-            alert('Voice mode coming soon!');
+    // Add mobile-friendly file upload trigger
+    const mobileUploadBtn = document.getElementById('mobile-upload-btn');
+    if (mobileUploadBtn && fileUploadInput) {
+        mobileUploadBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            fileUploadInput.click();
         });
     }
 
-    // Image creation button - placeholder
-    const imageCreationButton = document.getElementById('image-creation-button');
-    if (imageCreationButton) {
-        imageCreationButton.addEventListener('click', function() {
-            alert('Image creation coming soon!');
+    // SAM.gov search form handler if available
+    const samSearchForm = document.getElementById('sam-search-form');
+    if (samSearchForm) {
+        samSearchForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const searchInput = document.getElementById('sam-search-input');
+            if (!searchInput || searchInput.value.trim() === '') return;
+
+            // Handle SAM.gov search logic here
+            // This is just a placeholder
+            console.log('Searching SAM.gov for:', searchInput.value);
         });
+    }
+
+    // Load conversation history
+    function loadConversationHistory() {
+        const historyContainer = document.getElementById('conversation-history');
+        if (!historyContainer) return;
+
+        fetch('/api/recent_conversations')
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success' && data.conversations && data.conversations.length > 0) {
+                    historyContainer.innerHTML = '';
+
+                    data.conversations.forEach(conv => {
+                        const item = document.createElement('div');
+                        item.className = 'history-item';
+                        item.innerHTML = `
+                            <div class="history-query">${conv.query_text}</div>
+                            <div class="history-date">${new Date(conv.created_at).toLocaleString()}</div>
+                        `;
+                        item.addEventListener('click', function() {
+                            // Add the conversation to the current chat
+                            const userMsg = `
+                                <div class="message-bubble user">
+                                    <div class="message-content">
+                                        <p>${conv.query_text}</p>
+                                    </div>
+                                </div>
+                            `;
+
+                            const aiMsg = `
+                                <div class="message-bubble ai">
+                                    <div class="message-content">
+                                        <div class="ai-response-header">
+                                            Omi
+                                        </div>
+                                        <p>${conv.response.replace(/\n/g, '<br>')}</p>
+                                    </div>
+                                </div>
+                            `;
+
+                            if (messagesContainer) {
+                                messagesContainer.innerHTML += userMsg + aiMsg;
+                                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                            }
+                        });
+
+                        historyContainer.appendChild(item);
+                    });
+                } else {
+                    historyContainer.innerHTML = '<p class="text-muted">No conversation history yet.</p>';
+                }
+            })
+            .catch(error => {
+                console.error('Error loading conversation history:', error);
+                if (historyContainer) {
+                    historyContainer.innerHTML = '<p class="text-danger">Failed to load conversation history.</p>';
+                }
+            });
     }
 
     function addMessageToUI(text, isUser) {
@@ -179,72 +254,11 @@ document.addEventListener('DOMContentLoaded', function() {
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
 
-    // Function to load recent conversations
-    function loadRecentConversations() {
-        fetch('/api/recent_conversations')
-            .then(response => response.json())
-            .then(data => {
-                if (data.conversations && data.conversations.length > 0) {
-                    recentConversationsContainer.innerHTML = ''; // Clear placeholder
-
-                    data.conversations.forEach(conv => {
-                        const conversationDiv = document.createElement('div');
-                        conversationDiv.className = 'conversation-preview';
-                        conversationDiv.setAttribute('data-id', conv.id);
-
-                        const titleDiv = document.createElement('div');
-                        titleDiv.className = 'preview-title';
-                        titleDiv.textContent = truncateText(conv.query_text, 40);
-
-                        const snippetDiv = document.createElement('div');
-                        snippetDiv.className = 'preview-snippet';
-                        snippetDiv.textContent = truncateText(conv.response, 60);
-
-                        const timeDiv = document.createElement('div');
-                        timeDiv.className = 'conversation-time';
-                        timeDiv.textContent = formatDate(new Date(conv.created_at));
-
-                        conversationDiv.appendChild(titleDiv);
-                        conversationDiv.appendChild(snippetDiv);
-                        conversationDiv.appendChild(timeDiv);
-
-                        // Add click event to load the conversation
-                        conversationDiv.addEventListener('click', function() {
-                            // Clear current messages
-                            messagesContainer.innerHTML = '';
-
-                            // Add the conversation messages
-                            addMessageToUI(conv.query_text, true);
-                            addMessageToUI(conv.response, false);
-                        });
-
-                        recentConversationsContainer.appendChild(conversationDiv);
-                    });
-                } else {
-                    recentConversationsContainer.innerHTML = `
-                        <div class="text-center py-3 text-muted">
-                            <small>No recent conversations</small>
-                        </div>
-                    `;
-                }
-            })
-            .catch(error => {
-                console.error('Error loading recent conversations:', error);
-                recentConversationsContainer.innerHTML = `
-                    <div class="text-center py-3 text-muted">
-                        <small>Could not load conversations</small>
-                    </div>
-                `;
-            });
-    }
-
-    // Helper function to truncate text
     function truncateText(text, maxLength) {
         if (!text) return '';
         return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
     }
 
-    // Helper function to format date
     function formatDate(date) {
         const now = new Date();
         const diff = now - date;
@@ -256,13 +270,4 @@ document.addEventListener('DOMContentLoaded', function() {
             return date.toLocaleDateString();
         }
     }
-
-    // Initialize the page
-    function initPage() {
-        // Load recent conversations when the page loads
-        loadRecentConversations();
-    }
-
-    // Call the init function when the page loads
-    initPage();
 });

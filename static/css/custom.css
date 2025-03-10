@@ -147,6 +147,33 @@ button.file-upload:hover {
     text-decoration: none;
     padding: 0;
     color: var(--text-secondary);
+
+/* Mobile-friendly file upload */
+#mobile-upload-btn {
+    border-radius: 0;
+}
+
+/* File info display */
+#file-info {
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+}
+
+/* Better mobile experience */
+@media (max-width: 768px) {
+    .input-group {
+        flex-wrap: nowrap;
+    }
+    
+    #submit-query, #mobile-upload-btn {
+        padding: 0.375rem 0.75rem;
+    }
+}
+
 }
 
 .query-history .btn-link:hover {
