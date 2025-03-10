@@ -87,6 +87,17 @@ button.file-upload:hover {
     box-shadow: none;
 }
 
+/* Query input placeholder animation */
+#query-input::placeholder {
+    transition: opacity 0.2s ease;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+#query-input:focus::placeholder {
+    opacity: 0.3;
+}
+
+
 .query-history .accordion-button::after {
     filter: invert(1);
 }
