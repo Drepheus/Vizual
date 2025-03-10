@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 } else {
                     // Process successful response
-                    const formattedResponse = data.ai_response.replace(/\n/g, '<br>');
+                    const formattedResponse = data.ai_response.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>');
 
                     const aiMsg = `
                         <div class="message-bubble ai">
@@ -93,7 +93,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <div class="ai-response-header">
                                     Omi
                                 </div>
-                                <p>${formattedResponse}</p>
+                                <div class="formatted-content">${formattedResponse}</div>
                                 ${data.queries_remaining !== undefined ? 
                                 `<div class="queries-remaining mt-2 text-muted">
                                     <small>Queries remaining today: ${data.queries_remaining}</small>
@@ -205,7 +205,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                         <div class="ai-response-header">
                                             Omi
                                         </div>
-                                        <p>${conv.response.replace(/\n/g, '<br>')}</p>
+                                        <div class="formatted-content">${conv.response.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>')}</div>
                                     </div>
                                 </div>
                             `;
@@ -310,7 +310,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                         <div class="ai-response-header">
                                             Omi
                                         </div>
-                                        <p>${conv.response.replace(/\n/g, '<br>')}</p>
+                                        <div class="formatted-content">${conv.response.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>')}</div>
                                     </div>
                                 </div>
                             `;

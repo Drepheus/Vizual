@@ -197,6 +197,73 @@ button.file-upload:hover {
 }
 
 .query-history::-webkit-scrollbar-thumb {
+
+/* Formatted content styling */
+.formatted-content {
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.formatted-content strong {
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.formatted-content em {
+  font-style: italic;
+  color: #e2e2e2;
+}
+
+.formatted-content a {
+  color: #4d9aff;
+  text-decoration: underline;
+}
+
+.formatted-content ul, 
+.formatted-content ol {
+  margin-left: 20px;
+  margin-bottom: 15px;
+}
+
+.formatted-content code {
+  font-family: 'Courier New', monospace;
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+
+.formatted-content pre {
+  background-color: rgba(0, 0, 0, 0.3);
+  padding: 10px;
+  border-radius: 5px;
+  overflow-x: auto;
+  margin: 10px 0;
+}
+
+.formatted-content h1, 
+.formatted-content h2, 
+.formatted-content h3 {
+  margin-top: 15px;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.formatted-content h1 {
+  font-size: 1.5em;
+  color: #ffffff;
+}
+
+.formatted-content h2 {
+  font-size: 1.3em;
+  color: #f0f0f0;
+}
+
+.formatted-content h3 {
+  font-size: 1.1em;
+  color: #e0e0e0;
+}
+
     background-color: var(--gov-blue);
     border-radius: 3px;
 }
