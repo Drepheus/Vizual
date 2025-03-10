@@ -29,6 +29,9 @@ body {
   position: relative;
   margin-left: 15px;
   padding-left: 35px;
+  display: flex;
+  align-items: center;
+  height: 40px;
 }
 
 .navbar-brand::before {
