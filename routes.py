@@ -167,6 +167,77 @@ def register_routes(app):
                 'status': 'error',
                 'error': 'Could not fetch contract awards. Please try again later.'
             }), 500
+    
+    @app.route('/api/document/upload', methods=['POST'])
+    @login_required
+    def upload_document():
+        try:
+            # Check if request has the file part
+            if 'document' not in request.files:
+                return jsonify(error="No file part"), 400
+                
+            files = request.files.getlist('document')
+            query = request.form.get('query', '')
+            
+            if not files or all(file.filename == '' for file in files):
+                return jsonify(error="No selected file"), 400
+                
+            from services.document_service import ensure_upload_directory, allowed_file, process_document
+            import os
+            
+            # Ensure upload directory exists
+            if not ensure_upload_directory():
+                return jsonify(error="Server error: Could not create upload directory"), 500
+                
+            upload_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
+            
+            documents_text = []
+            for file in files:
+                if file and allowed_file(file.filename):
+                    filename = os.path.join(upload_folder, secure_filename(file.filename))
+                    file.save(filename)
+                    
+                    # Process the document to extract text
+                    text = process_document(filename)
+                    if text:
+                        documents_text.append(text)
+            
+            if not documents_text:
+                return jsonify(error="Could not extract text from uploaded files"), 400
+                
+            # Combine all document texts
+            combined_text = "\n\n".join(documents_text)
+            
+            # Generate context for the AI query
+            context = f"The user has uploaded the following document(s):\n\n{combined_text}"
+            if query:
+                context += f"\n\nThe user's question about these document(s): {query}"
+            else:
+                context += "\n\nPlease analyze these document(s) and provide a summary of the key information."
+                
+            # Get AI response
+            ai_response = ai_service.get_ai_response(context)
+            
+            if not ai_response:
+                return jsonify(error="Failed to analyze documents"), 500
+                
+            # Save the query to history
+            query_text = query if query else "Document analysis request"
+            query_obj = Query(
+                user_id=current_user.id,
+                query_text=query_text,
+                response=ai_response
+            )
+            db.session.add(query_obj)
+            db.session.commit()
+            
+            return jsonify({
+                'ai_response': ai_response
+            })
+            
+        except Exception as e:
+            logger.error(f"Error processing document upload: {str(e)}")
+            return jsonify(error=str(e)), 500
             
     @app.route('/api/sam/search', methods=['POST'])
     @login_required
