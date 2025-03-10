@@ -165,6 +165,38 @@ def register_routes(app):
 
             return jsonify({
                 'status': 'success',
+
+    @app.route('/api/recent_conversations')
+    @login_required
+    def recent_conversations():
+        """API endpoint to get recent conversations for the current user"""
+        try:
+            # Get the 10 most recent queries for the current user
+            queries = Query.query.filter_by(user_id=current_user.id)\
+                .order_by(Query.created_at.desc())\
+                .limit(10)
+            
+            conversations = []
+            for query in queries:
+                conversations.append({
+                    'id': query.id,
+                    'query_text': query.query_text,
+                    'response': query.response,
+                    'created_at': query.created_at.isoformat()
+                })
+            
+            return jsonify({
+                'status': 'success',
+                'conversations': conversations
+            })
+            
+        except Exception as e:
+            logger.error(f"Error fetching recent conversations: {str(e)}")
+            return jsonify({
+                'status': 'error',
+                'error': str(e)
+            }), 500
+
                 'entities': entities
             })
         except Exception as e:
