@@ -12,6 +12,11 @@ class User(UserMixin, db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     queries = db.relationship('Query', backref='user', lazy=True)
     documents = db.relationship('Document', backref='user', lazy=True)
+    
+    # Free tier rate limiting
+    query_count = db.Column(db.Integer, default=0)
+    last_query_reset = db.Column(db.DateTime, default=datetime.utcnow)
+    subscription_type = db.Column(db.String(20), default="free")  # free, pro, premium
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)

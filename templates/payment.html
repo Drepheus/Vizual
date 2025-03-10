@@ -1,47 +1,122 @@
+
 {% extends "base.html" %}
 
 {% block content %}
 <div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card dashboard-card mb-4">
-                <div class="card-body text-center">
-                    <h2 class="card-title mb-4">Upgrade to Premium</h2>
-                    <div class="row mb-4">
-                        <div class="col-md-6 mx-auto">
-                            <div class="pricing-features">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <h1 class="mb-4 text-center">Upgrade Your Omi AI Experience</h1>
+            <p class="lead text-center mb-5">Choose the plan that works best for you</p>
+
+            <div class="row">
+                <!-- Free Plan -->
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 dashboard-card">
+                        <div class="card-body text-center d-flex flex-column">
+                            <h3 class="card-title">Free</h3>
+                            <h2 class="my-3">$0</h2>
+                            <div class="card-text flex-grow-1">
                                 <ul class="list-unstyled">
-                                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Unlimited AI queries</li>
-                                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Full SAM.gov data access</li>
-                                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Advanced analytics</li>
-                                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Priority support</li>
+                                    <li class="mb-2">5 queries every 8 hours</li>
+                                    <li class="mb-2">Basic features</li>
+                                    <li class="mb-2">Standard response time</li>
                                 </ul>
                             </div>
-                            <div class="pricing-amount">
-                                <h3 class="display-4 mb-0">$39.99</h3>
-                                <p class="text-muted">per month</p>
+                            <p class="text-muted">Your current plan</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pro Plan -->
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 dashboard-card border-primary">
+                        <div class="card-body text-center d-flex flex-column">
+                            <h3 class="card-title">Pro</h3>
+                            <h2 class="my-3">$20<small>/month</small></h2>
+                            <div class="card-text flex-grow-1">
+                                <ul class="list-unstyled">
+                                    <li class="mb-2"><strong>Unlimited</strong> queries</li>
+                                    <li class="mb-2">Priority support</li>
+                                    <li class="mb-2">Advanced features</li>
+                                    <li class="mb-2">Document upload</li>
+                                </ul>
                             </div>
+                            <button id="pro-plan-btn" class="btn btn-primary" 
+                                    data-plan="pro" data-price="2000">
+                                Upgrade to Pro
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Premium Plan -->
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 dashboard-card border-warning">
+                        <div class="card-header bg-warning text-dark text-center">
+                            <strong>BEST VALUE</strong>
+                        </div>
+                        <div class="card-body text-center d-flex flex-column">
+                            <h3 class="card-title">Premium</h3>
+                            <h2 class="my-3">$40<small>/month</small></h2>
+                            <div class="card-text flex-grow-1">
+                                <ul class="list-unstyled">
+                                    <li class="mb-2"><strong>Unlimited</strong> queries</li>
+                                    <li class="mb-2">Priority support</li>
+                                    <li class="mb-2">All advanced features</li>
+                                    <li class="mb-2">Unlimited document upload</li>
+                                    <li class="mb-2">Data analysis tools</li>
+                                    <li class="mb-2">API access</li>
+                                </ul>
+                            </div>
+                            <button id="premium-plan-btn" class="btn btn-warning text-dark" 
+                                    data-plan="premium" data-price="4000">
+                                Upgrade to Premium
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="card dashboard-card payment-form">
-                <div class="card-body">
-                    <form id="payment-form">
-                        <div class="mb-3">
-                            <label for="name" class="form-label">Full Name</label>
-                            <input type="text" class="form-control" id="name" required>
+            <div class="mt-5 text-center">
+                <h4>All plans include:</h4>
+                <div class="row mt-3">
+                    <div class="col-md-4">
+                        <div class="feature-item mb-3">
+                            <i class="fas fa-robot fa-2x mb-2"></i>
+                            <h5>AI Conversations</h5>
+                            <p>Get answers and assistance from our AI</p>
                         </div>
-                        <div class="mb-3">
-                            <label for="card-element" class="form-label">Credit or debit card</label>
-                            <div id="card-element" class="form-control"></div>
-                            <div id="card-errors" class="invalid-feedback d-block" role="alert"></div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="feature-item mb-3">
+                            <i class="fas fa-shield-alt fa-2x mb-2"></i>
+                            <h5>Secure Data</h5>
+                            <p>Your conversations are private and secure</p>
                         </div>
-                        <button id="submit-payment" class="btn btn-primary w-100" type="submit">
-                            Pay Now
-                        </button>
-                    </form>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="feature-item mb-3">
+                            <i class="fas fa-history fa-2x mb-2"></i>
+                            <h5>Conversation History</h5>
+                            <p>Access to your conversation history</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="payment-modal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Complete Your Payment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="payment-form">
+                    <!-- Stripe Elements will be inserted here -->
                 </div>
             </div>
         </div>
@@ -52,7 +127,27 @@
 {% block scripts %}
 <script src="https://js.stripe.com/v3/"></script>
 <script>
-    const stripePublicKey = '{{ config.STRIPE_PUBLIC_KEY }}';
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set up Stripe payment 
+        const proButton = document.getElementById('pro-plan-btn');
+        const premiumButton = document.getElementById('premium-plan-btn');
+        
+        proButton.addEventListener('click', function() {
+            initializePayment('pro', 2000);
+        });
+        
+        premiumButton.addEventListener('click', function() {
+            initializePayment('premium', 4000);
+        });
+        
+        function initializePayment(plan, amount) {
+            // This would be replaced with actual Stripe integration
+            const modal = new bootstrap.Modal(document.getElementById('payment-modal'));
+            modal.show();
+            
+            // Here you would normally initialize Stripe Elements
+            // and set up the payment form
+        }
+    });
 </script>
-<script src="{{ url_for('static', filename='js/payments.js') }}"></script>
 {% endblock %}

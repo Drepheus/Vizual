@@ -91,18 +91,67 @@ document.addEventListener('DOMContentLoaded', function() {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ query: query })
                 })
-                .then(response => response.json())
-                .then(data => {
-                    // Remove all typing indicators completely
-                    clearAllTypingIndicators();
-                    
-                    // Additional cleanup for any remaining elements
-                    document.querySelectorAll('.typing-indicator, .typing-dots, .message-bubble.ai.typing').forEach(el => {
-                        el.remove();
-                    });
+                    .then(response => response.json())
+                    .then(data => {
+                        // Remove all typing indicators completely
+                        clearAllTypingIndicators();
 
-                    // Append AI response
-                    const responseCard = `
+                        // Additional cleanup for any remaining elements
+                        document.querySelectorAll('.typing-indicator, .typing-dots, .message-bubble.ai.typing').forEach(el => {
+                            el.remove();
+                        });
+
+                        // Check if we hit a rate limit
+                        if (data.error === 'Free tier query limit reached') {
+                            // Display rate limit message
+                            const limitMessage = `
+                        <div class="card mb-3 border-danger">
+                            <div class="card-body">
+                                <h5 class="card-title text-danger">Query Limit Reached</h5>
+                                <p>${data.message}</p>
+                                <div class="subscription-options mt-3">
+                                    <h6>Upgrade to continue asking questions:</h6>
+                                    <div class="row mt-3">
+                                        <div class="col-md-6 mb-2">
+                                            <div class="card bg-dark">
+                                                <div class="card-body">
+                                                    <h5 class="card-title">Pro Plan</h5>
+                                                    <h6 class="card-subtitle mb-2 text-muted">$20/month</h6>
+                                                    <p class="card-text">Unlimited queries<br>Priority support</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-2">
+                                            <div class="card bg-dark">
+                                                <div class="card-body">
+                                                    <h5 class="card-title">Premium Plan</h5>
+                                                    <h6 class="card-subtitle mb-2 text-muted">$40/month</h6>
+                                                    <p class="card-text">Unlimited queries<br>Priority support<br>Advanced features</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <a href="${data.upgrade_url}" class="btn btn-primary mt-3">Upgrade Now</a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                            responseArea.innerHTML += limitMessage;
+                            return;
+                        }
+
+                        // Display remaining queries if available
+                        if (data.queries_remaining !== undefined) {
+                            const queriesRemaining = `
+                        <div class="queries-remaining text-end mb-2">
+                            <small class="text-muted">${data.queries_remaining} queries remaining</small>
+                        </div>
+                    `;
+                            responseArea.innerHTML += queriesRemaining;
+                        }
+
+                        // Append AI response
+                        const responseCard = `
                         <div class="card dashboard-card response-card mb-4">
                             <div class="card-body">
                                 <div class="d-flex align-items-center mb-3">
@@ -113,32 +162,32 @@ document.addEventListener('DOMContentLoaded', function() {
                             </div>
                         </div>
                     `;
-                    responseArea.innerHTML += responseCard;
+                        responseArea.innerHTML += responseCard;
 
-                    submitBtn.disabled = false;
-                    if (stopBtn) stopBtn.classList.add('d-none');
-                    queryInput.value = '';
+                        submitBtn.disabled = false;
+                        if (stopBtn) stopBtn.classList.add('d-none');
+                        queryInput.value = '';
 
-                    // Auto-scroll to bottom
-                    window.scrollTo(0, document.body.scrollHeight);
+                        // Auto-scroll to bottom
+                        window.scrollTo(0, document.body.scrollHeight);
 
-                    // Update query history if it exists
-                    const queryHistory = document.getElementById('query-history');
-                    if (queryHistory) {
-                        updateQueryHistory();
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
+                        // Update query history if it exists
+                        const queryHistory = document.getElementById('query-history');
+                        if (queryHistory) {
+                            updateQueryHistory();
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
 
-                    // Remove typing indicator
-                    const typingCard = document.querySelector('.typing-indicator');
-                    if (typingCard && typingCard.closest('.card')) {
-                        responseArea.removeChild(typingCard.closest('.card'));
-                    }
+                        // Remove typing indicator
+                        const typingCard = document.querySelector('.typing-indicator');
+                        if (typingCard && typingCard.closest('.card')) {
+                            responseArea.removeChild(typingCard.closest('.card'));
+                        }
 
-                    // Show error message
-                    responseArea.innerHTML += `
+                        // Show error message
+                        responseArea.innerHTML += `
                         <div class="card dashboard-card response-card mb-4">
                             <div class="card-body">
                                 <div class="d-flex align-items-center mb-3">
@@ -150,9 +199,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                     `;
 
-                    submitBtn.disabled = false;
-                    if (stopBtn) stopBtn.classList.add('d-none');
-                });
+                        submitBtn.disabled = false;
+                        if (stopBtn) stopBtn.classList.add('d-none');
+                    });
             }
 
             function createTypingCard() {
@@ -316,7 +365,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 '.card-body .typing-indicator',
                 '.message-content .typing-dots'
             ];
-            
+
             typingSelectors.forEach(selector => {
                 document.querySelectorAll(selector).forEach(el => {
                     // Try to remove the entire bubble if possible
@@ -328,16 +377,16 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 });
             });
-            
+
             // Also hide any typing cursors
             document.querySelectorAll('.typing-cursor').forEach(cursor => {
                 cursor.classList.add('d-none');
             });
         }
-        
+
         function processQuery(query) {
             isTyping = true;
-            
+
             // Clear any existing typing indicators first
             clearAllTypingIndicators();
 
@@ -369,36 +418,36 @@ document.addEventListener('DOMContentLoaded', function() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ query: query })
             })
-            .then(response => response.json())
-            .then(data => {
-                // Remove typing indicator
-                const typingMsg = messagesContainer.querySelector('.message.typing');
-                if (typingMsg) {
-                    messagesContainer.removeChild(typingMsg);
-                }
+                .then(response => response.json())
+                .then(data => {
+                    // Remove typing indicator
+                    const typingMsg = messagesContainer.querySelector('.message.typing');
+                    if (typingMsg) {
+                        messagesContainer.removeChild(typingMsg);
+                    }
 
-                // Add response to UI
-                if (data.error) {
-                    addMessage('Error: ' + data.error, 'assistant');
-                } else {
-                    addMessage(data.ai_response, 'assistant');
-                }
+                    // Add response to UI
+                    if (data.error) {
+                        addMessage('Error: ' + data.error, 'assistant');
+                    } else {
+                        addMessage(data.ai_response, 'assistant');
+                    }
 
-                isTyping = false;
-            })
-            .catch(error => {
-                console.error('Error:', error);
+                    isTyping = false;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
 
-                // Remove typing indicator
-                const typingMsg = messagesContainer.querySelector('.message.typing');
-                if (typingMsg) {
-                    messagesContainer.removeChild(typingMsg);
-                }
+                    // Remove typing indicator
+                    const typingMsg = messagesContainer.querySelector('.message.typing');
+                    if (typingMsg) {
+                        messagesContainer.removeChild(typingMsg);
+                    }
 
-                // Show error message
-                addMessage('Sorry, there was an error processing your request. Please try again.', 'assistant');
-                isTyping = false;
-            });
+                    // Show error message
+                    addMessage('Sorry, there was an error processing your request. Please try again.', 'assistant');
+                    isTyping = false;
+                });
         }
 
         // Save conversations to localStorage
@@ -425,20 +474,20 @@ document.addEventListener('DOMContentLoaded', function() {
                         method: 'POST',
                         body: formData
                     })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.error) {
-                            addMessage('Error uploading file: ' + data.error, 'assistant');
-                        } else {
-                            addMessage(`File "${fileUploadInput.files[0].name}" uploaded successfully.`, 'system');
-                            // Automatically ask about the file
-                            processQuery(`Can you analyze this file: ${fileUploadInput.files[0].name}`);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        addMessage('Error uploading file. Please try again.', 'assistant');
-                    });
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.error) {
+                                addMessage('Error uploading file: ' + data.error, 'assistant');
+                            } else {
+                                addMessage(`File "${fileUploadInput.files[0].name}" uploaded successfully.`, 'system');
+                                // Automatically ask about the file
+                                processQuery(`Can you analyze this file: ${fileUploadInput.files[0].name}`);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            addMessage('Error uploading file. Please try again.', 'assistant');
+                        });
 
                     // Reset the file input
                     fileUploadInput.value = '';

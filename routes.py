@@ -83,14 +83,46 @@ def register_routes(app):
                 return jsonify(error="Missing query parameter"), 400
 
             query_text = data['query']
-
-            if not current_user.is_premium and Query.query.filter_by(user_id=current_user.id).count() >= 10:
-                return jsonify(error='Free tier limit reached. Please upgrade to premium.'), 403
-
+            
+            # Check subscription status and rate limits for free users
+            if not current_user.is_premium:
+                # Check if 8 hours have passed since last reset
+                reset_time = 8 * 60 * 60  # 8 hours in seconds
+                current_time = datetime.utcnow()
+                time_diff = (current_time - current_user.last_query_reset).total_seconds()
+                
+                # Reset counter if 8 hours have passed
+                if time_diff >= reset_time:
+                    current_user.query_count = 0
+                    current_user.last_query_reset = current_time
+                
+                # Check if user has reached the limit
+                if current_user.query_count >= 5:
+                    subscription_options = {
+                        'pro': {'price': '$20/month', 'features': 'Unlimited queries, priority support'},
+                        'premium': {'price': '$40/month', 'features': 'Unlimited queries, priority support, advanced features'}
+                    }
+                    
+                    next_reset_time = current_user.last_query_reset + timedelta(seconds=reset_time)
+                    hours_until_reset = max(0, (next_reset_time - current_time).total_seconds() / 3600)
+                    
+                    return jsonify({
+                        'error': 'Free tier query limit reached',
+                        'message': f'You have used all 5 queries. Limit will reset in {int(hours_until_reset)} hours.',
+                        'subscription_options': subscription_options,
+                        'upgrade_url': url_for('payment')
+                    }), 429
+            
+            # Process the query
             ai_response = ai_service.get_ai_response(query_text)
             if not ai_response:
                 return jsonify(error="Failed to get AI response"), 500
 
+            # Increment the query count for free users
+            if not current_user.is_premium:
+                current_user.query_count += 1
+            
+            # Save the query
             query = Query(
                 user_id=current_user.id,
                 query_text=query_text,
@@ -99,7 +131,12 @@ def register_routes(app):
             db.session.add(query)
             db.session.commit()
 
-            return jsonify({'ai_response': ai_response})
+            # Add remaining queries info for free users
+            response_data = {'ai_response': ai_response}
+            if not current_user.is_premium:
+                response_data['queries_remaining'] = 5 - current_user.query_count
+                
+            return jsonify(response_data)
 
         except Exception as e:
             logger.error(f"Error processing query: {str(e)}")
