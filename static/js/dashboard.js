@@ -309,8 +309,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (role === 'user') {
                 message.innerHTML = `<div class="message-content">${formatResponseToHTML(content)}</div>`;
-                message.style.backgroundColor = 'white';
-                message.style.border = '1px solid #007bff'; // Example logo color, adjust as needed
             } else {
                 message.innerHTML = `<div class="message-content"><div class="ai-response-header">Omi</div>${formatResponseToHTML(content)}</div>`;
             }

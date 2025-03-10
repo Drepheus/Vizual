@@ -163,6 +163,8 @@ body {
   border-bottom-right-radius: 5px;
   border: none;
   text-decoration: none;
+  box-shadow: 0 0 8px rgba(204, 204, 204, 0.5);
+  text-shadow: 0 0 4px rgba(255, 255, 255, 0.5);
 }
 
 .message-bubble.ai .message-content {
