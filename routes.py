@@ -14,6 +14,10 @@ def register_routes(app):
 
     @app.route('/')
     def index():
+        return render_template('intro.html')
+
+    @app.route('/landing')
+    def landing():
         return render_template('landing.html')
 
     @app.route('/home')
