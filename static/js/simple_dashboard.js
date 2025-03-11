@@ -1,4 +1,3 @@
-
 // Simple Dashboard specific JavaScript
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -13,7 +12,7 @@ function initializeSimpleDashboard() {
     const typingIndicator = document.getElementById('typing-indicator');
     const voiceModeButton = document.getElementById('voice-mode-button');
     const imageCreationButton = document.getElementById('image-creation-button');
-    
+
     // Load recent conversations
     loadRecentConversations();
 
@@ -61,7 +60,10 @@ function initializeSimpleDashboard() {
                 // Hide typing indicator
                 typingIndicator.style.display = 'none';
 
-                if (data.error) {
+                if (data.error === 'Free tier query limit reached') {
+                    const upgradeButton = `<div class="mt-2"><a href="${data.upgrade_url}" class="btn btn-primary btn-sm">Upgrade Now</a></div>`;
+                    appendMessage('system', `${data.message} Please upgrade to continue.${upgradeButton}`);
+                } else if (data.error) {
                     appendMessage('ai', `Error: ${data.error}`);
                 } else {
                     // Display AI response
@@ -72,7 +74,7 @@ function initializeSimpleDashboard() {
                         .replace(/\*(.*?)\*/g, '<em>$1</em>')
                         .replace(/`(.*?)`/g, '<code>$1</code>');
                     appendMessage('ai', formattedResponse);
-                    
+
                     // Display remaining queries for free users if available
                     if (data.queries_remaining !== undefined) {
                         const remainingElem = document.querySelector('.queries-remaining');
@@ -94,30 +96,33 @@ function initializeSimpleDashboard() {
     }
 }
 
-function appendMessage(sender, content) {
+// Function to append a message
+function appendMessage(sender, message) {
     const messagesContainer = document.getElementById('messages-container');
-    if (!messagesContainer) return;
+    const messageElement = document.createElement('div');
+    messageElement.className = `message-bubble ${sender}`;
 
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `message-bubble ${sender}`;
-    
-    const contentDiv = document.createElement('div');
-    contentDiv.className = 'message-content';
-    
+    // Create message content
+    const contentElement = document.createElement('div');
+    contentElement.className = 'message-content';
+
+    // Add header for AI messages
     if (sender === 'ai') {
-        const headerDiv = document.createElement('div');
-        headerDiv.className = 'ai-response-header';
-        headerDiv.textContent = 'Omi';
-        contentDiv.appendChild(headerDiv);
+        const headerElement = document.createElement('div');
+        headerElement.className = 'ai-response-header';
+        headerElement.textContent = 'Omi';
+        contentElement.appendChild(headerElement);
     }
-    
-    const contentPara = document.createElement('div');
-    contentPara.innerHTML = content;
-    contentDiv.appendChild(contentPara);
-    
-    messageDiv.appendChild(contentDiv);
-    messagesContainer.appendChild(messageDiv);
-    
+
+    // Create a wrapper for the message content
+    const textWrapper = document.createElement('div');
+    textWrapper.className = 'message-text-wrapper';
+    textWrapper.innerHTML = message;
+    contentElement.appendChild(textWrapper);
+
+    messageElement.appendChild(contentElement);
+    messagesContainer.appendChild(messageElement);
+
     // Scroll to bottom
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
@@ -131,25 +136,25 @@ function loadRecentConversations() {
         .then(data => {
             if (data.status === 'success' && data.conversations && data.conversations.length > 0) {
                 recentConversationsContainer.innerHTML = '';
-                
+
                 data.conversations.forEach(conv => {
                     const convItem = document.createElement('div');
                     convItem.className = 'conversation-item';
-                    
+
                     const queryPreview = document.createElement('div');
                     queryPreview.className = 'query-preview';
                     queryPreview.textContent = conv.query_text.length > 50 
                         ? conv.query_text.substring(0, 50) + '...'
                         : conv.query_text;
-                    
+
                     const timestamp = document.createElement('div');
                     timestamp.className = 'timestamp';
                     const date = new Date(conv.created_at);
                     timestamp.textContent = date.toLocaleString();
-                    
+
                     convItem.appendChild(queryPreview);
                     convItem.appendChild(timestamp);
-                    
+
                     // Add click event to load the conversation
                     convItem.addEventListener('click', function() {
                         const messagesContainer = document.getElementById('messages-container');
@@ -162,7 +167,7 @@ function loadRecentConversations() {
                                 .replace(/`(.*?)`/g, '<code>$1</code>'));
                         }
                     });
-                    
+
                     recentConversationsContainer.appendChild(convItem);
                 });
             } else {

@@ -1,4 +1,3 @@
-
 // GovCon Dashboard specific JavaScript
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -12,23 +11,23 @@ function initializeGovConDashboard() {
     const loadingSpinner = document.getElementById('loadingSpinner');
     const samSearchForm = document.getElementById('samSearchForm');
     const searchResults = document.getElementById('searchResults');
-    
+
     // Initialize SAM.gov status card
     loadSamStatus();
-    
+
     // Initialize recent awards
     loadRecentAwards();
-    
+
     // Handle SAM.gov search form submission
     if (samSearchForm) {
         samSearchForm.addEventListener('submit', function(e) {
             e.preventDefault();
             const searchInput = document.getElementById('searchInput');
             if (!searchInput) return;
-            
+
             const query = searchInput.value.trim();
             if (!query) return;
-            
+
             // Show loading state
             searchResults.innerHTML = `
                 <div class="text-center my-4">
@@ -38,7 +37,7 @@ function initializeGovConDashboard() {
                     <p class="text-muted mt-2">Searching SAM.gov for "${query}"...</p>
                 </div>
             `;
-            
+
             // Send search request
             fetch('/api/sam/search', {
                 method: 'POST',
@@ -54,7 +53,7 @@ function initializeGovConDashboard() {
                         <h5 class="mb-3">Found ${data.count} results for "${query}"</h5>
                         <div class="list-group">
                     `;
-                    
+
                     data.results.forEach(result => {
                         resultsHtml += `
                             <a href="${result.url}" target="_blank" class="list-group-item list-group-item-action">
@@ -67,7 +66,7 @@ function initializeGovConDashboard() {
                             </a>
                         `;
                     });
-                    
+
                     resultsHtml += `</div>`;
                     searchResults.innerHTML = resultsHtml;
                 } else {
@@ -90,27 +89,27 @@ function initializeGovConDashboard() {
             });
         });
     }
-    
+
     // Handle query form submission
     if (queryForm) {
         queryForm.addEventListener('submit', function(e) {
             e.preventDefault();
             const queryInput = document.getElementById('queryInput');
             if (!queryInput) return;
-            
+
             const query = queryInput.value.trim();
             if (!query) return;
-            
+
             // Show loading spinner
             if (loadingSpinner) {
                 loadingSpinner.classList.remove('d-none');
             }
-            
+
             // Clear previous response
             if (responseArea) {
                 responseArea.innerHTML = '';
             }
-            
+
             // Send query to server
             fetch('/api/query', {
                 method: 'POST',
@@ -125,7 +124,7 @@ function initializeGovConDashboard() {
                 if (loadingSpinner) {
                     loadingSpinner.classList.add('d-none');
                 }
-                
+
                 if (data.error) {
                     responseArea.innerHTML = `
                         <div class="card dashboard-card mb-4">
@@ -140,6 +139,21 @@ function initializeGovConDashboard() {
                             </div>
                         </div>
                     `;
+                } else if (data.limit_reached) {
+                    responseArea.innerHTML = `
+                        <div class="card dashboard-card mb-4">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="fas fa-exclamation-circle me-2 text-warning"></i>
+                                    <h4 class="card-title mb-0">Limit Reached</h4>
+                                </div>
+                                <div class="alert alert-warning">
+                                    ${data.message}
+                                </div>
+                                <a href="${data.upgrade_url}" class="btn btn-primary">Upgrade Now</a>
+                            </div>
+                        </div>
+                    `;
                 } else {
                     // Display AI response
                     // Convert markdown to HTML (basic formatting)
@@ -148,7 +162,7 @@ function initializeGovConDashboard() {
                         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                         .replace(/\*(.*?)\*/g, '<em>$1</em>')
                         .replace(/`(.*?)`/g, '<code>$1</code>');
-                    
+
                     responseArea.innerHTML = `
                         <div class="card dashboard-card mb-4">
                             <div class="card-body">
@@ -174,7 +188,7 @@ function initializeGovConDashboard() {
                 if (loadingSpinner) {
                     loadingSpinner.classList.add('d-none');
                 }
-                
+
                 responseArea.innerHTML = `
                     <div class="card dashboard-card mb-4">
                         <div class="card-body">
@@ -191,7 +205,7 @@ function initializeGovConDashboard() {
             });
         });
     }
-    
+
     // Handle document upload form if it exists
     const documentUploadForm = document.getElementById('documentUploadForm');
     if (documentUploadForm) {
@@ -207,18 +221,18 @@ function loadSamStatus() {
     const samStatusContent = document.getElementById('samStatusContent');
     const samDataContent = document.getElementById('samDataContent');
     const samLastUpdate = document.getElementById('samLastUpdate');
-    
+
     if (!samStatusLoading || !samStatusContent || !samDataContent) return;
-    
+
     fetch('/api/sam/status')
         .then(response => response.json())
         .then(data => {
             samStatusLoading.classList.add('d-none');
             samStatusContent.classList.remove('d-none');
-            
+
             if (data.status === 'success' && data.entities && data.entities.length > 0) {
                 let entitiesHtml = '<h6 class="mb-3">Registered Entities</h6><div class="sam-entities">';
-                
+
                 data.entities.forEach(entity => {
                     entitiesHtml += `
                         <div class="sam-entity mb-2">
@@ -230,10 +244,10 @@ function loadSamStatus() {
                         </div>
                     `;
                 });
-                
+
                 entitiesHtml += '</div>';
                 samDataContent.innerHTML = entitiesHtml;
-                
+
                 if (samLastUpdate) {
                     samLastUpdate.textContent = new Date().toLocaleString();
                 }
@@ -250,7 +264,7 @@ function loadSamStatus() {
             console.error('Error:', error);
             samStatusLoading.classList.add('d-none');
             samStatusContent.classList.remove('d-none');
-            
+
             samDataContent.innerHTML = `
                 <div class="alert alert-danger">
                     <i class="fas fa-exclamation-circle me-2"></i>
@@ -263,18 +277,18 @@ function loadSamStatus() {
 function loadRecentAwards() {
     const awardsLoading = document.getElementById('awardsLoading');
     const awardsContent = document.getElementById('awardsContent');
-    
+
     if (!awardsLoading || !awardsContent) return;
-    
+
     fetch('/api/sam/awards')
         .then(response => response.json())
         .then(data => {
             awardsLoading.classList.add('d-none');
             awardsContent.classList.remove('d-none');
-            
+
             if (data.status === 'success' && data.awards && data.awards.length > 0) {
                 let awardsHtml = '<div class="list-group">';
-                
+
                 data.awards.forEach(award => {
                     awardsHtml += `
                         <a href="${award.url}" target="_blank" class="list-group-item list-group-item-action">
@@ -287,7 +301,7 @@ function loadRecentAwards() {
                         </a>
                     `;
                 });
-                
+
                 awardsHtml += '</div>';
                 awardsContent.innerHTML = awardsHtml;
             } else {
@@ -303,7 +317,7 @@ function loadRecentAwards() {
             console.error('Error:', error);
             awardsLoading.classList.add('d-none');
             awardsContent.classList.remove('d-none');
-            
+
             awardsContent.innerHTML = `
                 <div class="alert alert-danger">
                     <i class="fas fa-exclamation-circle me-2"></i>

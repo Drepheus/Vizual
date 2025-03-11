@@ -343,6 +343,17 @@ button.file-upload:hover {
   margin-bottom: 15px;
 }
 
+/* Styling for buttons in message content */
+.message-text-wrapper .btn {
+  display: inline-block;
+  margin-top: 10px;
+}
+
+.message-bubble.system .message-content {
+  background: rgba(255, 193, 7, 0.15);
+  color: #eee;
+}
+
 .formatted-content code {
   font-family: 'Courier New', monospace;
   background-color: rgba(255, 255, 255, 0.1);
