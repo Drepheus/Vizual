@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Omi AI</title>
+    <!-- Open Graph / Social Media Preview Tags -->
+    <meta property="og:title" content="Omi AI">
+    <meta property="og:description" content="Intelligent AI assistant for general inquiries and government contracting.">
+    <meta property="og:image" content="{{ url_for('static', filename='images/omi-preview.png', _external=True) }}">
+    <meta property="og:url" content="{{ request.url }}">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
     <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/custom.css') }}" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/omi-theme.css') }}" rel="stylesheet">
