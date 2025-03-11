@@ -1,4 +1,3 @@
-
 {% extends "base.html" %}
 
 {% block content %}
@@ -41,10 +40,7 @@
                                     <li class="mb-2">Document upload</li>
                                 </ul>
                             </div>
-                            <button id="pro-plan-btn" class="btn btn-primary" 
-                                    data-plan="pro" data-price="2000">
-                                Upgrade to Pro
-                            </button>
+                            <a href="https://buy.stripe.com/5kA00qedv77nepG9AM" class="btn btn-primary">Upgrade to Pro</a>
                         </div>
                     </div>
                 </div>
@@ -68,10 +64,7 @@
                                     <li class="mb-2">API access</li>
                                 </ul>
                             </div>
-                            <button id="premium-plan-btn" class="btn btn-warning text-dark" 
-                                    data-plan="premium" data-price="4000">
-                                Upgrade to Premium
-                            </button>
+                            <a href="https://buy.stripe.com/aEU3cC1qJ77n95m4gi" class="btn btn-warning text-dark">Upgrade to Premium</a>
                         </div>
                     </div>
                 </div>
@@ -107,47 +100,10 @@
     </div>
 </div>
 
-<div id="payment-modal" class="modal fade">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Complete Your Payment</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div id="payment-form">
-                    <!-- Stripe Elements will be inserted here -->
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 {% endblock %}
 
 {% block scripts %}
-<script src="https://js.stripe.com/v3/"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Set up Stripe payment 
-        const proButton = document.getElementById('pro-plan-btn');
-        const premiumButton = document.getElementById('premium-plan-btn');
-        
-        proButton.addEventListener('click', function() {
-            initializePayment('pro', 2000);
-        });
-        
-        premiumButton.addEventListener('click', function() {
-            initializePayment('premium', 4000);
-        });
-        
-        function initializePayment(plan, amount) {
-            // This would be replaced with actual Stripe integration
-            const modal = new bootstrap.Modal(document.getElementById('payment-modal'));
-            modal.show();
-            
-            // Here you would normally initialize Stripe Elements
-            // and set up the payment form
-        }
-    });
+    // Direct payment links are now used instead of modal implementation
 </script>
 {% endblock %}
