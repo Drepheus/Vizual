@@ -10,6 +10,8 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(256))
     is_premium = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    last_login = db.Column(db.DateTime, default=datetime.utcnow)
+    is_admin = db.Column(db.Boolean, default=False)
     queries = db.relationship('Query', backref='user', lazy=True)
     documents = db.relationship('Document', backref='user', lazy=True)
     
@@ -17,6 +19,10 @@ class User(UserMixin, db.Model):
     query_count = db.Column(db.Integer, default=0)
     last_query_reset = db.Column(db.DateTime, default=datetime.utcnow)
     subscription_type = db.Column(db.String(20), default="free")  # free, pro, premium
+    
+    # Activity tracking
+    total_logins = db.Column(db.Integer, default=0)
+    last_active = db.Column(db.DateTime, default=datetime.utcnow)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)

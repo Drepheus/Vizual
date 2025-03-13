@@ -31,6 +31,12 @@ def register_routes(app):
         if request.method == 'POST':
             user = User.query.filter_by(email=request.form['email']).first()
             if user and user.check_password(request.form['password']):
+                # Update login tracking data
+                user.last_login = datetime.utcnow()
+                user.last_active = datetime.utcnow()
+                user.total_logins += 1
+                db.session.commit()
+                
                 login_user(user)
                 next_page = request.args.get('next')
                 if next_page:
@@ -130,6 +136,10 @@ def register_routes(app):
                 response=ai_response
             )
             db.session.add(query)
+            
+            # Update user's last active time
+            current_user.last_active = datetime.utcnow()
+            
             db.session.commit()
 
             # Add remaining queries info for free users
@@ -316,6 +326,145 @@ def register_routes(app):
         except Exception as e:
             logger.error(f"Error uploading file: {str(e)}")
             return jsonify(error=str(e)), 500
+
+    # Admin dashboard
+    @app.route('/admin')
+    @login_required
+    def admin_dashboard():
+        # Check if user is admin (for this example, we'll just check if user.id is 1)
+        if current_user.id != 1:  # You should replace this with a proper admin check
+            flash('Unauthorized access')
+            return redirect(url_for('index'))
+        return render_template('admin_dashboard.html')
+    
+    # Admin API endpoints
+    @app.route('/api/admin/users')
+    @login_required
+    def admin_users():
+        # Check if user is admin
+        if current_user.id != 1:  # You should replace this with a proper admin check
+            return jsonify(error="Unauthorized"), 403
+        
+        page = request.args.get('page', 1, type=int)
+        search = request.args.get('search', '')
+        per_page = 10
+        
+        query = User.query
+        
+        # Apply search filter if provided
+        if search:
+            query = query.filter(
+                (User.username.ilike(f'%{search}%')) |
+                (User.email.ilike(f'%{search}%'))
+            )
+        
+        # Get paginated users
+        pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+        users = pagination.items
+        
+        # Format user data for response
+        user_data = []
+        for user in users:
+            # Count queries made today
+            today = datetime.utcnow().date()
+            queries_today = Query.query.filter(
+                Query.user_id == user.id,
+                Query.created_at >= today
+            ).count()
+            
+            # Get last activity time (most recent query)
+            last_query = Query.query.filter_by(user_id=user.id).order_by(Query.created_at.desc()).first()
+            last_active = last_query.created_at if last_query else user.created_at
+            
+            # Get total queries
+            total_queries = Query.query.filter_by(user_id=user.id).count()
+            
+            user_data.append({
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'is_active': True,  # You might want to track this in your user model
+                'subscription_type': user.subscription_type,
+                'queries_today': queries_today,
+                'total_queries': total_queries,
+                'last_active': last_active.isoformat(),
+                'created_at': user.created_at.isoformat()
+            })
+        
+        return jsonify({
+            'users': user_data,
+            'pagination': {
+                'current_page': pagination.page,
+                'total_pages': pagination.pages,
+                'total_items': pagination.total
+            }
+        })
+    
+    @app.route('/api/admin/recent-queries')
+    @login_required
+    def admin_recent_queries():
+        # Check if user is admin
+        if current_user.id != 1:  # You should replace this with a proper admin check
+            return jsonify(error="Unauthorized"), 403
+        
+        # Get the 20 most recent queries across all users
+        recent_queries = db.session.query(Query, User.username).\
+            join(User, Query.user_id == User.id).\
+            order_by(Query.created_at.desc()).\
+            limit(20).all()
+        
+        queries_data = []
+        for query, username in recent_queries:
+            queries_data.append({
+                'id': query.id,
+                'username': username,
+                'query_text': query.query_text,
+                'created_at': query.created_at.isoformat()
+            })
+        
+        return jsonify({
+            'queries': queries_data
+        })
+    
+    @app.route('/api/admin/user/<int:user_id>/details')
+    @login_required
+    def admin_user_details(user_id):
+        # Check if user is admin
+        if current_user.id != 1:  # You should replace this with a proper admin check
+            return jsonify(error="Unauthorized"), 403
+        
+        # Get user
+        user = User.query.get_or_404(user_id)
+        
+        # Get user's recent activity (last 10 queries)
+        activity = Query.query.filter_by(user_id=user.id).\
+            order_by(Query.created_at.desc()).\
+            limit(10).all()
+        
+        # Format user data
+        user_data = {
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'is_active': True,  # You might want to track this in your user model
+            'subscription_type': user.subscription_type,
+            'total_queries': Query.query.filter_by(user_id=user.id).count(),
+            'created_at': user.created_at.isoformat()
+        }
+        
+        # Format activity data
+        activity_data = []
+        for item in activity:
+            activity_data.append({
+                'id': item.id,
+                'query_text': item.query_text,
+                'created_at': item.created_at.isoformat()
+            })
+        
+        return jsonify({
+            'user': user_data,
+            'activity': activity_data
+        })
 
     # Error handler for API routes
     @app.errorhandler(Exception)
