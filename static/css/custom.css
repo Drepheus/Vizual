@@ -630,3 +630,11 @@ button.file-upload:hover {
 .notification-close:hover {
     background-color: #555;
 }
+
+.error-notification {
+    border-left: 4px solid #ff3333;
+}
+
+.error-notification i {
+    color: #ff3333;
+}
