@@ -579,66 +579,54 @@ button.file-upload:hover {
     font-size: 1.1rem;
 }
 
-/* Leonardo AI Modal Styles */
-.leonardo-modal {
-    display: flex;
+/* Popup Blocked Notification */
+.popup-blocked-notification {
     position: fixed;
+    bottom: 20px;
+    right: 20px;
     z-index: 9999;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.8);
-    justify-content: center;
-    align-items: center;
+    max-width: 400px;
+    animation: slideIn 0.5s ease-out;
 }
 
-.leonardo-modal-content {
-    background-color: #1a1a1a;
-    border-radius: 12px;
-    width: 90%;
-    max-width: 1200px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-    overflow: hidden;
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+.notification-content {
+    background-color: #2d2d2d;
+    color: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    border-left: 4px solid #ff9800;
     display: flex;
     flex-direction: column;
-    max-height: 90vh;
 }
 
-.leonardo-modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px 20px;
-    background: linear-gradient(135deg, #000000, #222222);
-    border-bottom: 1px solid #333;
+.notification-content p {
+    margin: 0 0 10px 0;
+    line-height: 1.4;
 }
 
-.leonardo-modal-header h4 {
-    margin: 0;
+.notification-content i {
+    color: #ff9800;
+    margin-right: 8px;
+}
+
+.notification-close {
+    background-color: #444;
     color: white;
-    font-weight: 600;
-}
-
-.leonardo-close-btn {
-    background: none;
     border: none;
-    color: white;
-    font-size: 24px;
+    padding: 8px 12px;
+    border-radius: 4px;
     cursor: pointer;
-    padding: 0;
-    line-height: 1;
+    align-self: flex-end;
+    font-size: 0.9rem;
+    transition: background-color 0.2s;
 }
 
-.leonardo-modal-body {
-    padding: 0;
-    flex: 1;
-    overflow: hidden;
-}
-
-.leonardo-modal-body iframe {
-    display: block;
-    width: 100%;
-    height: 80vh;
-    border: none;
+.notification-close:hover {
+    background-color: #555;
 }
