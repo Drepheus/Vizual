@@ -638,3 +638,45 @@ button.file-upload:hover {
 .error-notification i {
     color: #ff3333;
 }
+
+.popup-blocked-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    max-width: 300px;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.notification-content {
+    background-color: #222;
+    color: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-left: 4px solid #4CAF50;
+}
+
+.notification-content.error-notification {
+    border-left: 4px solid #ff3333;
+}
+
+.notification-close {
+    background-color: #333;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    margin-top: 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.notification-close:hover {
+    background-color: #555;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
