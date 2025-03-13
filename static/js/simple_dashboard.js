@@ -26,7 +26,35 @@ function initializeSimpleDashboard() {
     // Handle image creation button
     if (imageCreationButton) {
         imageCreationButton.addEventListener('click', function() {
-            alert("Image creation feature is coming soon!");
+            // Create modal for the iframe
+            const modal = document.createElement('div');
+            modal.className = 'leonardo-modal';
+            modal.innerHTML = `
+                <div class="leonardo-modal-content">
+                    <div class="leonardo-modal-header">
+                        <h4>Instant Image Creation</h4>
+                        <button class="leonardo-close-btn">&times;</button>
+                    </div>
+                    <div class="leonardo-modal-body">
+                        <iframe src="https://app.leonardo.ai/realtime-gen" width="100%" height="600px" style="border:none;"></iframe>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Add close functionality
+            const closeBtn = modal.querySelector('.leonardo-close-btn');
+            closeBtn.addEventListener('click', function() {
+                document.body.removeChild(modal);
+            });
+            
+            // Close on outside click
+            window.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    document.body.removeChild(modal);
+                }
+            });
         });
     }
 
