@@ -15,9 +15,9 @@
 .background-video {
   position: absolute;
   top: 50%;
-  left: 50%;
-  width: 120%;
-  height: 120%;
+  left: 49.5%;
+  width: 200%;
+  height: 289%;
   transform: translate(-50%, -50%);
   z-index: -1;
   object-fit: contain;
