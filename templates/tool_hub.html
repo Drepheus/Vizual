@@ -28,6 +28,37 @@
     </div>
 </div>
 
+<!-- Edit Tool Modal -->
+<div class="modal fade" id="editToolModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Tool</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editToolForm">
+                    <input type="hidden" id="editToolCategory">
+                    <input type="hidden" id="editToolIndex">
+                    <div class="mb-3">
+                        <label for="editToolName" class="form-label">Tool Name</label>
+                        <input type="text" class="form-control" id="editToolName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editToolUrl" class="form-label">Tool URL</label>
+                        <input type="url" class="form-control" id="editToolUrl" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" id="deleteToolBtn">Delete</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="saveEditToolBtn">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% if session.get('is_admin') %}
 <!-- Add Tool Modal -->
 <div class="modal fade" id="addToolModal" tabindex="-1">
@@ -105,6 +136,82 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     {% endif %}
+
+    function displayTools(category, tools) {
+        const list = document.getElementById(category.replace(' ', '') + 'List');
+        if (!tools.length) {
+            list.innerHTML = '<li class="mb-2">No tools added yet</li>';
+            return;
+        }
+        list.innerHTML = tools.map((tool, index) => `
+            <li class="mb-2 d-flex justify-content-between align-items-center">
+                <a href="${tool.url}" target="_blank" class="text-decoration-none">
+                    ${tool.name}
+                </a>
+                {% if session.get('is_admin') %}
+                <button class="btn btn-sm btn-outline-secondary edit-tool-btn" 
+                        data-category="${category}"
+                        data-index="${index}"
+                        data-name="${tool.name}"
+                        data-url="${tool.url}">
+                    <i class="fas fa-edit"></i>
+                </button>
+                {% endif %}
+            </li>
+        `).join('');
+
+        // Add edit button handlers
+        const editBtns = list.querySelectorAll('.edit-tool-btn');
+        editBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const editModal = new bootstrap.Modal(document.getElementById('editToolModal'));
+                document.getElementById('editToolCategory').value = btn.dataset.category;
+                document.getElementById('editToolIndex').value = btn.dataset.index;
+                document.getElementById('editToolName').value = btn.dataset.name;
+                document.getElementById('editToolUrl').value = btn.dataset.url;
+                editModal.show();
+            });
+        });
+    }
+
+    function loadTools() {
+        const categories = ['Conversational', 'Productivity', 'Content Creation', 'Code', 'Image Generation', 'Audio Generation'];
+        categories.forEach(category => {
+            const tools = JSON.parse(localStorage.getItem(category) || '[]');
+            displayTools(category, tools);
+        });
+    }
+
+    // Edit tool handling
+    const editToolModal = new bootstrap.Modal(document.getElementById('editToolModal'));
+    const saveEditToolBtn = document.getElementById('saveEditToolBtn');
+    const deleteToolBtn = document.getElementById('deleteToolBtn');
+
+    saveEditToolBtn.addEventListener('click', () => {
+        const category = document.getElementById('editToolCategory').value;
+        const index = parseInt(document.getElementById('editToolIndex').value);
+        const name = document.getElementById('editToolName').value;
+        const url = document.getElementById('editToolUrl').value;
+
+        if (name && url) {
+            const tools = JSON.parse(localStorage.getItem(category) || '[]');
+            tools[index] = { name, url };
+            localStorage.setItem(category, JSON.stringify(tools));
+            loadTools();
+            editToolModal.hide();
+        }
+    });
+
+    deleteToolBtn.addEventListener('click', () => {
+        const category = document.getElementById('editToolCategory').value;
+        const index = parseInt(document.getElementById('editToolIndex').value);
+        
+        const tools = JSON.parse(localStorage.getItem(category) || '[]');
+        tools.splice(index, 1);
+        localStorage.setItem(category, JSON.stringify(tools));
+        loadTools();
+        editToolModal.hide();
+    });
 
     // Initial load
     loadTools();
