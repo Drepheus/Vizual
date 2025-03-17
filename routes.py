@@ -37,6 +37,8 @@ def register_routes(app):
                 db.session.commit()
 
                 login_user(user)
+                # Set admin status in session
+                session['is_admin'] = user.is_admin
                 next_page = request.args.get('next')
                 if next_page:
                     return redirect(next_page)
