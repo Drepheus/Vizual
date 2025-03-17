@@ -63,7 +63,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Load tools from localStorage
     function loadTools() {
-        const categories = ['Conversational', 'Productivity', 'Content Creation', 'Image Generation', 'Audio Generation'];
+        const categories = ['Conversational', 'Productivity', 'Content Creation', 'Code', 'Image Generation', 'Audio Generation'];
         categories.forEach(category => {
             const tools = JSON.parse(localStorage.getItem(category) || '[]');
             const list = document.getElementById(category.replace(' ', '') + 'List');
