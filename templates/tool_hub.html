@@ -126,10 +126,19 @@ document.addEventListener('DOMContentLoaded', function() {
         const url = document.getElementById('toolUrl').value;
 
         if (name && url) {
-            const tools = JSON.parse(localStorage.getItem(category) || '[]');
-            tools.push({ name, url });
-            localStorage.setItem(category, JSON.stringify(tools));
-            loadTools();
+            fetch('/api/tools', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name, url, category })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                }
+            });
             addToolModal.hide();
             document.getElementById('addToolForm').reset();
         }
@@ -174,10 +183,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function loadTools() {
+        const tools = {{ tools|tojson }};
         const categories = ['Conversational', 'Productivity', 'Content Creation', 'Code', 'Image Generation', 'Audio Generation'];
         categories.forEach(category => {
-            const tools = JSON.parse(localStorage.getItem(category) || '[]');
-            displayTools(category, tools);
+            const categoryTools = tools.filter(t => t.category === category);
+            displayTools(category, categoryTools);
         });
     }
 
