@@ -1,4 +1,3 @@
-
 import logging
 from datetime import datetime, timedelta
 from flask import render_template, redirect, url_for, flash, request, jsonify
@@ -36,7 +35,7 @@ def register_routes(app):
                 user.last_active = datetime.utcnow()
                 user.total_logins += 1
                 db.session.commit()
-                
+
                 login_user(user)
                 next_page = request.args.get('next')
                 if next_page:
@@ -45,6 +44,10 @@ def register_routes(app):
                     return redirect(url_for('simple_dashboard'))
             flash('Invalid email or password')
         return render_template('login.html')
+
+    @app.route('/tool-hub')
+    def tool_hub():
+        return render_template('tool_hub.html')
 
     @app.route('/register', methods=['GET', 'POST'])
     def register():
@@ -136,10 +139,10 @@ def register_routes(app):
                 response=ai_response
             )
             db.session.add(query)
-            
+
             # Update user's last active time
             current_user.last_active = datetime.utcnow()
-            
+
             db.session.commit()
 
             # Add remaining queries info for free users
@@ -195,7 +198,7 @@ def register_routes(app):
             queries = Query.query.filter_by(user_id=current_user.id)\
                 .order_by(Query.created_at.desc())\
                 .limit(10)
-            
+
             conversations = []
             for query in queries:
                 conversations.append({
@@ -204,12 +207,12 @@ def register_routes(app):
                     'response': query.response,
                     'created_at': query.created_at.isoformat()
                 })
-            
+
             return jsonify({
                 'status': 'success',
                 'conversations': conversations
             })
-            
+
         except Exception as e:
             logger.error(f"Error fetching recent conversations: {str(e)}")
             return jsonify({
@@ -336,7 +339,7 @@ def register_routes(app):
             flash('Unauthorized access')
             return redirect(url_for('index'))
         return render_template('admin_dashboard.html')
-    
+
     # Admin API endpoints
     @app.route('/api/admin/users')
     @login_required
@@ -344,24 +347,24 @@ def register_routes(app):
         # Check if user is admin
         if current_user.id != 1:  # You should replace this with a proper admin check
             return jsonify(error="Unauthorized"), 403
-        
+
         page = request.args.get('page', 1, type=int)
         search = request.args.get('search', '')
         per_page = 10
-        
+
         query = User.query
-        
+
         # Apply search filter if provided
         if search:
             query = query.filter(
                 (User.username.ilike(f'%{search}%')) |
                 (User.email.ilike(f'%{search}%'))
             )
-        
+
         # Get paginated users
         pagination = query.paginate(page=page, per_page=per_page, error_out=False)
         users = pagination.items
-        
+
         # Format user data for response
         user_data = []
         for user in users:
@@ -371,14 +374,14 @@ def register_routes(app):
                 Query.user_id == user.id,
                 Query.created_at >= today
             ).count()
-            
+
             # Get last activity time (most recent query)
             last_query = Query.query.filter_by(user_id=user.id).order_by(Query.created_at.desc()).first()
             last_active = last_query.created_at if last_query else user.created_at
-            
+
             # Get total queries
             total_queries = Query.query.filter_by(user_id=user.id).count()
-            
+
             user_data.append({
                 'id': user.id,
                 'username': user.username,
@@ -390,7 +393,7 @@ def register_routes(app):
                 'last_active': last_active.isoformat(),
                 'created_at': user.created_at.isoformat()
             })
-        
+
         return jsonify({
             'users': user_data,
             'pagination': {
@@ -399,20 +402,20 @@ def register_routes(app):
                 'total_items': pagination.total
             }
         })
-    
+
     @app.route('/api/admin/recent-queries')
     @login_required
     def admin_recent_queries():
         # Check if user is admin
         if current_user.id != 1:  # You should replace this with a proper admin check
             return jsonify(error="Unauthorized"), 403
-        
+
         # Get the 20 most recent queries across all users
         recent_queries = db.session.query(Query, User.username).\
             join(User, Query.user_id == User.id).\
             order_by(Query.created_at.desc()).\
             limit(20).all()
-        
+
         queries_data = []
         for query, username in recent_queries:
             queries_data.append({
@@ -421,26 +424,26 @@ def register_routes(app):
                 'query_text': query.query_text,
                 'created_at': query.created_at.isoformat()
             })
-        
+
         return jsonify({
             'queries': queries_data
         })
-    
+
     @app.route('/api/admin/user/<int:user_id>/details')
     @login_required
     def admin_user_details(user_id):
         # Check if user is admin
         if current_user.id != 1:  # You should replace this with a proper admin check
             return jsonify(error="Unauthorized"), 403
-        
+
         # Get user
         user = User.query.get_or_404(user_id)
-        
+
         # Get user's recent activity (last 10 queries)
         activity = Query.query.filter_by(user_id=user.id).\
             order_by(Query.created_at.desc()).\
             limit(10).all()
-        
+
         # Format user data
         user_data = {
             'id': user.id,
@@ -451,7 +454,7 @@ def register_routes(app):
             'total_queries': Query.query.filter_by(user_id=user.id).count(),
             'created_at': user.created_at.isoformat()
         }
-        
+
         # Format activity data
         activity_data = []
         for item in activity:
@@ -460,7 +463,7 @@ def register_routes(app):
                 'query_text': item.query_text,
                 'created_at': item.created_at.isoformat()
             })
-        
+
         return jsonify({
             'user': user_data,
             'activity': activity_data
