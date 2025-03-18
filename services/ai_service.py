@@ -66,9 +66,14 @@ Keep responses professional, concise, and immediately actionable."""
             {"role": "user", "content": query}
         ]
 
-        # Check if this needs SAM.gov data or web content
+        # Enhanced real-time data integration
+        data_keywords = ['current', 'latest', 'recent', 'today', 'now', 'live', 'real-time', 'update', 'news']
         sam_keywords = ['solicitation', 'sam.gov', 'contract', 'opportunity', 'bid', 'rfp', 'rfq', 'search', 'find', 'get']
-        needs_data = any(keyword in query.lower() for keyword in sam_keywords) or 'http' in query.lower()
+        
+        needs_data = (
+            any(keyword in query.lower() for keyword in data_keywords + sam_keywords) or 
+            'http' in query.lower()
+        )
 
         if needs_data:
             logger.debug("Processing data retrieval query")
@@ -77,13 +82,26 @@ Keep responses professional, concise, and immediately actionable."""
                 data_content = "\n\nLIVE DATA RETRIEVED:\n"
                 for result in web_results:
                     source_type = result.get('source', 'Web')
+                    timestamp = result.get('timestamp', '')
                     if source_type == 'SAM.gov':
-                        data_content += f"\n{result['content']}\n"
+                        data_content += f"\n[{timestamp}] SAM.gov Data:\n{result['content']}\n"
                     else:
-                        data_content += f"\nSource ({source_type}): {result['url']}\n"
-                        data_content += f"Content Summary:\n{result['content'][:1000]}...\n"
+                        data_content += f"\n[{timestamp}] Source ({source_type}): {result['url']}\n"
+                        if 'metadata' in result:
+                            metadata = result['metadata']
+                            data_content += f"Title: {metadata.get('title', 'N/A')}\n"
+                            data_content += f"Date: {metadata.get('date', 'N/A')}\n"
+                        data_content += f"Content Summary:\n{result['content'][:1500]}...\n"
 
-                messages.append({"role": "system", "content": f"Here is the live data that was just retrieved: {data_content}\nPlease analyze this data and provide insights based on the user's query."})
+                messages.append({
+                    "role": "system", 
+                    "content": (
+                        f"Here is the real-time data that was just retrieved (as of {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}):"
+                        f"{data_content}\n"
+                        "Please analyze this current data and provide insights based on the user's query. "
+                        "Make sure to reference the source and timestamp when citing information."
+                    )
+                })
 
         logger.debug(f"Sending request to OpenAI API with query: {query[:50]}...")
         logger.debug("Using model: gpt-4o-2024-11-20")
