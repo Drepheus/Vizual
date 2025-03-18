@@ -318,29 +318,56 @@ button.file-upload:hover {
 
 /* Formatted content styling */
 .formatted-content {
-  line-height: 1.6;
+  line-height: 1.8;
   white-space: pre-wrap;
+  font-size: 1.05rem;
+  color: #f0f0f0;
 }
 
 .formatted-content strong {
-  font-weight: 600;
+  font-weight: 700;
   color: #ffffff;
+  text-shadow: 0 0 1px rgba(255,255,255,0.1);
 }
 
 .formatted-content em {
   font-style: italic;
   color: #e2e2e2;
+  letter-spacing: 0.2px;
 }
 
 .formatted-content a {
-  color: #4d9aff;
+  color: #60a5fa;
   text-decoration: underline;
+  transition: color 0.2s ease;
+}
+
+.formatted-content a:hover {
+  color: #93c5fd;
 }
 
 .formatted-content ul, 
 .formatted-content ol {
-  margin-left: 20px;
-  margin-bottom: 15px;
+  margin: 1rem 0 1rem 1.5rem;
+  padding-left: 0.5rem;
+}
+
+.formatted-content li {
+  margin-bottom: 0.5rem;
+}
+
+.formatted-content p {
+  margin-bottom: 1rem;
+}
+
+.message-bubble {
+  max-width: 85%;
+  margin-bottom: 1rem;
+}
+
+.message-content {
+  padding: 1rem;
+  border-radius: 1rem;
 }
 
 /* Styling for buttons in message content */
