@@ -1,18 +1,17 @@
-
 {% extends "base.html" %}
 
 {% block content %}
 <div class="container mt-5">
     <h1 class="text-center mb-4">AI Tool Hub</h1>
     <p class="text-center mb-5">A curated collection of the best AI tools across different categories</p>
-    
+
     <div class="row" id="toolCategories">
         {% for category in ['Conversational', 'Productivity', 'Content Creation', 'Code', 'Image Generation', 'Audio Generation'] %}
         <div class="col-md-4 mb-4">
-            <div class="card h-100">
+            <div class="card h-100 tool-card">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="card-title">{{ category }}</h5>
+                    <div class="category-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title"><i class="fas fa-{{ category|lower|replace(' ', '-') }} me-2"></i>{{ category }}</h5>
                         {% if session.get('is_admin') %}
                         <button class="btn btn-sm btn-outline-primary add-tool-btn" data-category="{{ category }}">
                             <i class="fas fa-plus"></i>
@@ -214,7 +213,7 @@ document.addEventListener('DOMContentLoaded', function() {
     deleteToolBtn.addEventListener('click', () => {
         const category = document.getElementById('editToolCategory').value;
         const index = parseInt(document.getElementById('editToolIndex').value);
-        
+
         const tools = JSON.parse(localStorage.getItem(category) || '[]');
         tools.splice(index, 1);
         localStorage.setItem(category, JSON.stringify(tools));
@@ -226,4 +225,5 @@ document.addEventListener('DOMContentLoaded', function() {
     loadTools();
 });
 </script>
+<script src="{{ url_for('static', filename='js/tool_hub.js') }}"></script>
 {% endblock %}
