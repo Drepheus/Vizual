@@ -3,7 +3,7 @@
 
 {% block content %}
 <div class="landing-container">
-  <video autoplay muted loop id="bgVideo" class="background-video">
+  <video autoplay muted loop playsinline disablePictureInPicture disableRemotePlayback id="bgVideo" class="background-video">
     <source src="{{ url_for('static', filename='videos/14618955-uhd_2160_3840_24fps.mp4') }}" type="video/mp4">
   </video>
   <div class="container d-flex flex-column justify-content-center align-items-center" style="height: 100%;">
@@ -25,4 +25,56 @@
     <a href="{{ url_for('dashboard') }}">Government Contractors -> </a>
   </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Get the video element
+    const video = document.getElementById('bgVideo');
+    
+    // Force video to play without controls
+    video.controls = false;
+    
+    // Ensure video is muted and set to loop
+    video.muted = true;
+    video.loop = true;
+    
+    // Handle any errors with video loading/playing
+    video.addEventListener('error', function(e) {
+      console.error('Video error:', e);
+    });
+    
+    // Try to start the video immediately
+    video.play().catch(function(e) {
+      console.error('Auto-play failed:', e);
+      // Add a simple play button if autoplay fails
+      const playButton = document.createElement('button');
+      playButton.textContent = 'Play Background';
+      playButton.className = 'btn-play-bg';
+      playButton.style.position = 'absolute';
+      playButton.style.bottom = '10px';
+      playButton.style.left = '10px';
+      playButton.style.zIndex = '100';
+      playButton.style.opacity = '0.7';
+      playButton.style.background = 'rgba(0,0,0,0.5)';
+      playButton.style.color = 'white';
+      playButton.style.border = 'none';
+      playButton.style.borderRadius = '5px';
+      playButton.style.padding = '5px 10px';
+      
+      playButton.addEventListener('click', function() {
+        video.play();
+        this.remove();
+      });
+      
+      document.querySelector('.landing-container').appendChild(playButton);
+    });
+    
+    // Prevent right-click on video to disable context menu
+    video.addEventListener('contextmenu', function(e) {
+      e.preventDefault();
+    });
+  });
+</script>
 {% endblock %}
