@@ -457,7 +457,43 @@ function loadRecentConversations() {
                     
                     conversationPreview.addEventListener('click', function() {
                         const queryInput = document.getElementById('query-input');
-                        if (queryInput) {
+                        const messagesContainer = document.getElementById('messages-container');
+                        
+                        if (queryInput && messagesContainer) {
+                            // Clear existing messages except the first welcome message
+                            while (messagesContainer.children.length > 1) {
+                                messagesContainer.removeChild(messagesContainer.lastChild);
+                            }
+                            
+                            // Add the query as a user message
+                            const messageDiv = document.createElement('div');
+                            messageDiv.className = 'message-bubble user';
+                            messageDiv.innerHTML = `
+                                <div class="message-content">
+                                    <div class="formatted-content">${conversation.query_text}</div>
+                                </div>
+                            `;
+                            messagesContainer.appendChild(messageDiv);
+                            
+                            // Add the response as an AI message
+                            const responseDiv = document.createElement('div');
+                            responseDiv.className = 'message-bubble ai';
+                            responseDiv.innerHTML = `
+                                <div class="message-content">
+                                    <div class="ai-response-header">Omi</div>
+                                    <div class="formatted-content">${marked ? marked.parse(conversation.response) : conversation.response}</div>
+                                </div>
+                            `;
+                            messagesContainer.appendChild(responseDiv);
+                            
+                            // Scroll to the bottom of the messages container
+                            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                            
+                            // Set the query in the input field
+                            queryInput.value = conversation.query_text;
+                            queryInput.focus();
+                        } else if (queryInput) {
+                            // Fallback if message container isn't found
                             queryInput.value = conversation.query_text;
                             queryInput.focus();
                         }
