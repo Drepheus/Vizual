@@ -5,6 +5,13 @@
     <h1 class="text-center mb-4">AI Tool Hub</h1>
     <p class="text-center mb-5">A curated collection of the best AI tools across different categories</p>
 
+    <div class="mb-4">
+        <div class="input-group">
+            <span class="input-group-text"><i class="fas fa-search"></i></span>
+            <input type="text" class="form-control" id="toolSearch" placeholder="Search for tools...">
+        </div>
+    </div>
+
     <div class="row" id="toolCategories">
         {% for category in ['Conversational', 'Productivity', 'Content Creation', 'Code', 'Image Generation', 'Audio Generation'] %}
         <div class="col-md-4 mb-4">
@@ -91,20 +98,6 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    function displayTools() {
-        const categories = ['Conversational', 'Productivity', 'Content Creation', 'Code', 'Image Generation', 'Audio Generation'];
-        categories.forEach(category => {
-            const tools = {{ tools|tojson }}.filter(t => t.category === category);
-            const list = document.getElementById(category.replace(' ', '') + 'List');
-            list.innerHTML = tools.map(tool => `
-                <li class="mb-2">
-                    <a href="${tool.url}" target="_blank" class="text-decoration-none">
-                        ${tool.name}
-                    </a>
-                </li>
-            `).join('');
-        });
-    }
 
     {% if session.get('is_admin') %}
     // Modal handling
@@ -150,15 +143,15 @@ document.addEventListener('DOMContentLoaded', function() {
             list.innerHTML = '<li class="mb-2">No tools added yet</li>';
             return;
         }
-        list.innerHTML = tools.map((tool, index) => `
+        list.innerHTML = tools.map((tool) => `
             <li class="mb-2 d-flex justify-content-between align-items-center">
-                <a href="${tool.url}" target="_blank" class="text-decoration-none">
+                <a href="${tool.url}" target="_blank" class="text-decoration-none tool-link">
                     ${tool.name}
                 </a>
                 {% if session.get('is_admin') %}
                 <button class="btn btn-sm btn-outline-secondary edit-tool-btn" 
                         data-category="${category}"
-                        data-index="${index}"
+                        data-index="${tool.id}"
                         data-name="${tool.name}"
                         data-url="${tool.url}">
                     <i class="fas fa-edit"></i>
@@ -179,6 +172,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 editModal.show();
             });
         });
+        
+        // Ensure tool links work properly
+        const toolLinks = list.querySelectorAll('.tool-link');
+        toolLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                // Only necessary if we need additional handling
+                // Otherwise the target="_blank" will handle opening in new tab
+                // This ensures the click actually works
+                const url = link.getAttribute('href');
+                if (url) {
+                    window.open(url, '_blank');
+                }
+            });
+        });
     }
 
     function loadTools() {
@@ -196,28 +203,43 @@ document.addEventListener('DOMContentLoaded', function() {
     const deleteToolBtn = document.getElementById('deleteToolBtn');
 
     saveEditToolBtn.addEventListener('click', () => {
-        const category = document.getElementById('editToolCategory').value;
-        const index = parseInt(document.getElementById('editToolIndex').value);
+        const toolId = document.getElementById('editToolIndex').value;
         const name = document.getElementById('editToolName').value;
         const url = document.getElementById('editToolUrl').value;
 
         if (name && url) {
-            const tools = JSON.parse(localStorage.getItem(category) || '[]');
-            tools[index] = { name, url };
-            localStorage.setItem(category, JSON.stringify(tools));
-            loadTools();
+            fetch(`/api/tools/${toolId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name, url })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                }
+            });
             editToolModal.hide();
         }
     });
 
     deleteToolBtn.addEventListener('click', () => {
-        const category = document.getElementById('editToolCategory').value;
-        const index = parseInt(document.getElementById('editToolIndex').value);
+        const toolId = document.getElementById('editToolIndex').value;
 
-        const tools = JSON.parse(localStorage.getItem(category) || '[]');
-        tools.splice(index, 1);
-        localStorage.setItem(category, JSON.stringify(tools));
-        loadTools();
+        fetch(`/api/tools/${toolId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            }
+        });
         editToolModal.hide();
     });
 
