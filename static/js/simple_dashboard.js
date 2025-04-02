@@ -121,14 +121,61 @@ function loadRecentConversations() {
         .then(response => response.json())
         .then(data => {
             if (data.conversations && data.conversations.length > 0) {
-                recentConversationsDiv.innerHTML = data.conversations
-                    .map(conv => `
-                        <div class="conversation-item">
-                            <div class="query-preview">${conv.query_text}</div>
-                            <div class="timestamp">${new Date(conv.created_at).toLocaleString()}</div>
-                        </div>
-                    `)
-                    .join('');
+                recentConversationsDiv.innerHTML = '';
+                
+                // Create conversation items with click handlers
+                data.conversations.forEach(conv => {
+                    const conversationItem = document.createElement('div');
+                    conversationItem.className = 'conversation-item';
+                    conversationItem.innerHTML = `
+                        <div class="query-preview">${conv.query_text}</div>
+                        <div class="timestamp">${new Date(conv.created_at).toLocaleString()}</div>
+                    `;
+                    
+                    // Add click event listener
+                    conversationItem.addEventListener('click', function() {
+                        // Find the query input and messages container
+                        const queryInput = document.getElementById('query-input');
+                        const messagesContainer = document.getElementById('messages-container');
+                        
+                        if (queryInput && messagesContainer) {
+                            // Clear existing messages except the first welcome message
+                            while (messagesContainer.children.length > 1) {
+                                messagesContainer.removeChild(messagesContainer.lastChild);
+                            }
+                            
+                            // Add the query as a user message
+                            const messageDiv = document.createElement('div');
+                            messageDiv.className = 'message-bubble user';
+                            messageDiv.innerHTML = `
+                                <div class="message-content">
+                                    <div class="formatted-content">${conv.query_text}</div>
+                                </div>
+                            `;
+                            messagesContainer.appendChild(messageDiv);
+                            
+                            // Add the response as an AI message
+                            const responseDiv = document.createElement('div');
+                            responseDiv.className = 'message-bubble ai';
+                            responseDiv.innerHTML = `
+                                <div class="message-content">
+                                    <div class="ai-response-header">Omi</div>
+                                    <div class="formatted-content">${marked.parse(conv.response)}</div>
+                                </div>
+                            `;
+                            messagesContainer.appendChild(responseDiv);
+                            
+                            // Scroll to the bottom of the messages container
+                            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                            
+                            // Set the query in the input field
+                            queryInput.value = conv.query_text;
+                            queryInput.focus();
+                        }
+                    });
+                    
+                    recentConversationsDiv.appendChild(conversationItem);
+                });
             } else {
                 recentConversationsDiv.innerHTML = '<div class="text-center py-3 text-muted"><small>No recent conversations</small></div>';
             }
