@@ -209,9 +209,34 @@ function initializeGovConDashboard() {
     // Handle document upload form if it exists
     const documentUploadForm = document.getElementById('documentUploadForm');
     if (documentUploadForm) {
-        documentUploadForm.addEventListener('submit', function(e) {
+        documentUploadForm.addEventListener('submit', async function(e) {
             e.preventDefault();
-            alert('Document analysis feature is coming soon!');
+            
+            const formData = new FormData(this);
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            
+            try {
+                loadingSpinner.classList.remove('d-none');
+                
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('Document uploaded successfully!');
+                    this.reset();
+                } else {
+                    alert(result.error || 'Failed to upload document');
+                }
+            } catch (error) {
+                console.error('Upload error:', error);
+                alert('Error uploading document. Please try again.');
+            } finally {
+                loadingSpinner.classList.add('d-none');
+            }
         });
     }
 }
