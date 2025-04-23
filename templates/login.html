@@ -2,24 +2,29 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="auth-container">
-    <div class="auth-card">
-        <h2>Login</h2>
-        <form method="POST" action="{{ url_for('login') }}">
-            <div class="mb-4">
-                <label for="email" class="form-label">Email address</label>
-                <input type="email" class="form-control" id="email" name="email" required>
+<div class="landing-container">
+    <video autoplay muted loop playsinline id="bgVideo" class="background-video">
+        <source src="{{ url_for('static', filename='videos/14618955-uhd_2160_3840_24fps.mp4') }}" type="video/mp4">
+    </video>
+    <div class="auth-container">
+        <div class="auth-card">
+            <h1 class="logo-text mb-4">Omi AI</h1>
+            <form method="POST" action="{{ url_for('login') }}">
+                <div class="mb-4">
+                    <label for="email" class="form-label">Email address</label>
+                    <input type="email" class="form-control" id="email" name="email" required>
+                </div>
+                <div class="mb-4">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="password" name="password" required>
+                </div>
+                <div class="d-grid">
+                    <button type="submit" class="btn-use-omi w-100">Login</button>
+                </div>
+            </form>
+            <div class="text-center mt-4">
+                <p>Don't have an account? <a href="{{ url_for('register') }}" class="text-white">Register here</a></p>
             </div>
-            <div class="mb-4">
-                <label for="password" class="form-label">Password</label>
-                <input type="password" class="form-control" id="password" name="password" required>
-            </div>
-            <div class="d-grid">
-                <button type="submit" class="btn btn-primary">Login</button>
-            </div>
-        </form>
-        <div class="text-center mt-4">
-            <p>Don't have an account? <a href="{{ url_for('register') }}">Register here</a></p>
         </div>
     </div>
 </div>

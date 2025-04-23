@@ -14,7 +14,7 @@ def register_routes(app):
 
     @app.route('/')
     def index():
-        return render_template('landing.html')
+        return redirect(url_for('login'))
 
     @app.route('/home')
     def home():
@@ -40,7 +40,7 @@ def register_routes(app):
                 # Set admin status in session
                 session['is_admin'] = user.is_admin
                 next_page = request.args.get('next')
-                if next_page:
+                if next_page and next_page != url_for('index'):
                     return redirect(next_page)
                 else:
                     return redirect(url_for('simple_dashboard'))
