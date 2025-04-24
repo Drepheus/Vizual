@@ -3,6 +3,9 @@
 
 {% block content %}
 <div class="landing-container">
+  <video autoplay muted loop playsinline id="bgVideo" class="background-video">
+    <source src="{{ url_for('static', filename='videos/14618955-uhd_2160_3840_24fps.mp4') }}" type="video/mp4">
+  </video>
   <div class="container d-flex flex-column justify-content-center align-items-center" style="height: 100%;">
     <!-- Logo Container -->
     <div class="logo-container">
@@ -11,13 +14,15 @@
     
     <!-- Navigation Buttons -->
     <div class="action-buttons">
-      <a href="{{ url_for('dashboard') }}" class="btn-use-omi">Government Contracting Dashboard</a>
+      <a href="{{ url_for('simple_dashboard') }}" class="btn-use-omi">Use Omi</a>
       <div class="tool-hub-link">
         <a href="{{ url_for('tool_hub') }}" class="ai-tool-hub">AI Tool Hub ~></a>
       </div>
     </div>
   </div>
   
-  <!-- Removed redundant corner link -->
+  <div class="corner-text">
+    <a href="{{ url_for('dashboard') }}">Government Contractors -> </a>
+  </div>
 </div>
 {% endblock %}

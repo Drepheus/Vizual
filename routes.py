@@ -20,7 +20,10 @@ def register_routes(app):
     def home():
         return render_template('index.html')
 
-    # Simple dashboard has been removed
+    @app.route('/simple-dashboard')
+    @login_required
+    def simple_dashboard():
+        return render_template('simple_dashboard.html')
 
     @app.route('/login', methods=['GET', 'POST'])
     def login():
@@ -40,7 +43,7 @@ def register_routes(app):
                 if next_page and next_page != url_for('index'):
                     return redirect(next_page)
                 else:
-                    return redirect(url_for('dashboard'))
+                    return redirect(url_for('simple_dashboard'))
             flash('Invalid email or password')
         return render_template('login.html')
 
@@ -94,7 +97,7 @@ def register_routes(app):
             db.session.add(user)
             db.session.commit()
             login_user(user)
-            return redirect(url_for('dashboard'))
+            return redirect(url_for('simple_dashboard'))
         return render_template('register.html')
 
     @app.route('/logout')

@@ -1,12 +1,12 @@
 /* Custom styles on top of Bootstrap dark theme */
 :root {
-    --gov-blue: #663399;
-    --gov-red: #8B0000;
-    --dark-bg: #1a1a1a;
-    --card-bg: #2d2d2d;
-    --card-hover: #363636;
-    --text-primary: #e0e0e0;
-    --text-secondary: #b0b0b0;
+    --gov-blue: #000000;
+    --gov-red: #000000;
+    --dark-bg: #000000;
+    --card-bg: #121212;
+    --card-hover: #1a1a1a;
+    --text-primary: #ffffff;
+    --text-secondary: #cccccc;
 }
 
 body {
