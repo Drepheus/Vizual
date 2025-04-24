@@ -58,6 +58,11 @@
                         </li>
                     {% endif %}
                 </ul>
+                <!-- Theme Toggle Button -->
+                <div class="theme-toggle-btn" id="themeToggle">
+                    <i class="fas fa-sun theme-toggle-icon light-theme-icon"></i>
+                    <i class="fas fa-moon theme-toggle-icon dark-theme-icon"></i>
+                </div>
             </div>
         </div>
     </nav>
@@ -85,6 +90,37 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Theme Toggle Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const htmlElement = document.documentElement;
+            const themeToggle = document.getElementById('themeToggle');
+            
+            // Check if user has a saved theme preference
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'light') {
+                htmlElement.classList.add('light-theme');
+                htmlElement.setAttribute('data-bs-theme', 'light');
+            }
+            
+            // Theme toggle click handler
+            themeToggle.addEventListener('click', function() {
+                if (htmlElement.classList.contains('light-theme')) {
+                    // Switch to dark theme
+                    htmlElement.classList.remove('light-theme');
+                    htmlElement.setAttribute('data-bs-theme', 'dark');
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    // Switch to light theme
+                    htmlElement.classList.add('light-theme');
+                    htmlElement.setAttribute('data-bs-theme', 'light');
+                    localStorage.setItem('theme', 'light');
+                }
+            });
+        });
+    </script>
+    
     {% block scripts %}{% endblock %}
 </body>
 <footer class="mt-auto py-3 text-center">

@@ -1,5 +1,6 @@
-/* Custom styles on top of Bootstrap dark theme */
+/* Custom styles that support both dark and light themes */
 :root {
+    /* Dark theme (default) */
     --gov-blue: #000000;
     --gov-red: #000000;
     --dark-bg: #000000;
@@ -7,6 +8,81 @@
     --card-hover: #1a1a1a;
     --text-primary: #ffffff;
     --text-secondary: #cccccc;
+
+    /* Light theme variables - only applied when .light-theme class is added to html element */
+    --light-gov-blue: #1976D2;
+    --light-gov-red: #F44336;
+    --light-bg: #f5f5f5;
+    --light-card-bg: #ffffff;
+    --light-card-hover: #f0f0f0;
+    --light-text-primary: #333333;
+    --light-text-secondary: #666666;
+}
+
+/* Light theme styles */
+html.light-theme {
+    --gov-blue: var(--light-gov-blue);
+    --gov-red: var(--light-gov-red);
+    --dark-bg: var(--light-bg);
+    --card-bg: var(--light-card-bg);
+    --card-hover: var(--light-card-hover);
+    --text-primary: var(--light-text-primary);
+    --text-secondary: var(--light-text-secondary);
+}
+
+html.light-theme body {
+    background-color: var(--light-bg);
+    color: var(--light-text-primary);
+}
+
+html.light-theme .navbar {
+    background-color: var(--light-card-bg);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+html.light-theme .navbar-dark .navbar-nav .nav-link {
+    color: var(--light-text-primary);
+}
+
+html.light-theme .btn-primary {
+    background: linear-gradient(135deg, var(--light-gov-blue), #64B5F6) !important;
+    color: white !important;
+}
+
+html.light-theme .solid-background {
+    background: linear-gradient(135deg, #e6f0ff 0%, #ffffff 100%);
+}
+
+/* Light theme toggle button styling */
+.theme-toggle-btn {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding: 0.25rem 0.5rem;
+    margin-left: 1rem;
+    border-radius: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+html.light-theme .theme-toggle-btn {
+    border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.theme-toggle-icon {
+    font-size: 1rem;
+}
+
+html:not(.light-theme) .light-theme-icon {
+    display: none;
+}
+
+html.light-theme .dark-theme-icon {
+    display: none;
+}
+
+html.light-theme .light-theme-icon {
+    display: inline-block;
 }
 
 body {
