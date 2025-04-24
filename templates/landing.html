@@ -14,15 +14,13 @@
     
     <!-- Navigation Buttons -->
     <div class="action-buttons">
-      <a href="{{ url_for('simple_dashboard') }}" class="btn-use-omi">Use Omi</a>
+      <a href="{{ url_for('dashboard') }}" class="btn-use-omi">Government Contracting Dashboard</a>
       <div class="tool-hub-link">
         <a href="{{ url_for('tool_hub') }}" class="ai-tool-hub">AI Tool Hub ~></a>
       </div>
     </div>
   </div>
   
-  <div class="corner-text">
-    <a href="{{ url_for('dashboard') }}">Government Contractors -> </a>
-  </div>
+  <!-- Removed redundant corner link -->
 </div>
 {% endblock %}

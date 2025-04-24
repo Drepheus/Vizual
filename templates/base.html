@@ -29,9 +29,7 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% if current_user.is_authenticated %}{{ url_for('simple_dashboard') }}{% else %}{{ url_for('register') }}{% endif %}">Omi Chat</a>
-                    </li>
+                    <!-- Removed Omi Chat nav item -->
                     {% if current_user.is_authenticated %}
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('dashboard') }}">Gov Con Dashboard</a>
