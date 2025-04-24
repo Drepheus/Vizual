@@ -10,7 +10,8 @@
     --text-secondary: #cccccc;
 
     /* Light theme variables - only applied when .light-theme class is added to html element */
-    --light-gov-blue: #0d3b66;
+    --light-gov-blue: #1d5c96;
+    --light-gov-blue-light: #60a3d9;
     --light-gov-red: #F44336;
     --light-bg: #f5f5f5;
     --light-card-bg: #ffffff;
@@ -45,7 +46,7 @@ html.light-theme .navbar-dark .navbar-nav .nav-link {
 }
 
 html.light-theme .btn-primary {
-    background: linear-gradient(135deg, var(--light-gov-blue), #3a6ea5) !important;
+    background: linear-gradient(135deg, var(--light-gov-blue), var(--light-gov-blue-light)) !important;
     color: white !important;
 }
 
@@ -524,7 +525,7 @@ html.light-theme .query-history .accordion-item {
 
 /* Light theme premium badge */
 html.light-theme .premium-badge {
-    background: linear-gradient(135deg, var(--light-gov-blue), #3a6ea5);
+    background: linear-gradient(135deg, var(--light-gov-blue), var(--light-gov-blue-light));
 }
 
 .form-control {

@@ -49,7 +49,7 @@ html.light-theme .solid-background {
 
 /* Light theme for logo text */
 html.light-theme .logo-text {
-  background: linear-gradient(90deg, #0d3b66 0%, #3a6ea5 50%, #0d3b66 100%);
+  background: linear-gradient(90deg, #1d5c96 0%, #60a3d9 50%, #1d5c96 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -83,14 +83,14 @@ html.light-theme .logo-text {
 /* Light theme for buttons */
 html.light-theme .btn-use-omi {
   color: #ffffff;
-  background-color: #0d3b66;
-  border: 2px solid #3a6ea5;
-  box-shadow: 0 4px 10px rgba(13, 59, 102, 0.3);
+  background: linear-gradient(135deg, #1d5c96, #60a3d9);
+  border: none;
+  box-shadow: 0 4px 10px rgba(29, 92, 150, 0.3);
 }
 
 html.light-theme .btn-use-omi:hover {
-  box-shadow: 0 8px 16px rgba(13, 59, 102, 0.4);
-  border-color: #3a6ea5;
+  box-shadow: 0 8px 16px rgba(29, 92, 150, 0.4);
+  transform: translateY(-3px);
 }
 
 .tool-hub-link {
@@ -114,11 +114,11 @@ html.light-theme .btn-use-omi:hover {
 
 /* Light theme for text links */
 html.light-theme .ai-tool-hub {
-  color: #0d3b66;
+  color: #1d5c96;
 }
 
 html.light-theme .ai-tool-hub:hover {
-  color: #3a6ea5;
+  color: #60a3d9;
 }
 
 .corner-text {
