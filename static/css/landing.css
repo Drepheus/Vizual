@@ -21,6 +21,11 @@
   background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
 }
 
+/* Light theme for the background */
+html.light-theme .solid-background {
+  background: linear-gradient(135deg, #e6f0ff 0%, #ffffff 100%);
+}
+
 .logo-container {
   display: flex;
   flex-direction: column;
@@ -37,6 +42,14 @@
   color: #ffffff;
   text-align: center;
   background: linear-gradient(90deg, #888888 0%, #cccccc 50%, #888888 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Light theme for logo text */
+html.light-theme .logo-text {
+  background: linear-gradient(90deg, #1976D2 0%, #64B5F6 50%, #1976D2 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
