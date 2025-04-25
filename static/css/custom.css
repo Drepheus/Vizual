@@ -113,11 +113,15 @@ body {
 .file-upload-section input[type="submit"],
 .file-upload-section .btn,
 button.file-upload {
-  background-color: #000000 !important;
+  background: linear-gradient(135deg, #000000, #444444) !important;
   color: #ffffff !important;
-  border: 1px solid #333333 !important;
+  border: none !important;
+  border-radius: 23px;
+  padding: 10px 20px;
+  font-weight: 600;
   min-height: 44px; /* Better touch target for mobile */
   -webkit-tap-highlight-color: rgba(0,0,0,0); /* Remove tap highlight on mobile */
+  transition: all 0.3s ease;
 }
 
 .file-upload-section button:hover,
@@ -125,7 +129,9 @@ button.file-upload {
 .file-upload-section input[type="submit"]:hover,
 .file-upload-section .btn:hover,
 button.file-upload:hover {
-  background-color: #333333 !important;
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, #222222, #555555) !important;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
 }
 
 /* Responsive styles for mobile */
@@ -358,7 +364,48 @@ html.light-theme .query-history .accordion-item {
 
 /* Mobile-friendly file upload */
 #mobile-upload-btn {
-    border-radius: 0;
+    border-radius: 23px;
+}
+
+/* Stylized file input for document analysis */
+.upload-zone input[type="file"].custom-file-button {
+    position: relative;
+    background: linear-gradient(135deg, #000000, #444444) !important;
+    border: none !important;
+    border-radius: 23px;
+    color: #ffffff !important;
+    padding: 10px 20px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+}
+
+.upload-zone input[type="file"].custom-file-button:hover {
+    transform: translateY(-2px);
+    background: linear-gradient(135deg, #222222, #555555) !important;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Override browser-specific file button styling */
+.upload-zone input[type="file"].custom-file-button::-webkit-file-upload-button,
+.upload-zone input[type="file"].custom-file-button::file-selector-button {
+    background: transparent !important;
+    color: #ffffff !important;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 0px 10px 0px 0px !important;
+    margin-right: 10px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+}
+
+html.light-theme .upload-zone input[type="file"].custom-file-button {
+    background: linear-gradient(135deg, var(--light-gov-blue), var(--light-gov-blue-light)) !important;
+    color: #ffffff !important;
 }
 
 /* File info display */
@@ -637,15 +684,15 @@ html.light-theme .form-control[readonly] {
     background: linear-gradient(135deg, #000000, #444444) !important;
     border: none !important;
     padding: 0.75rem 1.5rem;
-    border-radius: 8px;
+    border-radius: 23px;
     font-weight: 600;
     color: #ffffff !important;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .btn-primary:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
     background: linear-gradient(135deg, #222222, #555555) !important;
 }
 
