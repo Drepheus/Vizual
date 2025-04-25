@@ -441,18 +441,18 @@ body {
 .file-upload-section input[type="submit"],
 button.file-upload {
   color: #ffffff !important;
-  background-color: #000000 !important;
-  background: #000000 !important;
-  border-radius: 6px;
-  padding: 8px 15px;
+  background: linear-gradient(135deg, #1a1a1a, #333333) !important;
+  border-radius: 25px !important;
+  padding: 10px 25px !important;
   visibility: visible !important;
-  border: 1px solid #333333 !important;
+  border: none !important;
   opacity: 1 !important;
   display: flex !important;
   align-items: center;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   margin: 5px 0;
-  box-shadow: none !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
+  font-weight: 500;
 }
 
 .file-upload-section button:hover,
@@ -461,11 +461,10 @@ button.file-upload {
 .file-upload-section input[type="button"]:hover,
 .file-upload-section input[type="submit"]:hover,
 button.file-upload:hover {
-  background-color: #333333 !important;
-  background: #333333 !important;
+  background: linear-gradient(135deg, #333333, #444444) !important;
   color: #ffffff !important;
   transform: translateY(-2px);
-  border-color: #444444 !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
 }
 
 #file-upload-status {
