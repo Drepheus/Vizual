@@ -280,7 +280,7 @@ function loadSamStatus() {
                 samDataContent.innerHTML = `
                     <div class="alert alert-warning">
                         <i class="fas fa-exclamation-triangle me-2"></i>
-                        No entity data available.
+                        <span class="text-dark fw-bold">No entity data available.</span>
                     </div>
                 `;
             }
