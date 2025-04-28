@@ -65,6 +65,17 @@ function initializeGovConDashboard() {
                     });
 
                     resultsHtml += `</div>`;
+                    
+                    // If there's a note about sample data, display it
+                    if (data.note) {
+                        resultsHtml += `
+                            <div class="alert alert-info mt-3">
+                                <i class="fas fa-info-circle me-2"></i>
+                                ${data.note}
+                            </div>
+                        `;
+                    }
+                    
                     searchResults.innerHTML = resultsHtml;
                 } else {
                     searchResults.innerHTML = `
