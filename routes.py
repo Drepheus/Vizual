@@ -43,7 +43,7 @@ def register_routes(app):
                 if next_page and next_page != url_for('index'):
                     return redirect(next_page)
                 else:
-                    return redirect(url_for('simple_dashboard'))
+                    return redirect(url_for('dashboard'))
             flash('Invalid email or password')
         return render_template('login.html')
 
@@ -97,7 +97,7 @@ def register_routes(app):
             db.session.add(user)
             db.session.commit()
             login_user(user)
-            return redirect(url_for('simple_dashboard'))
+            return redirect(url_for('dashboard'))
         return render_template('register.html')
 
     @app.route('/logout')
