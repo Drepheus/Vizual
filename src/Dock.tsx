@@ -123,7 +123,17 @@ export default function Dock({
             magnification={magnification}
             baseItemSize={baseItemSize}
           >
-            <DockIcon>{item.icon}</DockIcon>
+            <DockIcon>
+              {item.isImage ? (
+                <img 
+                  src={item.icon} 
+                  alt={item.label} 
+                  style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                />
+              ) : (
+                item.icon
+              )}
+            </DockIcon>
             <DockLabel>{item.label}</DockLabel>
           </DockItem>
         ))}

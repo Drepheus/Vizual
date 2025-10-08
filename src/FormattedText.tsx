@@ -18,12 +18,12 @@ export default function FormattedText({ text, className = '', delay = 0 }: Forma
     let wordIndex = 0;
 
     // Enhanced regex to capture all markdown patterns more accurately
-    const parts = text.split(/(\*\*.*?\*\*|\*.*?\*|`.*?`|^[-•]\s+.*$|^\d+\.\s+.*$)/gm);
+    const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`|^[-•]\s+.*$|^\d+\.\s+.*$)/gm);
     
     parts.forEach((part, partIndex) => {
       if (!part) return;
 
-      if (part.match(/^\*\*.*\*\*$/)) {
+      if (part.match(/^\*\*[^*]+\*\*$/)) {
         // Bold text
         const boldText = part.slice(2, -2);
         const words = boldText.split(' ');
@@ -48,7 +48,7 @@ export default function FormattedText({ text, className = '', delay = 0 }: Forma
             wordIndex++;
           }
         });
-      } else if (part.match(/^\*[^*].*[^*]\*$/) || part.match(/^\*\w+\*$/)) {
+      } else if (part.match(/^\*[^*]+\*$/) && !part.match(/^\*\*.*\*\*$/)) {
         // Italic text (single asterisk, not double)
         const italicText = part.slice(1, -1);
         const words = italicText.split(' ');
@@ -73,7 +73,7 @@ export default function FormattedText({ text, className = '', delay = 0 }: Forma
             wordIndex++;
           }
         });
-      } else if (part.match(/^`.*`$/)) {
+      } else if (part.match(/^`[^`]+`$/)) {
         // Code text
         const codeText = part.slice(1, -1);
         elements.push(

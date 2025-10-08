@@ -949,38 +949,38 @@ const defaultItems = [
   {
     image: 'https://picsum.photos/900/900?grayscale',
     link: 'https://google.com/',
-    title: 'Generate Image',
-    description: 'Create stunning visuals'
+    title: 'Generate Images',
+    description: 'Create AI-powered visuals'
   },
   {
     image: 'https://picsum.photos/901/900?grayscale',
     link: 'https://google.com/',
-    title: 'Write Story',
-    description: 'Craft compelling narratives'
+    title: 'Generate Videos',
+    description: 'AI video creation and editing'
   },
   {
     image: 'https://picsum.photos/902/900?grayscale',
     link: 'https://google.com/',
-    title: 'Create Poem',
-    description: 'Express through verse'
+    title: 'Generate Bots',
+    description: 'Build intelligent chatbots'
   },
   {
     image: 'https://picsum.photos/903/900?grayscale',
-    link: 'https://google.com/',
-    title: 'Generate Code',
-    description: 'Build software solutions'
+    link: 'https://percify.io/',
+    title: 'Percify Avatars',
+    description: 'Create digital personas with Percify'
   },
   {
     image: 'https://picsum.photos/904/900?grayscale',
     link: 'https://google.com/',
-    title: 'Compose Music',
-    description: 'Create melodies'
+    title: 'Generate Audio',
+    description: 'AI-powered sound creation'
   },
   {
     image: 'https://picsum.photos/905/900?grayscale',
     link: 'https://google.com/',
-    title: 'Create Video',
-    description: 'Produce visual content'
+    title: 'Generate Income',
+    description: 'AI monetization strategies'
   }
 ];
 
@@ -1035,7 +1035,17 @@ export default function InfiniteMenu({ isVisible, onClose }: InfiniteMenuProps) 
 
   const handleButtonClick = () => {
     if (!activeItem?.link) return;
-    console.log('Selected:', activeItem.title);
+    console.log('Selected:', activeItem.title, 'Link:', activeItem.link);
+    
+    // Open the link in a new tab
+    if (activeItem.link.startsWith('http')) {
+      window.open(activeItem.link, '_blank');
+    } else {
+      // Handle internal routes if needed
+      console.log('Internal route:', activeItem.link);
+    }
+    
+    // Close the menu after opening the link
     onClose();
   };
 

@@ -3,11 +3,14 @@ import FormattedText from './FormattedText';
 import Dock from './Dock';
 import InfiniteScroll from './InfiniteScroll';
 import InfiniteMenu from './InfiniteMenu';
+import LaserFlow from './LaserFlow';
+import ChromaGrid from './ChromaGrid';
+import FlowingMenu from './FlowingMenu';
 import './SplashPage.css';
 
 // Gemini API configuration
 const GEMINI_API_KEY = 'AIzaSyAPUrVUTLGnhPOY6KFypgSqqFB3hRKLEug';
-const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`;
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -16,11 +19,9 @@ interface ChatMessage {
 }
 
 function SplashPage() {
-  const [showWelcome, setShowWelcome] = useState(true);
-  const [showChat, setShowChat] = useState(false);
   const [showAIModels, setShowAIModels] = useState(false);
   const [viewMode, setViewMode] = useState<'chat' | 'models'>('chat');
-  const [selectedModel, setSelectedModel] = useState<string | null>(null);
+  const [selectedModel, setSelectedModel] = useState<string>('Gemini Pro'); // Default model
   const [inputValue, setInputValue] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -31,6 +32,11 @@ function SplashPage() {
   const [secondaryMessages, setSecondaryMessages] = useState<ChatMessage[]>([]);
   const [secondaryLoading, setSecondaryLoading] = useState(false);
   const [showCreateMenu, setShowCreateMenu] = useState(false);
+  const [isDeepSearchActive, setIsDeepSearchActive] = useState(false);
+  const [isPersonasActive, setIsPersonasActive] = useState(false);
+  const [selectedPersona, setSelectedPersona] = useState<string | null>(null);
+  const [isSynthesizeActive, setIsSynthesizeActive] = useState(false);
+  const [isPulseActive, setIsPulseActive] = useState(false);
 
   // Feature buttons data
   const featureButtons = [
@@ -42,6 +48,9 @@ function SplashPage() {
         const isActivating = selectedFeature !== 'Compare';
         setSelectedFeature(isActivating ? 'Compare' : null);
         setIsCompareMode(isActivating);
+        setIsDeepSearchActive(false); // Turn off laser animation
+        setIsPersonasActive(false); // Turn off ChromaGrid animation
+        setIsSynthesizeActive(false); // Turn off ElectricBorder animation
         if (!isActivating) {
           setSecondaryMessages([]);
           setSecondaryModel(null);
@@ -54,8 +63,12 @@ function SplashPage() {
       icon: '⟳',
       description: 'Merge responses into one distilled insight',
       onClick: () => {
-        setSelectedFeature(selectedFeature === 'Synthesize' ? null : 'Synthesize');
-        console.log('Synthesize clicked');
+        const isActivating = selectedFeature !== 'Synthesize';
+        setSelectedFeature(isActivating ? 'Synthesize' : null);
+        setIsDeepSearchActive(false); // Turn off laser animation
+        setIsPersonasActive(false); // Turn off ChromaGrid animation
+        setIsSynthesizeActive(isActivating); // Toggle ElectricBorder animation
+        console.log('Synthesize clicked - ElectricBorder', isActivating ? 'activated' : 'deactivated');
       }
     },
     {
@@ -63,7 +76,11 @@ function SplashPage() {
       icon: '◎',
       description: 'Explore beyond surface answers with advanced queries',
       onClick: () => {
-        setSelectedFeature(selectedFeature === 'DeepSearch' ? null : 'DeepSearch');
+        const isActivating = selectedFeature !== 'DeepSearch';
+        setSelectedFeature(isActivating ? 'DeepSearch' : null);
+        setIsDeepSearchActive(isActivating);
+        setIsPersonasActive(false); // Turn off ChromaGrid animation
+        setIsSynthesizeActive(false); // Turn off ElectricBorder animation
         console.log('DeepSearch clicked');
       }
     },
@@ -73,16 +90,23 @@ function SplashPage() {
       description: 'Generate visuals, stories, or creative ideas',
       onClick: () => {
         setShowCreateMenu(true);
+        setIsDeepSearchActive(false); // Turn off laser animation
+        setIsPersonasActive(false); // Turn off ChromaGrid animation
+        setIsSynthesizeActive(false); // Turn off ElectricBorder animation
         console.log('Create clicked - showing infinite menu');
       }
     },
     {
       name: 'Personas',
       icon: '◐',
-      description: 'Shift Omi\'s voice (teacher, critic, explorer, poet)',
+      description: selectedPersona ? `Active: ${selectedPersona}` : 'Shift Omi\'s voice (teacher, critic, explorer, poet)',
       onClick: () => {
-        setSelectedFeature(selectedFeature === 'Personas' ? null : 'Personas');
-        console.log('Personas clicked');
+        const isActivating = selectedFeature !== 'Personas';
+        setSelectedFeature(isActivating ? 'Personas' : null);
+        setIsDeepSearchActive(false); // Turn off laser animation
+        setIsPersonasActive(isActivating); // Toggle ChromaGrid overlay
+        setIsSynthesizeActive(false); // Turn off ElectricBorder animation
+        console.log('Personas clicked - ChromaGrid', isActivating ? 'activated' : 'deactivated');
       }
     },
     {
@@ -90,24 +114,16 @@ function SplashPage() {
       icon: '◆',
       description: 'Latest news, trends, or live data insights',
       onClick: () => {
-        setSelectedFeature(selectedFeature === 'Pulse' ? null : 'Pulse');
-        console.log('Pulse clicked');
+        const isActivating = selectedFeature !== 'Pulse';
+        setSelectedFeature(isActivating ? 'Pulse' : null);
+        setIsDeepSearchActive(false); // Turn off laser animation
+        setIsPersonasActive(false); // Turn off ChromaGrid animation
+        setIsSynthesizeActive(false); // Turn off ElectricBorder animation
+        setIsPulseActive(isActivating); // Toggle FlowingMenu
+        console.log('Pulse clicked - FlowingMenu', isActivating ? 'activated' : 'deactivated');
       }
     }
   ];
-
-  useEffect(() => {
-    // After 3 seconds, start fading out welcome text
-    const timer = setTimeout(() => {
-      setShowWelcome(false);
-      // After fade out completes, show chat interface
-      setTimeout(() => {
-        setShowChat(true);
-      }, 800); // Match CSS transition duration
-    }, 3000);
-
-    return () => clearTimeout(timer);
-  }, []);
 
   // Handle Escape key to close AI Models screen and Create menu
   useEffect(() => {
@@ -116,12 +132,15 @@ function SplashPage() {
         setShowAIModels(false);
       } else if (event.key === 'Escape' && showCreateMenu) {
         setShowCreateMenu(false);
+      } else if (event.key === 'Escape' && isPulseActive) {
+        setIsPulseActive(false);
+        setSelectedFeature(null);
       }
     };
 
     document.addEventListener('keydown', handleEscapeKey);
     return () => document.removeEventListener('keydown', handleEscapeKey);
-  }, [showAIModels, showCreateMenu]);
+  }, [showAIModels, showCreateMenu, isPulseActive]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value);
@@ -386,24 +405,20 @@ function SplashPage() {
   return (
     <>
       <div className="splash-page">
-        {showWelcome && (
-          <div className={`splash-content ${!showWelcome ? 'fade-out' : ''}`}>
-            <h1 className="splash-title">Welcome to Omi</h1>
-            <p className="splash-description">
-              Begin your new conversational experience
-            </p>
-          </div>
-        )}
-
-        {showChat && (
-        <div className="chat-interface fade-in">
+        <div className="chat-interface">
           <div className="chat-header">
             <h1 className="chat-title">Omi AI</h1>
-            {selectedModel && (
-              <div className="selected-model">
-                Model: {selectedModel}
-              </div>
-            )}
+            <div className="selected-model">
+              <span className="model-label">Active Model:</span>
+              <span className="model-name">{selectedModel}</span>
+              <button 
+                className="model-change-btn"
+                onClick={() => setShowAIModels(true)}
+                title="Change AI model"
+              >
+                ⚙️
+              </button>
+            </div>
           </div>
 
           {/* Feature Buttons - Above Dialog Box */}
@@ -432,41 +447,65 @@ function SplashPage() {
 
 
           
-          {messages.length > 0 && (
+          {/* Chat Container - Show in Compare Mode or when messages exist */}
+          {(messages.length > 0 || isCompareMode) && (
             <div className={`chat-container ${isCompareMode ? 'compare-mode' : ''}`}>
               {/* Primary Chat Panel */}
               <div className="chat-panel primary-panel">
                 <div className="panel-header">
-                  <h3>{selectedModel || 'Primary AI'}</h3>
+                  <h3>
+                    {isCompareMode ? (
+                      <select 
+                        className="model-selector"
+                        value={selectedModel}
+                        onChange={(e) => setSelectedModel(e.target.value)}
+                      >
+                        <option value="Gemini Pro">Gemini Pro</option>
+                        <option value="Claude">Claude</option>
+                        <option value="GPT-4">GPT-4</option>
+                        <option value="Llama">Llama</option>
+                      </select>
+                    ) : (
+                      selectedModel || 'Primary AI'
+                    )}
+                  </h3>
                 </div>
                 <div className="chat-messages">
-                  {messages.map((message, index) => (
-                    <div key={index} className={`message ${message.role}`}>
-                      <div className="message-content">
-                        {message.role === 'assistant' ? (
-                          <FormattedText 
-                            text={message.content} 
-                            delay={0.2}
-                          />
-                        ) : (
-                          message.content
-                        )}
-                      </div>
-                      <div className="message-time">
-                        {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </div>
+                  {messages.length === 0 && isCompareMode ? (
+                    <div className="empty-chat-message">
+                      <p>Compare mode activated. Start chatting to see responses from both models side-by-side.</p>
                     </div>
-                  ))}
-                  {isLoading && (
-                    <div className="message assistant loading">
-                      <div className="message-content">
-                        <div className="typing-indicator">
-                          <span></span>
-                          <span></span>
-                          <span></span>
+                  ) : (
+                    <>
+                      {messages.map((message, index) => (
+                        <div key={index} className={`message ${message.role}`}>
+                          <div className="message-content">
+                            {message.role === 'assistant' ? (
+                              <FormattedText 
+                                text={message.content} 
+                                delay={0.2}
+                              />
+                            ) : (
+                              message.content
+                            )}
+                          </div>
+                          <div className="message-time">
+                            {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </div>
                         </div>
-                      </div>
-                    </div>
+                      ))}
+                      {isLoading && (
+                        <div className="message assistant loading">
+                          <div className="message-content">
+                            <div className="typing-indicator">
+                              <span></span>
+                              <span></span>
+                              <span></span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               </div>
@@ -492,33 +531,41 @@ function SplashPage() {
                     </h3>
                   </div>
                   <div className="chat-messages">
-                    {secondaryMessages.map((message, index) => (
-                      <div key={index} className={`message ${message.role}`}>
-                        <div className="message-content">
-                          {message.role === 'assistant' ? (
-                            <FormattedText 
-                              text={message.content} 
-                              delay={0.2}
-                            />
-                          ) : (
-                            message.content
-                          )}
-                        </div>
-                        <div className="message-time">
-                          {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </div>
+                    {secondaryMessages.length === 0 ? (
+                      <div className="empty-chat-message">
+                        <p>Select a model above to compare responses.</p>
                       </div>
-                    ))}
-                    {secondaryLoading && (
-                      <div className="message assistant loading">
-                        <div className="message-content">
-                          <div className="typing-indicator">
-                            <span></span>
-                            <span></span>
-                            <span></span>
+                    ) : (
+                      <>
+                        {secondaryMessages.map((message, index) => (
+                          <div key={index} className={`message ${message.role}`}>
+                            <div className="message-content">
+                              {message.role === 'assistant' ? (
+                                <FormattedText 
+                                  text={message.content} 
+                                  delay={0.2}
+                                />
+                              ) : (
+                                message.content
+                              )}
+                            </div>
+                            <div className="message-time">
+                              {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </div>
                           </div>
-                        </div>
-                      </div>
+                        ))}
+                        {secondaryLoading && (
+                          <div className="message assistant loading">
+                            <div className="message-content">
+                              <div className="typing-indicator">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>
@@ -551,7 +598,7 @@ function SplashPage() {
               </div>
             )}
             
-            <div className="chat-input-container">
+            <div className={`chat-input-container ${isSynthesizeActive ? 'synthesize-active' : ''}`}>
               <input
                 type="file"
                 id="file-input"
@@ -574,7 +621,7 @@ function SplashPage() {
                 type="text"
                 value={inputValue}
                 onChange={handleInputChange}
-                placeholder="Type your message..."
+                placeholder={isSynthesizeActive ? "Type your message in Synthesize mode..." : "Type your message..."}
                 className="chat-input"
                 autoFocus
                 disabled={isLoading}
@@ -597,10 +644,65 @@ function SplashPage() {
                   </svg>
                 )}
               </button>
+              
+              {/* Electric Border Animation Overlay for Synthesize Mode */}
+              {isSynthesizeActive && (
+                <div className="electric-border-overlay">
+                  <svg className="electric-border-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <defs>
+                      <filter id="electric-glow">
+                        <feTurbulence baseFrequency="0.02" numOctaves="3" result="noise" seed="1">
+                          <animate attributeName="seed" values="1;5;1" dur="3s" repeatCount="indefinite"/>
+                        </feTurbulence>
+                        <feDisplacementMap in="SourceGraphic" in2="noise" scale="2"/>
+                        <feGaussianBlur stdDeviation="0.5"/>
+                        <feColorMatrix values="0 0 0 0 0.9 0 0 0 0 0.9 0 0 0 0 0.9 0 0 0 1 0"/>
+                      </filter>
+                    </defs>
+                    <rect 
+                      x="1" 
+                      y="1" 
+                      width="98" 
+                      height="98" 
+                      fill="none" 
+                      stroke="#e5e5e5" 
+                      strokeWidth="0.5"
+                      filter="url(#electric-glow)"
+                      rx="3"
+                      ry="3"
+                    >
+                      <animate 
+                        attributeName="stroke-opacity" 
+                        values="0.3;1;0.3" 
+                        dur="2s" 
+                        repeatCount="indefinite"
+                      />
+                    </rect>
+                    <rect 
+                      x="0.5" 
+                      y="0.5" 
+                      width="99" 
+                      height="99" 
+                      fill="none" 
+                      stroke="#e5e5e5" 
+                      strokeWidth="0.3"
+                      rx="3"
+                      ry="3"
+                      opacity="0.6"
+                    >
+                      <animate 
+                        attributeName="stroke-dasharray" 
+                        values="0,400;200,200;400,0;0,400" 
+                        dur="4s" 
+                        repeatCount="indefinite"
+                      />
+                    </rect>
+                  </svg>
+                </div>
+              )}
             </div>
           </form>
         </div>
-      )}
       
       {/* AI Models Section */}
       {showAIModels && (
@@ -624,7 +726,93 @@ function SplashPage() {
           </div>
         </div>
       )}
-      </div>
+    </div>
+      
+      {/* LaserFlow Background Animation for DeepSearch */}
+      {isDeepSearchActive && (
+        <div className="laser-flow-background">
+          <LaserFlow
+            color="#e5e5e5"
+            fogIntensity={0.15}
+            wispIntensity={1.5}
+            flowSpeed={0.3}
+            horizontalBeamOffset={0.0}
+            verticalBeamOffset={0.1}
+            verticalSizing={0.75}
+            horizontalSizing={0.4}
+          />
+        </div>
+      )}
+      
+      {/* ChromaGrid Overlay Animation for Personas */}
+      {isPersonasActive && (
+        <ChromaGrid
+          items={undefined} // Uses demo data
+          ease="power2.out"
+          damping={0.75}
+          fadeOut={0.5}
+          onClose={() => setIsPersonasActive(false)}
+          selectedPersona={selectedPersona}
+          onPersonaSelect={(persona) => {
+            console.log('Persona selected in SplashPage:', persona.title);
+            setSelectedPersona(persona.title);
+            // Visual feedback is now handled by the ChromaGrid component
+            // No need for alert dialog - the checkmark and glow effect show selection
+          }}
+        />
+      )}
+
+      {/* FlowingMenu Overlay Animation for Pulse */}
+      {isPulseActive && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 9000, background: '#000' }}>
+          <button
+            onClick={() => {
+              setIsPulseActive(false);
+              setSelectedFeature(null);
+            }}
+            style={{
+              position: 'absolute',
+              top: '2rem',
+              right: '2rem',
+              background: 'rgba(255, 255, 255, 0.1)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              borderRadius: '50%',
+              width: '48px',
+              height: '48px',
+              color: 'white',
+              fontSize: '1.5rem',
+              cursor: 'pointer',
+              zIndex: 9001,
+            }}
+          >
+            ✕
+          </button>
+          <FlowingMenu
+            items={[
+              {
+                link: '#',
+                text: 'Currently Trending',
+                image: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=400&h=400&fit=crop'
+              },
+              {
+                link: '#',
+                text: 'AI News',
+                image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&h=400&fit=crop'
+              },
+              {
+                link: '#',
+                text: 'LLM Updates',
+                image: 'https://images.unsplash.com/photo-1655635949384-f737c5133dfe?w=400&h=400&fit=crop'
+              },
+              {
+                link: '#',
+                text: 'AI Content',
+                image: 'https://images.unsplash.com/photo-1676573409772-45f0a65b98e1?w=400&h=400&fit=crop'
+              }
+            ]}
+          />
+        </div>
+      )}
       
       {/* Dock - always visible - Outside scrollable container */}
       <Dock items={dockItems} />

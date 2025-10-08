@@ -16,7 +16,6 @@
     "@types/gl-matrix": "^2.4.5",
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
-    "@types/three": "^0.180.0",
     "@vitejs/plugin-react": "^5.0.3",
     "gl-matrix": "^3.4.4",
     "gsap": "^3.13.0",
@@ -27,5 +26,8 @@
     "three": "^0.180.0",
     "typescript": "^5.9.2",
     "vite": "^7.1.7"
+  },
+  "devDependencies": {
+    "@types/three": "^0.180.0"
   }
 }

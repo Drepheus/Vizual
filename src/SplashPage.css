@@ -65,6 +65,31 @@ html, body {
   padding: 2rem 0 12rem 0;
 }
 
+/* LaserFlow Background Animation */
+.laser-flow-background {
+  position: fixed;
+  top: 25%;
+  left: 25%;
+  width: 50vw;
+  height: 50vh;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0;
+  animation: laserFlowFadeIn 1s ease-out forwards;
+  backdrop-filter: blur(1px);
+}
+
+@keyframes laserFlowFadeIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+}
+
 .splash-content {
   position: relative;
   z-index: 100;
@@ -141,10 +166,39 @@ html, body {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 20px;
-  display: inline-block;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   font-size: 0.9rem;
   color: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(10px);
+  width: fit-content;
+}
+
+.model-label {
+  opacity: 0.7;
+}
+
+.model-name {
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.model-change-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.7);
+  transition: all 0.3s ease;
+}
+
+.model-change-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.9);
+  transform: scale(1.05);
 }
 
 /* Feature Buttons - Horizontal Layout */
@@ -384,6 +438,35 @@ html, body {
   animation: panelSlideIn 0.6s ease-out 0.2s both;
 }
 
+/* Empty Chat Message */
+.empty-chat-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 2rem;
+  text-align: center;
+}
+
+.empty-chat-message p {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 1rem;
+  line-height: 1.6;
+  max-width: 400px;
+  animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .panel-header {
   padding: 1rem 1.5rem;
   background: linear-gradient(135deg, 
@@ -587,6 +670,93 @@ html, body {
     0 0 40px rgba(255, 255, 255, 0.3),
     0 0 80px rgba(255, 255, 255, 0.15),
     inset 0 0 20px rgba(255, 255, 255, 0.1);
+}
+
+/* Electric Border Animation for Synthesize Mode */
+.chat-input-container.synthesize-active {
+  border: 2px solid rgba(229, 229, 229, 0.4);
+  position: relative;
+  overflow: visible;
+}
+
+.electric-border-overlay {
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.electric-border-svg {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  filter: drop-shadow(0 0 6px rgba(229, 229, 229, 0.6));
+}
+
+/* Enhanced glow effect for Synthesize mode */
+.chat-input-container.synthesize-active::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  right: -6px;
+  bottom: -6px;
+  background: linear-gradient(45deg, 
+    rgba(229, 229, 229, 0.1), 
+    rgba(229, 229, 229, 0.3), 
+    rgba(229, 229, 229, 0.1));
+  border-radius: 20px;
+  filter: blur(8px);
+  opacity: 0.8;
+  animation: electricPulse 3s ease-in-out infinite;
+  z-index: -1;
+}
+
+.chat-input-container.synthesize-active::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border: 1px solid rgba(229, 229, 229, 0.6);
+  border-radius: 18px;
+  animation: electricBorder 2s linear infinite;
+  z-index: -1;
+}
+
+@keyframes electricPulse {
+  0%, 100% { 
+    opacity: 0.6; 
+    transform: scale(1); 
+  }
+  50% { 
+    opacity: 1; 
+    transform: scale(1.02); 
+  }
+}
+
+@keyframes electricBorder {
+  0% { 
+    box-shadow: 0 0 5px rgba(229, 229, 229, 0.5);
+  }
+  25% { 
+    box-shadow: 0 0 20px rgba(229, 229, 229, 0.8), 0 0 30px rgba(229, 229, 229, 0.4);
+  }
+  50% { 
+    box-shadow: 0 0 15px rgba(229, 229, 229, 0.9), 0 0 25px rgba(229, 229, 229, 0.6);
+  }
+  75% { 
+    box-shadow: 0 0 25px rgba(229, 229, 229, 0.7), 0 0 35px rgba(229, 229, 229, 0.3);
+  }
+  100% { 
+    box-shadow: 0 0 5px rgba(229, 229, 229, 0.5);
+  }
 }
 
 .chat-input {
