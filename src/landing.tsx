@@ -38,24 +38,37 @@ const LandingPage: React.FC = () => {
           console.error('Error processing OAuth callback:', error);
           alert(`Authentication error: ${error.message}\n\nIf you see a "try again" page, please check:\n1. Your Vercel URL is added to Google Cloud Console\n2. Your Vercel URL is added to Supabase redirect URLs`);
           setShowLogin(true);
+          setIsCheckingAuth(false);
         } else if (data.session) {
           console.log('OAuth successful! User:', data.session.user.email);
           setShowSplash(true);
+          setIsCheckingAuth(false);
         } else {
           console.log('No session found after OAuth, showing login...');
           setShowLogin(true);
+          setIsCheckingAuth(false);
         }
-      } else if (session) {
-        // Already logged in
-        console.log('Existing session found, redirecting to chat...');
-        setShowSplash(true);
+      } else {
+        // No OAuth callback, check for existing session
+        const { data } = await supabase.auth.getSession();
+        if (data.session) {
+          console.log('Existing session found, redirecting to chat...');
+          setShowSplash(true);
+        }
+        setIsCheckingAuth(false);
       }
-      
-      setIsCheckingAuth(false);
     };
 
     checkAuthCallback();
-  }, [session]);
+  }, []); // Run only once on mount
+
+  // Separate effect to handle session changes from useAuth
+  useEffect(() => {
+    if (!isCheckingAuth && session && !showSplash && !showLogin) {
+      console.log('Session detected, showing splash...');
+      setShowSplash(true);
+    }
+  }, [session, isCheckingAuth, showSplash, showLogin]);
 
   const handleStartClick = () => {
     setIsTransitioning(true);
