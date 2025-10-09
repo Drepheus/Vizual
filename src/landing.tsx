@@ -33,6 +33,11 @@ const LandingPage: React.FC = () => {
     setShowSplash(true);
   };
 
+  const handleGuestMode = () => {
+    // User chose guest mode, go straight to chat
+    setShowSplash(true);
+  };
+
   if (showSplash) {
     return (
       <div className="page-transition fade-in">
@@ -44,7 +49,10 @@ const LandingPage: React.FC = () => {
   if (showLogin) {
     return (
       <div className="page-transition fade-in">
-        <LoginPage onLoginSuccess={handleLoginSuccess} />
+        <LoginPage 
+          onLoginSuccess={handleLoginSuccess}
+          onGuestMode={handleGuestMode}
+        />
       </div>
     );
   }
