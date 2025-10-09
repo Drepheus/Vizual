@@ -43,15 +43,17 @@ Cannot log in with Google account - OAuth is not fully configured.
 
 **Authorized JavaScript origins:**
 ```
-http://localhost:5173
+http://localhost:5175
 http://localhost:3000
-https://cnvsdbjsjwqmpugmpmap.supabase.co
+https://cnysdbjajxnpmrugnpme.supabase.co
 ```
 
 **Authorized redirect URIs:**
 ```
-http://localhost:5173/auth/callback
-https://cnvsdbjsjwqmpugmpmap.supabase.co/auth/v1/callback
+http://localhost:5175
+http://localhost:5175/
+http://localhost:3000
+https://cnysdbjajxnpmrugnpme.supabase.co/auth/v1/callback
 ```
 
 *(When you deploy to Vercel, you'll add your Vercel URLs here too)*
@@ -73,11 +75,11 @@ https://cnvsdbjsjwqmpugmpmap.supabase.co/auth/v1/callback
 
 ### Step 5: Configure Supabase URL Configuration
 1. In Supabase Dashboard → **Authentication** → **URL Configuration**
-2. Set **Site URL**: `http://localhost:5173` (for development)
+2. Set **Site URL**: `http://localhost:5175` (for development)
 3. Add **Redirect URLs**:
    ```
-   http://localhost:5173
-   http://localhost:5173/**
+   http://localhost:5175
+   http://localhost:5175/**
    http://localhost:3000
    http://localhost:3000/**
    ```
@@ -87,11 +89,64 @@ https://cnvsdbjsjwqmpugmpmap.supabase.co/auth/v1/callback
    ```bash
    npm run dev
    ```
-2. Open `http://localhost:5173` in your browser
+2. Open `http://localhost:5175` in your browser
 3. Click "Start" → "Continue with Google"
 4. You should see the Google OAuth consent screen
 5. Sign in with your Google account
 6. You should be redirected back to the app and logged in!
+
+---
+
+## Fixing "Try Again" Screen
+
+If you see a "try again" screen after clicking Google login, follow these steps:
+
+### 1. Check Google Cloud Console URLs
+The most common cause is mismatched redirect URIs. In Google Cloud Console:
+
+- Go to **APIs & Services** → **Credentials** → Your OAuth Client
+- Under **Authorized redirect URIs**, make sure you have **EXACTLY**:
+  ```
+  https://cnysdbjajxnpmrugnpme.supabase.co/auth/v1/callback
+  ```
+  (Note: This is the Supabase callback URL, NOT your app URL)
+
+- Under **Authorized JavaScript origins**, add:
+  ```
+  http://localhost:5175
+  https://cnysdbjajxnpmrugnpme.supabase.co
+  ```
+
+### 2. Verify Supabase Configuration
+In your Supabase Dashboard:
+
+- Go to **Authentication** → **Providers** → **Google**
+- Make sure **Enabled** is toggled ON
+- Verify your Client ID and Client Secret are entered correctly
+- Click **Save** (even if you didn't change anything)
+
+### 3. Check Supabase URL Configuration
+- Go to **Authentication** → **URL Configuration**
+- Site URL should be: `http://localhost:5175`
+- Redirect URLs should include:
+  ```
+  http://localhost:5175
+  http://localhost:5175/**
+  ```
+
+### 4. Clear Browser Cache
+- Clear your browser cookies and cache
+- Or try in an incognito/private window
+- Close all browser tabs and restart
+
+### 5. Check Browser Console
+Open browser console (F12) and look for errors:
+- "redirect_uri_mismatch" → Fix Google Cloud Console URLs
+- "Invalid redirect URL" → Fix Supabase URL Configuration
+- Network errors → Check Supabase credentials in .env.local
+
+### 6. Wait a Few Minutes
+Sometimes Google Cloud Console changes take 1-5 minutes to propagate. Wait a bit and try again.
 
 ---
 

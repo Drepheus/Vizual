@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import Orb from './Orb';
 import ShinyText from './ShinyText';
 import LoginPage from './LoginPage';
 import SplashPage from './SplashPage';
 import { useAuth } from './Auth';
+import { supabase } from './supabaseClient';
 import './landing.css';
 
 // Simple landing page with orb background
@@ -12,7 +13,44 @@ const LandingPage: React.FC = () => {
   const [showLogin, setShowLogin] = useState(false);
   const [showSplash, setShowSplash] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const { session } = useAuth();
+
+  // Check for OAuth callback on mount
+  useEffect(() => {
+    const checkAuthCallback = async () => {
+      // Check if we're returning from OAuth
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const hasAuthParams = hashParams.has('access_token') || hashParams.has('error');
+      
+      if (hasAuthParams) {
+        console.log('OAuth callback detected, processing...');
+        
+        // Let Supabase handle the callback
+        const { data, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Error processing OAuth callback:', error);
+          alert(`Authentication error: ${error.message}`);
+          setShowLogin(true);
+        } else if (data.session) {
+          console.log('OAuth successful, redirecting to chat...');
+          setShowSplash(true);
+        } else {
+          console.log('No session found, showing login...');
+          setShowLogin(true);
+        }
+      } else if (session) {
+        // Already logged in
+        console.log('Existing session found, redirecting to chat...');
+        setShowSplash(true);
+      }
+      
+      setIsCheckingAuth(false);
+    };
+
+    checkAuthCallback();
+  }, [session]);
 
   const handleStartClick = () => {
     setIsTransitioning(true);
@@ -37,6 +75,26 @@ const LandingPage: React.FC = () => {
     // User chose guest mode, go straight to chat
     setShowSplash(true);
   };
+
+  // Show loading while checking auth
+  if (isCheckingAuth) {
+    return (
+      <div className="landing-container">
+        <div className="orb-background">
+          <Orb 
+            hue={220}
+            hoverIntensity={0.3}
+            rotateOnHover={true}
+            forceHoverState={false}
+          />
+        </div>
+        <div className="content">
+          <h1>Omi AI</h1>
+          <p>Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (showSplash) {
     return (
