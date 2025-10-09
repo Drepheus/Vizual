@@ -514,21 +514,21 @@ function SplashPage() {
       )}
 
       <div className="splash-page">
+        {/* Hamburger Menu - Fixed to top-left corner */}
+        {user && (
+          <button 
+            className="conversations-btn"
+            onClick={() => setShowConversations(true)}
+            title="Conversations"
+          >
+            ≡
+          </button>
+        )}
+
         <div className="chat-interface">
           <div className="chat-header">
             <div className="header-left">
-              <div className="header-top">
-                {user && (
-                  <button 
-                    className="conversations-btn"
-                    onClick={() => setShowConversations(true)}
-                    title="Conversations"
-                  >
-                    ≡
-                  </button>
-                )}
-                <h1 className="chat-title">Omi AI</h1>
-              </div>
+              <h1 className="chat-title">Omi AI</h1>
               <div className="selected-model">
                 <span className="model-label">Active Model:</span>
                 <span className="model-name">{selectedModel}</span>

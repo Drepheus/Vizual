@@ -53,16 +53,16 @@ html, body {
 }
 
 .splash-page {
-  position: relative;
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100vw;
-  min-height: 100vh;
+  height: 100vh;
   background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2rem 0 12rem 0;
 }
 
 /* LaserFlow Background Animation */
@@ -148,18 +148,19 @@ html, body {
   justify-content: flex-start;
   width: 100%;
   max-width: 700px;
-  padding: 2rem 2rem 12rem 2rem;
-  min-height: 80vh;
-  max-height: 95vh;
-  overflow: visible;
+  height: 100vh;
+  padding: 1rem 2rem 8rem 2rem;
+  overflow: hidden;
 }
 
 .chat-header {
+  width: 100%;
   margin-bottom: 2rem;
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  justify-content: center;
+  align-items: center;
   flex-shrink: 0;
+  position: relative;
 }
 
 .header-left {
@@ -176,6 +177,9 @@ html, body {
 }
 
 .conversations-btn {
+  position: fixed;
+  top: 1.5rem;
+  left: 1.5rem;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
@@ -190,6 +194,7 @@ html, body {
   cursor: pointer;
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
+  z-index: 200;
 }
 
 .conversations-btn:hover {
@@ -441,15 +446,16 @@ html, body {
 .chat-container {
   flex: 1;
   width: 100%;
-  margin-bottom: 2rem;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .chat-container.compare-mode {
   display: flex;
+  flex-direction: row;
   gap: 1.5rem;
-  max-height: calc(90vh - 200px);
-  min-height: 400px;
 }
 
 .chat-panel {
