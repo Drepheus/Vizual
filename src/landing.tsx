@@ -16,9 +16,11 @@ const LandingPage: React.FC = () => {
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const { session } = useAuth();
 
-  // Check for OAuth callback on mount
+  // Check for OAuth callback on mount - run only once
   useEffect(() => {
     const checkAuthCallback = async () => {
+      console.log('Checking auth state on mount...');
+      
       // Check if we're returning from OAuth
       const hashParams = new URLSearchParams(window.location.hash.substring(1));
       const hasAuthParams = hashParams.has('access_token') || hashParams.has('error');
@@ -31,22 +33,22 @@ const LandingPage: React.FC = () => {
         // Clear the hash from the URL
         window.history.replaceState(null, '', window.location.pathname);
         
+        // Wait a moment for Supabase to process the callback
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
         // Let Supabase handle the callback
         const { data, error } = await supabase.auth.getSession();
         
         if (error) {
           console.error('Error processing OAuth callback:', error);
-          alert(`Authentication error: ${error.message}\n\nIf you see a "try again" page, please check:\n1. Your Vercel URL is added to Google Cloud Console\n2. Your Vercel URL is added to Supabase redirect URLs`);
+          alert(`Authentication error: ${error.message}`);
           setShowLogin(true);
-          setIsCheckingAuth(false);
         } else if (data.session) {
           console.log('OAuth successful! User:', data.session.user.email);
           setShowSplash(true);
-          setIsCheckingAuth(false);
         } else {
           console.log('No session found after OAuth, showing login...');
           setShowLogin(true);
-          setIsCheckingAuth(false);
         }
       } else {
         // No OAuth callback, check for existing session
@@ -55,17 +57,18 @@ const LandingPage: React.FC = () => {
           console.log('Existing session found, redirecting to chat...');
           setShowSplash(true);
         }
-        setIsCheckingAuth(false);
       }
+      
+      setIsCheckingAuth(false);
     };
 
     checkAuthCallback();
-  }, []); // Run only once on mount
+  }, []); // Only run once on mount
 
-  // Separate effect to handle session changes from useAuth
+  // Separate effect to handle session updates from useAuth
   useEffect(() => {
     if (!isCheckingAuth && session && !showSplash && !showLogin) {
-      console.log('Session detected, showing splash...');
+      console.log('New session detected after initial check, showing chat...');
       setShowSplash(true);
     }
   }, [session, isCheckingAuth, showSplash, showLogin]);
