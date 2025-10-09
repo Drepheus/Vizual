@@ -6,7 +6,7 @@ import InfiniteMenu from './InfiniteMenu';
 import LaserFlow from './LaserFlow';
 import ChromaGrid from './ChromaGrid';
 import FlowingMenu from './FlowingMenu';
-import Auth, { useAuth } from './Auth';
+import { useAuth } from './Auth';
 import { supabase } from './supabaseClient';
 import './SplashPage.css';
 
@@ -414,19 +414,16 @@ function SplashPage() {
         <div className="chat-interface">
           <div className="chat-header">
             <h1 className="chat-title">Omi AI</h1>
-            <div className="header-right">
-              <div className="selected-model">
-                <span className="model-label">Active Model:</span>
-                <span className="model-name">{selectedModel}</span>
-                <button 
-                  className="model-change-btn"
-                  onClick={() => setShowAIModels(true)}
-                  title="Change AI model"
-                >
-                  ⚙️
-                </button>
-              </div>
-              <Auth />
+            <div className="selected-model">
+              <span className="model-label">Active Model:</span>
+              <span className="model-name">{selectedModel}</span>
+              <button 
+                className="model-change-btn"
+                onClick={() => setShowAIModels(true)}
+                title="Change AI model"
+              >
+                ⚙️
+              </button>
             </div>
           </div>
 

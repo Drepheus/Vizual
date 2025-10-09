@@ -2,26 +2,49 @@ import React, { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import Orb from './Orb';
 import ShinyText from './ShinyText';
+import LoginPage from './LoginPage';
 import SplashPage from './SplashPage';
+import { useAuth } from './Auth';
 import './landing.css';
 
 // Simple landing page with orb background
 const LandingPage: React.FC = () => {
+  const [showLogin, setShowLogin] = useState(false);
   const [showSplash, setShowSplash] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const { session } = useAuth();
 
   const handleStartClick = () => {
     setIsTransitioning(true);
-    // Wait for fade out animation to complete before showing splash page
+    // Wait for fade out animation to complete before showing login page
     setTimeout(() => {
-      setShowSplash(true);
+      if (session) {
+        // Already logged in, go straight to chat
+        setShowSplash(true);
+      } else {
+        // Not logged in, show login page
+        setShowLogin(true);
+      }
     }, 800); // Match the CSS transition duration
+  };
+
+  const handleLoginSuccess = () => {
+    // User successfully logged in, show the chat interface
+    setShowSplash(true);
   };
 
   if (showSplash) {
     return (
       <div className="page-transition fade-in">
         <SplashPage />
+      </div>
+    );
+  }
+
+  if (showLogin) {
+    return (
+      <div className="page-transition fade-in">
+        <LoginPage onLoginSuccess={handleLoginSuccess} />
       </div>
     );
   }
