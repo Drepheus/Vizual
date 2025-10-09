@@ -22,6 +22,7 @@ export default function LoginPage({ onLoginSuccess, onGuestMode }: LoginPageProp
     console.log('Attempting Google sign in...')
     console.log('Supabase URL:', import.meta.env.VITE_SUPABASE_URL)
     console.log('Redirect URL:', window.location.origin)
+    console.log('Browser:', navigator.userAgent)
     
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
@@ -30,7 +31,8 @@ export default function LoginPage({ onLoginSuccess, onGuestMode }: LoginPageProp
         queryParams: {
           access_type: 'offline',
           prompt: 'consent',
-        }
+        },
+        skipBrowserRedirect: false
       }
     })
     
