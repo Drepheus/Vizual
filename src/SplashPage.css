@@ -603,7 +603,7 @@ html, body {
 .message {
   display: flex;
   flex-direction: column;
-  max-width: 90%;
+  width: 100%;
   animation: messageSlideIn 0.3s ease-out;
 }
 
@@ -625,9 +625,10 @@ html, body {
   backdrop-filter: blur(20px);
   color: white;
   font-size: 1rem;
-  line-height: 1.6;
+  line-height: 1.8;
   word-wrap: break-word;
   overflow-wrap: break-word;
+  width: 100%;
 }
 
 .message.user .message-content {
@@ -639,11 +640,12 @@ html, body {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.08);
   font-size: 1rem;
-  line-height: 1.6;
+  line-height: 1.8;
   padding: 20px 24px;
-  min-height: 80px;
-  max-height: 60vh;
-  overflow-y: auto;
+  width: 100%;
+  min-height: auto;
+  max-height: none;
+  overflow-y: visible;
 }
 
 .message.assistant .message-content span {
