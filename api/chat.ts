@@ -1,5 +1,5 @@
 import { google, createGoogleGenerativeAI } from '@ai-sdk/google';
-import { streamText } from 'ai';
+import { streamText, createUIMessageStream, createUIMessageStreamResponse } from 'ai';
 
 export const config = {
   runtime: 'edge',
@@ -117,8 +117,36 @@ export default async function handler(req: Request) {
 Remember: You represent Andre Green's vision for helpful, intelligent AI. Maintain high standards in every interaction.`,
     });
 
-    console.log('streamText call completed, returning stream response...');
-    return result.toTextStreamResponse();
+    console.log('streamText call completed, creating UI message stream...');
+    
+    // Create a UI message stream from the streamText result
+    const stream = createUIMessageStream({
+      async execute({ writer }) {
+        const messageId = `msg-${Date.now()}`;
+        let textId = `text-${Date.now()}`;
+        
+        writer.write({ type: 'start', messageId });
+        writer.write({ type: 'text-start', id: textId });
+        
+        for await (const chunk of result.textStream) {
+          writer.write({ 
+            type: 'text-delta', 
+            id: textId,
+            delta: chunk
+          });
+        }
+        
+        writer.write({ type: 'text-end', id: textId });
+        writer.write({ type: 'finish' });
+      },
+      onError: (error) => {
+        console.error('Stream error:', error);
+        return 'An error occurred during streaming.';
+      }
+    });
+
+    console.log('Returning UI message stream response...');
+    return createUIMessageStreamResponse({ stream });
   } catch (error) {
     console.error('=== API ROUTE ERROR ===');
     console.error('Chat API error:', error);
