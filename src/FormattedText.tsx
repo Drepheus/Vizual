@@ -17,8 +17,8 @@ export default function FormattedText({ text, className = '', delay = 0 }: Forma
     const elements: React.ReactElement[] = [];
     let wordIndex = 0;
 
-    // Enhanced regex to capture all markdown patterns more accurately
-    const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`|^[-•]\s+.*$|^\d+\.\s+.*$)/gm);
+    // Enhanced regex to capture all markdown patterns including links
+    const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`|\[([^\]]+)\]\(([^)]+)\)|^[-•]\s+.*$|^\d+\.\s+.*$)/gm);
     
     parts.forEach((part, partIndex) => {
       if (!part) return;
@@ -93,6 +93,33 @@ export default function FormattedText({ text, className = '', delay = 0 }: Forma
           </motion.code>
         );
         wordIndex++;
+      } else if (part.match(/\[([^\]]+)\]\(([^)]+)\)/)) {
+        // Markdown link [text](url)
+        const match = part.match(/\[([^\]]+)\]\(([^)]+)\)/);
+        if (match) {
+          const linkText = match[1];
+          const linkUrl = match[2];
+          elements.push(
+            <motion.a
+              key={`${partIndex}-${wordIndex}`}
+              href={linkUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              initial={{ opacity: 0, filter: 'blur(10px)' }}
+              animate={isInView ? { opacity: 1, filter: 'blur(0px)' } : {}}
+              transition={{
+                duration: 0.3,
+                delay: wordIndex * 0.03 + delay,
+                ease: [0.4, 0.0, 0.2, 1]
+              }}
+              style={{ display: 'inline-block', marginRight: '0.25em' }}
+              className="text-link gradient-link"
+            >
+              {linkText}
+            </motion.a>
+          );
+          wordIndex += linkText.split(' ').length;
+        }
       } else if (part.match(/^[-•]\s+/) || part.match(/^\d+\.\s+/)) {
         // Bullet points or numbered lists
         const isNumbered = part.match(/^\d+\.\s+/);
