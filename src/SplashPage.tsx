@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useChat } from 'ai/react';
 import FormattedText from './FormattedText';
 import Dock from './Dock';
 import InfiniteScroll from './InfiniteScroll';
@@ -13,11 +14,7 @@ import * as db from './databaseService';
 import type { DbConversation } from './databaseService';
 import './SplashPage.css';
 
-// Gemini API configuration
-const GEMINI_API_KEY = 'AIzaSyAPUrVUTLGnhPOY6KFypgSqqFB3hRKLEug';
-const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`;
-
-// Omi Core Identity (Static System Message)
+// Omi Core Identity (Static System Message) - now used server-side
 const CORE_IDENTITY_OMI = `You are Omi — an advanced conversational intelligence built to provide precise, insightful, and modern communication.
 
 Personality & Tone:
@@ -59,15 +56,25 @@ interface ChatMessage {
 
 function SplashPage() {
   // Authentication
-  const { user, session } = useAuth();
+  const { user } = useAuth();
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
   
+  // Vercel AI SDK's useChat hook - replaces manual message management and API calls
+  const {
+    messages,
+    input,
+    handleInputChange,
+    handleSubmit: handleChatSubmit,
+    isLoading,
+    setMessages,
+    setInput
+  } = useChat({
+    api: '/api/chat',
+  });
+
   const [showAIModels, setShowAIModels] = useState(false);
   const [viewMode, setViewMode] = useState<'chat' | 'models'>('chat');
   const [selectedModel, setSelectedModel] = useState<string>('Gemini Pro'); // Default model
-  const [inputValue, setInputValue] = useState('');
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [selectedFeature, setSelectedFeature] = useState<string | null>(null);
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
   const [isCompareMode, setIsCompareMode] = useState(false);
@@ -201,8 +208,10 @@ function SplashPage() {
   useEffect(() => {
     if (user && currentConversationId && messages.length > 0) {
       const lastMessage = messages[messages.length - 1];
-      // Save the last message to database
-      db.saveMessage(currentConversationId, lastMessage.role, lastMessage.content);
+      // Save the last message to database (only user and assistant messages)
+      if (lastMessage.role === 'user' || lastMessage.role === 'assistant') {
+        db.saveMessage(currentConversationId, lastMessage.role, lastMessage.content);
+      }
     }
   }, [messages, currentConversationId, user]);
 
@@ -224,14 +233,14 @@ function SplashPage() {
     setCurrentConversationId(conversationId);
     const dbMessages = await db.getConversationMessages(conversationId);
     
-    // Convert database messages to ChatMessage format
-    const chatMessages: ChatMessage[] = dbMessages.map(msg => ({
-      role: msg.role,
+    // Convert database messages to AI SDK Message format
+    const aiMessages = dbMessages.map(msg => ({
+      id: msg.id || `msg-${Date.now()}-${Math.random()}`,
+      role: msg.role as 'user' | 'assistant',
       content: msg.content,
-      timestamp: new Date(msg.timestamp)
     }));
     
-    setMessages(chatMessages);
+    setMessages(aiMessages);
   };
 
   const createNewConversation = async () => {
@@ -262,10 +271,6 @@ function SplashPage() {
     await loadConversations(); // Refresh list
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(e.target.value);
-  };
-
   const handleFileAttach = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files) {
@@ -280,214 +285,18 @@ function SplashPage() {
     setAttachedFiles(prev => prev.filter((_, i) => i !== index));
   };
 
-  // Generate dynamic runtime context
-  const generateRuntimeContext = () => {
-    const currentDateTime = new Date().toLocaleString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      timeZoneName: 'short'
-    });
-
-    // Determine current mode
-    let currentMode = 'Standard Conversation';
-    if (isDeepSearchActive) currentMode = 'Deep Search Mode';
-    else if (isPersonasActive && selectedPersona) currentMode = `Persona Mode: ${selectedPersona}`;
-    else if (isSynthesizeActive) currentMode = 'Synthesize Mode';
-    else if (isPulseActive) currentMode = 'Pulse Mode';
-
-    // Analyze conversation context
-    const recentMessages = messages.slice(-3); // Last 3 messages
-    let conversationContext = 'No prior conversation context.';
-    let topicFocus = 'General';
-    let userTone = 'Neutral';
-
-    if (recentMessages.length > 0) {
-      const userMessages = recentMessages.filter(m => m.role === 'user');
-      if (userMessages.length > 0) {
-        const lastUserMessage = userMessages[userMessages.length - 1].content;
-        
-        // Simple topic detection
-        if (lastUserMessage.match(/\b(code|program|debug|function|error)\b/i)) {
-          topicFocus = 'Technical/Programming';
-        } else if (lastUserMessage.match(/\b(idea|create|design|build|make)\b/i)) {
-          topicFocus = 'Creative/Building';
-        } else if (lastUserMessage.match(/\b(how|why|what|explain|understand)\b/i)) {
-          topicFocus = 'Learning/Exploration';
-        } else if (lastUserMessage.match(/\b(help|issue|problem|stuck)\b/i)) {
-          topicFocus = 'Problem-Solving';
-          userTone = 'Seeking assistance';
-        }
-
-        // Simple tone detection
-        if (lastUserMessage.includes('?') && lastUserMessage.split(' ').length < 10) {
-          userTone = 'Curious and direct';
-        } else if (lastUserMessage.includes('!')) {
-          userTone = 'Enthusiastic';
-        } else if (lastUserMessage.split(' ').length > 30) {
-          userTone = 'Detailed and analytical';
-        }
-
-        conversationContext = `The conversation has been about ${topicFocus.toLowerCase()}. ${
-          recentMessages.length > 1 
-            ? 'User has been actively engaged with follow-up questions.' 
-            : 'This is a new topic.'
-        }`;
-      }
-    }
-
-    return `
-Session Context:
-- Current datetime: ${currentDateTime}
-- User: ${user?.email ? user.email.split('@')[0] : 'Guest'}
-- Active mode: ${currentMode}
-- Conversation length: ${messages.length} messages
-- Topic focus: ${topicFocus}
-- User tone: ${userTone}
-
-Behavioral Adjustments:
-- Maintain continuity with previous messages; reference past points naturally when relevant.
-- ${messages.length > 2 ? 'Build upon the established conversation context.' : 'Establish a helpful foundation for the conversation.'}
-- ${isDeepSearchActive ? 'Provide comprehensive, research-oriented responses with sources when possible.' : ''}
-- ${selectedPersona ? `Adopt the ${selectedPersona} persona's perspective and communication style.` : ''}
-- If user seems confused or indirect, briefly clarify intent before continuing.
-- Offer a relevant next step, suggestion, or question at the end when appropriate.
-
-Contextual Awareness:
-${conversationContext}
-${selectedFeature ? `\nActive feature: ${selectedFeature} - Tailor responses to leverage this feature's capabilities.` : ''}`;
-  };
-
-  const callGeminiAPI = async (message: string): Promise<string> => {
-    try {
-      console.log('🚀 Starting Gemini API call...');
-      console.log('📝 Message:', message);
-      console.log('🔑 API Key (first 10 chars):', GEMINI_API_KEY.substring(0, 10) + '...');
-      console.log('🌐 API URL:', GEMINI_API_URL.split('?')[0]); // Don't log full URL with key
-      
-      // Build dynamic system instruction
-      const runtimeContext = generateRuntimeContext();
-      const fullSystemInstruction = `${CORE_IDENTITY_OMI}\n\n${runtimeContext}`;
-      
-      console.log('🧠 Dynamic Context Generated:', runtimeContext);
-      
-      const requestBody = {
-        systemInstruction: {
-          parts: [
-            {
-              text: fullSystemInstruction
-            }
-          ]
-        },
-        contents: [
-          {
-            parts: [
-              {
-                text: message
-              }
-            ]
-          }
-        ],
-        generationConfig: {
-          temperature: 0.9,
-          topK: 1,
-          topP: 1,
-          maxOutputTokens: 2048,
-        },
-        safetySettings: [
-          {
-            category: "HARM_CATEGORY_HARASSMENT",
-            threshold: "BLOCK_MEDIUM_AND_ABOVE"
-          },
-          {
-            category: "HARM_CATEGORY_HATE_SPEECH",
-            threshold: "BLOCK_MEDIUM_AND_ABOVE"
-          },
-          {
-            category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-            threshold: "BLOCK_MEDIUM_AND_ABOVE"
-          },
-          {
-            category: "HARM_CATEGORY_DANGEROUS_CONTENT",
-            threshold: "BLOCK_MEDIUM_AND_ABOVE"
-          }
-        ]
-      };
-
-      console.log('📤 Request body:', JSON.stringify(requestBody, null, 2));
-
-      const response = await fetch(GEMINI_API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody)
-      });
-
-      console.log('📥 Response status:', response.status);
-      console.log('📥 Response ok:', response.ok);
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('API Error Response:', errorText);
-        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
-      }
-
-      const data = await response.json();
-      console.log('API Response:', data);
-      
-      const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (!responseText) {
-        console.error('No response text found in API response:', data);
-        return 'Sorry, I could not generate a response. Please try again.';
-      }
-      
-      return responseText;
-    } catch (error) {
-      console.error('Detailed error calling Gemini API:', error);
-      if (error instanceof Error) {
-        console.error('Error message:', error.message);
-        console.error('Error stack:', error.stack);
-      }
-      return `Sorry, I encountered an error: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`;
-    }
-  };
-
-  const callSecondaryAPI = async (message: string, model: string): Promise<string> => {
-    try {
-      // For now, we'll use the same Gemini API but with different prompting
-      // In a real implementation, you'd route to different models based on the model parameter
-      console.log(`Sending message to ${model}:`, message);
-      
-      const modelPrompts = {
-        'Claude': `As Claude (Anthropic's AI), please respond to: ${message}`,
-        'GPT-4': `As GPT-4 (OpenAI's model), please respond to: ${message}`,
-        'Gemini Pro': `As Gemini Pro (Google's AI), please respond to: ${message}`,
-        'Llama': `As Llama (Meta's AI), please respond to: ${message}`
-      };
-      
-      const prompt = modelPrompts[model as keyof typeof modelPrompts] || `Please respond to: ${message}`;
-      return await callGeminiAPI(prompt);
-    } catch (error) {
-      console.error(`Error calling ${model}:`, error);
-      return `Sorry, I encountered an error with ${model}. Please try again.`;
-    }
-  };
-
+  // Wrapper for handleSubmit to integrate with conversation management
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('handleSubmit called - Input:', inputValue.trim(), '| isLoading:', isLoading);
+    console.log('handleSubmit called - Input:', input.trim(), '| isLoading:', isLoading);
     
-    if (inputValue.trim() && !isLoading) {
+    if (input.trim() && !isLoading) {
       console.log('Processing message submission...');
       
       // Create a new conversation if this is the first message and user is logged in
       if (user && !currentConversationId && messages.length === 0) {
         console.log('Creating new conversation for logged-in user...');
-        const title = db.generateConversationTitle(inputValue.trim());
+        const title = db.generateConversationTitle(input.trim());
         const newConversation = await db.createConversation(user.id, title, selectedModel);
         if (newConversation) {
           setCurrentConversationId(newConversation.id);
@@ -497,66 +306,11 @@ ${selectedFeature ? `\nActive feature: ${selectedFeature} - Tailor responses to 
         console.log('Guest mode - no conversation to create');
       }
 
-      const userMessage: ChatMessage = {
-        role: 'user',
-        content: inputValue.trim(),
-        timestamp: new Date()
-      };
-
-      console.log('Adding user message to chat:', userMessage);
+      // Let useChat handle the actual message submission
+      handleChatSubmit(e);
       
-      // Add user message to both chats
-      setMessages(prev => [...prev, userMessage]);
-      if (isCompareMode) {
-        setSecondaryMessages(prev => [...prev, userMessage]);
-      }
-      
-      setInputValue('');
-      setAttachedFiles([]); // Clear attached files
-      setIsLoading(true);
-      
-      // Start secondary loading if in compare mode
-      if (isCompareMode && secondaryModel) {
-        setSecondaryLoading(true);
-      }
-
-      try {
-        console.log('Calling Gemini API...');
-        // Get primary AI response
-        const aiResponse = await callGeminiAPI(userMessage.content);
-        console.log('Got AI Response:', aiResponse);
-        const assistantMessage: ChatMessage = {
-          role: 'assistant',
-          content: aiResponse,
-          timestamp: new Date()
-        };
-
-        // Add primary AI response to chat
-        console.log('Adding assistant message to chat');
-        setMessages(prev => [...prev, assistantMessage]);
-        setIsLoading(false);
-
-        // Get secondary AI response if in compare mode
-        if (isCompareMode && secondaryModel) {
-          console.log('Getting secondary AI response...');
-          const secondaryResponse = await callSecondaryAPI(userMessage.content, secondaryModel);
-          console.log('Got Secondary AI Response:', secondaryResponse);
-          const secondaryAssistantMessage: ChatMessage = {
-            role: 'assistant',
-            content: secondaryResponse,
-            timestamp: new Date()
-          };
-
-          // Add secondary AI response to secondary chat
-          setSecondaryMessages(prev => [...prev, secondaryAssistantMessage]);
-          setSecondaryLoading(false);
-        }
-      } catch (error) {
-        setIsLoading(false);
-        setSecondaryLoading(false);
-        console.error('Error in handleSubmit:', error);
-        alert(`Error getting AI response: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      }
+      // Clear attached files after submission
+      setAttachedFiles([]);
     } else {
       console.log('Submit blocked - Empty input or already loading');
     }
@@ -749,8 +503,8 @@ ${selectedFeature ? `\nActive feature: ${selectedFeature} - Tailor responses to 
                     </div>
                   ) : (
                     <>
-                      {messages.map((message, index) => (
-                        <div key={index} className={`message ${message.role}`}>
+                      {messages.map((message) => (
+                        <div key={message.id} className={`message ${message.role}`}>
                           <div className="message-content">
                             {message.role === 'assistant' ? (
                               <FormattedText 
@@ -760,9 +514,6 @@ ${selectedFeature ? `\nActive feature: ${selectedFeature} - Tailor responses to 
                             ) : (
                               message.content
                             )}
-                          </div>
-                          <div className="message-time">
-                            {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </div>
                         </div>
                       ))}
@@ -891,7 +642,7 @@ ${selectedFeature ? `\nActive feature: ${selectedFeature} - Tailor responses to 
               </button>
               <input
                 type="text"
-                value={inputValue}
+                value={input}
                 onChange={handleInputChange}
                 placeholder={isSynthesizeActive ? "Type your message in Synthesize mode..." : "Type your message..."}
                 className="chat-input"
@@ -901,7 +652,7 @@ ${selectedFeature ? `\nActive feature: ${selectedFeature} - Tailor responses to 
               <button 
                 type="submit" 
                 className="chat-submit"
-                disabled={!inputValue.trim() || isLoading}
+                disabled={!input.trim() || isLoading}
               >
                 {isLoading ? (
                   <div className="loading-spinner">
