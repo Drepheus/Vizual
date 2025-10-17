@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
-import { useChat } from 'ai/react';
+import { useState, useEffect, useMemo } from 'react';
+import { useChat, Chat } from '@ai-sdk/react';
+import { DefaultChatTransport } from 'ai';
 import FormattedText from './FormattedText';
 import Dock from './Dock';
 import InfiniteScroll from './InfiniteScroll';
@@ -54,22 +55,35 @@ interface ChatMessage {
   timestamp: Date;
 }
 
+// Helper function to extract text from v5 UIMessage parts
+function getMessageText(message: any): string {
+  if (!message.parts) return '';
+  const textParts = message.parts.filter((p: any) => p.type === 'text');
+  return textParts.map((p: any) => p.text).join('');
+}
+
 function SplashPage() {
   // Authentication
   const { user } = useAuth();
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
   
-  // Vercel AI SDK v4's useChat hook
+  // Create Chat instance with transport for v5
+  const chat = useMemo(() => new Chat({
+    messages: [],
+    transport: new DefaultChatTransport({ api: '/api/chat' }),
+  }), []);
+  
+  // Vercel AI SDK v5's useChat hook
   const {
     messages,
-    input,
-    handleInputChange,
-    handleSubmit: handleChatSubmit,
-    isLoading,
+    sendMessage,
+    status,
     setMessages,
-  } = useChat({
-    api: '/api/chat',
-  });
+  } = useChat({ chat });
+
+  // Local input state (v5 doesn't provide input helpers, we manage ourselves)
+  const [input, setInput] = useState('');
+  const isLoading = status === 'streaming' || status === 'submitted';
 
   const [showAIModels, setShowAIModels] = useState(false);
   const [viewMode, setViewMode] = useState<'chat' | 'models'>('chat');
@@ -209,7 +223,8 @@ function SplashPage() {
       const lastMessage = messages[messages.length - 1];
       // Save the last message to database (only user and assistant messages)
       if (lastMessage.role === 'user' || lastMessage.role === 'assistant') {
-        db.saveMessage(currentConversationId, lastMessage.role, lastMessage.content);
+        const messageText = getMessageText(lastMessage);
+        db.saveMessage(currentConversationId, lastMessage.role, messageText);
       }
     }
   }, [messages, currentConversationId, user]);
@@ -232,11 +247,14 @@ function SplashPage() {
     setCurrentConversationId(conversationId);
     const dbMessages = await db.getConversationMessages(conversationId);
     
-    // Convert database messages to AI SDK Message format
+    // Convert database messages to v5 UIMessage format with parts
     const aiMessages = dbMessages.map(msg => ({
       id: msg.id || `msg-${Date.now()}-${Math.random()}`,
       role: msg.role as 'user' | 'assistant',
-      content: msg.content,
+      parts: [{
+        type: 'text' as const,
+        text: msg.content
+      }],
     }));
     
     setMessages(aiMessages);
@@ -284,7 +302,12 @@ function SplashPage() {
     setAttachedFiles(prev => prev.filter((_, i) => i !== index));
   };
 
-  // Wrapper for handleSubmit to integrate with conversation management
+  // Input change handler for v5
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInput(e.target.value);
+  };
+
+  // Wrapper for handleSubmit to integrate with conversation management  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log('handleSubmit called - Input:', input.trim(), '| isLoading:', isLoading);
@@ -305,10 +328,13 @@ function SplashPage() {
         console.log('Guest mode - no conversation to create');
       }
 
-      // Let useChat handle the actual message submission
-      handleChatSubmit(e);
+      // Use v5's sendMessage API
+      await sendMessage({
+        parts: [{ type: 'text', text: input.trim() }],
+      });
       
-      // Clear attached files after submission
+      // Clear input and attached files
+      setInput('');
       setAttachedFiles([]);
     } else {
       console.log('Submit blocked - Empty input or already loading');
@@ -507,11 +533,11 @@ function SplashPage() {
                           <div className="message-content">
                             {message.role === 'assistant' ? (
                               <FormattedText 
-                                text={message.content} 
+                                text={getMessageText(message)} 
                                 delay={0.2}
                               />
                             ) : (
-                              message.content
+                              getMessageText(message)
                             )}
                           </div>
                         </div>
