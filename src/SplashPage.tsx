@@ -138,6 +138,7 @@ function SplashPage() {
   const [isSynthesizeActive, setIsSynthesizeActive] = useState(false);
   const [isPulseActive, setIsPulseActive] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showInstantGen, setShowInstantGen] = useState(false);
 
   // Conversation management
   const [conversations, setConversations] = useState<DbConversation[]>([]);
@@ -228,13 +229,30 @@ function SplashPage() {
         setIsPulseActive(isActivating); // Toggle FlowingMenu
         console.log('Pulse clicked - FlowingMenu', isActivating ? 'activated' : 'deactivated');
       }
+    },
+    {
+      name: 'Instant Gen',
+      icon: '⚡',
+      description: 'Real-time AI image generation with Leonardo',
+      onClick: () => {
+        setShowInstantGen(true);
+        setSelectedFeature('Instant Gen');
+        setIsDeepSearchActive(false);
+        setIsPersonasActive(false);
+        setIsSynthesizeActive(false);
+        setIsPulseActive(false);
+        console.log('Instant Gen clicked - opening Leonardo AI');
+      }
     }
   ];
 
-  // Handle Escape key to close AI Models screen, Create menu, and fullscreen
+  // Handle Escape key to close AI Models screen, Create menu, fullscreen, and Instant Gen
   useEffect(() => {
     const handleEscapeKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && isFullscreen) {
+      if (event.key === 'Escape' && showInstantGen) {
+        setShowInstantGen(false);
+        setSelectedFeature(null);
+      } else if (event.key === 'Escape' && isFullscreen) {
         setIsFullscreen(false);
       } else if (event.key === 'Escape' && showAIModels) {
         setShowAIModels(false);
@@ -248,7 +266,7 @@ function SplashPage() {
 
     document.addEventListener('keydown', handleEscapeKey);
     return () => document.removeEventListener('keydown', handleEscapeKey);
-  }, [isFullscreen, showAIModels, showCreateMenu, isPulseActive]);
+  }, [showInstantGen, isFullscreen, showAIModels, showCreateMenu, isPulseActive]);
 
   // Load conversations when user logs in
   useEffect(() => {
@@ -947,6 +965,32 @@ function SplashPage() {
         isVisible={showCreateMenu} 
         onClose={() => setShowCreateMenu(false)} 
       />
+
+      {/* Instant Gen Modal - Leonardo AI Real-time Generator */}
+      {showInstantGen && (
+        <div className="instant-gen-modal">
+          <div className="instant-gen-header">
+            <h2>⚡ Instant Gen - Real-time AI Image Generation</h2>
+            <button 
+              className="instant-gen-close"
+              onClick={() => {
+                setShowInstantGen(false);
+                setSelectedFeature(null);
+              }}
+              title="Close (ESC)"
+            >
+              ✕
+            </button>
+          </div>
+          <iframe
+            src="https://app.leonardo.ai/realtime-gen"
+            className="instant-gen-iframe"
+            title="Leonardo AI Real-time Generator"
+            allow="clipboard-write; microphone"
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
+          />
+        </div>
+      )}
     </>
   );
 }
