@@ -606,7 +606,7 @@ html, body {
 .message {
   display: flex;
   flex-direction: column;
-  width: 100%;
+  max-width: 80%;
   animation: messageSlideIn 0.3s ease-out;
 }
 
@@ -637,6 +637,7 @@ html, body {
 .message.user .message-content {
   background: rgba(255, 255, 255, 0.1);
   border-color: rgba(255, 255, 255, 0.2);
+  border-radius: 16px 16px 4px 16px;
 }
 
 .message.assistant .message-content {
@@ -649,6 +650,7 @@ html, body {
   min-height: auto;
   max-height: none;
   overflow-y: visible;
+  border-radius: 16px 16px 16px 4px;
 }
 
 .message.assistant .message-content span {
