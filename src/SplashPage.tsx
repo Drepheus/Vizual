@@ -101,6 +101,23 @@ function SplashPage() {
     console.log('Initial messages:', messages);
   }, []);
 
+  // Debug messages changes
+  useEffect(() => {
+    console.log('=== MESSAGES UPDATED ===');
+    console.log('Total messages:', messages.length);
+    console.log('All messages:', JSON.stringify(messages, null, 2));
+    if (messages.length > 0) {
+      const lastMessage = messages[messages.length - 1];
+      console.log('Last message structure:', {
+        id: lastMessage.id,
+        role: lastMessage.role,
+        hasParts: !!lastMessage.parts,
+        parts: lastMessage.parts,
+        fullMessage: lastMessage,
+      });
+    }
+  }, [messages]);
+
   // Local input state (v5 doesn't provide input helpers, we manage ourselves)
   const [input, setInput] = useState('');
   const isLoading = status === 'streaming' || status === 'submitted';
