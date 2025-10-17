@@ -59,7 +59,7 @@ function SplashPage() {
   const { user } = useAuth();
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
   
-  // Vercel AI SDK's useChat hook - replaces manual message management and API calls
+  // Vercel AI SDK v4's useChat hook
   const {
     messages,
     input,
@@ -67,7 +67,6 @@ function SplashPage() {
     handleSubmit: handleChatSubmit,
     isLoading,
     setMessages,
-    setInput
   } = useChat({
     api: '/api/chat',
   });

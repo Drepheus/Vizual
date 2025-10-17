@@ -25,7 +25,7 @@ export default async function handler(req: Request) {
     // Create Google AI provider with API key
     const googleAI = createGoogleGenerativeAI({ apiKey });
 
-    const result = await streamText({
+    const result = streamText({
       model: googleAI('gemini-2.0-flash-exp'),
       messages,
       system: `You are Omi, a highly advanced AI assistant created by Andre Green. Your primary directive is to provide intelligent, precise, and helpful responses.
