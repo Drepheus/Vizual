@@ -5,6 +5,32 @@ export const config = {
   runtime: 'edge',
 };
 
+// Helper function to convert UI messages to model messages
+function convertToModelMessages(uiMessages: any[]): any[] {
+  return uiMessages.map((msg) => {
+    // If message already has content field, return as-is
+    if (msg.content) {
+      return { role: msg.role, content: msg.content };
+    }
+    
+    // Convert parts-based message to content-based message
+    if (msg.parts && Array.isArray(msg.parts)) {
+      const textParts = msg.parts
+        .filter((part: any) => part.type === 'text')
+        .map((part: any) => part.text)
+        .join('');
+      
+      return {
+        role: msg.role,
+        content: textParts
+      };
+    }
+    
+    // Fallback: return message as-is
+    return msg;
+  });
+}
+
 export default async function handler(req: Request) {
   console.log('=== API ROUTE CALLED ===');
   console.log('Request method:', req.method);
@@ -15,6 +41,11 @@ export default async function handler(req: Request) {
     console.log('Request body received:', JSON.stringify(body, null, 2));
     const { messages } = body;
     console.log('Messages extracted:', messages?.length, 'messages');
+
+    // Convert UI messages to model messages
+    const modelMessages = convertToModelMessages(messages);
+    console.log('Converted to model messages:', modelMessages.length, 'messages');
+    console.log('First converted message:', JSON.stringify(modelMessages[0], null, 2));
 
     // Verify API key is available
     const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
@@ -36,7 +67,7 @@ export default async function handler(req: Request) {
     console.log('Calling streamText...');
     const result = streamText({
       model: googleAI('gemini-2.0-flash-exp'),
-      messages,
+      messages: modelMessages, // Use converted messages
       system: `You are Omi, a highly advanced AI assistant created by Andre Green. Your primary directive is to provide intelligent, precise, and helpful responses.
 
 # Core Identity
