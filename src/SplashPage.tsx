@@ -328,10 +328,8 @@ function SplashPage() {
         console.log('Guest mode - no conversation to create');
       }
 
-      // Use v5's sendMessage API
-      await sendMessage({
-        parts: [{ type: 'text', text: input.trim() }],
-      });
+      // Use v5's sendMessage API with text format
+      await sendMessage({ text: input.trim() });
       
       // Clear input and attached files
       setInput('');
