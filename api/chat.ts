@@ -6,8 +6,15 @@ export const config = {
 };
 
 export default async function handler(req: Request) {
+  console.log('=== API ROUTE CALLED ===');
+  console.log('Request method:', req.method);
+  console.log('Request URL:', req.url);
+  
   try {
-    const { messages } = await req.json();
+    const body = await req.json();
+    console.log('Request body received:', JSON.stringify(body, null, 2));
+    const { messages } = body;
+    console.log('Messages extracted:', messages?.length, 'messages');
 
     // Verify API key is available
     const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
@@ -22,9 +29,11 @@ export default async function handler(req: Request) {
       );
     }
 
+    console.log('API key found, creating Google AI provider...');
     // Create Google AI provider with API key
     const googleAI = createGoogleGenerativeAI({ apiKey });
 
+    console.log('Calling streamText...');
     const result = streamText({
       model: googleAI('gemini-2.0-flash-exp'),
       messages,
@@ -77,9 +86,12 @@ export default async function handler(req: Request) {
 Remember: You represent Andre Green's vision for helpful, intelligent AI. Maintain high standards in every interaction.`,
     });
 
+    console.log('streamText call completed, returning stream response...');
     return result.toTextStreamResponse();
   } catch (error) {
+    console.error('=== API ROUTE ERROR ===');
     console.error('Chat API error:', error);
+    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
     return new Response(
       JSON.stringify({ 
         error: 'Failed to process chat request',
