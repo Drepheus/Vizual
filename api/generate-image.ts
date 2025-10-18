@@ -5,6 +5,8 @@ export const config = {
 };
 
 export default async function handler(req: Request) {
+  console.log('=== IMAGE GENERATION API CALLED ===');
+  
   if (req.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
       status: 405,
