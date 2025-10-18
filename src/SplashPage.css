@@ -59,10 +59,12 @@ html, body {
   width: 100vw;
   height: 100vh;
   background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
+  padding-top: 2rem;
 }
 
 /* LaserFlow Background Animation */
@@ -96,6 +98,8 @@ html, body {
   text-align: center;
   pointer-events: none;
   padding: 2rem;
+  width: 100%;
+  max-width: 1400px;
 }
 
 .splash-title {
@@ -447,10 +451,15 @@ html, body {
 .chat-container {
   flex: 1;
   width: 100%;
-  overflow: hidden;
+  max-height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  padding-left: 6rem; /* Add padding for vertical dock */
+  padding-right: 1rem;
+  padding-bottom: 2rem;
 }
 
 .chat-container.fullscreen {
@@ -1522,6 +1531,7 @@ html, body {
 
 .generated-image-container {
   margin-top: 2rem;
+  margin-bottom: 2rem;
   padding: 2.5rem;
   background: linear-gradient(135deg,
     rgba(138, 43, 226, 0.05) 0%,
@@ -1529,7 +1539,7 @@ html, body {
     rgba(138, 43, 226, 0.05) 100%);
   border-radius: 20px;
   border: 2px solid rgba(138, 43, 226, 0.2);
-  min-height: 450px;
+  min-height: 300px;
   display: flex;
   align-items: center;
   justify-content: center;
