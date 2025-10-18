@@ -1,4 +1,4 @@
-const Replicate = require('replicate').default;
+const Replicate = require('replicate');
 
 module.exports = async function handler(req, res) {
   console.log('=== IMAGE GENERATION API CALLED ===');
