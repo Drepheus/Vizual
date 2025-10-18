@@ -6,6 +6,7 @@ export const config = {
 
 export default async function handler(req: Request) {
   console.log('=== IMAGE GENERATION API CALLED ===');
+  console.log('Environment check - API token present:', !!process.env.REPLICATE_API_TOKEN);
   
   if (req.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
