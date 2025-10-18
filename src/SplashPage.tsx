@@ -13,6 +13,8 @@ import { useAuth } from './Auth';
 import { supabase } from './supabaseClient';
 import * as db from './databaseService';
 import type { DbConversation } from './databaseService';
+import PaywallModal from './PaywallModal';
+import { checkUsageLimit, incrementUsage, UsageType } from './usageTracking';
 import './SplashPage.css';
 
 // Omi Core Identity (Static System Message) - now used server-side
@@ -147,6 +149,15 @@ function SplashPage() {
   const [isGeneratingVideo, setIsGeneratingVideo] = useState(false);
   const videoContainerRef = useRef<HTMLDivElement>(null);
 
+  // Paywall and subscription management
+  const [showPaywall, setShowPaywall] = useState(false);
+  const [paywallLimitType, setPaywallLimitType] = useState<'chat' | 'image' | 'video'>('chat');
+  const [paywallUsage, setPaywallUsage] = useState<{ current: number; limit: number; resetAt: string | null }>({ 
+    current: 0, 
+    limit: 15, 
+    resetAt: null 
+  });
+
   // Conversation management
   const [conversations, setConversations] = useState<DbConversation[]>([]);
   const [showConversations, setShowConversations] = useState(false);
@@ -260,6 +271,31 @@ function SplashPage() {
       }
     }
   ];
+
+  // Helper function to check usage and show paywall if needed
+  const checkAndShowPaywall = async (usageType: UsageType): Promise<boolean> => {
+    if (!user) return true; // Allow guests to use without limits for now
+    
+    try {
+      const result = await checkUsageLimit(user.id, usageType);
+      
+      if (!result.canPerform) {
+        setPaywallLimitType(usageType === 'chat' ? 'chat' : usageType === 'image_gen' ? 'image' : 'video');
+        setPaywallUsage({
+          current: result.currentUsage,
+          limit: result.usageLimit,
+          resetAt: result.resetAt
+        });
+        setShowPaywall(true);
+        return false;
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Error checking usage limit:', error);
+      return true; // Allow on error to not block user
+    }
+  };
 
   // Handle Escape key to close AI Models screen, Create menu, and fullscreen
   useEffect(() => {
@@ -387,6 +423,10 @@ function SplashPage() {
     if (input.trim() && !isLoading && !isGeneratingImage && !isGeneratingVideo) {
       // If Video Gen mode is active, generate a video instead of sending a chat message
       if (isVideoGenActive) {
+        // Check usage limit before proceeding
+        const canProceed = await checkAndShowPaywall('video_gen');
+        if (!canProceed) return;
+        
         console.log('Generating video with prompt:', input.trim());
         setIsGeneratingVideo(true);
         setGeneratedVideo(null);
@@ -403,6 +443,11 @@ function SplashPage() {
           if (response.ok && data.videoUrl) {
             console.log('Video generated successfully:', data.videoUrl);
             setGeneratedVideo(data.videoUrl);
+            
+            // Increment usage after successful generation
+            if (user) {
+              await incrementUsage(user.id, 'video_gen');
+            }
             
             // Scroll to video after a short delay to allow render
             setTimeout(() => {
@@ -427,6 +472,10 @@ function SplashPage() {
       
       // If Instant Gen mode is active, generate an image instead of sending a chat message
       if (isInstantGenActive) {
+        // Check usage limit before proceeding
+        const canProceed = await checkAndShowPaywall('image_gen');
+        if (!canProceed) return;
+        
         console.log('Generating image with prompt:', input.trim());
         setIsGeneratingImage(true);
         setGeneratedImage(null);
@@ -443,6 +492,11 @@ function SplashPage() {
           if (response.ok && data.imageUrl) {
             console.log('Image generated successfully:', data.imageUrl);
             setGeneratedImage(data.imageUrl);
+            
+            // Increment usage after successful generation
+            if (user) {
+              await incrementUsage(user.id, 'image_gen');
+            }
             
             // Scroll to image after a short delay to allow render
             setTimeout(() => {
@@ -467,6 +521,10 @@ function SplashPage() {
       
       console.log('Processing message submission...');
       
+      // Check usage limit for chat before proceeding
+      const canProceed = await checkAndShowPaywall('chat');
+      if (!canProceed) return;
+      
       // Create a new conversation if this is the first message and user is logged in
       if (user && !currentConversationId && messages.length === 0) {
         console.log('Creating new conversation for logged-in user...');
@@ -485,6 +543,11 @@ function SplashPage() {
         // Use v5's sendMessage API with text format
         const result = await sendMessage({ text: input.trim() });
         console.log('sendMessage result:', result);
+        
+        // Increment usage after successful message
+        if (user && result) {
+          await incrementUsage(user.id, 'chat');
+        }
         
         // Clear input and attached files
         setInput('');
@@ -1205,6 +1268,16 @@ function SplashPage() {
       <InfiniteMenu 
         isVisible={showCreateMenu} 
         onClose={() => setShowCreateMenu(false)} 
+      />
+
+      {/* Paywall Modal */}
+      <PaywallModal
+        isOpen={showPaywall}
+        onClose={() => setShowPaywall(false)}
+        limitType={paywallLimitType}
+        currentUsage={paywallUsage.current}
+        usageLimit={paywallUsage.limit}
+        resetAt={paywallUsage.resetAt}
       />
     </>
   );

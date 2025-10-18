@@ -1,5 +1,11 @@
 import React from 'react';
+import { createClient } from '@supabase/supabase-js';
 import './PaywallModal.css';
+
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY
+);
 
 interface PaywallModalProps {
   isOpen: boolean;
@@ -7,7 +13,7 @@ interface PaywallModalProps {
   limitType: 'chat' | 'image' | 'video';
   currentUsage: number;
   usageLimit: number;
-  resetAt?: string;
+  resetAt?: string | null;
 }
 
 const PaywallModal: React.FC<PaywallModalProps> = ({
@@ -60,9 +66,37 @@ const PaywallModal: React.FC<PaywallModalProps> = ({
     return `${minutes}m`;
   };
 
-  const handleUpgrade = () => {
-    // Redirect to Stripe checkout
-    window.location.href = '/api/create-checkout-session';
+  const handleUpgrade = async () => {
+    try {
+      // Get current user from Supabase
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        alert('Please log in to upgrade');
+        return;
+      }
+      
+      // Create checkout session
+      const response = await fetch('/api/create-checkout-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          userId: user.id, 
+          email: user.email 
+        }),
+      });
+      
+      const data = await response.json();
+      
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error('No checkout URL returned');
+      }
+    } catch (error) {
+      console.error('Error creating checkout:', error);
+      alert('Failed to start checkout. Please try again.');
+    }
   };
 
   const info = getLimitInfo();
