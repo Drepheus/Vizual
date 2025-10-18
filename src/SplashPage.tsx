@@ -173,6 +173,24 @@ function SplashPage() {
       }
     },
     {
+      name: 'Image Gen',
+      icon: '⚡',
+      description: isInstantGenActive ? 'Image generation active - type a prompt!' : 'Real-time AI image generation',
+      onClick: () => {
+        const isActivating = selectedFeature !== 'Image Gen';
+        setSelectedFeature(isActivating ? 'Image Gen' : null);
+        setIsInstantGenActive(isActivating);
+        setIsDeepSearchActive(false);
+        setIsPersonasActive(false);
+        setIsSynthesizeActive(false);
+        setIsPulseActive(false);
+        if (!isActivating) {
+          setGeneratedImage(null); // Clear image when deactivating
+        }
+        console.log('Image Gen mode', isActivating ? 'activated' : 'deactivated');
+      }
+    },
+    {
       name: 'Video Gen',
       icon: '🎬',
       description: 'Generate AI videos from text prompts',
@@ -239,24 +257,6 @@ function SplashPage() {
         setIsSynthesizeActive(false); // Turn off ElectricBorder animation
         setIsPulseActive(isActivating); // Toggle FlowingMenu
         console.log('Pulse clicked - FlowingMenu', isActivating ? 'activated' : 'deactivated');
-      }
-    },
-    {
-      name: 'Instant Gen',
-      icon: '⚡',
-      description: isInstantGenActive ? 'Image generation active - type a prompt!' : 'Real-time AI image generation',
-      onClick: () => {
-        const isActivating = selectedFeature !== 'Instant Gen';
-        setSelectedFeature(isActivating ? 'Instant Gen' : null);
-        setIsInstantGenActive(isActivating);
-        setIsDeepSearchActive(false);
-        setIsPersonasActive(false);
-        setIsSynthesizeActive(false);
-        setIsPulseActive(false);
-        if (!isActivating) {
-          setGeneratedImage(null); // Clear image when deactivating
-        }
-        console.log('Instant Gen mode', isActivating ? 'activated' : 'deactivated');
       }
     }
   ];
@@ -813,12 +813,12 @@ function SplashPage() {
               </div>
             )}
             
-            {/* Instant Gen Mode Indicator */}
+            {/* Image Gen Mode Indicator */}
             {isInstantGenActive && (
               <div className="instant-gen-indicator">
                 <span className="instant-gen-icon">⚡</span>
                 <span className="instant-gen-text">
-                  Instant Gen Mode Active - Describe the image you want to create
+                  Image Gen Mode Active - Describe the image you want to create
                 </span>
               </div>
             )}
