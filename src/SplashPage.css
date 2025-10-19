@@ -774,12 +774,16 @@ html, body {
   word-wrap: break-word;
   overflow-wrap: break-word;
   width: 100%;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .message.user .message-content {
   background: rgba(255, 255, 255, 0.1);
   border-color: rgba(255, 255, 255, 0.2);
   border-radius: 16px 16px 4px 16px;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .message.assistant .message-content {
@@ -793,10 +797,67 @@ html, body {
   max-height: none;
   overflow-y: visible;
   border-radius: 16px 16px 16px 4px;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .message.assistant .message-content span {
   display: inline-block;
+}
+
+/* Proper spacing for formatted content */
+.message-content p {
+  margin: 0.75em 0;
+}
+
+.message-content p:first-child {
+  margin-top: 0;
+}
+
+.message-content p:last-child {
+  margin-bottom: 0;
+}
+
+.message-content ul,
+.message-content ol {
+  margin: 0.75em 0;
+  padding-left: 1.5em;
+}
+
+.message-content li {
+  margin: 0.5em 0;
+}
+
+.message-content code {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9em;
+}
+
+.message-content pre {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 1em;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 0.75em 0;
+}
+
+.message-content pre code {
+  background: none;
+  padding: 0;
+}
+
+.message-content a {
+  color: #60a5fa;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.message-content a:hover {
+  border-bottom-color: #60a5fa;
 }
 
 .message-time {
