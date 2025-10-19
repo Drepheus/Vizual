@@ -688,6 +688,35 @@ function SplashPage() {
           </button>
         )}
 
+        {/* Top Right Action Buttons - Fixed to top-right corner */}
+        <div className="top-right-actions">
+          {/* New Conversation Button */}
+          <button
+            className="header-action-btn new-conversation-btn"
+            onClick={createNewConversation}
+            title="Start new conversation"
+          >
+            <span className="header-btn-icon">✨</span>
+            <span className="header-btn-text">New Chat</span>
+          </button>
+
+          {/* Account Button */}
+          {user ? (
+            <button
+              className="header-action-btn account-btn"
+              onClick={() => setShowSettings(true)}
+              title="Account settings"
+            >
+              <span className="header-btn-icon">👤</span>
+              <span className="header-btn-text">{user.email?.split('@')[0] || 'Account'}</span>
+            </button>
+          ) : (
+            <div className="header-guest-indicator">
+              <span>🎭 Guest Mode</span>
+            </div>
+          )}
+        </div>
+
         <div className="chat-interface">
           <div className="chat-header">
             <div className="header-left">
@@ -703,34 +732,6 @@ function SplashPage() {
                   ⚙️
                 </button>
               </div>
-            </div>
-            
-            <div className="header-right">
-              {/* New Conversation Button */}
-              <button
-                className="header-action-btn new-conversation-btn"
-                onClick={createNewConversation}
-                title="Start new conversation"
-              >
-                <span className="header-btn-icon">✨</span>
-                <span className="header-btn-text">New Chat</span>
-              </button>
-
-              {/* Account Button */}
-              {user ? (
-                <button
-                  className="header-action-btn account-btn"
-                  onClick={() => setShowSettings(true)}
-                  title="Account settings"
-                >
-                  <span className="header-btn-icon">👤</span>
-                  <span className="header-btn-text">{user.email?.split('@')[0] || 'Account'}</span>
-                </button>
-              ) : (
-                <div className="header-guest-indicator">
-                  <span>🎭 Guest Mode</span>
-                </div>
-              )}
             </div>
           </div>
 
