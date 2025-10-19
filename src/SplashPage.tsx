@@ -14,6 +14,7 @@ import { supabase } from './supabaseClient';
 import * as db from './databaseService';
 import type { DbConversation } from './databaseService';
 import PaywallModal from './PaywallModal';
+import SettingsModal from './SettingsModal';
 import { checkUsageLimit, incrementUsage, UsageType } from './usageTracking';
 import './SplashPage.css';
 
@@ -173,6 +174,9 @@ function SplashPage() {
   const [conversations, setConversations] = useState<DbConversation[]>([]);
   const [showConversations, setShowConversations] = useState(false);
   const [isLoadingConversations, setIsLoadingConversations] = useState(false);
+
+  // Settings modal
+  const [showSettings, setShowSettings] = useState(false);
 
   // Feature buttons data
   const featureButtons = [
@@ -792,6 +796,34 @@ function SplashPage() {
                 </button>
               </div>
             </div>
+            
+            <div className="header-right">
+              {/* New Conversation Button */}
+              <button
+                className="header-action-btn new-conversation-btn"
+                onClick={createNewConversation}
+                title="Start new conversation"
+              >
+                <span className="header-btn-icon">✨</span>
+                <span className="header-btn-text">New Chat</span>
+              </button>
+
+              {/* Account Button */}
+              {user ? (
+                <button
+                  className="header-action-btn account-btn"
+                  onClick={() => setShowSettings(true)}
+                  title="Account settings"
+                >
+                  <span className="header-btn-icon">👤</span>
+                  <span className="header-btn-text">{user.email?.split('@')[0] || 'Account'}</span>
+                </button>
+              ) : (
+                <div className="header-guest-indicator">
+                  <span>🎭 Guest Mode</span>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Feature Buttons - Above Dialog Box */}
@@ -1377,6 +1409,13 @@ function SplashPage() {
         currentUsage={paywallUsage.current}
         usageLimit={paywallUsage.limit}
         resetAt={paywallUsage.resetAt}
+      />
+
+      {/* Settings Modal */}
+      <SettingsModal
+        isOpen={showSettings}
+        onClose={() => setShowSettings(false)}
+        user={user}
       />
     </>
   );
