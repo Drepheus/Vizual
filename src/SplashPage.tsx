@@ -1,6 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
-import { useChat, Chat } from '@ai-sdk/react';
-import { DefaultChatTransport } from 'ai';
+import { useState, useEffect, useRef } from 'react';
 import FormattedText from './FormattedText';
 import Dock from './Dock';
 import InfiniteScroll from './InfiniteScroll';
@@ -59,19 +57,14 @@ interface ChatMessage {
 }
 
 // Helper function to extract text from v5 UIMessage (handles both parts and content format)
-function getMessageText(message: any): string {
-  // Handle content field (from API responses)
-  if (message.content) {
-    return typeof message.content === 'string' ? message.content : '';
-  }
-  
-  // Handle parts array (from UI state)
-  if (message.parts) {
-    const textParts = message.parts.filter((p: any) => p.type === 'text');
-    return textParts.map((p: any) => p.text).join('');
-  }
-  
-  return '';
+function getMessageText(message: Message): string {
+  return message.content || '';
+}
+
+interface Message {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
 }
 
 function SplashPage() {
@@ -79,62 +72,10 @@ function SplashPage() {
   const { user } = useAuth();
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
   
-  // Determine API route based on active mode
-  const apiRoute = isDeepSearchActive ? '/api/deep-search' : '/api/chat';
-  
-  // Create Chat instance with transport for v5
-  const chat = useMemo(() => {
-    console.log('Creating Chat instance with API route:', apiRoute);
-    return new Chat({
-      messages: [],
-      transport: new DefaultChatTransport({ api: apiRoute }),
-    });
-  }, [apiRoute]);
-  
-  // Vercel AI SDK v5's useChat hook
-  const {
-    messages,
-    sendMessage,
-    status,
-    setMessages,
-  } = useChat({ chat });
-
-  // Update chat transport when DeepSearch mode changes
-  useEffect(() => {
-    console.log('=== API ROUTE CHANGED ===');
-    console.log('isDeepSearchActive:', isDeepSearchActive);
-    console.log('New API route:', apiRoute);
-    console.log('Chat instance updated');
-  }, [isDeepSearchActive, apiRoute]);
-
-  // Debug chat hook initialization
-  useEffect(() => {
-    console.log('useChat hook initialized');
-    console.log('sendMessage function:', typeof sendMessage);
-    console.log('Initial status:', status);
-    console.log('Initial messages:', messages);
-  }, []);
-
-  // Debug messages changes
-  useEffect(() => {
-    console.log('=== MESSAGES UPDATED ===');
-    console.log('Total messages:', messages.length);
-    console.log('All messages:', JSON.stringify(messages, null, 2));
-    if (messages.length > 0) {
-      const lastMessage = messages[messages.length - 1];
-      console.log('Last message structure:', {
-        id: lastMessage.id,
-        role: lastMessage.role,
-        hasParts: !!lastMessage.parts,
-        parts: lastMessage.parts,
-        fullMessage: lastMessage,
-      });
-    }
-  }, [messages]);
-
-  // Local input state (v5 doesn't provide input helpers, we manage ourselves)
+  // Chat state management (replacing AI SDK)
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
-  const isLoading = status === 'streaming' || status === 'submitted';
+  const [isLoading, setIsLoading] = useState(false);
 
   const [showAIModels, setShowAIModels] = useState(false);
   const [viewMode, setViewMode] = useState<'chat' | 'models'>('chat');
@@ -368,14 +309,11 @@ function SplashPage() {
     setCurrentConversationId(conversationId);
     const dbMessages = await db.getConversationMessages(conversationId);
     
-    // Convert database messages to v5 UIMessage format with parts
-    const aiMessages = dbMessages.map(msg => ({
+    // Convert database messages to simple Message format
+    const aiMessages: Message[] = dbMessages.map(msg => ({
       id: msg.id || `msg-${Date.now()}-${Math.random()}`,
       role: msg.role as 'user' | 'assistant',
-      parts: [{
-        type: 'text' as const,
-        text: msg.content
-      }],
+      content: msg.content,
     }));
     
     setMessages(aiMessages);
@@ -538,7 +476,7 @@ function SplashPage() {
       console.log('=== CURRENT STATE CHECK ===');
       console.log('isDeepSearchActive:', isDeepSearchActive);
       console.log('isVideoGenActive:', isVideoGenActive);
-      console.log('isImageGenActive:', isImageGenActive);
+      console.log('isInstantGenActive:', isInstantGenActive);
       console.log('selectedFeature:', selectedFeature);
       
       // Check usage limit for chat before proceeding
@@ -559,108 +497,63 @@ function SplashPage() {
       }
 
       try {
-        console.log('About to call sendMessage with:', { text: input.trim() });
+        setIsLoading(true);
+        console.log('Sending message:', { text: input.trim() });
         console.log('DeepSearch active:', isDeepSearchActive);
+        
+        // Add user message to UI immediately
+        const userMessage: Message = {
+          id: `user-${Date.now()}`,
+          role: 'user',
+          content: input.trim(),
+        };
+        
+        setMessages(prev => [...prev, userMessage]);
+        setInput(''); // Clear input immediately
+        setAttachedFiles([]);
+        
+        // Determine which API to call
+        const apiRoute = isDeepSearchActive ? '/api/deep-search' : '/api/chat';
         console.log('Using API route:', apiRoute);
         
-        // If DeepSearch is active, manually call the deep-search API
-        if (isDeepSearchActive) {
-          console.log('=== USING DEEP SEARCH API ===');
-          
-          // Add user message to UI immediately
-          const userMessage = {
-            id: `user-${Date.now()}`,
-            role: 'user' as const,
-            content: input.trim(),
-            parts: [{ type: 'text' as const, text: input.trim() }],
-          };
-          
-          setMessages([...messages, userMessage]);
-          setInput(''); // Clear input immediately
-          
-          // Call DeepSearch API
-          const response = await fetch('/api/deep-search', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              messages: [...messages, userMessage]
-            }),
-          });
-          
-          if (!response.ok) {
-            throw new Error('DeepSearch API call failed');
-          }
-          
-          // Handle streaming response
-          const reader = response.body?.getReader();
-          const decoder = new TextDecoder();
-          let assistantText = '';
-          const assistantId = `assistant-${Date.now()}`;
-          
-          if (reader) {
-            while (true) {
-              const { done, value } = await reader.read();
-              if (done) break;
-              
-              const chunk = decoder.decode(value);
-              const lines = chunk.split('\n');
-              
-              for (const line of lines) {
-                if (line.startsWith('0:')) {
-                  try {
-                    const jsonStr = line.substring(2);
-                    const data = JSON.parse(jsonStr);
-                    
-                    if (data.type === 'text-delta' && data.delta) {
-                      assistantText += data.delta;
-                      
-                      // Update messages with accumulated text
-                      setMessages((prev) => {
-                        const withoutLastAssistant = prev.filter(m => m.id !== assistantId);
-                        return [
-                          ...withoutLastAssistant,
-                          {
-                            id: assistantId,
-                            role: 'assistant' as const,
-                            content: assistantText,
-                            parts: [{ type: 'text' as const, text: assistantText }],
-                          }
-                        ];
-                      });
-                    }
-                  } catch (e) {
-                    // Ignore parse errors for incomplete chunks
-                  }
-                }
-              }
-            }
-          }
-          
-          // Increment usage after successful message
-          if (user) {
-            await incrementUsage(user.id, 'chat');
-          }
-          
-        } else {
-          // Use regular chat API via useChat hook
-          const result = await sendMessage({ text: input.trim() });
-          console.log('sendMessage result:', result);
-          
-          // Increment usage after successful message
-          if (user && result) {
-            await incrementUsage(user.id, 'chat');
-          }
-          
-          // Clear input and attached files
-          setInput('');
-          setAttachedFiles([]);
+        // Call API
+        const response = await fetch(apiRoute, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            messages: [...messages, userMessage]
+          }),
+        });
+        
+        if (!response.ok) {
+          throw new Error('API call failed');
         }
+        
+        const data = await response.json();
+        console.log('API response:', data);
+        
+        // Add assistant message to UI
+        const assistantMessage: Message = {
+          id: `assistant-${Date.now()}`,
+          role: 'assistant',
+          content: data.message,
+        };
+        
+        setMessages(prev => [...prev, assistantMessage]);
+        setIsLoading(false);
+        
+        // Increment usage after successful message
+        if (user) {
+          await incrementUsage(user.id, 'chat');
+        }
+        
       } catch (error) {
         console.error('Error in sendMessage:', error);
         console.error('Error details:', {
           message: error instanceof Error ? error.message : 'Unknown error',
           stack: error instanceof Error ? error.stack : undefined,
         });
+        setIsLoading(false);
       }
     } else {
       console.log('Submit blocked - Empty input or already loading');

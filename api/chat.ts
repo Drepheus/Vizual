@@ -1,62 +1,30 @@
-import { google, createGoogleGenerativeAI } from '@ai-sdk/google';
-import { streamText, createUIMessageStream, createUIMessageStreamResponse } from 'ai';
-import { z } from 'zod';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
-export const config = {
-  runtime: 'edge',
-};
-
-// Helper function to convert UI messages to model messages
-function convertToModelMessages(uiMessages: any[]): any[] {
-  return uiMessages.map((msg) => {
-    console.log('Converting message:', JSON.stringify(msg, null, 2));
-    
-    // If message already has content field, return as-is
-    if (msg.content && typeof msg.content === 'string' && msg.content.trim()) {
-      console.log('Message has content:', msg.content);
-      return { role: msg.role, content: msg.content };
-    }
-    
-    // Convert parts-based message to content-based message
-    if (msg.parts && Array.isArray(msg.parts)) {
-      const textParts = msg.parts
-        .filter((part: any) => part.type === 'text')
-        .map((part: any) => part.text)
-        .join('');
-      
-      console.log('Extracted text from parts:', textParts);
-      
-      if (!textParts.trim()) {
-        console.error('WARNING: Empty content extracted from parts!');
-      }
-      
-      return {
-        role: msg.role,
-        content: textParts || 'Hello' // Fallback to prevent empty content
-      };
-    }
-    
-    console.error('WARNING: Message has no content or parts!', msg);
-    // Fallback: return message with placeholder content
-    return { role: msg.role, content: msg.content || 'Hello' };
-  });
+interface Message {
+  role: 'user' | 'assistant';
+  content: string;
 }
 
 export default async function handler(req: Request) {
-  console.log('=== API ROUTE CALLED ===');
+  console.log('=== CHAT API ROUTE CALLED ===');
   console.log('Request method:', req.method);
   console.log('Request URL:', req.url);
   
+  if (req.method !== 'POST') {
+    return new Response(
+      JSON.stringify({ error: 'Method not allowed' }),
+      {
+        status: 405,
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
+  }
+  
   try {
     const body = await req.json();
-    console.log('Request body received:', JSON.stringify(body, null, 2));
-    const { messages } = body;
+    console.log('Request body received');
+    const { messages } = body as { messages: Message[] };
     console.log('Messages extracted:', messages?.length, 'messages');
-
-    // Convert UI messages to model messages
-    const modelMessages = convertToModelMessages(messages);
-    console.log('Converted to model messages:', modelMessages.length, 'messages');
-    console.log('All converted messages:', JSON.stringify(modelMessages, null, 2));
 
     // Verify API key is available
     const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
@@ -71,59 +39,19 @@ export default async function handler(req: Request) {
       );
     }
 
-    console.log('API key found, creating Google AI provider...');
-    // Create Google AI provider with API key
-    const googleAI = createGoogleGenerativeAI({ apiKey });
-
-    console.log('Calling streamText...');
-    const result = streamText({
-      model: googleAI('gemini-2.0-flash-exp'),
-      messages: modelMessages, // Use converted messages
-      tools: {
-        getCurrentDateTime: {
-          description: 'Get the current date and time. Use this when the user asks about the current date, time, day of the week, or any time-related information.',
-          inputSchema: z.object({
-            timezone: z.string().optional().describe('Optional timezone (e.g., "America/New_York", "Europe/London"). Defaults to UTC if not specified.'),
-          }),
-          execute: async ({ timezone }: { timezone?: string }) => {
-            const now = new Date();
-            const options: Intl.DateTimeFormatOptions = {
-              weekday: 'long',
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit',
-              second: '2-digit',
-              timeZone: timezone || 'UTC',
-              timeZoneName: 'short',
-            };
-            
-            const formattedDate = now.toLocaleString('en-US', options);
-            const isoDate = now.toISOString();
-            const unixTimestamp = Math.floor(now.getTime() / 1000);
-            
-            return {
-              formatted: formattedDate,
-              iso: isoDate,
-              timestamp: unixTimestamp,
-              timezone: timezone || 'UTC',
-            };
-          },
-        },
-      },
-      system: `You are Omi, a highly advanced AI assistant created by Andre Green. Your primary directive is to provide intelligent, precise, and helpful responses.
+    console.log('API key found, initializing Gemini...');
+    
+    // Initialize Gemini
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ 
+      model: 'gemini-2.0-flash-exp',
+      systemInstruction: `You are Omi, a highly advanced AI assistant created by Andre Green. Your primary directive is to provide intelligent, precise, and helpful responses.
 
 # Core Identity
 - Name: Omi
 - Creator: Andre Green
 - Purpose: Assist users with clarity, intelligence, and empathy
 - Personality: Calm, precise, and intelligent. You communicate with confidence but remain approachable
-
-# Available Tools
-- You have access to a tool called "getCurrentDateTime" that provides real-time date and time information
-- ALWAYS use this tool when users ask about the current time, date, day of the week, or any time-related queries
-- Never rely on your training cutoff date for current time information
 
 # Communication Style
 - Be concise yet comprehensive
@@ -163,41 +91,40 @@ export default async function handler(req: Request) {
 - For learning queries: Teach concepts, don't just give answers
 - For debugging: Explain the problem, the solution, and why it works
 
-Remember: You represent Andre Green's vision for helpful, intelligent AI. Maintain high standards in every interaction.`,
+Remember: You represent Andre Green's vision for helpful, intelligent AI. Maintain high standards in every interaction.`
     });
 
-    console.log('streamText call completed, creating UI message stream...');
+    // Convert messages to Gemini format (exclude system messages, take last 10 for context)
+    const history = messages.slice(-10, -1).map(msg => ({
+      role: msg.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: msg.content }],
+    }));
+
+    // Get the latest user message
+    const latestMessage = messages[messages.length - 1];
     
-    // Create a UI message stream from the streamText result
-    const stream = createUIMessageStream({
-      async execute({ writer }) {
-        const messageId = `msg-${Date.now()}`;
-        let textId = `text-${Date.now()}`;
-        
-        writer.write({ type: 'start', messageId });
-        writer.write({ type: 'text-start', id: textId });
-        
-        for await (const chunk of result.textStream) {
-          writer.write({ 
-            type: 'text-delta', 
-            id: textId,
-            delta: chunk
-          });
-        }
-        
-        writer.write({ type: 'text-end', id: textId });
-        writer.write({ type: 'finish' });
-      },
-      onError: (error) => {
-        console.error('Stream error:', error);
-        return 'An error occurred during streaming.';
-      }
-    });
+    console.log('Starting chat with', history.length, 'history messages');
+    const chat = model.startChat({ history });
+    
+    console.log('Sending message to Gemini...');
+    const result = await chat.sendMessage(latestMessage.content);
+    const response = await result.response;
+    const text = response.text();
+    
+    console.log('Response received from Gemini');
 
-    console.log('Returning UI message stream response...');
-    return createUIMessageStreamResponse({ stream });
+    return new Response(
+      JSON.stringify({ 
+        message: text,
+        role: 'assistant'
+      }),
+      {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
   } catch (error) {
-    console.error('=== API ROUTE ERROR ===');
+    console.error('=== CHAT API ERROR ===');
     console.error('Chat API error:', error);
     console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
     return new Response(

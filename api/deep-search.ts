@@ -1,44 +1,30 @@
 import { tavily } from '@tavily/core';
-import { google, createGoogleGenerativeAI } from '@ai-sdk/google';
-import { streamText, createUIMessageStream, createUIMessageStreamResponse } from 'ai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
-export const config = {
-  runtime: 'edge',
-};
-
-// Helper function to convert UI messages to model messages
-function convertToModelMessages(uiMessages: any[]): any[] {
-  return uiMessages.map((msg) => {
-    if (msg.content && typeof msg.content === 'string' && msg.content.trim()) {
-      return { role: msg.role, content: msg.content };
-    }
-    
-    if (msg.parts && Array.isArray(msg.parts)) {
-      const textParts = msg.parts
-        .filter((part: any) => part.type === 'text')
-        .map((part: any) => part.text)
-        .join('');
-      
-      return {
-        role: msg.role,
-        content: textParts || 'Hello'
-      };
-    }
-    
-    return { role: msg.role, content: msg.content || 'Hello' };
-  });
+interface Message {
+  role: 'user' | 'assistant';
+  content: string;
 }
 
 export default async function handler(req: Request) {
   console.log('=== DEEPSEARCH API ROUTE CALLED ===');
   
+  if (req.method !== 'POST') {
+    return new Response(
+      JSON.stringify({ error: 'Method not allowed' }),
+      {
+        status: 405,
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
+  }
+  
   try {
     const body = await req.json();
-    const { messages } = body;
+    const { messages } = body as { messages: Message[] };
     
     // Get the latest user message (the search query)
-    const modelMessages = convertToModelMessages(messages);
-    const lastUserMessage = [...modelMessages].reverse().find(m => m.role === 'user');
+    const lastUserMessage = [...messages].reverse().find(m => m.role === 'user');
     const searchQuery = lastUserMessage?.content || '';
     
     console.log('DeepSearch query:', searchQuery);
@@ -118,48 +104,46 @@ ${searchContext}
 
 Remember: You're in DeepSearch mode, so leverage the web search results to give the most current and accurate information possible.`;
 
-    // Create Google AI provider
-    const googleAI = createGoogleGenerativeAI({ apiKey: googleApiKey });
-
-    console.log('Calling streamText with search context...');
+    console.log('Initializing Gemini with search context...');
     
-    // Stream response with enhanced context
-    const result = streamText({
-      model: googleAI('gemini-2.0-flash-exp'),
-      messages: modelMessages,
-      system: enhancedSystemPrompt,
+    // Initialize Gemini
+    const genAI = new GoogleGenerativeAI(googleApiKey);
+    const model = genAI.getGenerativeModel({ 
+      model: 'gemini-2.0-flash-exp',
+      systemInstruction: enhancedSystemPrompt
     });
 
-    console.log('Creating UI message stream...');
+    // Convert messages to Gemini format (exclude latest, take last 10 for context)
+    const history = messages.slice(-10, -1).map(msg => ({
+      role: msg.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: msg.content }],
+    }));
     
-    // Create a UI message stream from the streamText result
-    const stream = createUIMessageStream({
-      async execute({ writer }) {
-        const messageId = `msg-${Date.now()}`;
-        let textId = `text-${Date.now()}`;
-        
-        writer.write({ type: 'start', messageId });
-        writer.write({ type: 'text-start', id: textId });
-        
-        for await (const chunk of result.textStream) {
-          writer.write({ 
-            type: 'text-delta', 
-            id: textId,
-            delta: chunk
-          });
-        }
-        
-        writer.write({ type: 'text-end', id: textId });
-        writer.write({ type: 'finish' });
-      },
-      onError: (error) => {
-        console.error('Stream error:', error);
-        return 'An error occurred during DeepSearch.';
+    console.log('Starting chat with', history.length, 'history messages');
+    const chat = model.startChat({ history });
+    
+    console.log('Sending message to Gemini...');
+    const result = await chat.sendMessage(searchQuery);
+    const response = await result.response;
+    const text = response.text();
+    
+    console.log('DeepSearch response generated');
+
+    return new Response(
+      JSON.stringify({ 
+        message: text,
+        role: 'assistant',
+        sources: searchResults.results?.map((r: any) => ({
+          title: r.title,
+          url: r.url,
+          score: r.score
+        }))
+      }),
+      {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
       }
-    });
-
-    console.log('Returning DeepSearch response...');
-    return createUIMessageStreamResponse({ stream });
+    );
     
   } catch (error) {
     console.error('=== DEEPSEARCH API ERROR ===');
