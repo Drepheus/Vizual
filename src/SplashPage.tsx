@@ -272,10 +272,14 @@ function SplashPage() {
     return () => document.removeEventListener('keydown', handleEscapeKey);
   }, [isFullscreen, showAIModels, showCreateMenu, isPulseActive]);
 
-  // Load conversations when user logs in
+  // Load conversations when user logs in (but start fresh)
   useEffect(() => {
     if (user) {
-      loadConversations();
+      // Clear current messages to start fresh
+      setMessages([]);
+      setCurrentConversationId(null);
+      // Just load the list, don't auto-load a conversation
+      loadConversationsOnly();
     }
   }, [user]);
 
@@ -291,6 +295,17 @@ function SplashPage() {
     }
   }, [messages, currentConversationId, user]);
 
+  // Load just the list of conversations (don't auto-load messages)
+  const loadConversationsOnly = async () => {
+    if (!user) return;
+    
+    setIsLoadingConversations(true);
+    const userConversations = await db.getUserConversations(user.id);
+    setConversations(userConversations);
+    setIsLoadingConversations(false);
+  };
+
+  // Load conversations list and optionally load the most recent
   const loadConversations = async () => {
     if (!user) return;
     
@@ -331,7 +346,7 @@ function SplashPage() {
     if (newConversation) {
       setCurrentConversationId(newConversation.id);
       setMessages([]);
-      await loadConversations(); // Refresh list
+      await loadConversationsOnly(); // Refresh list only
     }
   };
 
@@ -344,7 +359,7 @@ function SplashPage() {
       setMessages([]);
     }
     
-    await loadConversations(); // Refresh list
+    await loadConversationsOnly(); // Refresh list only
   };
 
   const handleFileAttach = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -490,7 +505,7 @@ function SplashPage() {
         const newConversation = await db.createConversation(user.id, title, selectedModel);
         if (newConversation) {
           setCurrentConversationId(newConversation.id);
-          await loadConversations(); // Refresh sidebar
+          await loadConversationsOnly(); // Refresh sidebar list only
         }
       } else if (!user) {
         console.log('Guest mode - no conversation to create');
