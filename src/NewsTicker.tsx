@@ -22,10 +22,9 @@ export default function NewsTicker() {
 
   const fetchAINews = async () => {
     try {
-      // Using NewsAPI.org free tier (100 requests/day)
-      const apiKey = 'ba7bbf12cdac43d8bb850a7926e8ce5d'; // Free tier key
+      // Using Google News RSS feed via RSS to JSON converter
       const response = await fetch(
-        `https://newsapi.org/v2/everything?q=(artificial+intelligence+OR+ChatGPT+OR+OpenAI+OR+"machine+learning"+OR+"deep+learning"+OR+Anthropic+OR+Claude+OR+Gemini+OR+"AI+model")&domains=techcrunch.com,theverge.com,wired.com,arstechnica.com,venturebeat.com,thenextweb.com,engadget.com&sortBy=publishedAt&language=en&pageSize=20&apiKey=${apiKey}`
+        `https://api.rss2json.com/v1/api.json?rss_url=https://news.google.com/rss/search?q=artificial+intelligence+OR+AI+OR+ChatGPT+OR+OpenAI+when:7d&hl=en-US&gl=US&ceid=US:en`
       );
       
       if (!response.ok) {
@@ -33,27 +32,11 @@ export default function NewsTicker() {
       }
 
       const data = await response.json();
-      
-      // Filter out irrelevant articles
-      const filteredArticles = data.articles.filter((article: any) => {
-        const title = article.title.toLowerCase();
-        return (
-          title.includes('ai') || 
-          title.includes('artificial intelligence') ||
-          title.includes('chatgpt') ||
-          title.includes('openai') ||
-          title.includes('machine learning') ||
-          title.includes('claude') ||
-          title.includes('gemini') ||
-          title.includes('anthropic')
-        );
-      });
-
-      const newsItems: NewsItem[] = filteredArticles.map((article: any) => ({
+      const newsItems: NewsItem[] = data.items.map((article: any) => ({
         title: article.title,
-        url: article.url,
-        source: article.source.name,
-        publishedAt: article.publishedAt,
+        url: article.link,
+        source: article.author || 'Google News',
+        publishedAt: article.pubDate,
       }));
 
       setNews(newsItems);
@@ -62,8 +45,8 @@ export default function NewsTicker() {
       console.error('Error fetching AI news:', error);
       // Fallback news items if API fails
       setNews([
-        { title: 'Stay updated with the latest AI developments', url: '#', source: 'Omi AI', publishedAt: new Date().toISOString() },
-        { title: 'Artificial Intelligence continues to evolve', url: '#', source: 'Tech News', publishedAt: new Date().toISOString() },
+        { title: 'Stay updated with the latest AI developments', url: 'https://news.google.com/search?q=artificial+intelligence', source: 'Omi AI', publishedAt: new Date().toISOString() },
+        { title: 'Artificial Intelligence continues to evolve', url: 'https://news.google.com/search?q=AI+news', source: 'Tech News', publishedAt: new Date().toISOString() },
       ]);
       setIsLoading(false);
     }
