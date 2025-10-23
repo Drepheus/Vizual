@@ -8,6 +8,7 @@ import ChromaGrid from './ChromaGrid';
 import FlowingMenu from './FlowingMenu';
 import ConversationSidebar from './ConversationSidebar';
 import CommandHub from './CommandHub';
+import NewsTicker from './NewsTicker';
 import { useAuth } from './Auth';
 import { supabase } from './supabaseClient';
 import * as db from './databaseService';
@@ -1348,6 +1349,9 @@ function SplashPage() {
         onClose={() => setShowSettings(false)}
         user={user}
       />
+
+      {/* News Ticker - Fixed at bottom */}
+      <NewsTicker />
     </>
   );
 }
