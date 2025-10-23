@@ -706,7 +706,7 @@ function SplashPage() {
           {user && subscriptionTier === 'free' && (
             <>
               <div className="account-tier-badge">
-                <span className="tier-icon">🆓</span>
+                <span className="tier-icon">◎</span>
                 <span className="tier-text">Free Account</span>
               </div>
               <button
@@ -714,7 +714,7 @@ function SplashPage() {
                 onClick={() => setShowPaywall(true)}
                 title="Upgrade to Pro"
               >
-                <span className="header-btn-icon">⚡</span>
+                <span className="header-btn-icon">◈</span>
                 <span className="header-btn-text">Upgrade</span>
               </button>
             </>
@@ -723,7 +723,7 @@ function SplashPage() {
           {/* Account Tier Indicator (for pro users) */}
           {user && subscriptionTier === 'pro' && (
             <div className="account-tier-badge pro-badge">
-              <span className="tier-icon">✨</span>
+              <span className="tier-icon">◆</span>
               <span className="tier-text">Pro Account</span>
             </div>
           )}
@@ -734,7 +734,7 @@ function SplashPage() {
             onClick={createNewConversation}
             title="Start new conversation"
           >
-            <span className="header-btn-icon">✨</span>
+            <span className="header-btn-icon">✦</span>
             <span className="header-btn-text">New Chat</span>
           </button>
 
@@ -745,12 +745,12 @@ function SplashPage() {
               onClick={() => setShowSettings(true)}
               title="Account settings"
             >
-              <span className="header-btn-icon">👤</span>
+              <span className="header-btn-icon">◉</span>
               <span className="header-btn-text">{user.email?.split('@')[0] || 'Account'}</span>
             </button>
           ) : (
             <div className="header-guest-indicator">
-              <span>🎭 Guest Mode</span>
+              <span>◎ Guest Mode</span>
             </div>
           )}
         </div>
