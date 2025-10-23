@@ -53,6 +53,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(500).json({ error: 'Failed to check usage limits' });
     }
 
+    if (!data || data.length === 0) {
+      console.error('No data returned from can_user_perform_action');
+      return res.status(500).json({ error: 'No usage data found' });
+    }
+
     const result = data[0];
 
     return res.status(200).json({
