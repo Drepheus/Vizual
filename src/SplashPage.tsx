@@ -501,9 +501,7 @@ function SplashPage() {
       console.log('isInstantGenActive:', isInstantGenActive);
       console.log('selectedFeature:', selectedFeature);
       
-      // Check usage limit for chat before proceeding
-      const canProceed = await checkAndShowPaywall('chat');
-      if (!canProceed) return;
+      // NO USAGE LIMIT FOR CHAT - unlimited messages for all users
       
       // Create a new conversation if this is the first message and user is logged in
       if (user && !currentConversationId && messages.length === 0) {
@@ -559,10 +557,7 @@ function SplashPage() {
         setMessages(prev => [...prev, assistantMessage]);
         setIsLoading(false);
         
-        // Increment usage after successful message
-        if (user) {
-          await incrementUsage(user.id, 'chat');
-        }
+        // NO USAGE TRACKING FOR CHAT - unlimited messages
         
       } catch (error) {
         console.error('Error in sendMessage:', error);
