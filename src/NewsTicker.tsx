@@ -25,7 +25,7 @@ export default function NewsTicker() {
       // Using NewsAPI.org free tier (100 requests/day)
       const apiKey = 'ba7bbf12cdac43d8bb850a7926e8ce5d'; // Free tier key
       const response = await fetch(
-        `https://newsapi.org/v2/everything?q=artificial+intelligence+OR+AI+OR+machine+learning+OR+OpenAI+OR+ChatGPT+OR+Google+AI&sortBy=publishedAt&language=en&pageSize=20&apiKey=${apiKey}`
+        `https://newsapi.org/v2/everything?q=(artificial+intelligence+OR+ChatGPT+OR+OpenAI+OR+"machine+learning"+OR+"deep+learning"+OR+Anthropic+OR+Claude+OR+Gemini+OR+"AI+model")&domains=techcrunch.com,theverge.com,wired.com,arstechnica.com,venturebeat.com,thenextweb.com,engadget.com&sortBy=publishedAt&language=en&pageSize=20&apiKey=${apiKey}`
       );
       
       if (!response.ok) {
@@ -33,7 +33,23 @@ export default function NewsTicker() {
       }
 
       const data = await response.json();
-      const newsItems: NewsItem[] = data.articles.map((article: any) => ({
+      
+      // Filter out irrelevant articles
+      const filteredArticles = data.articles.filter((article: any) => {
+        const title = article.title.toLowerCase();
+        return (
+          title.includes('ai') || 
+          title.includes('artificial intelligence') ||
+          title.includes('chatgpt') ||
+          title.includes('openai') ||
+          title.includes('machine learning') ||
+          title.includes('claude') ||
+          title.includes('gemini') ||
+          title.includes('anthropic')
+        );
+      });
+
+      const newsItems: NewsItem[] = filteredArticles.map((article: any) => ({
         title: article.title,
         url: article.url,
         source: article.source.name,
