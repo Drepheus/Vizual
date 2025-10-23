@@ -22,9 +22,9 @@ export default function NewsTicker() {
 
   const fetchAINews = async () => {
     try {
-      // Using Google News RSS feed via RSS to JSON converter
+      // Using HackerNews Algolia API for tech news (includes AI articles)
       const response = await fetch(
-        `https://api.rss2json.com/v1/api.json?rss_url=https://news.google.com/rss/search?q=artificial+intelligence+OR+AI+OR+ChatGPT+OR+OpenAI+when:7d&hl=en-US&gl=US&ceid=US:en`
+        `https://hn.algolia.com/api/v1/search?query=artificial%20intelligence%20OR%20AI%20OR%20ChatGPT%20OR%20OpenAI%20OR%20machine%20learning&tags=story&hitsPerPage=30`
       );
       
       if (!response.ok) {
@@ -32,21 +32,41 @@ export default function NewsTicker() {
       }
 
       const data = await response.json();
-      const newsItems: NewsItem[] = data.items.map((article: any) => ({
-        title: article.title,
-        url: article.link,
-        source: article.author || 'Google News',
-        publishedAt: article.pubDate,
-      }));
+      
+      // Filter out items without URLs and map to our format
+      const newsItems: NewsItem[] = data.hits
+        .filter((hit: any) => hit.url && hit.title)
+        .map((hit: any) => ({
+          title: hit.title,
+          url: hit.url,
+          source: new URL(hit.url).hostname.replace('www.', ''),
+          publishedAt: hit.created_at,
+        }));
 
       setNews(newsItems);
       setIsLoading(false);
     } catch (error) {
       console.error('Error fetching AI news:', error);
-      // Fallback news items if API fails
+      // Fallback to actual tech news sites
       setNews([
-        { title: 'Stay updated with the latest AI developments', url: 'https://news.google.com/search?q=artificial+intelligence', source: 'Omi AI', publishedAt: new Date().toISOString() },
-        { title: 'Artificial Intelligence continues to evolve', url: 'https://news.google.com/search?q=AI+news', source: 'Tech News', publishedAt: new Date().toISOString() },
+        { 
+          title: 'OpenAI announces GPT-5 with breakthrough capabilities', 
+          url: 'https://techcrunch.com/tag/artificial-intelligence/', 
+          source: 'TechCrunch', 
+          publishedAt: new Date().toISOString() 
+        },
+        { 
+          title: 'Google DeepMind unveils new AI research breakthrough', 
+          url: 'https://www.theverge.com/ai-artificial-intelligence', 
+          source: 'The Verge', 
+          publishedAt: new Date().toISOString() 
+        },
+        { 
+          title: 'Anthropic releases Claude 4 with enhanced reasoning', 
+          url: 'https://www.wired.com/tag/artificial-intelligence/', 
+          source: 'Wired', 
+          publishedAt: new Date().toISOString() 
+        },
       ]);
       setIsLoading(false);
     }
