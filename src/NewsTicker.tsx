@@ -24,7 +24,7 @@ export default function NewsTicker() {
     try {
       // Using HackerNews Algolia API for tech news
       const response = await fetch(
-        `https://hn.algolia.com/api/v1/search?query=AI%20artificial%20intelligence&tags=story&hitsPerPage=30`
+        `https://hn.algolia.com/api/v1/search?query=AI%20artificial%20intelligence&tags=story&hitsPerPage=50`
       );
       
       if (!response.ok) {
@@ -35,9 +35,10 @@ export default function NewsTicker() {
       
       console.log('HackerNews API response:', data); // Debug log
       
-      // Filter out items without URLs and map to our format
+      // Filter out items without URLs and map to our format, take first 15
       const newsItems: NewsItem[] = data.hits
         .filter((hit: any) => hit.url && hit.title)
+        .slice(0, 15)
         .map((hit: any) => ({
           title: hit.title,
           url: hit.url,
@@ -55,7 +56,7 @@ export default function NewsTicker() {
       setIsLoading(false);
     } catch (error) {
       console.error('Error fetching AI news:', error);
-      // Fallback to actual tech news sites
+      // Fallback to actual tech news sites - 12 articles
       setNews([
         { 
           title: 'Latest developments in artificial intelligence and machine learning', 
@@ -79,6 +80,54 @@ export default function NewsTicker() {
           title: 'OpenAI continues to push boundaries of AI capabilities', 
           url: 'https://www.engadget.com/tag/ai/', 
           source: 'Engadget', 
+          publishedAt: new Date().toISOString() 
+        },
+        { 
+          title: 'Machine learning algorithms advance at unprecedented pace', 
+          url: 'https://arstechnica.com/tag/artificial-intelligence/', 
+          source: 'Ars Technica', 
+          publishedAt: new Date().toISOString() 
+        },
+        { 
+          title: 'Deep learning models achieve new milestones in accuracy', 
+          url: 'https://venturebeat.com/ai/', 
+          source: 'VentureBeat', 
+          publishedAt: new Date().toISOString() 
+        },
+        { 
+          title: 'AI ethics and governance take center stage in tech industry', 
+          url: 'https://www.technologyreview.com/topic/artificial-intelligence/', 
+          source: 'MIT Tech Review', 
+          publishedAt: new Date().toISOString() 
+        },
+        { 
+          title: 'Neural networks demonstrate human-like reasoning abilities', 
+          url: 'https://www.nature.com/subjects/artificial-intelligence', 
+          source: 'Nature', 
+          publishedAt: new Date().toISOString() 
+        },
+        { 
+          title: 'Generative AI tools transform creative workflows globally', 
+          url: 'https://www.theverge.com/generative-ai', 
+          source: 'The Verge', 
+          publishedAt: new Date().toISOString() 
+        },
+        { 
+          title: 'Quantum computing meets artificial intelligence in breakthrough', 
+          url: 'https://www.scientificamerican.com/artificial-intelligence/', 
+          source: 'Scientific American', 
+          publishedAt: new Date().toISOString() 
+        },
+        { 
+          title: 'AI-powered robotics reach new levels of sophistication', 
+          url: 'https://spectrum.ieee.org/topic/artificial-intelligence/', 
+          source: 'IEEE Spectrum', 
+          publishedAt: new Date().toISOString() 
+        },
+        { 
+          title: 'Large language models continue evolution with multimodal capabilities', 
+          url: 'https://www.technologyreview.com/topic/ai/', 
+          source: 'MIT Tech Review', 
           publishedAt: new Date().toISOString() 
         },
       ]);
