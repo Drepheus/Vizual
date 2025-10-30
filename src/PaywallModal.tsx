@@ -82,7 +82,7 @@ const PaywallModal: React.FC<PaywallModalProps> = ({
             <div className="plan-pricing">
               <div className="price-wrapper">
                 <span className="currency">$</span>
-                <span className="amount">60</span>
+                <span className="amount">4.99</span>
               </div>
               <p className="billing-text">per month</p>
             </div>
