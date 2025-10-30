@@ -10,36 +10,42 @@ const MOBILE_BREAKPOINT = 768;
 const cardData = [
   {
     color: '#0a0a0a',
+    icon: '💬',
     title: 'Omi Chat',
     description: 'Conversational AI with advanced reasoning',
     label: 'Intelligence'
   },
   {
     color: '#0a0a0a',
+    icon: '🌐',
     title: 'Web Search',
     description: 'Search the web with AI-powered insights',
     label: 'Discovery'
   },
   {
     color: '#0a0a0a',
+    icon: '🎨',
     title: 'Custom Omi\'s',
     description: 'Design personalized AI assistants that adapt to your style, tone, and workflow',
     label: 'Creative'
   },
   {
     color: '#0a0a0a',
+    icon: '🧪',
     title: 'AI Playground',
     description: 'Experiment with cutting-edge models, generative tools, and experimental features',
     label: 'Production'
   },
   {
     color: '#0a0a0a',
+    icon: '⚡',
     title: 'Workflows',
     description: 'Automate complex tasks or multi-step reasoning with agentic systems',
     label: 'Character'
   },
   {
     color: '#0a0a0a',
+    icon: '⚙️',
     title: 'API Settings',
     description: 'Configure API\'s',
     label: 'Metrics'
@@ -571,6 +577,7 @@ const MagicBento: React.FC<MagicBentoProps> = ({
                   <div className="card__label">{card.label}</div>
                 </div>
                 <div className="card__content">
+                  <div className="card__icon">{card.icon}</div>
                   <h2 className="card__title">{card.title}</h2>
                   <p className="card__description">{card.description}</p>
                 </div>
@@ -584,6 +591,7 @@ const MagicBento: React.FC<MagicBentoProps> = ({
                 <div className="card__label">{card.label}</div>
               </div>
               <div className="card__content">
+                <div className="card__icon">{card.icon}</div>
                 <h2 className="card__title">{card.title}</h2>
                 <p className="card__description">{card.description}</p>
               </div>
