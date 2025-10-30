@@ -143,31 +143,16 @@ function SplashPage() {
   // Feature buttons data
   const featureButtons = [
     {
-      name: 'Compare',
-      icon: '⚖',
-      description: 'Instantly query multiple LLMs side-by-side',
+      name: 'Pulse',
+      icon: '◆',
+      description: 'Latest news, trends, or live data insights',
       onClick: () => {
-        const isActivating = selectedFeature !== 'Compare';
-        setSelectedFeature(isActivating ? 'Compare' : null);
-        setIsCompareMode(isActivating);
+        const isActivating = selectedFeature !== 'Pulse';
+        setSelectedFeature(isActivating ? 'Pulse' : null);
         setIsPersonasActive(false); // Turn off ChromaGrid animation
         setIsSynthesizeActive(false); // Turn off ElectricBorder animation
-        if (!isActivating) {
-          setSecondaryMessages([]);
-          setSecondaryModel(null);
-        }
-        console.log('Compare Minds clicked');
-      }
-    },
-    {
-      name: 'Create',
-      icon: '◇',
-      description: 'Generate visuals, stories, or creative ideas',
-      onClick: () => {
-        setShowCreateMenu(true);
-        setIsPersonasActive(false); // Turn off ChromaGrid animation
-        setIsSynthesizeActive(false); // Turn off ElectricBorder animation
-        console.log('Create clicked - showing infinite menu');
+        setIsPulseActive(isActivating); // Toggle FlowingMenu
+        console.log('Pulse clicked - FlowingMenu', isActivating ? 'activated' : 'deactivated');
       }
     },
     {
@@ -183,16 +168,20 @@ function SplashPage() {
       }
     },
     {
-      name: 'Pulse',
-      icon: '◆',
-      description: 'Latest news, trends, or live data insights',
+      name: 'Compare',
+      icon: '⚖',
+      description: 'Instantly query multiple LLMs side-by-side',
       onClick: () => {
-        const isActivating = selectedFeature !== 'Pulse';
-        setSelectedFeature(isActivating ? 'Pulse' : null);
+        const isActivating = selectedFeature !== 'Compare';
+        setSelectedFeature(isActivating ? 'Compare' : null);
+        setIsCompareMode(isActivating);
         setIsPersonasActive(false); // Turn off ChromaGrid animation
         setIsSynthesizeActive(false); // Turn off ElectricBorder animation
-        setIsPulseActive(isActivating); // Toggle FlowingMenu
-        console.log('Pulse clicked - FlowingMenu', isActivating ? 'activated' : 'deactivated');
+        if (!isActivating) {
+          setSecondaryMessages([]);
+          setSecondaryModel(null);
+        }
+        console.log('Compare Minds clicked');
       }
     },
     {
@@ -226,6 +215,17 @@ function SplashPage() {
           setGeneratedVideo(null); // Clear video when deactivating
         }
         console.log('Video Gen clicked');
+      }
+    },
+    {
+      name: 'Create',
+      icon: '◇',
+      description: 'Generate visuals, stories, or creative ideas',
+      onClick: () => {
+        setShowCreateMenu(true);
+        setIsPersonasActive(false); // Turn off ChromaGrid animation
+        setIsSynthesizeActive(false); // Turn off ElectricBorder animation
+        console.log('Create clicked - showing infinite menu');
       }
     }
   ];
