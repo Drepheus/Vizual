@@ -126,48 +126,60 @@ const PaywallModal: React.FC<PaywallModalProps> = ({
           {/* Pro Plan Card */}
           <div className="pro-plan-card">
             <div className="plan-header">
-              <div className="plan-badge">
-                <span className="badge-icon">👑</span>
-                <span className="badge-text">PRO</span>
+              <div className="plan-icon-badge">⚡</div>
+              <div className="plan-title-group">
+                <h3 className="plan-name">OMI PRO</h3>
+                <p className="plan-subtitle">Unlimited AI power at your fingertips</p>
               </div>
-              <div className="plan-price">
+            </div>
+
+            <div className="plan-pricing">
+              <div className="price-display">
                 <span className="price-currency">$</span>
                 <span className="price-amount">5</span>
-                <span className="price-period">/month</span>
+                <span className="price-period">/mo</span>
               </div>
+              <p className="billing-info">
+                <span className="billing-total">$60</span> billed today <span className="billing-option">or pay monthly</span>
+              </p>
             </div>
 
             <div className="plan-features">
-              <div className="feature-item">
-                <span className="feature-check">✓</span>
+              <div className="feature-highlight">
+                <span className="feature-icon">✓</span>
                 <span className="feature-text">Unlimited chat prompts</span>
               </div>
-              <div className="feature-item">
-                <span className="feature-check">✓</span>
+              <div className="feature-highlight">
+                <span className="feature-icon">✓</span>
                 <span className="feature-text">Unlimited image generation</span>
-              </div>
-              <div className="feature-item">
-                <span className="feature-check">✓</span>
-                <span className="feature-text">Unlimited video generation</span>
-              </div>
-              <div className="feature-item">
-                <span className="feature-check">✓</span>
-                <span className="feature-text">Priority support</span>
-              </div>
-              <div className="feature-item">
-                <span className="feature-check">✓</span>
-                <span className="feature-text">Early access to new features</span>
-              </div>
-              <div className="feature-item">
-                <span className="feature-check">✓</span>
-                <span className="feature-text">Commercial license</span>
               </div>
             </div>
 
+            <p className="plan-description">
+              Generate unlimited AI content, including images, videos, chat responses. 
+              Perfect for power users and creators.
+            </p>
+
             <button className="upgrade-button" onClick={handleUpgrade}>
-              <span className="button-text">Upgrade to Omi Pro</span>
-              <span className="button-icon">→</span>
+              <span className="button-icon">✨</span>
+              <span className="button-text">Select Omi Pro Plan</span>
             </button>
+
+            <p className="secure-checkout">Secure checkout with PayPal and Card</p>
+
+            <div className="everything-free">
+              <h4 className="everything-title">Everything in Free, plus:</h4>
+              <div className="free-features">
+                <div className="free-feature-item">
+                  <span className="free-icon">✓</span>
+                  <span className="free-text">Unlimited video generation</span>
+                </div>
+                <div className="free-feature-item">
+                  <span className="free-icon">✓</span>
+                  <span className="free-text">Priority support</span>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="paywall-footer">
