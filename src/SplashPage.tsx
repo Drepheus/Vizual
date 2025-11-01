@@ -1216,14 +1216,15 @@ function SplashPage() {
                 </div>
               ) : (
                 <div className="video-gen-placeholder">
-                  {/* Show video preview when no input, fade out when typing */}
-                  {!input.trim() ? (
+                  {/* Show video preview when no input OR when input is empty */}
+                  {input.length === 0 ? (
                     <video
                       className="video-gen-preview"
                       autoPlay
                       loop
                       muted
                       playsInline
+                      key="video-preview"
                       style={{
                         width: '100%',
                         maxWidth: '800px',
@@ -1235,6 +1236,7 @@ function SplashPage() {
                       }}
                     >
                       <source src="/static/videos/vidpreview.mp4" type="video/mp4" />
+                      Your browser does not support the video tag.
                     </video>
                   ) : (
                     <>
