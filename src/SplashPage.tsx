@@ -1234,7 +1234,9 @@ function SplashPage() {
                       display: input.length === 0 ? 'block' : 'none'
                     }}
                   >
-                    <source src="/static/videos/vidpreview.mp4" type="video/mp4" />
+                    <source src="./static/videos/vidpreview.mp4" type="video/mp4" />
+                    <source src="../static/videos/vidpreview.mp4" type="video/mp4" />
+                    <source src="../../static/videos/vidpreview.mp4" type="video/mp4" />
                   </video>
                   {input.length > 0 && (
                     <>
