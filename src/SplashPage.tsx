@@ -723,7 +723,7 @@ function SplashPage() {
               pointerEvents: 'none'
             }}
           >
-            <source src="/static/videos/video-gen-bg.mp4" type="video/mp4" />
+            <source src="/static/videos/vidpreview.mp4" type="video/mp4" />
           </video>
         )}
 
