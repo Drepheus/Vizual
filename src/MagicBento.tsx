@@ -21,7 +21,8 @@ const cardData = [
     icon: '🌐',
     title: 'Web Search',
     description: 'Search that thinks. Navigate the web like intelligence, not keywords.',
-    label: 'Discovery'
+    label: 'Discovery',
+    action: 'websearch' // Add action identifier
   },
   {
     color: '#0a0a0a',
@@ -523,6 +524,7 @@ interface MagicBentoProps {
   glowColor?: string;
   clickEffect?: boolean;
   enableMagnetism?: boolean;
+  onWebSearchClick?: () => void;
 }
 
 const MagicBento: React.FC<MagicBentoProps> = ({
@@ -536,7 +538,8 @@ const MagicBento: React.FC<MagicBentoProps> = ({
   enableTilt = false,
   glowColor = DEFAULT_GLOW_COLOR,
   clickEffect = true,
-  enableMagnetism = true
+  enableMagnetism = true,
+  onWebSearchClick
 }) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const isMobile = useMobileDetection();
@@ -547,6 +550,9 @@ const MagicBento: React.FC<MagicBentoProps> = ({
     if (card.action === 'chat') {
       // Navigate to the root/main chat interface
       window.location.href = '/';
+    } else if (card.action === 'websearch' && onWebSearchClick) {
+      // Trigger the web search page
+      onWebSearchClick();
     }
     // Add more actions here as needed for other cards
   };

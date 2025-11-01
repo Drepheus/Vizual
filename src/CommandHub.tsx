@@ -2,7 +2,11 @@ import { useState } from 'react';
 import MagicBento from './MagicBento';
 import './CommandHub.css';
 
-export default function CommandHub() {
+interface CommandHubProps {
+  onWebSearchClick?: () => void;
+}
+
+export default function CommandHub({ onWebSearchClick }: CommandHubProps) {
   const [showHub, setShowHub] = useState(true);
 
   return (
@@ -29,6 +33,7 @@ export default function CommandHub() {
             textAutoHide={true}
             enableStars={true}
             enableSpotlight={true}
+            onWebSearchClick={onWebSearchClick}
             enableBorderGlow={true}
             enableTilt={false}
             clickEffect={true}

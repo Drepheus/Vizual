@@ -11,6 +11,7 @@ import CommandHub from './CommandHub';
 import NewsTicker from './NewsTicker';
 import MediaGallery from './MediaGallery';
 import SearchModal from './SearchModal';
+import WebSearch from './WebSearch';
 import { useAuth } from './Auth';
 import { supabase } from './supabaseClient';
 import * as db from './databaseService';
@@ -125,6 +126,7 @@ function SplashPage() {
 
   // Command Hub
   const [showCommandHub, setShowCommandHub] = useState(false);
+  const [showWebSearch, setShowWebSearch] = useState(false);
 
   // Media Gallery
   const [showMediaGallery, setShowMediaGallery] = useState(false);
@@ -692,7 +694,10 @@ function SplashPage() {
       {/* Command Hub - Full screen overlay */}
       {showCommandHub && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 2000 }}>
-          <CommandHub />
+          <CommandHub onWebSearchClick={() => {
+            setShowCommandHub(false);
+            setShowWebSearch(true);
+          }} />
           <button
             onClick={() => setShowCommandHub(false)}
             style={{
@@ -714,6 +719,11 @@ function SplashPage() {
             ← Back to Chat
           </button>
         </div>
+      )}
+
+      {/* Web Search - Full screen overlay */}
+      {showWebSearch && (
+        <WebSearch onClose={() => setShowWebSearch(false)} />
       )}
 
       {/* Conversation Sidebar */}
