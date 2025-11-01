@@ -1215,30 +1215,28 @@ function SplashPage() {
                   />
                 </div>
               ) : (
-                <div className="video-gen-placeholder">
-                  {/* Show video preview when no input OR when input is empty */}
-                  {input.length === 0 ? (
-                    <video
-                      className="video-gen-preview"
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                      key="video-preview"
-                      style={{
-                        width: '100%',
-                        maxWidth: '800px',
-                        height: 'auto',
-                        borderRadius: '16px',
-                        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
-                        margin: '0 auto',
-                        display: 'block'
-                      }}
-                    >
-                      <source src="/static/videos/vidpreview.mp4" type="video/mp4" />
-                      Your browser does not support the video tag.
-                    </video>
-                  ) : (
+                <div className="video-gen-placeholder" style={{ padding: '40px', textAlign: 'center' }}>
+                  {/* Always show video preview first, then text when typing */}
+                  <video
+                    className="video-gen-preview"
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    key="video-preview"
+                    style={{
+                      width: '100%',
+                      maxWidth: '800px',
+                      height: 'auto',
+                      borderRadius: '16px',
+                      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+                      margin: '0 auto 20px',
+                      display: input.length === 0 ? 'block' : 'none'
+                    }}
+                  >
+                    <source src="/static/videos/vidpreview.mp4" type="video/mp4" />
+                  </video>
+                  {input.length > 0 && (
                     <>
                       <div className="placeholder-icon">🎬</div>
                       <p className="placeholder-text">Enter a prompt above to generate a video</p>
