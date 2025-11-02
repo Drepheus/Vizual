@@ -105,6 +105,17 @@ export function useAuth() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    // Check for guest mode first
+    const isGuest = localStorage.getItem('omi_guest_mode') === 'true';
+    
+    if (isGuest) {
+      // If in guest mode, skip auth check
+      setSession(null);
+      setUser(null);
+      setLoading(false);
+      return;
+    }
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session)
       setUser(session?.user ?? null)

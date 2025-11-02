@@ -9,6 +9,7 @@ import WebSearch from './WebSearch';
 import MediaStudio from './MediaStudio';
 import CustomOmis from './CustomOmis';
 import { useAuth } from './Auth';
+import { GuestModeProvider, useGuestMode } from './GuestMode';
 import { supabase } from './supabaseClient';
 import './landing.css';
 
@@ -60,12 +61,14 @@ const LandingPage: React.FC = () => {
 const AuthChecker: React.FC = () => {
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const { session } = useAuth();
+  const { isGuestMode } = useGuestMode();
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
     const checkAuthCallback = async () => {
       console.log('Checking auth state on mount...');
+      console.log('Guest mode:', isGuestMode);
       
       // Check if we're returning from OAuth
       const hashParams = new URLSearchParams(window.location.hash.substring(1));
@@ -94,17 +97,26 @@ const AuthChecker: React.FC = () => {
           navigate('/login');
         }
       } else {
-        // No OAuth callback, check for existing session
-        const { data } = await supabase.auth.getSession();
-        if (data.session) {
-          console.log('Existing session found');
-          // Only redirect if we're on the root path
-          if (location.pathname === '/') {
+        // Check for guest mode or existing session
+        if (isGuestMode) {
+          console.log('Guest mode active');
+          // Allow access to protected routes in guest mode
+          if (location.pathname === '/' || location.pathname === '/login') {
             navigate('/chat');
           }
-        } else if (location.pathname !== '/' && location.pathname !== '/login') {
-          // Not logged in and trying to access protected route
-          navigate('/login');
+        } else {
+          // No guest mode, check for existing session
+          const { data } = await supabase.auth.getSession();
+          if (data.session) {
+            console.log('Existing session found');
+            // Only redirect if we're on the root path
+            if (location.pathname === '/') {
+              navigate('/chat');
+            }
+          } else if (location.pathname !== '/' && location.pathname !== '/login') {
+            // Not logged in and not in guest mode, trying to access protected route
+            navigate('/login');
+          }
         }
       }
       
@@ -112,7 +124,7 @@ const AuthChecker: React.FC = () => {
     };
 
     checkAuthCallback();
-  }, []);
+  }, [isGuestMode]);
 
   if (isCheckingAuth) {
     return (
@@ -150,7 +162,7 @@ const AuthChecker: React.FC = () => {
       <Route 
         path="/chat" 
         element={
-          session ? (
+          (session || isGuestMode) ? (
             <div className="page-transition fade-in">
               <SplashPage />
             </div>
@@ -162,7 +174,7 @@ const AuthChecker: React.FC = () => {
       <Route 
         path="/command-hub" 
         element={
-          session ? (
+          (session || isGuestMode) ? (
             <div className="page-transition fade-in">
               <CommandHub onWebSearchClick={() => navigate('/web-search')} />
             </div>
@@ -174,7 +186,7 @@ const AuthChecker: React.FC = () => {
       <Route 
         path="/web-search" 
         element={
-          session ? (
+          (session || isGuestMode) ? (
             <div className="page-transition fade-in">
               <WebSearch onClose={() => navigate(-1)} />
             </div>
@@ -186,7 +198,7 @@ const AuthChecker: React.FC = () => {
       <Route 
         path="/media-studio" 
         element={
-          session ? (
+          (session || isGuestMode) ? (
             <div className="page-transition fade-in">
               <MediaStudio onClose={() => navigate(-1)} />
             </div>
@@ -198,7 +210,7 @@ const AuthChecker: React.FC = () => {
       <Route 
         path="/custom-omis" 
         element={
-          session ? (
+          (session || isGuestMode) ? (
             <div className="page-transition fade-in">
               <CustomOmis onClose={() => navigate(-1)} />
             </div>
@@ -216,9 +228,11 @@ const AuthChecker: React.FC = () => {
 // Main App component
 const App: React.FC = () => {
   return (
-    <BrowserRouter>
-      <AuthChecker />
-    </BrowserRouter>
+    <GuestModeProvider>
+      <BrowserRouter>
+        <AuthChecker />
+      </BrowserRouter>
+    </GuestModeProvider>
   );
 };
 
