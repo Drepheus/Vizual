@@ -29,6 +29,13 @@ const PaywallModal: React.FC<PaywallModalProps> = ({
 
   const handleUpgrade = async (plan: 'pro' | 'ultra') => {
     try {
+      // For Ultra plan, use direct Stripe payment link
+      if (plan === 'ultra') {
+        window.location.href = 'https://buy.stripe.com/fZu14ndCtdVZfvf4Y8dfG0g';
+        return;
+      }
+      
+      // For Pro plan, use the API checkout session
       // Get current user from Supabase
       const { data: { user } } = await supabase.auth.getUser();
       
@@ -158,7 +165,7 @@ const PaywallModal: React.FC<PaywallModalProps> = ({
                 <div className="plan-pricing">
                   <div className="price-wrapper">
                     <span className="currency">$</span>
-                    <span className="amount">9.99</span>
+                    <span className="amount">20</span>
                   </div>
                   <p className="billing-text">per month</p>
                 </div>
