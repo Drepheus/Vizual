@@ -52,8 +52,23 @@ export default async function handler(
 
     const tavilyApiKey = process.env.TAVILY_API_KEY;
     if (!tavilyApiKey) {
-      return res.status(500).json({ error: 'Tavily API key not configured' });
+      console.error('TAVILY_API_KEY environment variable not set');
+      return res.status(500).json({ 
+        error: 'Search service not configured',
+        details: 'TAVILY_API_KEY environment variable is missing'
+      });
     }
+
+    const groqApiKey = process.env.GROQ_API_KEY;
+    if (!groqApiKey) {
+      console.error('GROQ_API_KEY environment variable not set');
+      return res.status(500).json({ 
+        error: 'AI service not configured',
+        details: 'GROQ_API_KEY environment variable is missing'
+      });
+    }
+
+    console.log('Starting Tavily search for query:', query);
 
     // Call Tavily API for web search
     const tavilyResponse = await fetch('https://api.tavily.com/search', {
@@ -74,8 +89,11 @@ export default async function handler(
 
     if (!tavilyResponse.ok) {
       const errorText = await tavilyResponse.text();
-      console.error('Tavily API error:', errorText);
-      return res.status(500).json({ error: 'Search service error' });
+      console.error('Tavily API error:', tavilyResponse.status, errorText);
+      return res.status(500).json({ 
+        error: 'Search service error',
+        details: `Tavily API returned ${tavilyResponse.status}: ${errorText.substring(0, 200)}`
+      });
     }
 
     const tavilyData: TavilyResponse = await tavilyResponse.json();
@@ -144,9 +162,13 @@ Please provide a comprehensive answer to the query based on these search results
 
   } catch (error) {
     console.error('Web search error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorStack = error instanceof Error ? error.stack : '';
+    console.error('Error stack:', errorStack);
+    
     return res.status(500).json({ 
       error: 'Failed to process search request',
-      details: error instanceof Error ? error.message : 'Unknown error'
+      details: errorMessage
     });
   }
 }

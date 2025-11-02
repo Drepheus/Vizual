@@ -130,16 +130,23 @@ const WebSearch: React.FC<WebSearchProps> = ({ onClose }) => {
         },
         body: JSON.stringify({
           query: searchQuery,
-          mode: 'search',
+          mode: selectedMode === 'search' ? 'basic' : 'deep'
         }),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Search failed');
+      let data: SearchResult;
+      try {
+        data = await response.json();
+      } catch (jsonError) {
+        const text = await response.text();
+        console.error('Failed to parse JSON response:', text);
+        throw new Error('Server returned invalid response. Please check the console for details.');
       }
 
-      const data: SearchResult = await response.json();
+      if (!response.ok) {
+        throw new Error(data.details || data.error || `Search failed with status ${response.status}`);
+      }
+
       setSearchResults(data);
 
       // Scroll to results
