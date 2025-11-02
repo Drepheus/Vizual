@@ -7,12 +7,29 @@ interface WebSearchProps {
   onClose?: () => void;
 }
 
+interface SearchResult {
+  query: string;
+  summary: string;
+  sources: Array<{
+    number: number;
+    title: string;
+    url: string;
+    snippet: string;
+    published_date?: string;
+  }>;
+  images?: string[];
+  answer?: string;
+}
+
 const WebSearch: React.FC<WebSearchProps> = ({ onClose }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [selectedMode, setSelectedMode] = useState<string | null>(null);
+  const [searchResults, setSearchResults] = useState<SearchResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const searchBoxRef = useRef<HTMLDivElement>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
 
   // Search modes
   const searchModes = [
@@ -91,19 +108,53 @@ const WebSearch: React.FC<WebSearchProps> = ({ onClose }) => {
     );
   }, []);
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!searchQuery.trim()) return;
+    if (!searchQuery.trim() || isSearching) return;
+
+    // Only Search + Summarize mode is implemented
+    if (selectedMode !== 'Search + Summarize') {
+      alert(`${selectedMode || 'This'} mode is coming soon! Please select "Search + Summarize" mode.`);
+      return;
+    }
 
     setIsSearching(true);
-    // TODO: Implement actual web search API call
-    console.log('Searching for:', searchQuery);
+    setError(null);
+    setSearchResults(null);
     
-    // Simulate search
-    setTimeout(() => {
+    try {
+      const response = await fetch('/api/web-search', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: searchQuery,
+          mode: 'search',
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Search failed');
+      }
+
+      const data: SearchResult = await response.json();
+      setSearchResults(data);
+
+      // Scroll to results
+      setTimeout(() => {
+        if (resultsRef.current) {
+          resultsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+
+    } catch (err) {
+      console.error('Search error:', err);
+      setError(err instanceof Error ? err.message : 'Search failed. Please try again.');
+    } finally {
       setIsSearching(false);
-      alert(`Search feature coming soon! Query: ${searchQuery}`);
-    }, 1500);
+    }
   };
 
   const handleCategoryClick = (category: string) => {
@@ -191,26 +242,109 @@ const WebSearch: React.FC<WebSearchProps> = ({ onClose }) => {
         )}
       </div>
 
-      {/* Search Categories */}
-      <div className="search-categories">
-        <h2 className="categories-title">Explore</h2>
-        <div className="categories-grid">
-          {searchCategories.map((category, index) => (
-            <div
-              key={index}
-              className="search-category-card"
-              onClick={() => handleCategoryClick(category.title)}
-              style={{ background: category.gradient }}
-            >
-              <div className="category-icon">{category.icon}</div>
-              <h3 className="category-title">{category.title}</h3>
-              <p className="category-description">{category.description}</p>
-              <div className="category-arrow">→</div>
-              <div className="category-border"></div>
-            </div>
-          ))}
+      {/* Error Message */}
+      {error && (
+        <div className="search-error">
+          <span className="error-icon">⚠</span>
+          <span className="error-text">{error}</span>
         </div>
-      </div>
+      )}
+
+      {/* Search Results */}
+      {searchResults && (
+        <div className="search-results" ref={resultsRef}>
+          <div className="results-header">
+            <h2 className="results-title">Search Results</h2>
+            <span className="results-query">"{searchResults.query}"</span>
+          </div>
+
+          {/* AI Summary */}
+          <div className="results-summary">
+            <div className="summary-header">
+              <span className="summary-icon">✨</span>
+              <h3 className="summary-title">AI Summary</h3>
+            </div>
+            <div className="summary-content">
+              {searchResults.summary.split('\n').map((paragraph, index) => (
+                <p key={index} className="summary-paragraph">
+                  {paragraph}
+                </p>
+              ))}
+            </div>
+          </div>
+
+          {/* Sources */}
+          <div className="results-sources">
+            <div className="sources-header">
+              <span className="sources-icon">📚</span>
+              <h3 className="sources-title">Sources</h3>
+            </div>
+            <div className="sources-list">
+              {searchResults.sources.map((source) => (
+                <a
+                  key={source.number}
+                  href={source.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="source-card"
+                >
+                  <div className="source-number">[{source.number}]</div>
+                  <div className="source-content">
+                    <h4 className="source-title">{source.title}</h4>
+                    <p className="source-snippet">{source.snippet}</p>
+                    <div className="source-url">{new URL(source.url).hostname}</div>
+                  </div>
+                  <div className="source-arrow">→</div>
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* Images (if available) */}
+          {searchResults.images && searchResults.images.length > 0 && (
+            <div className="results-images">
+              <div className="images-header">
+                <span className="images-icon">🖼️</span>
+                <h3 className="images-title">Related Images</h3>
+              </div>
+              <div className="images-grid">
+                {searchResults.images.slice(0, 4).map((image, index) => (
+                  <img
+                    key={index}
+                    src={image}
+                    alt={`Result ${index + 1}`}
+                    className="result-image"
+                    loading="lazy"
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Search Categories */}
+      {!searchResults && (
+        <div className="search-categories">
+          <h2 className="categories-title">Explore</h2>
+          <div className="categories-grid">
+            {searchCategories.map((category, index) => (
+              <div
+                key={index}
+                className="search-category-card"
+                onClick={() => handleCategoryClick(category.title)}
+                style={{ background: category.gradient }}
+              >
+                <div className="category-icon">{category.icon}</div>
+                <h3 className="category-title">{category.title}</h3>
+                <p className="category-description">{category.description}</p>
+                <div className="category-arrow">→</div>
+                <div className="category-border"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Floating particles effect */}
       <div className="websearch-particles">
