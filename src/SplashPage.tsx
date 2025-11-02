@@ -11,6 +11,7 @@ import NewsTicker from './NewsTicker';
 import MediaGallery from './MediaGallery';
 import SearchModal from './SearchModal';
 import ImagePreviewTooltip from './ImagePreviewTooltip';
+import VideoPreviewTooltip from './VideoPreviewTooltip';
 import { useAuth } from './Auth';
 import { supabase } from './supabaseClient';
 import * as db from './databaseService';
@@ -106,6 +107,7 @@ function SplashPage() {
   const [isGeneratingVideo, setIsGeneratingVideo] = useState(false);
   const videoContainerRef = useRef<HTMLDivElement>(null);
   const [isHoveringImageGen, setIsHoveringImageGen] = useState(false);
+  const [isHoveringVideoGen, setIsHoveringVideoGen] = useState(false);
 
   // Paywall and subscription management
   const [showPaywall, setShowPaywall] = useState(false);
@@ -795,6 +797,7 @@ function SplashPage() {
             {featureButtons.map((button, index) => {
               const isSelected = selectedFeature === button.name;
               const isImageGenButton = button.name === 'Image Gen';
+              const isVideoGenButton = button.name === 'Video Gen';
               
               return (
                 <button
@@ -803,9 +806,11 @@ function SplashPage() {
                   onClick={button.onClick}
                   onMouseEnter={() => {
                     if (isImageGenButton) setIsHoveringImageGen(true);
+                    if (isVideoGenButton) setIsHoveringVideoGen(true);
                   }}
                   onMouseLeave={() => {
                     if (isImageGenButton) setIsHoveringImageGen(false);
+                    if (isVideoGenButton) setIsHoveringVideoGen(false);
                   }}
                   style={{
                     animationDelay: `${index * 0.1}s`
@@ -816,6 +821,8 @@ function SplashPage() {
                   </span>
                   {isImageGenButton ? (
                     <ImagePreviewTooltip isVisible={isHoveringImageGen} />
+                  ) : isVideoGenButton ? (
+                    <VideoPreviewTooltip isVisible={isHoveringVideoGen} />
                   ) : (
                     <div className="feature-button-tooltip">
                       {button.description}
