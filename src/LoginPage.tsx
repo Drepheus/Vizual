@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { useAuth } from './Auth'
 import { supabase } from './supabaseClient'
+import { useGuestMode } from './GuestMode'
 import './LoginPage.css'
 
 interface LoginPageProps {
@@ -10,6 +11,7 @@ interface LoginPageProps {
 
 export default function LoginPage({ onLoginSuccess, onGuestMode }: LoginPageProps) {
   const { session, loading } = useAuth()
+  const { setGuestMode } = useGuestMode()
 
   // Redirect to chat if already logged in
   useEffect(() => {
@@ -45,6 +47,9 @@ export default function LoginPage({ onLoginSuccess, onGuestMode }: LoginPageProp
   }
 
   const handleGuestMode = () => {
+    // Set guest mode in context and localStorage
+    setGuestMode(true)
+    
     if (onGuestMode) {
       onGuestMode()
     }
