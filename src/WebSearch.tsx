@@ -134,11 +134,15 @@ const WebSearch: React.FC<WebSearchProps> = ({ onClose }) => {
         }),
       });
 
+      // Clone the response so we can read it multiple times if needed
+      const responseClone = response.clone();
+      
       let data: SearchResult;
       try {
         data = await response.json();
       } catch (jsonError) {
-        const text = await response.text();
+        // Use the cloned response to get text
+        const text = await responseClone.text();
         console.error('Failed to parse JSON response:', text);
         throw new Error('Server returned invalid response. Please check the console for details.');
       }
