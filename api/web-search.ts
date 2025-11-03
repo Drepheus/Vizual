@@ -33,6 +33,7 @@ export default async function handler(
     'Access-Control-Allow-Headers',
     'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
   );
+  res.setHeader('Content-Type', 'application/json');
 
   if (req.method === 'OPTIONS') {
     res.status(200).end();
@@ -40,14 +41,14 @@ export default async function handler(
   }
 
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({ error: 'Method not allowed', details: 'Only POST requests are allowed' });
   }
 
   try {
     const { query, mode = 'search' } = req.body;
 
     if (!query || typeof query !== 'string') {
-      return res.status(400).json({ error: 'Query is required' });
+      return res.status(400).json({ error: 'Query is required', details: 'Please provide a valid search query' });
     }
 
     const tavilyApiKey = process.env.TAVILY_API_KEY;
@@ -55,7 +56,7 @@ export default async function handler(
       console.error('TAVILY_API_KEY environment variable not set');
       return res.status(500).json({ 
         error: 'Search service not configured',
-        details: 'TAVILY_API_KEY environment variable is missing'
+        details: 'The TAVILY_API_KEY environment variable is not set in Vercel. Please add it in your Vercel project settings.'
       });
     }
 
@@ -64,7 +65,7 @@ export default async function handler(
       console.error('GROQ_API_KEY environment variable not set');
       return res.status(500).json({ 
         error: 'AI service not configured',
-        details: 'GROQ_API_KEY environment variable is missing'
+        details: 'The GROQ_API_KEY environment variable is not set in Vercel. Please add it in your Vercel project settings.'
       });
     }
 
