@@ -223,6 +223,8 @@ const WebSearch: React.FC<WebSearchProps> = ({ onClose }) => {
                 className={`search-mode-button ${selectedMode === mode.name ? 'active' : ''} ${isPro ? 'pro' : ''} ${isComingSoon ? 'coming-soon' : ''}`}
                 onClick={() => !isComingSoon && setSelectedMode(selectedMode === mode.name ? null : mode.name)}
                 disabled={isComingSoon}
+                title={mode.description}
+                data-tooltip={mode.description}
               >
                 <span className="mode-icon">{mode.icon}</span>
                 <span className="mode-name">{mode.name}</span>
