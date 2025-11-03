@@ -42,7 +42,7 @@ interface SystemMetrics {
 }
 
 const AdminDashboard = () => {
-  const { user } = useAuth();
+  const { user, session, loading } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'logs' | 'analytics' | 'control'>('overview');
   const [users, setUsers] = useState<UserStats[]>([]);
@@ -55,12 +55,36 @@ const AdminDashboard = () => {
   const [logFilter, setLogFilter] = useState<'all' | 'errors' | 'success'>('all');
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Check if user is admin
+  // Check if user is admin - wait for auth to load
   useEffect(() => {
-    if (!user || user.email !== 'andregreengp@gmail.com') {
-      navigate('/chat');
+    console.log('AdminDashboard: Auth state -', { 
+      loading, 
+      user: user?.email, 
+      session: !!session 
+    });
+    
+    // Wait for auth to finish loading
+    if (loading) {
+      console.log('AdminDashboard: Auth still loading...');
+      return;
     }
-  }, [user, navigate]);
+    
+    // Check if logged in
+    if (!session || !user) {
+      console.log('AdminDashboard: No session, redirecting to /login');
+      navigate('/login');
+      return;
+    }
+    
+    // Check if admin
+    if (user.email !== 'andregreengp@gmail.com') {
+      console.log('AdminDashboard: Not admin (' + user.email + '), redirecting to /chat');
+      navigate('/chat');
+      return;
+    }
+    
+    console.log('AdminDashboard: ✅ Admin access confirmed for', user.email);
+  }, [user, session, loading, navigate]);
 
   // Fetch system metrics
   const fetchSystemMetrics = async () => {
@@ -221,6 +245,13 @@ const AdminDashboard = () => {
   // Initial load
   useEffect(() => {
     const loadData = async () => {
+      // Only load if user is confirmed admin
+      if (!user || user.email !== 'andregreengp@gmail.com') {
+        console.log('AdminDashboard: Skipping data load - not admin');
+        return;
+      }
+      
+      console.log('AdminDashboard: Loading admin data...');
       setIsLoading(true);
       await Promise.all([
         fetchSystemMetrics(),
@@ -231,7 +262,7 @@ const AdminDashboard = () => {
     };
 
     loadData();
-  }, [logFilter]);
+  }, [logFilter, user]); // Add user as dependency
 
   // Auto-refresh every 30 seconds
   useEffect(() => {
@@ -313,13 +344,18 @@ const AdminDashboard = () => {
     }
   };
 
-  if (isLoading) {
+  if (loading || isLoading) {
     return (
       <div className="admin-loading">
         <div className="loading-spinner"></div>
         <p>Loading Admin Dashboard...</p>
       </div>
     );
+  }
+
+  // Don't render anything if not admin (will redirect)
+  if (!user || user.email !== 'andregreengp@gmail.com') {
+    return null;
   }
 
   return (
