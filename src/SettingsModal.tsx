@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from './supabaseClient';
 import './SettingsModal.css';
 
@@ -9,9 +10,11 @@ interface SettingsModalProps {
 }
 
 export default function SettingsModal({ isOpen, onClose, user }: SettingsModalProps) {
+  const navigate = useNavigate();
   const [userEmail, setUserEmail] = useState('');
   const [subscriptionTier, setSubscriptionTier] = useState('free');
   const [isLoading, setIsLoading] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     if (user && isOpen) {
@@ -24,8 +27,13 @@ export default function SettingsModal({ isOpen, onClose, user }: SettingsModalPr
     
     setIsLoading(true);
     try {
+      // Check if user is admin
+      if (user.email === 'andregreengp@gmail.com') {
+        setIsAdmin(true);
+      }
+
       // Get user data from Supabase
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('users')
         .select('email, subscription_tier')
         .eq('id', user.id)
@@ -113,6 +121,18 @@ export default function SettingsModal({ isOpen, onClose, user }: SettingsModalPr
               <div className="settings-section">
                 <h3 className="settings-section-title">⚡ Actions</h3>
                 <div className="settings-actions">
+                  {isAdmin && (
+                    <button 
+                      className="settings-action-btn settings-admin-btn" 
+                      onClick={() => {
+                        onClose();
+                        navigate('/admin');
+                      }}
+                    >
+                      <span className="settings-action-icon">👑</span>
+                      <span>Admin Dashboard</span>
+                    </button>
+                  )}
                   <button className="settings-action-btn settings-logout-btn" onClick={handleLogout}>
                     <span className="settings-action-icon">🚪</span>
                     <span>Log Out</span>

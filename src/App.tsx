@@ -8,6 +8,7 @@ import CommandHub from './CommandHub';
 import WebSearch from './WebSearch';
 import MediaStudio from './MediaStudio';
 import CustomOmis from './CustomOmis';
+import AdminDashboard from './AdminDashboard';
 import { useAuth } from './Auth';
 import { GuestModeProvider, useGuestMode } from './GuestMode';
 import { supabase } from './supabaseClient';
@@ -213,6 +214,18 @@ const AuthChecker: React.FC = () => {
           (session || isGuestMode) ? (
             <div className="page-transition fade-in">
               <CustomOmis onClose={() => navigate(-1)} />
+            </div>
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        } 
+      />
+      <Route 
+        path="/admin" 
+        element={
+          session ? (
+            <div className="page-transition fade-in">
+              <AdminDashboard />
             </div>
           ) : (
             <Navigate to="/login" replace />
