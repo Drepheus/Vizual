@@ -624,7 +624,7 @@ function SplashPage() {
     },
     {
       icon: '⚙',
-      label: 'Settings',
+      label: 'AI News',
       onClick: () => {
         console.log('Settings clicked - activating Pulse mode');
         setIsPulseActive(!isPulseActive); // Toggle FlowingMenu

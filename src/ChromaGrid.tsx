@@ -85,7 +85,7 @@ export const ChromaGrid: React.FC<ChromaGridProps> = ({
       url: '#'
     },
     {
-      image: 'https://i.pravatar.cc/300?img=25',
+      image: '/images/personas/scientist.jpg',
       title: 'The Scientist',
       subtitle: 'Logical & Precise',
       handle: '@researcher',
