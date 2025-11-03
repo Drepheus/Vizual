@@ -146,19 +146,6 @@ function SplashPage() {
   // Feature buttons data
   const featureButtons = [
     {
-      name: 'Pulse',
-      icon: '◆',
-      description: 'Latest news, trends, or live data insights',
-      onClick: () => {
-        const isActivating = selectedFeature !== 'Pulse';
-        setSelectedFeature(isActivating ? 'Pulse' : null);
-        setIsPersonasActive(false); // Turn off ChromaGrid animation
-        setIsSynthesizeActive(false); // Turn off ElectricBorder animation
-        setIsPulseActive(isActivating); // Toggle FlowingMenu
-        console.log('Pulse clicked - FlowingMenu', isActivating ? 'activated' : 'deactivated');
-      }
-    },
-    {
       name: 'Personas',
       icon: '◐',
       description: selectedPersona ? `Active: ${selectedPersona}` : 'Shift Omi\'s voice (teacher, critic, explorer, poet)',
@@ -638,7 +625,12 @@ function SplashPage() {
     {
       icon: '⚙',
       label: 'Settings',
-      onClick: () => console.log('Settings clicked')
+      onClick: () => {
+        console.log('Settings clicked - activating Pulse mode');
+        setIsPulseActive(!isPulseActive); // Toggle FlowingMenu
+        setIsPersonasActive(false); // Turn off other animations
+        setIsSynthesizeActive(false);
+      }
     }
   ];
 
