@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
+import WebTaskModal from './WebTaskModal';
 import './WebSearch.css';
 
 // Updated with search modes - v2
@@ -27,6 +28,7 @@ const WebSearch: React.FC<WebSearchProps> = ({ onClose }) => {
   const [selectedMode, setSelectedMode] = useState<string | null>(null);
   const [searchResults, setSearchResults] = useState<SearchResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showWebTaskModal, setShowWebTaskModal] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const searchBoxRef = useRef<HTMLDivElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
@@ -133,6 +135,12 @@ const WebSearch: React.FC<WebSearchProps> = ({ onClose }) => {
     e.preventDefault();
     if (!searchQuery.trim() || isSearching) return;
 
+    // Handle AI Web Task mode separately
+    if (selectedMode === 'AI Web Task') {
+      setShowWebTaskModal(true);
+      return;
+    }
+
     // Only Search + Summarize mode is implemented
     if (selectedMode !== 'Search + Summarize') {
       alert(`${selectedMode || 'This'} mode is coming soon! Please select "Search + Summarize" mode.`);
@@ -151,7 +159,7 @@ const WebSearch: React.FC<WebSearchProps> = ({ onClose }) => {
         },
         body: JSON.stringify({
           query: searchQuery,
-          mode: selectedMode === 'search' ? 'basic' : 'deep'
+          mode: 'basic' // Always use basic mode for now
         }),
       });
 
@@ -191,15 +199,16 @@ const WebSearch: React.FC<WebSearchProps> = ({ onClose }) => {
   };
 
   return (
-    <div className="websearch-container" ref={containerRef}>
-      {/* Close button */}
-      <button 
-        className="websearch-close"
-        onClick={onClose}
-        title="Back"
-      >
-        ← Back
-      </button>
+    <>
+      <div className="websearch-container" ref={containerRef}>
+        {/* Close button */}
+        <button 
+          className="websearch-close"
+          onClick={onClose}
+          title="Back"
+        >
+          ← Back
+        </button>
 
       {/* Header */}
       <div className="websearch-header">
@@ -407,6 +416,13 @@ const WebSearch: React.FC<WebSearchProps> = ({ onClose }) => {
         ))}
       </div>
     </div>
+
+    {/* AI Web Task Modal */}
+    <WebTaskModal 
+      isOpen={showWebTaskModal} 
+      onClose={() => setShowWebTaskModal(false)} 
+    />
+    </>
   );
 };
 
