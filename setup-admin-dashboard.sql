@@ -117,7 +117,7 @@ CREATE POLICY "Users can view own api logs"
   ON api_logs FOR SELECT
   USING (auth.uid() = user_id OR is_admin_user());
 
--- Step 4: Set your account to Pro tier (optional, for testing)
+-- Step 4: Set your account to Ultra tier (highest plan)
 DO $$
 DECLARE
   admin_user_id UUID;
@@ -128,14 +128,27 @@ BEGIN
   WHERE email = 'andregreengp@gmail.com';
   
   IF admin_user_id IS NOT NULL THEN
-    -- Update to pro tier
+    -- First, add 'ultra' to the CHECK constraint if it doesn't exist
+    BEGIN
+      ALTER TABLE public.users 
+      DROP CONSTRAINT IF EXISTS users_subscription_tier_check;
+      
+      ALTER TABLE public.users 
+      ADD CONSTRAINT users_subscription_tier_check 
+      CHECK (subscription_tier IN ('free', 'pro', 'ultra'));
+    EXCEPTION
+      WHEN OTHERS THEN
+        RAISE NOTICE 'Constraint already exists or error: %', SQLERRM;
+    END;
+    
+    -- Update to ultra tier
     UPDATE public.users
     SET 
-      subscription_tier = 'pro',
+      subscription_tier = 'ultra',
       subscription_status = 'active'
     WHERE id = admin_user_id;
     
-    RAISE NOTICE 'Admin account set to PRO tier successfully';
+    RAISE NOTICE 'Admin account set to ULTRA tier successfully';
   ELSE
     RAISE NOTICE 'Admin account not found - make sure you are logged in';
   END IF;

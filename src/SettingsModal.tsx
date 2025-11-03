@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { supabase } from './supabaseClient';
 import './SettingsModal.css';
 
@@ -10,7 +9,6 @@ interface SettingsModalProps {
 }
 
 export default function SettingsModal({ isOpen, onClose, user }: SettingsModalProps) {
-  const navigate = useNavigate();
   const [userEmail, setUserEmail] = useState('');
   const [subscriptionTier, setSubscriptionTier] = useState('free');
   const [isLoading, setIsLoading] = useState(false);
@@ -28,8 +26,12 @@ export default function SettingsModal({ isOpen, onClose, user }: SettingsModalPr
     setIsLoading(true);
     try {
       // Check if user is admin
+      console.log('Checking admin status for:', user.email);
       if (user.email === 'andregreengp@gmail.com') {
         setIsAdmin(true);
+        console.log('✅ Admin status confirmed!');
+      } else {
+        console.log('❌ Not admin account');
       }
 
       // Get user data from Supabase
@@ -42,6 +44,7 @@ export default function SettingsModal({ isOpen, onClose, user }: SettingsModalPr
       if (data) {
         setUserEmail(data.email || user.email);
         setSubscriptionTier(data.subscription_tier || 'free');
+        console.log('User subscription tier:', data.subscription_tier);
       }
     } catch (error) {
       console.error('Error fetching user data:', error);
@@ -125,8 +128,10 @@ export default function SettingsModal({ isOpen, onClose, user }: SettingsModalPr
                     <button 
                       className="settings-action-btn settings-admin-btn" 
                       onClick={() => {
+                        console.log('Admin button clicked! Navigating to /admin');
                         onClose();
-                        navigate('/admin');
+                        // Use window.location for a full page navigation
+                        window.location.href = '/admin';
                       }}
                     >
                       <span className="settings-action-icon">👑</span>
