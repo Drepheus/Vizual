@@ -2,19 +2,24 @@
 
 ## 🚀 Quick Setup
 
-### Step 1: Run the SQL Functions in Supabase
+### Step 1: Run the SQL Script in Supabase
 
 1. Open your Supabase Dashboard
 2. Go to **SQL Editor**
 3. Click **New Query**
-4. Copy and paste the contents of `supabase-admin-functions.sql`
+4. Copy and paste the contents of `setup-admin-dashboard.sql`
 5. Click **Run** to execute
 
 This will create:
-- `get_admin_user_stats()` function - Returns all user data with usage stats
 - `is_admin_user()` function - Checks if current user is admin
+- `get_admin_user_stats()` function - Returns all user data with usage stats
 - Updated RLS policies to allow admin access to all data
-- Admin permissions for andregreengp@gmail.com
+- Sets andregreengp@gmail.com to PRO tier automatically
+
+**Note:** This script is designed to work with your existing database schema:
+- Uses existing `users` table (with `subscription_tier` column)
+- Uses existing `usage_tracking` table (with `usage_type` and `count` columns)
+- Uses existing `api_logs` table
 
 ### Step 2: Verify Your Admin Account
 
