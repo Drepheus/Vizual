@@ -28,20 +28,35 @@ BEGIN
 
   RETURN QUERY
   SELECT 
-    u.id,
-    u.email::TEXT,
-    u.created_at,
-    COALESCE(s.tier, 'free')::TEXT as tier,
-    COALESCE(ut.chats, 0)::INTEGER as total_chats,
-    COALESCE(ut.images, 0)::INTEGER as total_images,
-    COALESCE(ut.videos, 0)::INTEGER as total_videos,
-    COALESCE(ut.web_searches, 0)::INTEGER as total_web_searches,
-    COALESCE(ut.updated_at, u.created_at) as last_active,
-    s.stripe_customer_id::TEXT
-  FROM auth.users u
-  LEFT JOIN user_subscriptions s ON u.id = s.user_id
-  LEFT JOIN usage_tracking ut ON u.id = ut.user_id
-  ORDER BY u.created_at DESC;
+    au.id,
+    au.email::TEXT,
+    au.created_at,
+    COALESCE(u.subscription_tier, 'free')::TEXT as tier,
+    COALESCE(
+      (SELECT SUM(count) FROM usage_tracking 
+       WHERE user_id = au.id AND usage_type = 'chat'), 0
+    )::INTEGER as total_chats,
+    COALESCE(
+      (SELECT SUM(count) FROM usage_tracking 
+       WHERE user_id = au.id AND usage_type = 'image_gen'), 0
+    )::INTEGER as total_images,
+    COALESCE(
+      (SELECT SUM(count) FROM usage_tracking 
+       WHERE user_id = au.id AND usage_type = 'video_gen'), 0
+    )::INTEGER as total_videos,
+    COALESCE(
+      (SELECT web_searches FROM usage_tracking 
+       WHERE user_id = au.id 
+       ORDER BY created_at DESC LIMIT 1), 0
+    )::INTEGER as total_web_searches,
+    COALESCE(
+      (SELECT MAX(created_at) FROM usage_tracking WHERE user_id = au.id),
+      au.created_at
+    ) as last_active,
+    u.stripe_customer_id::TEXT
+  FROM auth.users au
+  LEFT JOIN public.users u ON au.id = u.id
+  ORDER BY au.created_at DESC;
 END;
 $$;
 
@@ -83,11 +98,11 @@ CREATE POLICY "Users can view own usage"
   ON usage_tracking FOR SELECT
   USING (auth.uid() = user_id OR is_admin_user());
 
--- Update user_subscriptions policy to allow admin to modify subscriptions
-DROP POLICY IF EXISTS "Admin can update all subscriptions" ON user_subscriptions;
+-- Update users table policy to allow admin to modify subscriptions
+DROP POLICY IF EXISTS "Admin can update all users" ON public.users;
 
-CREATE POLICY "Admin can update all subscriptions"
-  ON user_subscriptions FOR ALL
+CREATE POLICY "Admin can update all users"
+  ON public.users FOR ALL
   USING (is_admin_user());
 
 -- Add comment for documentation

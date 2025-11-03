@@ -101,71 +101,62 @@ export default async function handler(
       });
     }
 
-    // Check if user is admin (bypass all limits)
-    const isAdmin = user.email === 'andregreengp@gmail.com';
+    // Check subscription tier and usage limits
+    const { data: subscription, error: subError } = await supabase
+      .from('user_subscriptions')
+      .select('*')
+      .eq('user_id', user.id)
+      .single();
 
-    // Check subscription tier and usage limits (skip for admin)
-    let tier = 'ultra'; // Default to ultra for admin
-    let currentUsage = 0;
-    let limit = 999999; // Unlimited for admin
-
-    if (!isAdmin) {
-      const { data: subscription, error: subError } = await supabase
-        .from('user_subscriptions')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
-
-      if (subError && subError.code !== 'PGRST116') { // PGRST116 = no rows returned
-        console.error('Subscription check error:', subError);
-      }
-
-      tier = subscription?.tier || 'free';
-
-      // Check usage tracking
-      const { data: usage, error: usageError } = await supabase
-        .from('usage_tracking')
-        .select('*')
-        .eq('user_id', user.id)
-        .gte('period_start', new Date(new Date().setDate(1)).toISOString()) // Start of current month
-        .single();
-
-      if (usageError && usageError.code !== 'PGRST116') {
-        console.error('Usage tracking error:', usageError);
-      }
-
-      // Define limits per tier
-      const limits = {
-        free: 0, // AI Web Task not available on free tier
-        pro: 10, // 10 AI Web Tasks per month for Pro
-        ultra: 50 // 50 AI Web Tasks per month for Ultra
-      };
-
-      currentUsage = usage?.web_searches || 0;
-      limit = limits[tier as keyof typeof limits] || 0;
-
-      // Check if user has exceeded limit (not admin)
-      if (tier === 'free') {
-        return res.status(403).json({ 
-          error: 'Premium feature', 
-          details: 'AI Web Task is only available for Pro and Ultra subscribers',
-          upgrade_required: true,
-          tier: 'free'
-        });
-      }
-
-      if (currentUsage >= limit) {
-        return res.status(429).json({ 
-          error: 'Usage limit exceeded', 
-          details: `You've used ${currentUsage}/${limit} AI Web Tasks this month. Upgrade for more!`,
-          current: currentUsage,
-          limit: limit,
-          reset_at: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1).toISOString()
-        });
-      }
+    if (subError && subError.code !== 'PGRST116') { // PGRST116 = no rows returned
+      console.error('Subscription check error:', subError);
     }
 
-    console.log(`Starting Skyvern task for user ${user.id} (${tier}${isAdmin ? ' - ADMIN' : ''}): "${prompt}"`);
+    const tier = subscription?.tier || 'free';
+
+    // Check usage tracking
+    const { data: usage, error: usageError } = await supabase
+      .from('usage_tracking')
+      .select('*')
+      .eq('user_id', user.id)
+      .gte('period_start', new Date(new Date().setDate(1)).toISOString()) // Start of current month
+      .single();
+
+    if (usageError && usageError.code !== 'PGRST116') {
+      console.error('Usage tracking error:', usageError);
+    }
+
+    // Define limits per tier
+    const limits = {
+      free: 0, // AI Web Task not available on free tier
+      pro: 10, // 10 AI Web Tasks per month for Pro
+      ultra: 50 // 50 AI Web Tasks per month for Ultra
+    };
+
+    const currentUsage = usage?.web_searches || 0;
+    const limit = limits[tier as keyof typeof limits] || 0;
+
+    // Check if user has exceeded limit
+    if (tier === 'free') {
+      return res.status(403).json({ 
+        error: 'Premium feature', 
+        details: 'AI Web Task is only available for Pro and Ultra subscribers',
+        upgrade_required: true,
+        tier: 'free'
+      });
+    }
+
+    if (currentUsage >= limit) {
+      return res.status(429).json({ 
+        error: 'Usage limit exceeded', 
+        details: `You've used ${currentUsage}/${limit} AI Web Tasks this month. Upgrade for more!`,
+        current: currentUsage,
+        limit: limit,
+        reset_at: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1).toISOString()
+      });
+    }
+
+    console.log(`Starting Skyvern task for user ${user.id} (${tier}): "${prompt}"`);
 
     // Call Skyvern Cloud API
     const skyvernResponse = await fetch('https://api.skyvern.com/v1/run/tasks', {
@@ -219,39 +210,30 @@ export default async function handler(
       // Don't fail the request if logging fails
     }
 
-    // Increment usage counter (skip for admin)
-    if (!isAdmin) {
-      const { data: usage } = await supabase
+    // Increment usage counter
+    if (usage) {
+      // Update existing usage record
+      await supabase
         .from('usage_tracking')
-        .select('*')
+        .update({ 
+          web_searches: currentUsage + 1,
+          updated_at: new Date().toISOString()
+        })
         .eq('user_id', user.id)
-        .gte('period_start', new Date(new Date().setDate(1)).toISOString())
-        .single();
-
-      if (usage) {
-        // Update existing usage record
-        await supabase
-          .from('usage_tracking')
-          .update({ 
-            web_searches: (usage.web_searches || 0) + 1,
-            updated_at: new Date().toISOString()
-          })
-          .eq('user_id', user.id)
-          .eq('id', usage.id);
-      } else {
-        // Create new usage record for this month
-        await supabase
-          .from('usage_tracking')
-          .insert({
-            user_id: user.id,
-            chats: 0,
-            images: 0,
-            videos: 0,
-            web_searches: 1,
-            period_start: new Date(new Date().setDate(1)).toISOString(),
-            period_end: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1).toISOString(),
-          });
-      }
+        .eq('id', usage.id);
+    } else {
+      // Create new usage record for this month
+      await supabase
+        .from('usage_tracking')
+        .insert({
+          user_id: user.id,
+          chats: 0,
+          images: 0,
+          videos: 0,
+          web_searches: 1,
+          period_start: new Date(new Date().setDate(1)).toISOString(),
+          period_end: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1).toISOString(),
+        });
     }
 
     // Poll for task completion if it's still running
@@ -297,11 +279,7 @@ export default async function handler(
         : finalTaskData.status === 'running'
         ? '⏳ Your AI web task is still processing. Complex tasks may take up to 60 seconds to complete.'
         : undefined,
-      usage: isAdmin ? {
-        current: 0,
-        limit: 999999,
-        remaining: 999999,
-      } : {
+      usage: {
         current: currentUsage + 1,
         limit: limit,
         remaining: limit - currentUsage - 1,

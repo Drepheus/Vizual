@@ -65,19 +65,19 @@ const AdminDashboard = () => {
   // Fetch system metrics
   const fetchSystemMetrics = async () => {
     try {
-      // Get total users
+      // Get total users from public.users table
       const { count: totalUsers } = await supabase
-        .from('auth.users')
+        .from('users')
         .select('*', { count: 'exact', head: true });
 
-      // Get subscription breakdown
-      const { data: subscriptions } = await supabase
-        .from('user_subscriptions')
-        .select('tier');
+      // Get subscription breakdown from users table
+      const { data: users } = await supabase
+        .from('users')
+        .select('subscription_tier');
 
-      const freeUsers = subscriptions?.filter(s => !s.tier || s.tier === 'free').length || 0;
-      const proUsers = subscriptions?.filter(s => s.tier === 'pro').length || 0;
-      const ultraUsers = subscriptions?.filter(s => s.tier === 'ultra').length || 0;
+      const freeUsers = users?.filter(u => !u.subscription_tier || u.subscription_tier === 'free').length || 0;
+      const proUsers = users?.filter(u => u.subscription_tier === 'pro').length || 0;
+      const ultraUsers = 0; // Ultra tier if you add it later
 
       // Get API call count
       const { count: apiCalls } = await supabase
@@ -114,37 +114,56 @@ const AdminDashboard = () => {
       
       if (error) {
         console.error('Error fetching users:', error);
-        // Fallback: fetch basic user data
+        // Fallback: fetch basic user data from users table
         const { data: usersData } = await supabase
-          .from('user_subscriptions')
+          .from('users')
           .select(`
-            user_id,
-            tier,
+            id,
+            email,
+            subscription_tier,
             stripe_customer_id,
             created_at
           `);
         
-        const userStats = await Promise.all((usersData || []).map(async (sub) => {
-          const { data: userData } = await supabase.auth.admin.getUserById(sub.user_id);
-          const { data: usage } = await supabase
+        const userStats = await Promise.all((usersData || []).map(async (user) => {
+          // Get aggregated usage stats
+          const { data: chatUsage } = await supabase
             .from('usage_tracking')
-            .select('*')
-            .eq('user_id', sub.user_id)
+            .select('count')
+            .eq('user_id', user.id)
+            .eq('usage_type', 'chat');
+          
+          const { data: imageUsage } = await supabase
+            .from('usage_tracking')
+            .select('count')
+            .eq('user_id', user.id)
+            .eq('usage_type', 'image_gen');
+          
+          const { data: videoUsage } = await supabase
+            .from('usage_tracking')
+            .select('count')
+            .eq('user_id', user.id)
+            .eq('usage_type', 'video_gen');
+
+          const { data: lastActivity } = await supabase
+            .from('usage_tracking')
+            .select('created_at')
+            .eq('user_id', user.id)
             .order('created_at', { ascending: false })
             .limit(1)
             .single();
 
           return {
-            id: sub.user_id,
-            email: userData?.user?.email || 'Unknown',
-            created_at: sub.created_at,
-            tier: sub.tier || 'free',
-            total_chats: usage?.chats || 0,
-            total_images: usage?.images || 0,
-            total_videos: usage?.videos || 0,
-            total_web_searches: usage?.web_searches || 0,
-            last_active: usage?.updated_at || sub.created_at,
-            stripe_customer_id: sub.stripe_customer_id,
+            id: user.id,
+            email: user.email || 'Unknown',
+            created_at: user.created_at,
+            tier: user.subscription_tier || 'free',
+            total_chats: chatUsage?.reduce((sum, u) => sum + (u.count || 0), 0) || 0,
+            total_images: imageUsage?.reduce((sum, u) => sum + (u.count || 0), 0) || 0,
+            total_videos: videoUsage?.reduce((sum, u) => sum + (u.count || 0), 0) || 0,
+            total_web_searches: 0, // Will be added once web_searches column is populated
+            last_active: lastActivity?.created_at || user.created_at,
+            stripe_customer_id: user.stripe_customer_id,
           };
         }));
 
@@ -245,14 +264,14 @@ const AdminDashboard = () => {
   // User action handlers
   const handleUpgradeUser = async (userId: string, tier: 'pro' | 'ultra') => {
     try {
+      // Update the users table directly
       await supabase
-        .from('user_subscriptions')
-        .upsert({
-          user_id: userId,
-          tier: tier,
-          status: 'active',
-          updated_at: new Date().toISOString(),
-        });
+        .from('users')
+        .update({
+          subscription_tier: tier,
+          subscription_status: 'active',
+        })
+        .eq('id', userId);
 
       alert(`User upgraded to ${tier.toUpperCase()} tier`);
       fetchUsers();
@@ -264,15 +283,10 @@ const AdminDashboard = () => {
 
   const handleResetUsage = async (userId: string) => {
     try {
+      // Delete all usage records for this user to reset
       await supabase
         .from('usage_tracking')
-        .update({
-          chats: 0,
-          images: 0,
-          videos: 0,
-          web_searches: 0,
-          updated_at: new Date().toISOString(),
-        })
+        .delete()
         .eq('user_id', userId);
 
       alert('User usage reset successfully');
