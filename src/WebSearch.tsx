@@ -154,24 +154,21 @@ const WebSearch: React.FC<WebSearchProps> = ({ onClose }) => {
         }),
       });
 
-      // Clone the response so we can read it multiple times if needed
-      const responseClone = response.clone();
-      
-      let data: SearchResult;
+      let data: any;
       try {
         data = await response.json();
       } catch (jsonError) {
-        // Use the cloned response to get text
-        const text = await responseClone.text();
-        console.error('Failed to parse JSON response:', text);
+        console.error('Failed to parse JSON response:', jsonError);
         throw new Error('Server returned invalid response. Please check the console for details.');
       }
 
+      // Check if response was not OK after parsing
       if (!response.ok) {
-        throw new Error(data.details || data.error || `Search failed with status ${response.status}`);
+        const errorMessage = data?.details || data?.error || `Search failed with status ${response.status}`;
+        throw new Error(errorMessage);
       }
 
-      setSearchResults(data);
+      setSearchResults(data as SearchResult);
 
       // Scroll to results
       setTimeout(() => {
