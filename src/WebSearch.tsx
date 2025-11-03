@@ -39,14 +39,15 @@ const WebSearch: React.FC<WebSearchProps> = ({ onClose }) => {
       description: 'AI-powered contextual summaries'
     },
     {
-      name: 'Auto Deep Dive',
-      icon: '🧭',
-      description: 'Smart context navigation'
-    },
-    {
       name: 'Continuous Research',
       icon: '◇',
       description: '60-second deep research mode'
+    },
+    {
+      name: 'AI Web Task',
+      icon: '🧭',
+      description: 'Smart context navigation',
+      isPro: true
     },
     {
       name: 'Cited Sources',
@@ -215,7 +216,7 @@ const WebSearch: React.FC<WebSearchProps> = ({ onClose }) => {
         {/* Search modes */}
         <div className="search-modes">
           {searchModes.map((mode, index) => {
-            const isPro = mode.name === 'Research Chains';
+            const isPro = mode.isPro || mode.name === 'Research Chains';
             const isComingSoon = mode.name === 'Developer Mode';
             return (
               <button
