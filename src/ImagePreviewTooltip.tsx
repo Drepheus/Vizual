@@ -10,13 +10,10 @@ const ImagePreviewTooltip: React.FC<ImagePreviewTooltipProps> = ({ isVisible }) 
 
   // Sample images - replace these URLs with actual sample images
   const sampleImages = [
-    'https://images.unsplash.com/photo-1686904423955-b3c03e894949?w=400&h=300&fit=crop', // AI generated art
-    'https://images.unsplash.com/photo-1706049379414-437ec3a54e93?w=400&h=300&fit=crop', // Futuristic scene
-    'https://images.unsplash.com/photo-1707343843437-caacff5cfa74?w=400&h=300&fit=crop', // Abstract AI
-    'https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=400&h=300&fit=crop', // Digital art
-    'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400&h=300&fit=crop', // AI landscape
-    'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=400&h=300&fit=crop', // Tech art
-    'https://images.unsplash.com/photo-1686904423955-b3c03e894949?w=400&h=300&fit=crop', // Sci-fi scene
+    '/images/samples/sample1.jpg', // Futuristic AI tech
+    '/images/samples/sample2.jpg', // Diverse team illustration
+    '/images/samples/sample3.jpg', // Portrait
+    '/images/samples/sample4.jpg', // Car scene
   ];
 
   useEffect(() => {
