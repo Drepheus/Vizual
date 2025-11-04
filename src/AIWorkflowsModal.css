@@ -1,0 +1,183 @@
+/* AI Workflows Modal */
+.ai-workflows-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.3s ease-out;
+  overflow-y: auto;
+  padding: 2rem;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.ai-workflows-modal-content {
+  position: relative;
+  width: 100%;
+  max-width: 1400px;
+  background: linear-gradient(135deg, 
+    rgba(10, 10, 10, 0.95) 0%, 
+    rgba(20, 20, 20, 0.95) 50%, 
+    rgba(10, 10, 10, 0.95) 100%);
+  border: 1px solid rgba(128, 128, 128, 0.3);
+  border-radius: 24px;
+  padding: 3rem;
+  animation: slideUp 0.4s ease-out;
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.5),
+    0 0 1px rgba(192, 192, 192, 0.3) inset;
+  overflow: hidden;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.ai-workflows-modal-close {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  width: 40px;
+  height: 40px;
+  background: rgba(64, 64, 64, 0.3);
+  border: 1px solid rgba(128, 128, 128, 0.2);
+  border-radius: 50%;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  z-index: 10;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.ai-workflows-modal-close:hover {
+  background: rgba(96, 96, 96, 0.4);
+  border-color: rgba(192, 192, 192, 0.3);
+  color: rgba(255, 255, 255, 0.9);
+  transform: rotate(90deg);
+}
+
+.ai-workflows-modal-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding-top: 1rem;
+}
+
+.ai-workflows-modal-title {
+  font-size: 3.5rem;
+  font-weight: 300;
+  background: linear-gradient(135deg,
+    rgba(192, 192, 192, 0.95) 0%,
+    rgba(160, 160, 160, 0.9) 25%,
+    rgba(128, 128, 128, 0.85) 50%,
+    rgba(160, 160, 160, 0.9) 75%,
+    rgba(192, 192, 192, 0.95) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0 0 1rem 0;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+}
+
+.ai-workflows-modal-subtitle {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0;
+  font-weight: 300;
+  letter-spacing: 1.5px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+}
+
+/* Override FlowingMenu styles to fit within modal */
+.ai-workflows-modal-content .menu-wrap {
+  height: auto;
+  min-height: 400px;
+  display: block;
+  padding: 2rem 0;
+}
+
+.ai-workflows-modal-content .menu {
+  max-width: 100%;
+  padding: 0;
+}
+
+.ai-workflows-modal-content .menu__item-link {
+  transition: all 0.3s ease;
+}
+
+.ai-workflows-modal-content .menu__item-link:hover {
+  color: rgba(192, 192, 192, 0.95);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .ai-workflows-modal-overlay {
+    padding: 1rem;
+  }
+
+  .ai-workflows-modal-content {
+    padding: 2rem 1.5rem;
+  }
+
+  .ai-workflows-modal-title {
+    font-size: 2rem;
+    letter-spacing: 3px;
+  }
+
+  .ai-workflows-modal-subtitle {
+    font-size: 0.9rem;
+  }
+
+  .ai-workflows-modal-close {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+  }
+
+  .ai-workflows-modal-content .menu-wrap {
+    min-height: 300px;
+  }
+}
+
+@media (max-width: 480px) {
+  .ai-workflows-modal-content {
+    padding: 1.5rem 1rem;
+  }
+
+  .ai-workflows-modal-title {
+    font-size: 1.5rem;
+    letter-spacing: 2px;
+  }
+
+  .ai-workflows-modal-header {
+    margin-bottom: 1rem;
+  }
+}

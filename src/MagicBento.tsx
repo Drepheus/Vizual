@@ -34,18 +34,19 @@ const cardData = [
   },
   {
     color: '#0a0a0a',
+    icon: '⚡',
+    title: 'AI Workflows',
+    description: 'Automate complex tasks or multi-step reasoning with agentic systems',
+    label: 'Character',
+    action: 'aiworkflows'
+  },
+  {
+    color: '#0a0a0a',
     icon: '🧪',
     title: 'Custom Omi\'s',
     description: 'Design personalized AI assistants that adapt to your style, tone, and workflow',
     label: 'Creative',
     action: 'customomis'
-  },
-  {
-    color: '#0a0a0a',
-    icon: '⚡',
-    title: 'Workflows',
-    description: 'Automate complex tasks or multi-step reasoning with agentic systems',
-    label: 'Character'
   },
   {
     color: '#0a0a0a',
@@ -527,6 +528,7 @@ interface MagicBentoProps {
   clickEffect?: boolean;
   enableMagnetism?: boolean;
   onWebSearchClick?: () => void;
+  onAIWorkflowsClick?: () => void;
 }
 
 const MagicBento: React.FC<MagicBentoProps> = ({
@@ -541,7 +543,8 @@ const MagicBento: React.FC<MagicBentoProps> = ({
   glowColor = DEFAULT_GLOW_COLOR,
   clickEffect = true,
   enableMagnetism = true,
-  onWebSearchClick
+  onWebSearchClick,
+  onAIWorkflowsClick
 }) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const isMobile = useMobileDetection();
@@ -561,6 +564,9 @@ const MagicBento: React.FC<MagicBentoProps> = ({
     } else if (card.action === 'customomis') {
       // Navigate to Custom Omi's
       window.location.href = '/custom-omis';
+    } else if (card.action === 'aiworkflows' && onAIWorkflowsClick) {
+      // Trigger the AI Workflows modal
+      onAIWorkflowsClick();
     }
     // Add more actions here as needed for other cards
   };
