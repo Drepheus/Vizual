@@ -5,7 +5,7 @@ import Dock from './Dock';
 import InfiniteScroll from './InfiniteScroll';
 import InfiniteMenu from './InfiniteMenu';
 import ChromaGrid from './ChromaGrid';
-import FlowingMenu from './FlowingMenu';
+import CircularGallery from './CircularGallery';
 import ConversationSidebar from './ConversationSidebar';
 import NewsTicker from './NewsTicker';
 import MediaGallery from './MediaGallery';
@@ -1291,7 +1291,7 @@ function SplashPage() {
         />
       )}
 
-      {/* FlowingMenu Overlay Animation for Pulse */}
+      {/* CircularGallery Overlay Animation for Pulse */}
       {isPulseActive && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 9000, background: '#000' }}>
           <button
@@ -1316,7 +1316,11 @@ function SplashPage() {
           >
             ✕
           </button>
-          <FlowingMenu
+          <CircularGallery
+            bend={3}
+            textColor="#ffffff"
+            borderRadius={0.05}
+            scrollEase={0.02}
             items={[
               {
                 link: '#',
