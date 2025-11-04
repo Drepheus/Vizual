@@ -14,9 +14,7 @@ export default function MediaGallery({ isOpen, onClose, userId }: MediaGalleryPr
   const [filter, setFilter] = useState<'all' | 'image' | 'video'>('all');
   const [selectedMedia, setSelectedMedia] = useState<GeneratedMedia | null>(null);
 
-  // Debug logging
-  console.log('🎨 MediaGallery rendered - isOpen:', isOpen, 'userId:', userId);
-
+  // Load media when modal opens or userId changes
   useEffect(() => {
     if (isOpen && userId) {
       console.log('📥 Loading media for user:', userId);
@@ -24,11 +22,23 @@ export default function MediaGallery({ isOpen, onClose, userId }: MediaGalleryPr
     }
   }, [isOpen, userId]);
 
+  // Refresh media every time the modal opens (to catch new additions)
+  useEffect(() => {
+    if (isOpen && userId) {
+      loadMedia();
+    }
+  }, [isOpen]);
+
   const loadMedia = async () => {
-    if (!userId) return;
+    if (!userId) {
+      console.warn('⚠️ No userId provided to MediaGallery');
+      setIsLoading(false);
+      return;
+    }
     
     setIsLoading(true);
     const data = await getUserGeneratedMedia(userId);
+    console.log('📸 Loaded media items:', data.length);
     setMedia(data);
     setIsLoading(false);
   };
@@ -55,7 +65,7 @@ export default function MediaGallery({ isOpen, onClose, userId }: MediaGalleryPr
     <div className="media-gallery-overlay" onClick={onClose}>
       <div className="media-gallery-modal" onClick={(e) => e.stopPropagation()}>
         <div className="media-gallery-header">
-          <h2>🎨 Your Generated Media</h2>
+          <h2>Your Generated Media</h2>
           <button className="close-btn" onClick={onClose}>✕</button>
         </div>
 
@@ -88,9 +98,9 @@ export default function MediaGallery({ isOpen, onClose, userId }: MediaGalleryPr
             </div>
           ) : filteredMedia.length === 0 ? (
             <div className="empty-state">
-              <div className="empty-icon">🎨</div>
+              <div className="empty-icon">📁</div>
               <p>No {filter !== 'all' ? filter + 's' : 'media'} yet</p>
-              <p className="empty-hint">Generate images and videos to see them here!</p>
+              <p className="empty-hint">Generate images and videos in the AI Media Studio to see them here</p>
             </div>
           ) : (
             <div className="media-grid">
@@ -98,9 +108,22 @@ export default function MediaGallery({ isOpen, onClose, userId }: MediaGalleryPr
                 <div key={item.id} className="media-card">
                   <div className="media-preview" onClick={() => setSelectedMedia(item)}>
                     {item.type === 'image' ? (
-                      <img src={item.url} alt={item.prompt} loading="lazy" />
+                      <img 
+                        src={item.url} 
+                        alt={item.prompt} 
+                        loading="lazy"
+                        onError={(e) => {
+                          console.error('Failed to load image:', item.url);
+                          e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"%3E%3Crect fill="%23111" width="400" height="300"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" fill="%23666" font-size="16"%3EImage unavailable%3C/text%3E%3C/svg%3E';
+                        }}
+                      />
                     ) : (
-                      <video src={item.url} />
+                      <video 
+                        src={item.url}
+                        onError={() => {
+                          console.error('Failed to load video:', item.url);
+                        }}
+                      />
                     )}
                     <div className="media-overlay">
                       <span className="media-type-badge">
@@ -143,14 +166,34 @@ export default function MediaGallery({ isOpen, onClose, userId }: MediaGalleryPr
             <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
               <button className="lightbox-close" onClick={() => setSelectedMedia(null)}>✕</button>
               {selectedMedia.type === 'image' ? (
-                <img src={selectedMedia.url} alt={selectedMedia.prompt} />
+                <img 
+                  src={selectedMedia.url} 
+                  alt={selectedMedia.prompt}
+                  onError={(e) => {
+                    console.error('Failed to load image in lightbox:', selectedMedia.url);
+                    e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600"%3E%3Crect fill="%23111" width="800" height="600"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" fill="%23666" font-size="24"%3EImage unavailable%3C/text%3E%3C/svg%3E';
+                  }}
+                />
               ) : (
-                <video src={selectedMedia.url} controls autoPlay />
+                <video 
+                  src={selectedMedia.url} 
+                  controls 
+                  autoPlay
+                  onError={() => {
+                    console.error('Failed to load video in lightbox:', selectedMedia.url);
+                  }}
+                />
               )}
               <div className="lightbox-info">
                 <p className="lightbox-prompt">{selectedMedia.prompt}</p>
                 <p className="lightbox-date">
-                  {new Date(selectedMedia.created_at).toLocaleDateString()}
+                  {new Date(selectedMedia.created_at).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
                 </p>
               </div>
             </div>
