@@ -1,34 +1,9 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MagicBento from './MagicBento';
-import AIWorkflowsModal from './AIWorkflowsModal';
-import GoogleAIStudio from './GoogleAIStudio';
 import './CommandHub.css';
 
-interface CommandHubProps {
-  onWebSearchClick?: () => void;
-}
-
-export default function CommandHub({ onWebSearchClick }: CommandHubProps) {
-  const [showAIWorkflows, setShowAIWorkflows] = useState(false);
-  const [showGoogleAIStudio, setShowGoogleAIStudio] = useState(false);
+export default function CommandHub() {
   const navigate = useNavigate();
-
-  const handleAIWorkflowsClick = () => {
-    setShowAIWorkflows(true);
-  };
-
-  const handleCloseAIWorkflows = () => {
-    setShowAIWorkflows(false);
-  };
-
-  const handleGoogleAIStudioClick = () => {
-    setShowGoogleAIStudio(true);
-  };
-
-  const handleCloseGoogleAIStudio = () => {
-    setShowGoogleAIStudio(false);
-  };
 
   return (
     <div className="command-hub-container">
@@ -52,9 +27,6 @@ export default function CommandHub({ onWebSearchClick }: CommandHubProps) {
         textAutoHide={true}
         enableStars={true}
         enableSpotlight={true}
-        onWebSearchClick={onWebSearchClick}
-        onAIWorkflowsClick={handleAIWorkflowsClick}
-        onGoogleAIStudioClick={handleGoogleAIStudioClick}
         enableBorderGlow={true}
         enableTilt={false}
         clickEffect={true}
@@ -62,18 +34,6 @@ export default function CommandHub({ onWebSearchClick }: CommandHubProps) {
         glowColor="192, 192, 192"
         particleCount={12}
         spotlightRadius={300}
-      />
-
-      {/* AI Workflows Modal */}
-      <AIWorkflowsModal 
-        isOpen={showAIWorkflows}
-        onClose={handleCloseAIWorkflows}
-      />
-
-      {/* Google AI Studio Modal */}
-      <GoogleAIStudio
-        isOpen={showGoogleAIStudio}
-        onClose={handleCloseGoogleAIStudio}
       />
     </div>
   );

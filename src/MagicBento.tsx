@@ -535,9 +535,6 @@ interface MagicBentoProps {
   glowColor?: string;
   clickEffect?: boolean;
   enableMagnetism?: boolean;
-  onWebSearchClick?: () => void;
-  onAIWorkflowsClick?: () => void;
-  onGoogleAIStudioClick?: () => void;
 }
 
 const MagicBento: React.FC<MagicBentoProps> = ({
@@ -551,10 +548,7 @@ const MagicBento: React.FC<MagicBentoProps> = ({
   enableTilt = false,
   glowColor = DEFAULT_GLOW_COLOR,
   clickEffect = true,
-  enableMagnetism = true,
-  onWebSearchClick,
-  onAIWorkflowsClick,
-  onGoogleAIStudioClick
+  enableMagnetism = true
 }) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const isMobile = useMobileDetection();
@@ -563,25 +557,18 @@ const MagicBento: React.FC<MagicBentoProps> = ({
   // Handle card clicks
   const handleCardClick = (card: typeof cardData[0]) => {
     if (card.action === 'chat') {
-      // Navigate to chat (handled by parent)
       window.location.href = '/chat';
-    } else if (card.action === 'websearch' && onWebSearchClick) {
-      // Trigger the web search page
-      onWebSearchClick();
+    } else if (card.action === 'websearch') {
+      window.location.href = '/web-search';
     } else if (card.action === 'mediastudio') {
-      // Navigate to AI Media Studio
       window.location.href = '/media-studio';
     } else if (card.action === 'customomis') {
-      // Navigate to Custom Omi's
       window.location.href = '/custom-omis';
-    } else if (card.action === 'aiworkflows' && onAIWorkflowsClick) {
-      // Trigger the AI Workflows modal
-      onAIWorkflowsClick();
-    } else if (card.action === 'googleaistudio' && onGoogleAIStudioClick) {
-      // Trigger the Google AI Studio modal
-      onGoogleAIStudioClick();
+    } else if (card.action === 'aiworkflows') {
+      window.location.href = '/ai-workflows';
+    } else if (card.action === 'googleaistudio') {
+      window.location.href = '/google-ai-studio';
     }
-    // Add more actions here as needed for other cards
   };
 
   return (

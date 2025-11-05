@@ -1,9 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './GoogleAIStudio.css';
 
 interface GoogleAIStudioProps {
-  isOpen: boolean;
-  onClose: () => void;
+  onClose?: () => void;
 }
 
 const promptCards = [
@@ -59,82 +59,87 @@ const promptCards = [
   }
 ];
 
-export default function GoogleAIStudio({ isOpen, onClose }: GoogleAIStudioProps) {
+export default function GoogleAIStudio({ onClose }: GoogleAIStudioProps) {
   const [prompt, setPrompt] = useState('');
+  const navigate = useNavigate();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (isOpen && scrollContainerRef.current) {
-      // Start the scroll animation
-      const container = scrollContainerRef.current;
-      let scrollPosition = 0;
-      const scrollSpeed = 0.5;
+    // Start the scroll animation
+    const container = scrollContainerRef.current;
+    if (!container) return;
 
-      const animate = () => {
-        if (container) {
-          scrollPosition += scrollSpeed;
-          if (scrollPosition >= container.scrollWidth / 2) {
-            scrollPosition = 0;
-          }
-          container.scrollLeft = scrollPosition;
+    let scrollPosition = 0;
+    const scrollSpeed = 0.5;
+
+    const animate = () => {
+      if (container) {
+        scrollPosition += scrollSpeed;
+        if (scrollPosition >= container.scrollWidth / 2) {
+          scrollPosition = 0;
         }
-      };
+        container.scrollLeft = scrollPosition;
+      }
+    };
 
-      const intervalId = setInterval(animate, 16); // ~60fps
+    const intervalId = setInterval(animate, 16); // ~60fps
 
-      return () => clearInterval(intervalId);
-    }
-  }, [isOpen]);
+    return () => clearInterval(intervalId);
+  }, []);
 
   const handlePromptCardClick = (title: string) => {
     setPrompt(title);
   };
 
-  if (!isOpen) return null;
+  const handleClose = () => {
+    if (onClose) {
+      onClose();
+    } else {
+      navigate('/command-hub');
+    }
+  };
 
   return (
-    <div className="google-ai-studio-overlay" onClick={onClose}>
-      <div className="google-ai-studio-modal" onClick={(e) => e.stopPropagation()}>
-        <button className="google-ai-close-btn" onClick={onClose}>
-          ✕
-        </button>
+    <div className="google-ai-studio-page">
+      <button className="google-ai-close-btn" onClick={handleClose}>
+        ✕
+      </button>
 
-        <div className="google-ai-header">
-          <h1 className="google-ai-title">
-            Try <span className="gemini-star">✦</span> Gemini
-          </h1>
+      <div className="google-ai-header">
+        <h1 className="google-ai-title">
+          Try <span className="gemini-star">✦</span> Gemini
+        </h1>
+      </div>
+
+      <div className="google-ai-search-container">
+        <div className="google-ai-search-wrapper">
+          <input
+            type="text"
+            className="google-ai-search-input"
+            placeholder="Ask Gemini"
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+          />
+          <button className="google-ai-send-btn" disabled={!prompt.trim()}>
+            ▶
+          </button>
         </div>
+      </div>
 
-        <div className="google-ai-search-container">
-          <div className="google-ai-search-wrapper">
-            <input
-              type="text"
-              className="google-ai-search-input"
-              placeholder="Ask Gemini"
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-            />
-            <button className="google-ai-send-btn" disabled={!prompt.trim()}>
-              ▶
-            </button>
-          </div>
-        </div>
-
-        <div className="google-ai-prompts-section">
-          <div className="google-ai-prompts-scroll" ref={scrollContainerRef}>
-            {/* Duplicate cards for seamless loop */}
-            {[...promptCards, ...promptCards].map((card, index) => (
-              <div
-                key={index}
-                className="google-ai-prompt-card"
-                style={{ backgroundColor: card.color }}
-                onClick={() => handlePromptCardClick(card.title)}
-              >
-                <div className="prompt-card-icon">{card.icon}</div>
-                <p className="prompt-card-title">{card.title}</p>
-              </div>
-            ))}
-          </div>
+      <div className="google-ai-prompts-section">
+        <div className="google-ai-prompts-scroll" ref={scrollContainerRef}>
+          {/* Duplicate cards for seamless loop */}
+          {[...promptCards, ...promptCards].map((card, index) => (
+            <div
+              key={index}
+              className="google-ai-prompt-card"
+              style={{ backgroundColor: card.color }}
+              onClick={() => handlePromptCardClick(card.title)}
+            >
+              <div className="prompt-card-icon">{card.icon}</div>
+              <p className="prompt-card-title">{card.title}</p>
+            </div>
+          ))}
         </div>
       </div>
     </div>

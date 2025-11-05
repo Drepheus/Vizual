@@ -9,6 +9,8 @@ import WebSearch from './WebSearch';
 import MediaStudio from './MediaStudio';
 import CustomOmis from './CustomOmis';
 import AdminDashboard from './AdminDashboard';
+import GoogleAIStudio from './GoogleAIStudio';
+import AIWorkflowsPage from './AIWorkflowsPage';
 import { useAuth } from './Auth';
 import { GuestModeProvider, useGuestMode } from './GuestMode';
 import { supabase } from './supabaseClient';
@@ -177,7 +179,7 @@ const AuthChecker: React.FC = () => {
         element={
           (session || isGuestMode) ? (
             <div className="page-transition fade-in">
-              <CommandHub onWebSearchClick={() => navigate('/web-search')} />
+              <CommandHub />
             </div>
           ) : (
             <Navigate to="/login" replace />
@@ -214,6 +216,30 @@ const AuthChecker: React.FC = () => {
           (session || isGuestMode) ? (
             <div className="page-transition fade-in">
               <CustomOmis onClose={() => navigate(-1)} />
+            </div>
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        } 
+      />
+      <Route 
+        path="/google-ai-studio" 
+        element={
+          (session || isGuestMode) ? (
+            <div className="page-transition fade-in">
+              <GoogleAIStudio onClose={() => navigate(-1)} />
+            </div>
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        } 
+      />
+      <Route 
+        path="/ai-workflows" 
+        element={
+          (session || isGuestMode) ? (
+            <div className="page-transition fade-in">
+              <AIWorkflowsPage onClose={() => navigate(-1)} />
             </div>
           ) : (
             <Navigate to="/login" replace />
