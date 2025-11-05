@@ -1,0 +1,137 @@
+import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { createClient } from '@supabase/supabase-js';
+import OpenAI from 'openai';
+
+const supabase = createClient(
+  process.env.VITE_SUPABASE_URL!,
+  process.env.VITE_SUPABASE_ANON_KEY!
+);
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY
+});
+
+// Chunk text into smaller pieces
+function chunkText(text: string, chunkSize: number = 1000, overlap: number = 200): string[] {
+  const chunks: string[] = [];
+  let start = 0;
+
+  while (start < text.length) {
+    const end = Math.min(start + chunkSize, text.length);
+    const chunk = text.slice(start, end);
+    chunks.push(chunk);
+    start = end - overlap;
+  }
+
+  return chunks;
+}
+
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+      return res.status(401).json({ error: 'No authorization header' });
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
+    if (authError || !user) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const { documentId, content, chunkSize = 1000, overlap = 200 } = req.body;
+
+    if (!documentId || !content) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    // Verify document belongs to user
+    const { data: document, error: docError } = await supabase
+      .from('knowledge_documents')
+      .select('*')
+      .eq('id', documentId)
+      .eq('user_id', user.id)
+      .single();
+
+    if (docError || !document) {
+      return res.status(404).json({ error: 'Document not found' });
+    }
+
+    // Chunk the text
+    const chunks = chunkText(content, chunkSize, overlap);
+    console.log(`Processing ${chunks.length} chunks for document ${documentId}`);
+
+    // Generate embeddings for each chunk
+    const embeddings = [];
+    for (let i = 0; i < chunks.length; i++) {
+      const chunk = chunks[i];
+      
+      try {
+        const embeddingResponse = await openai.embeddings.create({
+          model: 'text-embedding-ada-002',
+          input: chunk,
+        });
+
+        const embedding = embeddingResponse.data[0].embedding;
+
+        embeddings.push({
+          document_id: documentId,
+          user_id: user.id,
+          content: chunk,
+          embedding: JSON.stringify(embedding), // Supabase will convert to vector
+          metadata: {
+            chunk_index: i,
+            chunk_total: chunks.length,
+            document_name: document.name
+          }
+        });
+
+        console.log(`Generated embedding ${i + 1}/${chunks.length}`);
+      } catch (embeddingError: any) {
+        console.error(`Error generating embedding for chunk ${i}:`, embeddingError);
+        // Continue with other chunks even if one fails
+      }
+    }
+
+    // Insert embeddings into database
+    const { error: insertError } = await supabase
+      .from('document_embeddings')
+      .insert(embeddings);
+
+    if (insertError) {
+      console.error('Error inserting embeddings:', insertError);
+      
+      // Update document status to failed
+      await supabase
+        .from('knowledge_documents')
+        .update({ status: 'failed' })
+        .eq('id', documentId);
+
+      return res.status(500).json({ error: 'Failed to store embeddings' });
+    }
+
+    // Update document status to indexed
+    await supabase
+      .from('knowledge_documents')
+      .update({ 
+        status: 'indexed',
+        chunk_count: chunks.length
+      })
+      .eq('id', documentId);
+
+    return res.status(200).json({ 
+      success: true,
+      chunksProcessed: chunks.length,
+      message: 'Document processed and indexed successfully'
+    });
+
+  } catch (error: any) {
+    console.error('Processing error:', error);
+    return res.status(500).json({ error: error.message || 'Internal server error' });
+  }
+}
