@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { useAuth } from './Auth';
 import './CustomOmis.css';
+import * as ragService from './ragService';
 
 interface CustomOmisProps {
   onClose?: () => void;
@@ -12,8 +13,8 @@ interface CustomOmi {
   name: string;
   description: string;
   status: 'training' | 'ready' | 'idle';
-  documentsCount: number;
-  embeddingsCount: number;
+  documentsCount?: number;
+  embeddingsCount?: number;
   accuracy: number;
 }
 
@@ -32,6 +33,8 @@ const CustomOmis: React.FC<CustomOmisProps> = ({ onClose }) => {
   const [activeTab, setActiveTab] = useState<'bots' | 'documents' | 'training'>('bots');
   const [selectedBot, setSelectedBot] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [newBotName, setNewBotName] = useState('');
   const [newBotDescription, setNewBotDescription] = useState('');
@@ -39,47 +42,56 @@ const CustomOmis: React.FC<CustomOmisProps> = ({ onClose }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [customOmis, setCustomOmis] = useState<CustomOmi[]>([
-    {
-      id: '1',
-      name: 'Customer Support Bot',
-      description: 'Trained on support tickets and documentation',
-      status: 'ready',
-      documentsCount: 45,
-      embeddingsCount: 1250,
-      accuracy: 94
-    },
-    {
-      id: '2',
-      name: 'Technical Documentation Assistant',
-      description: 'Specialized in codebase and API documentation',
-      status: 'training',
-      documentsCount: 23,
-      embeddingsCount: 890,
-      accuracy: 87
-    }
-  ]);
+  const [customOmis, setCustomOmis] = useState<CustomOmi[]>([]);
+  const [documents, setDocuments] = useState<Document[]>([]);
 
-  const [documents, setDocuments] = useState<Document[]>([
-    {
-      id: '1',
-      name: 'Product Manual.pdf',
-      type: 'PDF',
-      size: 2400000,
-      uploadedAt: '2025-11-04T10:30:00Z',
-      status: 'indexed',
-      chunkCount: 45
-    },
-    {
-      id: '2',
-      name: 'FAQ Database.txt',
-      type: 'TXT',
-      size: 150000,
-      uploadedAt: '2025-11-04T09:15:00Z',
-      status: 'indexed',
-      chunkCount: 23
+  // Load bots on mount
+  useEffect(() => {
+    if (session?.user?.id) {
+      loadBots();
     }
-  ]);
+  }, [session?.user?.id]);
+
+  // Load documents when a bot is selected or tab changes
+  useEffect(() => {
+    if (session?.user?.id && activeTab === 'documents') {
+      loadDocuments();
+    }
+  }, [session?.user?.id, activeTab, selectedBot]);
+
+  const loadBots = async () => {
+    if (!session?.user?.id) return;
+    setIsLoading(true);
+    try {
+      const bots = await ragService.loadCustomOmis(session.user.id);
+      setCustomOmis(bots);
+    } catch (error) {
+      console.error('Failed to load bots:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loadDocuments = async () => {
+    if (!session?.user?.id) return;
+    setIsLoading(true);
+    try {
+      const docs = await ragService.loadDocuments(selectedBot || undefined);
+      setDocuments(docs.map(doc => ({
+        id: doc.id,
+        name: doc.name,
+        type: doc.type,
+        size: doc.size,
+        uploadedAt: doc.uploaded_at,
+        status: doc.status,
+        chunkCount: doc.chunk_count
+      })));
+    } catch (error) {
+      console.error('Failed to load documents:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (containerRef.current) {
@@ -91,40 +103,55 @@ const CustomOmis: React.FC<CustomOmisProps> = ({ onClose }) => {
     }
   }, []);
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files || files.length === 0) return;
+    
+    if (!selectedBot && customOmis.length === 0) {
+      alert('Please create a bot first before uploading documents');
+      return;
+    }
+
+    const botId = selectedBot || customOmis[0]?.id;
+    if (!botId) return;
+
     setIsUploading(true);
-    Array.from(files).forEach((file) => {
-      const newDoc: Document = {
-        id: Date.now().toString(),
-        name: file.name,
-        type: file.name.split('.').pop()?.toUpperCase() || 'FILE',
-        size: file.size,
-        uploadedAt: new Date().toISOString(),
-        status: 'processing',
-        chunkCount: 0
-      };
-      setDocuments(prev => [...prev, newDoc]);
-    });
-    setTimeout(() => setIsUploading(false), 2000);
+    
+    for (const file of Array.from(files)) {
+      try {
+        await ragService.uploadDocument(file, botId, (status) => {
+          console.log(status);
+        });
+      } catch (error: any) {
+        console.error('Upload failed:', error);
+        alert(`Failed to upload ${file.name}: ${error.message}`);
+      }
+    }
+
+    setIsUploading(false);
+    // Reload documents to show the new ones
+    await loadDocuments();
+    
+    // Clear the file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
-  const handleCreateBot = () => {
-    if (!newBotName.trim()) return;
-    const newBot: CustomOmi = {
-      id: Date.now().toString(),
-      name: newBotName,
-      description: newBotDescription,
-      status: 'idle',
-      documentsCount: 0,
-      embeddingsCount: 0,
-      accuracy: 0
-    };
-    setCustomOmis(prev => [...prev, newBot]);
-    setNewBotName('');
-    setNewBotDescription('');
-    setShowCreateModal(false);
+  const handleCreateBot = async () => {
+    if (!newBotName.trim() || !session?.user?.id) return;
+    
+    try {
+      await ragService.createCustomOmi(session.user.id, newBotName, newBotDescription);
+      setNewBotName('');
+      setNewBotDescription('');
+      setShowCreateModal(false);
+      // Reload bots to show the new one
+      await loadBots();
+    } catch (error: any) {
+      console.error('Failed to create bot:', error);
+      alert(`Failed to create bot: ${error.message}`);
+    }
   };
 
   const formatFileSize = (bytes: number) => {
@@ -204,25 +231,31 @@ const CustomOmis: React.FC<CustomOmisProps> = ({ onClose }) => {
               </button>
             </div>
             <div className="bots-grid">
-              {customOmis.map((bot) => (
-                <div key={bot.id} className={'bot-card' + (selectedBot === bot.id ? ' selected' : '')} onClick={() => setSelectedBot(bot.id)}>
-                  <div className="bot-card-header">
-                    <div className="bot-icon">🤖</div>
-                    <div className="bot-status-badge" style={{ backgroundColor: getStatusColor(bot.status) }}>{bot.status}</div>
-                  </div>
-                  <h3 className="bot-name">{bot.name}</h3>
-                  <p className="bot-description">{bot.description}</p>
-                  <div className="bot-stats">
-                    <div className="bot-stat"><span className="stat-label">Documents</span><span className="stat-value">{bot.documentsCount}</span></div>
-                    <div className="bot-stat"><span className="stat-label">Embeddings</span><span className="stat-value">{bot.embeddingsCount}</span></div>
-                    <div className="bot-stat"><span className="stat-label">Accuracy</span><span className="stat-value">{bot.accuracy}%</span></div>
-                  </div>
-                  <div className="bot-card-actions">
-                    <button className="bot-action-btn"><span>⚙️</span> Configure</button>
-                    <button className="bot-action-btn"><span>💬</span> Test</button>
-                  </div>
+              {customOmis.length === 0 ? (
+                <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px', color: 'rgba(255,255,255,0.5)' }}>
+                  <p>No bots yet. Create your first custom Omi bot to get started!</p>
                 </div>
-              ))}
+              ) : (
+                customOmis.map((bot) => (
+                  <div key={bot.id} className={'bot-card' + (selectedBot === bot.id ? ' selected' : '')} onClick={() => setSelectedBot(bot.id)}>
+                    <div className="bot-card-header">
+                      <div className="bot-icon">🤖</div>
+                      <div className="bot-status-badge" style={{ backgroundColor: getStatusColor(bot.status) }}>{bot.status}</div>
+                    </div>
+                    <h3 className="bot-name">{bot.name}</h3>
+                    <p className="bot-description">{bot.description}</p>
+                    <div className="bot-stats">
+                      <div className="bot-stat"><span className="stat-label">Documents</span><span className="stat-value">{bot.documentsCount || 0}</span></div>
+                      <div className="bot-stat"><span className="stat-label">Embeddings</span><span className="stat-value">{bot.embeddingsCount || 0}</span></div>
+                      <div className="bot-stat"><span className="stat-label">Accuracy</span><span className="stat-value">{bot.accuracy || 0}%</span></div>
+                    </div>
+                    <div className="bot-card-actions">
+                      <button className="bot-action-btn"><span>⚙️</span> Configure</button>
+                      <button className="bot-action-btn"><span>💬</span> Test</button>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         )}
@@ -286,35 +319,43 @@ const CustomOmis: React.FC<CustomOmisProps> = ({ onClose }) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {documents.map((doc) => (
-                    <tr key={doc.id}>
-                      <td>
-                        <div className="doc-name-cell">
-                          <span className="doc-icon">📄</span>
-                          {doc.name}
-                        </div>
-                      </td>
-                      <td><span className="doc-type-badge">{doc.type}</span></td>
-                      <td>{formatFileSize(doc.size)}</td>
-                      <td>{doc.chunkCount || '-'}</td>
-                      <td>
-                        <span 
-                          className="status-badge"
-                          style={{ backgroundColor: getStatusColor(doc.status) }}
-                        >
-                          {doc.status}
-                        </span>
-                      </td>
-                      <td>{formatDate(doc.uploadedAt)}</td>
-                      <td>
-                        <div className="table-actions">
-                          <button className="action-btn" title="View">👁️</button>
-                          <button className="action-btn" title="Download">⬇️</button>
-                          <button className="action-btn delete" title="Delete">🗑️</button>
-                        </div>
+                  {documents.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} style={{ textAlign: 'center', padding: '40px', color: 'rgba(255,255,255,0.5)' }}>
+                        No documents yet. Upload your first document to start training!
                       </td>
                     </tr>
-                  ))}
+                  ) : (
+                    documents.map((doc) => (
+                      <tr key={doc.id}>
+                        <td>
+                          <div className="doc-name-cell">
+                            <span className="doc-icon">📄</span>
+                            {doc.name}
+                          </div>
+                        </td>
+                        <td><span className="doc-type-badge">{doc.type}</span></td>
+                        <td>{formatFileSize(doc.size)}</td>
+                        <td>{doc.chunkCount || '-'}</td>
+                        <td>
+                          <span 
+                            className="status-badge"
+                            style={{ backgroundColor: getStatusColor(doc.status) }}
+                          >
+                            {doc.status}
+                          </span>
+                        </td>
+                        <td>{formatDate(doc.uploadedAt)}</td>
+                        <td>
+                          <div className="table-actions">
+                            <button className="action-btn" title="View">👁️</button>
+                            <button className="action-btn" title="Download">⬇️</button>
+                            <button className="action-btn delete" title="Delete">🗑️</button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
