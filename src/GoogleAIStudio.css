@@ -1,0 +1,319 @@
+.google-ai-studio-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.95);
+  backdrop-filter: blur(20px);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.3s ease;
+}
+
+.google-ai-studio-modal {
+  background: #1a1a1a;
+  width: 95%;
+  max-width: 1400px;
+  height: 90vh;
+  border-radius: 24px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(20px);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(30px) scale(0.96);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+.google-ai-close-btn {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.9);
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  font-size: 1.6rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 300;
+  z-index: 10;
+}
+
+.google-ai-close-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+.google-ai-close-btn:active {
+  transform: scale(0.95);
+}
+
+.google-ai-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 40px 40px;
+}
+
+.google-ai-title {
+  font-size: 4rem;
+  font-weight: 400;
+  color: white;
+  margin: 0;
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.gemini-star {
+  background: linear-gradient(135deg, #4285f4, #34a853, #fbbc04, #ea4335);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-size: 3.5rem;
+  animation: rotate 3s linear infinite;
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.google-ai-search-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 40px 120px;
+}
+
+.google-ai-search-wrapper {
+  width: 100%;
+  max-width: 900px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50px;
+  padding: 8px 8px 8px 28px;
+  transition: all 0.3s ease;
+}
+
+.google-ai-search-wrapper:focus-within {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
+}
+
+.google-ai-search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: white;
+  font-size: 1.3rem;
+  padding: 12px 0;
+  font-weight: 300;
+}
+
+.google-ai-search-input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.google-ai-send-btn {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.google-ai-send-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
+}
+
+.google-ai-send-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.google-ai-prompts-section {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 240px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+  overflow: hidden;
+  padding: 40px 0 32px;
+}
+
+.google-ai-prompts-scroll {
+  display: flex;
+  gap: 16px;
+  padding: 0 24px;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  height: 100%;
+  align-items: center;
+}
+
+.google-ai-prompt-card {
+  min-width: 280px;
+  height: 160px;
+  border-radius: 20px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.google-ai-prompt-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.google-ai-prompt-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+}
+
+.google-ai-prompt-card:hover::before {
+  opacity: 1;
+}
+
+.prompt-card-icon {
+  font-size: 2rem;
+  margin-bottom: 8px;
+}
+
+.prompt-card-title {
+  color: white;
+  font-size: 1rem;
+  font-weight: 400;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .google-ai-title {
+    font-size: 3rem;
+  }
+
+  .gemini-star {
+    font-size: 2.5rem;
+  }
+
+  .google-ai-search-input {
+    font-size: 1.1rem;
+  }
+
+  .google-ai-prompt-card {
+    min-width: 240px;
+    height: 140px;
+  }
+}
+
+@media (max-width: 768px) {
+  .google-ai-studio-modal {
+    width: 100%;
+    height: 100vh;
+    border-radius: 0;
+  }
+
+  .google-ai-header {
+    padding: 60px 24px 24px;
+  }
+
+  .google-ai-title {
+    font-size: 2.5rem;
+  }
+
+  .gemini-star {
+    font-size: 2rem;
+  }
+
+  .google-ai-search-container {
+    padding: 0 24px 100px;
+  }
+
+  .google-ai-search-input {
+    font-size: 1rem;
+  }
+
+  .google-ai-send-btn {
+    width: 48px;
+    height: 48px;
+  }
+
+  .google-ai-prompts-section {
+    height: 200px;
+  }
+
+  .google-ai-prompt-card {
+    min-width: 220px;
+    height: 120px;
+    padding: 20px;
+  }
+
+  .prompt-card-icon {
+    font-size: 1.5rem;
+  }
+
+  .prompt-card-title {
+    font-size: 0.9rem;
+  }
+}

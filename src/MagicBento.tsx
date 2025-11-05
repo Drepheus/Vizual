@@ -50,6 +50,14 @@ const cardData = [
   },
   {
     color: '#0a0a0a',
+    icon: '✦',
+    title: 'Google AI Studio',
+    description: 'Powered by Gemini - Google\'s most capable AI model for multimodal reasoning',
+    label: 'Advanced',
+    action: 'googleaistudio'
+  },
+  {
+    color: '#0a0a0a',
     icon: '⚙️',
     title: 'API Settings',
     description: 'Configure API\'s',
@@ -529,6 +537,7 @@ interface MagicBentoProps {
   enableMagnetism?: boolean;
   onWebSearchClick?: () => void;
   onAIWorkflowsClick?: () => void;
+  onGoogleAIStudioClick?: () => void;
 }
 
 const MagicBento: React.FC<MagicBentoProps> = ({
@@ -544,7 +553,8 @@ const MagicBento: React.FC<MagicBentoProps> = ({
   clickEffect = true,
   enableMagnetism = true,
   onWebSearchClick,
-  onAIWorkflowsClick
+  onAIWorkflowsClick,
+  onGoogleAIStudioClick
 }) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const isMobile = useMobileDetection();
@@ -567,6 +577,9 @@ const MagicBento: React.FC<MagicBentoProps> = ({
     } else if (card.action === 'aiworkflows' && onAIWorkflowsClick) {
       // Trigger the AI Workflows modal
       onAIWorkflowsClick();
+    } else if (card.action === 'googleaistudio' && onGoogleAIStudioClick) {
+      // Trigger the Google AI Studio modal
+      onGoogleAIStudioClick();
     }
     // Add more actions here as needed for other cards
   };

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MagicBento from './MagicBento';
 import AIWorkflowsModal from './AIWorkflowsModal';
+import GoogleAIStudio from './GoogleAIStudio';
 import './CommandHub.css';
 
 interface CommandHubProps {
@@ -10,6 +11,7 @@ interface CommandHubProps {
 
 export default function CommandHub({ onWebSearchClick }: CommandHubProps) {
   const [showAIWorkflows, setShowAIWorkflows] = useState(false);
+  const [showGoogleAIStudio, setShowGoogleAIStudio] = useState(false);
   const navigate = useNavigate();
 
   const handleAIWorkflowsClick = () => {
@@ -18,6 +20,14 @@ export default function CommandHub({ onWebSearchClick }: CommandHubProps) {
 
   const handleCloseAIWorkflows = () => {
     setShowAIWorkflows(false);
+  };
+
+  const handleGoogleAIStudioClick = () => {
+    setShowGoogleAIStudio(true);
+  };
+
+  const handleCloseGoogleAIStudio = () => {
+    setShowGoogleAIStudio(false);
   };
 
   return (
@@ -44,6 +54,7 @@ export default function CommandHub({ onWebSearchClick }: CommandHubProps) {
         enableSpotlight={true}
         onWebSearchClick={onWebSearchClick}
         onAIWorkflowsClick={handleAIWorkflowsClick}
+        onGoogleAIStudioClick={handleGoogleAIStudioClick}
         enableBorderGlow={true}
         enableTilt={false}
         clickEffect={true}
@@ -57,6 +68,12 @@ export default function CommandHub({ onWebSearchClick }: CommandHubProps) {
       <AIWorkflowsModal 
         isOpen={showAIWorkflows}
         onClose={handleCloseAIWorkflows}
+      />
+
+      {/* Google AI Studio Modal */}
+      <GoogleAIStudio
+        isOpen={showGoogleAIStudio}
+        onClose={handleCloseGoogleAIStudio}
       />
     </div>
   );
