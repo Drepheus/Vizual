@@ -164,7 +164,8 @@ export async function uploadDocument(
 
     if (!uploadResponse.ok) {
       const error = await uploadResponse.json();
-      throw new Error(error.error || 'Upload failed');
+      console.error('Upload API error:', error);
+      throw new Error(error.details || error.error || 'Upload failed');
     }
 
     const { documentId } = await uploadResponse.json();

@@ -30,6 +30,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
+    // Ensure required fields have defaults
+    const documentType = fileType || fileName.split('.').pop()?.toUpperCase() || 'FILE';
+    const documentSize = fileSize || 0;
+
     // Insert document record
     const { data: document, error: dbError } = await supabase
       .from('knowledge_documents')
@@ -37,8 +41,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         bot_id: botId,
         user_id: user.id,
         name: fileName,
-        type: fileType,
-        size: fileSize,
+        type: documentType,
+        size: documentSize,
         status: 'processing',
         chunk_count: 0
       })
@@ -47,7 +51,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (dbError) {
       console.error('Database error:', dbError);
-      return res.status(500).json({ error: 'Failed to create document record' });
+      return res.status(500).json({ 
+        error: 'Failed to create document record', 
+        details: dbError.message,
+        code: dbError.code 
+      });
     }
 
     // Return document ID for further processing
