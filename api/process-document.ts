@@ -78,17 +78,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       try {
         console.log(`Extracting text from PDF: ${document.name}`);
         
-        // Dynamic import for pdf-parse (import entire module)
-        const pdfParseModule = await import('pdf-parse');
-        // @ts-ignore - pdf-parse exports might not have proper types
-        const pdfParse = pdfParseModule.default || pdfParseModule;
+        // Use pdf.js-extract which works in serverless environments
+        const { PDFExtract } = await import('pdf.js-extract');
+        const pdfExtract = new PDFExtract();
         
         // Convert base64 to buffer
         const buffer = Buffer.from(fileData, 'base64');
-        const pdfData = await pdfParse(buffer);
-        extractedText = pdfData.text;
         
-        console.log(`Extracted ${extractedText.length} characters from PDF`);
+        // Extract text from PDF
+        const data = await pdfExtract.extractBuffer(buffer, {});
+        
+        // Combine all text from all pages
+        extractedText = data.pages
+          .map(page => page.content.map(item => item.str).join(' '))
+          .join('\n\n');
+        
+        console.log(`Extracted ${extractedText.length} characters from PDF (${data.pages.length} pages)`);
       } catch (pdfError: any) {
         console.error('PDF extraction error:', pdfError);
         await supabase
