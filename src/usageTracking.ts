@@ -15,7 +15,7 @@ export async function checkUsageLimit(
   usageType: UsageType
 ): Promise<UsageCheckResult> {
   try {
-    const response = await fetch('/api/check-usage', {
+    const response = await fetch('/api/usage?action=check', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId, usageType }),
@@ -37,7 +37,7 @@ export async function incrementUsage(
   usageType: UsageType
 ): Promise<{ success: boolean; limitReached?: boolean }> {
   try {
-    const response = await fetch('/api/increment-usage', {
+    const response = await fetch('/api/usage?action=increment', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId, usageType }),
