@@ -1,6 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
-import { Sentry } from './sentry';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
@@ -67,9 +66,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (dbError) {
       console.error('Database error:', dbError);
-      Sentry.captureException(dbError, {
-        extra: { fileName, botId, userId: user.id }
-      });
       return res.status(500).json({ 
         error: 'Failed to create document record', 
         details: dbError.message,
@@ -86,9 +82,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   } catch (error: any) {
     console.error('Upload error:', error);
-    Sentry.captureException(error, {
-      extra: { body: req.body }
-    });
     return res.status(500).json({ error: error.message || 'Internal server error' });
   }
 }
