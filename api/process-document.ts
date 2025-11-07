@@ -78,22 +78,39 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       try {
         console.log(`Extracting text from PDF: ${document.name}`);
         
-        // Use pdf.js-extract which works in serverless environments
-        const { PDFExtract } = await import('pdf.js-extract');
-        const pdfExtract = new PDFExtract();
+        // Import pdfjs-dist
+        const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs');
         
-        // Convert base64 to buffer
+        // Convert base64 to Uint8Array
         const buffer = Buffer.from(fileData, 'base64');
+        const uint8Array = new Uint8Array(buffer);
         
-        // Extract text from PDF
-        const data = await pdfExtract.extractBuffer(buffer, {});
+        // Load PDF document
+        const loadingTask = pdfjsLib.getDocument({
+          data: uint8Array,
+          useSystemFonts: true,
+          isEvalSupported: false,
+        });
         
-        // Combine all text from all pages
-        extractedText = data.pages
-          .map(page => page.content.map(item => item.str).join(' '))
-          .join('\n\n');
+        const pdfDocument = await loadingTask.promise;
+        const numPages = pdfDocument.numPages;
         
-        console.log(`Extracted ${extractedText.length} characters from PDF (${data.pages.length} pages)`);
+        console.log(`PDF has ${numPages} pages`);
+        
+        // Extract text from all pages
+        const textPages: string[] = [];
+        for (let i = 1; i <= numPages; i++) {
+          const page = await pdfDocument.getPage(i);
+          const textContent = await page.getTextContent();
+          const pageText = textContent.items
+            .map((item: any) => item.str)
+            .join(' ');
+          textPages.push(pageText);
+        }
+        
+        extractedText = textPages.join('\n\n');
+        
+        console.log(`Extracted ${extractedText.length} characters from ${numPages} pages`);
       } catch (pdfError: any) {
         console.error('PDF extraction error:', pdfError);
         await supabase
