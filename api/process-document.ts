@@ -78,9 +78,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       try {
         console.log(`Extracting text from PDF: ${document.name}`);
         
-        // Use require for CommonJS module
-        // @ts-ignore
-        const pdfParse = require('pdf-parse');
+        // Dynamic import for pdf-parse (import entire module)
+        const pdfParseModule = await import('pdf-parse');
+        // @ts-ignore - pdf-parse exports might not have proper types
+        const pdfParse = pdfParseModule.default || pdfParseModule;
         
         // Convert base64 to buffer
         const buffer = Buffer.from(fileData, 'base64');
