@@ -150,7 +150,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           document_id: documentId,
           user_id: user.id,
           content: chunk,
-          embedding: JSON.stringify(embedding), // Supabase will convert to vector
+          embedding: embedding, // Pass array directly for pgvector
           metadata: {
             chunk_index: i,
             chunk_total: chunks.length,
