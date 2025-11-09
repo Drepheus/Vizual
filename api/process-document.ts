@@ -146,6 +146,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
         const embedding = embeddingResponse.data[0].embedding;
 
+        // Validate embedding format
+        if (!Array.isArray(embedding) || !embedding.length) {
+          throw new Error('Invalid embedding format: must be a non-empty array');
+        }
+
+        // Ensure it's a flat array of floats
+        if (!embedding.every(val => typeof val === 'number' && !isNaN(val))) {
+          throw new Error('Invalid embedding format: must contain only numbers');
+        }
+
         embeddings.push({
           document_id: documentId,
           user_id: user.id,
@@ -166,12 +176,34 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // Insert embeddings into database
-    const { error: insertError } = await supabase
-      .from('document_embeddings')
-      .insert(embeddings);
+    try {
+      const { error: insertError } = await supabase
+        .from('document_embeddings')
+        .insert(embeddings);
 
-    if (insertError) {
-      console.error('Error inserting embeddings:', insertError);
+      if (insertError) {
+        // Log the full Supabase error details
+        console.error('Supabase insertion error:', {
+          message: insertError.message,
+          details: insertError.details,
+          hint: insertError.hint,
+          code: insertError.code
+        });
+        
+        // Update document status to failed
+        await supabase
+          .from('knowledge_documents')
+          .update({ status: 'failed' })
+          .eq('id', documentId);
+
+        return res.status(500).json({ 
+          error: 'Failed to store embeddings',
+          details: insertError.message,
+          code: insertError.code
+        });
+      }
+    } catch (dbError: any) {
+      console.error('Database error:', dbError);
       
       // Update document status to failed
       await supabase
@@ -179,7 +211,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         .update({ status: 'failed' })
         .eq('id', documentId);
 
-      return res.status(500).json({ error: 'Failed to store embeddings' });
+      return res.status(500).json({ 
+        error: 'Database operation failed',
+        details: dbError.message || 'Unknown database error'
+      });
     }
 
     // Update document status to indexed
