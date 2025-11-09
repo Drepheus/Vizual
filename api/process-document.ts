@@ -1,10 +1,22 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import OpenAI from 'openai';
+import pdf from 'pdf-extraction';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY
 });
+
+// Extract text from PDF buffer (serverless-safe)
+async function extractTextFromPDF(fileBuffer: Buffer): Promise<string> {
+  try {
+    const data = await pdf(fileBuffer);
+    return data.text || '';
+  } catch (error) {
+    console.error('PDF extraction error (serverless safe):', error);
+    return '';
+  }
+}
 
 // Chunk text into smaller pieces
 function chunkText(text: string, chunkSize: number = 1000, overlap: number = 200): string[] {
@@ -78,39 +90,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       try {
         console.log(`Extracting text from PDF: ${document.name}`);
         
-        // Import pdfjs-dist
-        const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs');
+        // Convert base64 to Buffer
+        const fileBuffer = Buffer.from(fileData, 'base64');
         
-        // Convert base64 to Uint8Array
-        const buffer = Buffer.from(fileData, 'base64');
-        const uint8Array = new Uint8Array(buffer);
+        // Extract text using pdf-extraction (serverless-safe)
+        extractedText = await extractTextFromPDF(fileBuffer);
         
-        // Load PDF document
-        const loadingTask = pdfjsLib.getDocument({
-          data: uint8Array,
-          useSystemFonts: true,
-          isEvalSupported: false,
-        });
+        console.log(`Extracted ${extractedText.length} characters from PDF`);
         
-        const pdfDocument = await loadingTask.promise;
-        const numPages = pdfDocument.numPages;
-        
-        console.log(`PDF has ${numPages} pages`);
-        
-        // Extract text from all pages
-        const textPages: string[] = [];
-        for (let i = 1; i <= numPages; i++) {
-          const page = await pdfDocument.getPage(i);
-          const textContent = await page.getTextContent();
-          const pageText = textContent.items
-            .map((item: any) => item.str)
-            .join(' ');
-          textPages.push(pageText);
+        if (!extractedText || extractedText.trim().length === 0) {
+          throw new Error('No text could be extracted from PDF');
         }
-        
-        extractedText = textPages.join('\n\n');
-        
-        console.log(`Extracted ${extractedText.length} characters from ${numPages} pages`);
       } catch (pdfError: any) {
         console.error('PDF extraction error:', pdfError);
         await supabase
