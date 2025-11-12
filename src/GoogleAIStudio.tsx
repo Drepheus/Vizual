@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './GoogleAIStudio.css';
 
@@ -9,33 +9,33 @@ interface GoogleAIStudioProps {
 const studioTools = [
   {
     name: 'Flow',
-    description: 'Create dynamic visual stories',
+    description: 'Create dynamic visual stories with AI-powered flow generation',
     url: 'https://labs.google/fx/tools/flow',
-    icon: '�',
+    icon: '',
     gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
     color: '#667eea'
   },
   {
     name: 'MusicFx DJ',
-    description: 'Generate unique music mixes',
+    description: 'Generate unique music mixes and soundscapes with AI',
     url: 'https://labs.google/fx/tools/music-fx-dj',
-    icon: '🎵',
+    icon: '',
     gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
     color: '#f093fb'
   },
   {
     name: 'ImageFx',
-    description: 'Transform images with AI',
+    description: 'Transform and generate images with advanced AI models',
     url: 'https://labs.google/fx/tools/image-fx',
-    icon: '🎨',
+    icon: '',
     gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
     color: '#4facfe'
   },
   {
     name: 'Whisk',
-    description: 'Blend creative concepts',
+    description: 'Blend creative concepts and ideas into unique outputs',
     url: 'https://labs.google/fx/tools/whisk',
-    icon: '✨',
+    icon: '',
     gradient: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
     color: '#43e97b'
   }
@@ -59,7 +59,6 @@ export default function GoogleAIStudio({ onClose }: GoogleAIStudioProps) {
 
   return (
     <div className="google-studio-page">
-      {/* Animated background */}
       <div className="studio-background">
         <div className="studio-gradient-orb studio-orb-1"></div>
         <div className="studio-gradient-orb studio-orb-2"></div>
@@ -67,57 +66,82 @@ export default function GoogleAIStudio({ onClose }: GoogleAIStudioProps) {
       </div>
 
       <button className="studio-close-btn" onClick={handleClose}>
-        ✕
+        
       </button>
 
-      <div className="studio-content">
-        <div className="studio-header">
-          <h1 className="studio-title">
-            <span className="studio-google-text">Google</span>
-            <span className="studio-labs-text">Labs</span>
+      <div className="studio-container">
+        <div className="studio-hero">
+          <h1 className="studio-main-title">
+            Get started with <span className="studio-google-text">Google</span> <span className="studio-labs-text">Labs</span>
           </h1>
-          <p className="studio-subtitle">
-            Explore the future of AI creativity
+          <p className="studio-hero-description">
+            Google Labs empowers creators, developers, and innovators to explore the cutting edge of AI. 
+            Experiment with generative models and transform your creative projects from ideation to deployment.{' '}
+            <a href="https://labs.google" target="_blank" rel="noopener noreferrer" className="studio-learn-more">
+              Learn more about Google Labs 
+            </a>
           </p>
+          
+          <button className="studio-enable-btn">
+            <span className="enable-btn-icon"></span>
+            Enable all recommended tools
+          </button>
         </div>
 
-        <div className="studio-tools-grid">
-          {studioTools.map((tool) => (
-            <div
-              key={tool.name}
-              className={`studio-tool-card ${hoveredTool === tool.name ? 'hovered' : ''}`}
-              onClick={() => handleToolClick(tool.url)}
-              onMouseEnter={() => setHoveredTool(tool.name)}
-              onMouseLeave={() => setHoveredTool(null)}
-            >
-              <div className="tool-card-glow" style={{ background: tool.gradient }}></div>
-              
-              <div className="tool-card-content">
-                <div className="tool-icon" style={{ color: tool.color }}>
-                  {tool.icon}
-                </div>
+        <div className="studio-section">
+          <div className="studio-tools-grid">
+            {studioTools.map((tool) => (
+              <div
+                key={tool.name}
+                className={`studio-tool-card ${hoveredTool === tool.name ? 'hovered' : ''}`}
+                onClick={() => handleToolClick(tool.url)}
+                onMouseEnter={() => setHoveredTool(tool.name)}
+                onMouseLeave={() => setHoveredTool(null)}
+              >
+                <div className="tool-card-glow" style={{ background: tool.gradient }}></div>
                 
-                <div className="tool-info">
+                <div className="tool-card-header">
+                  <div className="tool-icon-wrapper">
+                    <div className="tool-icon" style={{ color: tool.color }}>
+                      {tool.icon}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="tool-card-body">
                   <h3 className="tool-name">{tool.name}</h3>
                   <p className="tool-description">{tool.description}</p>
                 </div>
 
-                <div className="tool-launch-btn">
-                  <span>Launch</span>
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <path d="M6 3L11 8L6 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
+                <div className="tool-card-footer">
+                  <button className="tool-launch-btn">
+                    <span>Try now</span>
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                      <path d="M6 3L11 8L6 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </button>
                 </div>
-              </div>
 
-              <div className="tool-card-border"></div>
-            </div>
-          ))}
+                <div className="tool-card-border"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="studio-tutorials-section">
+          <div className="tutorials-header">
+            <h2 className="tutorials-title">Tutorials</h2>
+            <p className="tutorials-subtitle">Learn how to use generative AI and explore advanced features</p>
+          </div>
+          <button className="view-tutorials-btn">
+            <span className="tutorials-icon"></span>
+            View tutorials
+          </button>
         </div>
 
         <div className="studio-footer">
           <p className="studio-footer-text">
-            Powered by <span className="gemini-badge">✦ Gemini</span>
+            Powered by <span className="gemini-badge"> Gemini</span> | Explore responsibly with Google AI
           </p>
         </div>
       </div>
