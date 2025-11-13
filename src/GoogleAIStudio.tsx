@@ -1,5 +1,6 @@
 ﻿import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Dock from './Dock';
 import './GoogleAIStudio.css';
 
 interface GoogleAIStudioProps {
@@ -54,6 +55,7 @@ const sidebarItems = [
 export default function GoogleAIStudio({ onClose }: GoogleAIStudioProps) {
   const [hoveredTool, setHoveredTool] = useState<string | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [showRecentSearches, setShowRecentSearches] = useState(false);
   const navigate = useNavigate();
 
   const handleToolClick = (url: string) => {
@@ -67,6 +69,39 @@ export default function GoogleAIStudio({ onClose }: GoogleAIStudioProps) {
       navigate('/command-hub');
     }
   };
+
+  // Dock items configuration for Web Search
+  const dockItems = [
+    {
+      icon: '⌘',
+      label: 'Command',
+      onClick: () => {
+        navigate('/command-hub');
+      }
+    },
+    {
+      icon: '🔍',
+      label: 'Recent Searches',
+      onClick: () => {
+        console.log('Recent Searches clicked');
+        setShowRecentSearches(!showRecentSearches);
+      }
+    },
+    {
+      icon: '◈',
+      label: 'Search',
+      onClick: () => {
+        console.log('Search clicked');
+      }
+    },
+    {
+      icon: '⚙',
+      label: 'Settings',
+      onClick: () => {
+        console.log('Settings clicked');
+      }
+    }
+  ];
 
   return (
     <div className="google-studio-page">
@@ -184,6 +219,9 @@ export default function GoogleAIStudio({ onClose }: GoogleAIStudioProps) {
           </p>
         </div>
       </div>
+
+      {/* Dock Menu */}
+      <Dock items={dockItems} />
     </div>
   );
 }

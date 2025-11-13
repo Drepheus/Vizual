@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import './ReplicateStudio.css';
+import Dock from './Dock';
 
 interface ReplicateStudioProps {
-  onClose?: () => void;
+  onClose: () => void;
 }
 
 interface ModelCard {
@@ -102,8 +103,9 @@ const actionCategories = [
 ];
 
 export default function ReplicateStudio({ onClose }: ReplicateStudioProps) {
-  const [activeTab, setActiveTab] = useState('Latest');
+  const [activeTab, setActiveTab] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [showAPIUsage, setShowAPIUsage] = useState(false);
 
   const tabs = ['Latest', 'Blog posts', 'Featured models', 'Popular', 'New releases'];
 
@@ -112,6 +114,39 @@ export default function ReplicateStudio({ onClose }: ReplicateStudioProps) {
     model.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
     model.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // Dock items configuration for Replicate Studio
+  const dockItems = [
+    {
+      icon: '\u2318',
+      label: 'Command',
+      onClick: () => {
+        onClose();
+      }
+    },
+    {
+      icon: '\ud83d\udcc8',
+      label: 'API Usage',
+      onClick: () => {
+        console.log('API Usage clicked');
+        setShowAPIUsage(!showAPIUsage);
+      }
+    },
+    {
+      icon: '\u25c8',
+      label: 'Search',
+      onClick: () => {
+        console.log('Search clicked');
+      }
+    },
+    {
+      icon: '\u2699',
+      label: 'Settings',
+      onClick: () => {
+        console.log('Settings clicked');
+      }
+    }
+  ];
 
   return (
     <div className="replicate-studio">
@@ -235,6 +270,9 @@ export default function ReplicateStudio({ onClose }: ReplicateStudioProps) {
           </div>
         </div>
       </footer>
+
+      {/* Dock Menu */}
+      <Dock items={dockItems} />
     </div>
   );
 }
