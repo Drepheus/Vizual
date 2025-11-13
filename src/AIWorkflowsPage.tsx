@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './AIWorkflowsPage.css';
+import DotGrid from './DotGrid';
 
 interface AIWorkflowsPageProps {
   onClose?: () => void;
@@ -172,6 +173,17 @@ export default function AIWorkflowsPage({ onClose }: AIWorkflowsPageProps) {
         </header>
 
         <div className="workflow-canvas-content">
+          <DotGrid 
+            dotSize={2}
+            gap={40}
+            baseColor="rgba(168, 85, 247, 0.15)"
+            activeColor="#a855f7"
+            proximity={120}
+            speedTrigger={80}
+            shockRadius={200}
+            shockStrength={4}
+            className="workflow-dot-grid-bg"
+          />
           <div className="workflow-placeholder">
             <div className="workflow-placeholder-icon">⚡</div>
             <h2 className="workflow-placeholder-title">Build Your Workflow</h2>
