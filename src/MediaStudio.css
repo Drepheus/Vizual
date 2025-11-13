@@ -220,15 +220,29 @@
   box-shadow: 0 10px 40px rgba(168, 85, 247, 0.2);
 }
 
+.banner-logoloop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: 0.15;
+}
+
+.banner-logo-animation {
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
 .banner-overlay {
   position: absolute;
   inset: 0;
   background: linear-gradient(180deg, transparent 0%, #0a0a0f 100%);
+  z-index: 1;
 }
 
 .banner-content {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   max-width: 1200px;
   margin: 0 auto;
   padding: 80px 40px;

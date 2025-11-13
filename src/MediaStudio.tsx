@@ -2,6 +2,7 @@
 import './MediaStudio.css';
 import DomeGallery from './DomeGallery';
 import ShinyText from './ShinyText';
+import LogoLoop from './LogoLoop';
 
 interface MediaStudioProps {
   onClose?: () => void;
@@ -138,6 +139,27 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
 
         {/* Hero Banner */}
         <div className="hero-banner">
+          <div className="banner-logoloop">
+            <LogoLoop
+              logos={[
+                { node: '✨', title: 'Sparkle' },
+                { node: '🎨', title: 'Art' },
+                { node: '🎬', title: 'Video' },
+                { node: '🖼️', title: 'Image' },
+                { node: '⚡', title: 'Blueprint' },
+                { node: '🌟', title: 'Star' },
+                { node: '🎭', title: 'Creative' },
+                { node: '🚀', title: 'Launch' }
+              ]}
+              speed={30}
+              direction="left"
+              logoHeight={60}
+              gap={80}
+              fadeOut={true}
+              fadeOutColor="#1a0f2e"
+              className="banner-logo-animation"
+            />
+          </div>
           <div className="banner-overlay"></div>
           <div className="banner-content">
             <h1 className="banner-title">
