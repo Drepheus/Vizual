@@ -141,7 +141,7 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
           <div className="banner-overlay"></div>
           <div className="banner-content">
             <h1 className="banner-title">
-              Create with Omi <span className="highlight-text"><ShinyText text="Blueprints" speed={3} /></span>
+              Create with Omi <span className="highlight-text"><ShinyText text="Blueprints" speed={8} /></span>
             </h1>
             <p className="banner-subtitle">
               Discover 50+ ready-made workflows for effortless AI creation. All Blueprints 75% off for a limited time!
@@ -168,7 +168,7 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
         <section className="featured-section">
           <div className="section-header">
             <h2 className="section-title">
-              <span className="title-highlight"><ShinyText text="Featured" speed={4} /></span> Blueprints
+              <span className="title-highlight"><ShinyText text="Featured" speed={10} /></span> Blueprints
             </h2>
             <button className="view-more-btn">
               View More <span className="arrow">→</span>
