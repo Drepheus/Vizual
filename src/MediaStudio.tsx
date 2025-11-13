@@ -1,5 +1,6 @@
 ﻿import { useState } from 'react';
 import './MediaStudio.css';
+import DomeGallery from './DomeGallery';
 
 interface MediaStudioProps {
   onClose?: () => void;
@@ -173,18 +174,19 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
             </button>
           </div>
 
-          <div className="blueprints-grid">
-            {featuredBlueprints.map((blueprint, index) => (
-              <div key={index} className="blueprint-card">
-                <div className="card-image-wrapper">
-                  <img src={blueprint.image} alt={blueprint.title} className="card-image" />
-                  <div className="card-gradient" style={{ background: blueprint.gradient }}></div>
-                </div>
-                <div className="card-content">
-                  <h3 className="card-title">{blueprint.title}</h3>
-                </div>
-              </div>
-            ))}
+          <div className="dome-gallery-container">
+            <DomeGallery
+              images={featuredBlueprints.map(bp => ({ src: bp.image, alt: bp.title }))}
+              fit={0.5}
+              minRadius={500}
+              maxRadius={800}
+              segments={30}
+              dragDampening={5}
+              overlayBlurColor="#0a0a0a"
+              imageBorderRadius="30px"
+              openedImageBorderRadius="30px"
+              grayscale={false}
+            />
           </div>
         </section>
 
