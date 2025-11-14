@@ -41,19 +41,16 @@ const studioTools = [
   }
 ];
 
-const sidebarItems = [
-  { name: 'Dashboard', icon: '📊', active: true },
-  { name: 'Model Garden', icon: '🌱', active: false },
-  { name: 'Vertex AI Studio', icon: '⚡', active: false },
-  { name: 'Agent Builder', icon: '🤖', active: false },
-  { name: 'GenAI Evaluation', icon: '📈', active: false },
-  { name: 'Tuning', icon: '⚙️', active: false },
-  { name: 'Search', icon: '🔍', active: false },
+const recentSearches = [
+  { query: 'Latest AI advancements 2024', mode: 'Deep Research', timestamp: '2 hours ago' },
+  { query: 'Machine learning frameworks comparison', mode: 'Quick Search', timestamp: '5 hours ago' },
+  { query: 'Neural network architectures', mode: 'Deep Research', timestamp: '1 day ago' },
+  { query: 'Natural language processing trends', mode: 'Quick Search', timestamp: '2 days ago' },
+  { query: 'Computer vision applications', mode: 'Deep Research', timestamp: '3 days ago' },
 ];
 
 export default function GoogleAIStudio({ onClose }: GoogleAIStudioProps) {
   const [hoveredTool, setHoveredTool] = useState<string | null>(null);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const navigate = useNavigate();
 
   const handleToolClick = (url: string) => {
@@ -76,39 +73,40 @@ export default function GoogleAIStudio({ onClose }: GoogleAIStudioProps) {
         <div className="studio-gradient-orb studio-orb-3"></div>
       </div>
 
-      {/* Sidebar */}
-      <div className={`studio-sidebar ${sidebarCollapsed ? 'collapsed' : ''}`}>
-        <div className="sidebar-header">
-          <div className="sidebar-logo">
-            <span className="logo-icon">🔷</span>
-            {!sidebarCollapsed && <span className="logo-text">Vertex AI</span>}
+      {/* Recent Searches Sidebar */}
+      <div className="search-history-sidebar">
+        <div className="search-sidebar-header">
+          <div className="search-sidebar-title">
+            <span className="search-sidebar-icon">🕐</span>
+            <span className="search-sidebar-text">Recent Searches</span>
           </div>
-          <button 
-            className="sidebar-toggle"
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-          >
-            {sidebarCollapsed ? '→' : '←'}
-          </button>
         </div>
 
-        <nav className="sidebar-nav">
-          {sidebarItems.map((item) => (
-            <button
-              key={item.name}
-              className={`sidebar-item ${item.active ? 'active' : ''}`}
-            >
-              <span className="sidebar-icon">{item.icon}</span>
-              {!sidebarCollapsed && <span className="sidebar-label">{item.name}</span>}
+        <div className="search-history-list">
+          {recentSearches.map((search, index) => (
+            <button key={index} className="search-history-item">
+              <div className="search-history-query">{search.query}</div>
+              <div className="search-history-meta">
+                <span className="search-history-mode">{search.mode}</span>
+                <span className="search-history-dot">•</span>
+                <span className="search-history-time">{search.timestamp}</span>
+              </div>
             </button>
           ))}
-        </nav>
+        </div>
+
+        <div className="search-sidebar-footer">
+          <button className="search-clear-history">
+            <span>Clear History</span>
+          </button>
+        </div>
       </div>
 
       <button className="studio-close-btn" onClick={handleClose}>
         ✕
       </button>
 
-      <div className={`studio-container ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+      <div className="studio-container">
         <div className="studio-hero">
           <h1 className="studio-main-title">
             Get started with <span className="studio-google-text">Google</span> <span className="studio-labs-text">Labs</span>
