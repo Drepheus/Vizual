@@ -33,6 +33,15 @@ const WebSearch: React.FC<WebSearchProps> = ({ onClose }) => {
   const searchBoxRef = useRef<HTMLDivElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
 
+  // Recent searches data
+  const recentSearches = [
+    { query: 'Latest AI advancements 2024', mode: 'Search + Summarize', timestamp: '2 hours ago' },
+    { query: 'Machine learning frameworks comparison', mode: 'Continuous Research', timestamp: '5 hours ago' },
+    { query: 'Neural network architectures', mode: 'Search + Summarize', timestamp: '1 day ago' },
+    { query: 'Natural language processing trends', mode: 'Continuous Research', timestamp: '2 days ago' },
+    { query: 'Computer vision applications', mode: 'Search + Summarize', timestamp: '3 days ago' },
+  ];
+
   // Search modes
   const searchModes = [
     {
@@ -196,13 +205,42 @@ const WebSearch: React.FC<WebSearchProps> = ({ onClose }) => {
   return (
     <>
       <div className="websearch-container" ref={containerRef}>
+        {/* Recent Searches Sidebar */}
+        <div className="websearch-sidebar">
+          <div className="sidebar-header">
+            <div className="sidebar-title">
+              <span className="sidebar-icon">🕐</span>
+              <span className="sidebar-text">Recent Searches</span>
+            </div>
+          </div>
+
+          <div className="sidebar-list">
+            {recentSearches.map((search, index) => (
+              <button key={index} className="sidebar-item" onClick={() => setSearchQuery(search.query)}>
+                <div className="sidebar-query">{search.query}</div>
+                <div className="sidebar-meta">
+                  <span className="sidebar-mode">{search.mode}</span>
+                  <span className="sidebar-dot">•</span>
+                  <span className="sidebar-time">{search.timestamp}</span>
+                </div>
+              </button>
+            ))}
+          </div>
+
+          <div className="sidebar-footer">
+            <button className="sidebar-clear">
+              <span>Clear History</span>
+            </button>
+          </div>
+        </div>
+
         {/* Close button */}
         <button 
           className="websearch-close"
           onClick={onClose}
-          title="Back"
+          title="Close"
         >
-          ← Back
+          ✕
         </button>
 
       {/* Header */}
