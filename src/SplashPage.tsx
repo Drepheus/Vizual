@@ -142,6 +142,18 @@ function SplashPage() {
       }
     },
     {
+      name: 'Create',
+      icon: '◇',
+      description: 'Generate visuals, stories, or creative ideas',
+      onClick: () => {
+        const isActivating = selectedFeature !== 'Create';
+        setSelectedFeature(isActivating ? 'Create' : null);
+        setIsSynthesizeActive(isActivating); // Activate the electric border
+        setIsPersonasActive(false); // Turn off ChromaGrid animation
+        console.log('Create clicked - ElectricBorder', isActivating ? 'activated' : 'deactivated');
+      }
+    },
+    {
       name: 'Compare',
       icon: '⚖',
       description: 'Instantly query multiple LLMs side-by-side',
@@ -162,22 +174,6 @@ function SplashPage() {
       name: 'Video Gen',
       icon: '🎬',
       description: 'Generate AI videos from text prompts',
-      onClick: () => {
-        const isActivating = selectedFeature !== 'Video Gen';
-        setSelectedFeature(isActivating ? 'Video Gen' : null);
-        setIsPersonasActive(false);
-        setIsSynthesizeActive(isActivating); // Keep the electric border animation
-        setIsVideoGenActive(isActivating);
-        if (!isActivating) {
-          setGeneratedVideo(null); // Clear video when deactivating
-        }
-        console.log('Video Gen clicked');
-      }
-    },
-    {
-      name: 'Create',
-      icon: '◇',
-      description: 'Generate visuals, stories, or creative ideas',
       onClick: () => {
         setShowCreateMenu(true);
         setIsPersonasActive(false); // Turn off ChromaGrid animation
