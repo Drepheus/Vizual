@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import WebTaskModal from './WebTaskModal';
+import SearchHistorySidebar from './SearchHistorySidebar';
 import './WebSearch.css';
 
 // Updated with search modes - v2
@@ -29,6 +30,7 @@ const WebSearch: React.FC<WebSearchProps> = ({ onClose }) => {
   const [searchResults, setSearchResults] = useState<SearchResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showWebTaskModal, setShowWebTaskModal] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const searchBoxRef = useRef<HTMLDivElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
@@ -202,37 +204,36 @@ const WebSearch: React.FC<WebSearchProps> = ({ onClose }) => {
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
+  const handleSelectSearch = (query: string) => {
+    setSearchQuery(query);
+  };
+
+  const handleClearHistory = () => {
+    if (window.confirm('Clear all search history?')) {
+      // TODO: Implement actual history clearing
+      console.log('Clear history');
+    }
+  };
+
   return (
     <>
+      <SearchHistorySidebar
+        searches={recentSearches}
+        onSelectSearch={handleSelectSearch}
+        onClearHistory={handleClearHistory}
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+      />
+
       <div className="websearch-container" ref={containerRef}>
-        {/* Recent Searches Sidebar */}
-        <div className="websearch-sidebar">
-          <div className="sidebar-header">
-            <div className="sidebar-title">
-              <span className="sidebar-icon">🕐</span>
-              <span className="sidebar-text">Recent Searches</span>
-            </div>
-          </div>
-
-          <div className="sidebar-list">
-            {recentSearches.map((search, index) => (
-              <button key={index} className="sidebar-item" onClick={() => setSearchQuery(search.query)}>
-                <div className="sidebar-query">{search.query}</div>
-                <div className="sidebar-meta">
-                  <span className="sidebar-mode">{search.mode}</span>
-                  <span className="sidebar-dot">•</span>
-                  <span className="sidebar-time">{search.timestamp}</span>
-                </div>
-              </button>
-            ))}
-          </div>
-
-          <div className="sidebar-footer">
-            <button className="sidebar-clear">
-              <span>Clear History</span>
-            </button>
-          </div>
-        </div>
+        {/* Sidebar Toggle Button */}
+        <button 
+          className="websearch-sidebar-toggle"
+          onClick={() => setIsSidebarOpen(true)}
+          title="Recent Searches"
+        >
+          🕐
+        </button>
 
         {/* Close button */}
         <button 
