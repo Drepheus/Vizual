@@ -6,13 +6,20 @@ FROM base AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
+# Enable corepack and install pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
 # Install dependencies based on the preferred package manager
 COPY package.json pnpm-lock.yaml* ./
-RUN corepack enable pnpm && pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile
 
 # Rebuild the source code only when needed
 FROM base AS builder
 WORKDIR /app
+
+# Enable corepack and install pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
@@ -20,7 +27,7 @@ COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 
 # Build Next.js application
-RUN corepack enable pnpm && pnpm run build
+RUN pnpm run build
 
 # Production image, copy all the files and run next
 FROM base AS runner
