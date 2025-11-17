@@ -48,10 +48,6 @@ RUN adduser --system --uid 1001 nextjs
 # Copy necessary files from standalone build
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-COPY --from=builder --chown=nextjs:nodejs /app/public ./public
-
-# Copy API routes (legacy Vercel functions)
-COPY --from=builder --chown=nextjs:nodejs /app/api ./api
 
 USER nextjs
 
