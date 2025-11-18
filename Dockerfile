@@ -45,9 +45,15 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Copy necessary files from standalone build
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+# Enable corepack and install pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+# Copy package files and install production dependencies
+COPY --from=builder --chown=nextjs:nodejs /app/package.json /app/pnpm-lock.yaml ./
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
+
+# Copy built application
+COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
 USER nextjs
@@ -57,4 +63,4 @@ EXPOSE 8080
 ENV PORT=8080
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["node", "server.js"]
+CMD ["pnpm", "start"]
