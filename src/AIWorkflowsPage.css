@@ -1,9 +1,69 @@
+.workflow-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  text-align: center;
+  max-width: 480px;
+  width: 100%;
+  background: rgba(16, 16, 20, 0.85);
+  border-radius: 18px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  padding: 2.5rem 2rem 2rem 2rem;
+  backdrop-filter: blur(8px);
+}
+
+.workflow-overlay-title {
+  color: #fff;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.01em;
+}
+
+.workflow-overlay-desc {
+  color: #c0c0c0;
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+}
+
+.workflow-overlay-actions {
+  display: flex;
+  gap: 1.25rem;
+  justify-content: center;
+}
+
+.workflow-overlay-btn {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  border: none;
+  background: rgba(192,192,192,0.12);
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.workflow-overlay-btn.primary {
+  background: linear-gradient(135deg, #c0c0c0 0%, #fff 100%);
+  color: #181818;
+}
+.workflow-overlay-btn:hover {
+  background: rgba(192,192,192,0.22);
+  color: #fff;
+}
+.workflow-overlay-btn.primary:hover {
+  background: linear-gradient(135deg, #fff 0%, #c0c0c0 100%);
+  color: #181818;
+}
 /* AI Workflow Builder - Omi Silver/Black/White Theme */
 
 .workflow-builder {
   position: fixed;
   inset: 0;
-  background: #0a0a0a;
+  background: transparent !important;
   display: flex;
   overflow: hidden;
   z-index: 1000;
@@ -12,9 +72,9 @@
 
 /* Close Button - Top Right */
 .workflow-close-btn {
-  position: absolute;
-  top: 20px;
-  right: 20px;
+  position: fixed;
+  top: 18px;
+  right: 32px;
   width: 40px;
   height: 40px;
   border-radius: 8px;
@@ -27,8 +87,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1001;
+  z-index: 2000;
   font-weight: 300;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
 }
 
 .workflow-close-btn:hover {
@@ -279,7 +340,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 32px;
+  padding: 56px 32px 16px 32px;
   background: rgba(17, 17, 17, 0.5);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
@@ -354,8 +415,22 @@
 .workflow-canvas-content {
   flex: 1;
   position: relative;
-  overflow: auto;
-  background: transparent;
+  overflow: hidden;
+  background: #101014 !important;
+}
+
+.drag-drop-area::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: repeating-radial-gradient(circle at 1px 1px, rgba(192,192,192,0.10) 0.5px, transparent 2px);
+  opacity: 0.25;
+  z-index: 0;
+  pointer-events: none;
+  filter: drop-shadow(0 0 8px #c0c0c0);
 }
 
 .workflow-dot-grid-bg {
@@ -364,8 +439,9 @@
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 0;
+  z-index: 1;
   pointer-events: auto;
+  background: transparent !important;
 }
 
 .workflow-placeholder {

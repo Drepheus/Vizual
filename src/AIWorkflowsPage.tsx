@@ -168,40 +168,16 @@ export default function AIWorkflowsPage({ onClose }: AIWorkflowsPageProps) {
               <span className="workflow-btn-icon">🚀</span>
               Deploy
             </button>
-            <button className="workflow-btn workflow-btn-secondary">
-              <span className="workflow-btn-icon">↗️</span>
-              Share
-            </button>
           </div>
         </header>
 
-        <div className="workflow-canvas-content">
-          <DotGrid 
-            dotSize={2}
-            gap={40}
-            baseColor="rgba(192, 192, 192, 0.1)"
-            activeColor="#c0c0c0"
-            proximity={120}
-            speedTrigger={80}
-            shockRadius={200}
-            shockStrength={4}
-            className="workflow-dot-grid-bg"
-          />
-          <div className="workflow-placeholder">
-            <div className="workflow-placeholder-icon">⚡</div>
-            <h2 className="workflow-placeholder-title">Build Your Workflow</h2>
-            <p className="workflow-placeholder-text">
-              Drag and drop components from the sidebar to create powerful AI workflows
-            </p>
-            <div className="workflow-placeholder-actions">
-              <button className="workflow-placeholder-btn">
-                <span className="workflow-placeholder-btn-icon">📋</span>
-                Start from Template
-              </button>
-              <button className="workflow-placeholder-btn">
-                <span className="workflow-placeholder-btn-icon">✨</span>
-                Create from Scratch
-              </button>
+        <div className="workflow-canvas-content drag-drop-area">
+          <div className="workflow-overlay">
+            <h2 className="workflow-overlay-title">Build Your Workflow</h2>
+            <p className="workflow-overlay-desc">Drag and drop modules here to create your custom AI workflow. You can also start from a template.</p>
+            <div className="workflow-overlay-actions">
+              <button className="workflow-overlay-btn primary">Get Started</button>
+              <button className="workflow-overlay-btn">Choose Template</button>
             </div>
           </div>
         </div>

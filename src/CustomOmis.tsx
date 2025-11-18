@@ -43,6 +43,8 @@ const CustomOmis: React.FC<CustomOmisProps> = ({ onClose }) => {
   const [newBotName, setNewBotName] = useState('');
   const [newBotDescription, setNewBotDescription] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [isCreatingBot, setIsCreatingBot] = useState(false);
+  const [createBotError, setCreateBotError] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -150,18 +152,31 @@ const CustomOmis: React.FC<CustomOmisProps> = ({ onClose }) => {
   };
 
   const handleCreateBot = async () => {
-    if (!newBotName.trim() || !session?.user?.id) return;
-    
+    if (!newBotName.trim()) {
+      setCreateBotError('Please enter a bot name.');
+      return;
+    }
+
+    if (!session?.user?.id) {
+      setCreateBotError('You must be signed in to create a bot.');
+      return;
+    }
+
+    setIsCreatingBot(true);
+    setCreateBotError(null);
     try {
-      await ragService.createCustomOmi(session.user.id, newBotName, newBotDescription);
+      const newBot = await ragService.createCustomOmi(session.user.id, newBotName, newBotDescription);
       setNewBotName('');
       setNewBotDescription('');
       setShowCreateModal(false);
-      // Reload bots to show the new one
       await loadBots();
+      setSelectedBot(newBot.id);
+      setActiveTab('documents');
     } catch (error: any) {
       console.error('Failed to create bot:', error);
-      alert(`Failed to create bot: ${error.message}`);
+      setCreateBotError(error.message || 'Failed to create bot.');
+    } finally {
+      setIsCreatingBot(false);
     }
   };
 
@@ -621,6 +636,7 @@ const CustomOmis: React.FC<CustomOmisProps> = ({ onClose }) => {
                   placeholder="e.g., Customer Support Assistant"
                   value={newBotName}
                   onChange={(e) => setNewBotName(e.target.value)}
+                  disabled={isCreatingBot}
                 />
               </div>
               <div className="form-group">
@@ -630,21 +646,26 @@ const CustomOmis: React.FC<CustomOmisProps> = ({ onClose }) => {
                   value={newBotDescription}
                   onChange={(e) => setNewBotDescription(e.target.value)}
                   rows={4}
+                  disabled={isCreatingBot}
                 />
               </div>
+              {createBotError && (
+                <div style={{ color: '#f87171', marginBottom: 12, fontSize: 14 }}>{createBotError}</div>
+              )}
               <div className="modal-actions">
                 <button 
                   className="modal-btn cancel"
                   onClick={() => setShowCreateModal(false)}
+                  disabled={isCreatingBot}
                 >
                   Cancel
                 </button>
                 <button 
                   className="modal-btn create"
                   onClick={handleCreateBot}
-                  disabled={!newBotName.trim()}
+                  disabled={!newBotName.trim() || isCreatingBot}
                 >
-                  Create Bot
+                  {isCreatingBot ? 'Creating...' : 'Create Bot'}
                 </button>
               </div>
             </div>
