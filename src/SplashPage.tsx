@@ -697,9 +697,14 @@ function SplashPage() {
               <span className="header-btn-text">{user.email?.split('@')[0] || 'Account'}</span>
             </button>
           ) : (
-            <div className="header-guest-indicator">
-              <span>◎ Guest Mode</span>
-            </div>
+            <button
+              className="header-action-btn guest-mode-btn"
+              onClick={() => window.location.href = '/login'}
+              title="Sign in to save your conversations"
+            >
+              <span className="header-btn-icon">◎</span>
+              <span className="header-btn-text">Guest Mode</span>
+            </button>
           )}
         </div>
 

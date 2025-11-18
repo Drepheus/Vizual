@@ -282,6 +282,31 @@ html, body {
   border-color: rgba(255, 255, 255, 0.3);
 }
 
+.guest-mode-btn {
+  padding: 10px 16px;
+  background: rgba(255, 215, 0, 0.1);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  border-radius: 12px;
+  color: rgba(255, 215, 0, 0.9);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.guest-mode-btn:hover {
+  background: rgba(255, 215, 0, 0.15);
+  border-color: rgba(255, 215, 0, 0.5);
+  transform: translateY(-1px);
+}
+
+.guest-mode-btn:active {
+  transform: translateY(0);
+}
+
 .header-guest-indicator {
   padding: 10px 16px;
   background: rgba(255, 215, 0, 0.1);
