@@ -1,18 +1,83 @@
 /* [project]/Omi-AI-1/src/AIWorkflowsPage.css [app-client] (css) */
+.workflow-overlay {
+  z-index: 2;
+  text-align: center;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  background: #101014d9;
+  border-radius: 18px;
+  width: 100%;
+  max-width: 480px;
+  padding: 2.5rem 2rem 2rem;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 8px 32px #0000002e;
+}
+
+.workflow-overlay-title {
+  color: #fff;
+  letter-spacing: -.01em;
+  margin-bottom: .5rem;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.workflow-overlay-desc {
+  color: silver;
+  margin-bottom: 2rem;
+  font-size: 1.1rem;
+}
+
+.workflow-overlay-actions {
+  justify-content: center;
+  gap: 1.25rem;
+  display: flex;
+}
+
+.workflow-overlay-btn {
+  color: #fff;
+  cursor: pointer;
+  background: #c0c0c01f;
+  border: none;
+  border-radius: 8px;
+  padding: .75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: background .2s, color .2s;
+  box-shadow: 0 2px 8px #00000014;
+}
+
+.workflow-overlay-btn.primary {
+  color: #181818;
+  background: linear-gradient(135deg, silver 0%, #fff 100%);
+}
+
+.workflow-overlay-btn:hover {
+  color: #fff;
+  background: #c0c0c038;
+}
+
+.workflow-overlay-btn.primary:hover {
+  color: #181818;
+  background: linear-gradient(135deg, #fff 0%, silver 100%);
+}
+
 .workflow-builder {
   z-index: 1000;
-  background: #0a0a0a;
   font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif;
   display: flex;
   position: fixed;
   inset: 0;
   overflow: hidden;
+  background: none !important;
 }
 
 .workflow-close-btn {
   color: #fff;
   cursor: pointer;
-  z-index: 1001;
+  z-index: 2000;
   background: #ffffff0d;
   border: 1px solid #ffffff1a;
   border-radius: 8px;
@@ -24,9 +89,10 @@
   font-weight: 300;
   transition: all .3s;
   display: flex;
-  position: absolute;
-  top: 20px;
-  right: 20px;
+  position: fixed;
+  top: 18px;
+  right: 32px;
+  box-shadow: 0 2px 8px #0000001a;
 }
 
 .workflow-close-btn:hover {
@@ -276,7 +342,7 @@
   border-bottom: 1px solid #ffffff14;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 32px;
+  padding: 56px 32px 16px;
   display: flex;
 }
 
@@ -346,19 +412,34 @@
 }
 
 .workflow-canvas-content {
-  background: none;
   flex: 1;
   position: relative;
-  overflow: auto;
+  overflow: hidden;
+  background: #101014 !important;
+}
+
+.drag-drop-area:before {
+  content: "";
+  opacity: .25;
+  z-index: 0;
+  pointer-events: none;
+  filter: drop-shadow(0 0 8px silver);
+  background: repeating-radial-gradient(circle at 1px 1px, #c0c0c01a .5px, #0000 2px);
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
 .workflow-dot-grid-bg {
-  z-index: 0;
+  z-index: 1;
   pointer-events: auto;
   width: 100%;
   height: 100%;
   top: 0;
   left: 0;
+  background: none !important;
   position: absolute !important;
 }
 

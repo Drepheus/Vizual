@@ -10,7 +10,6 @@ import {
 } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { getBrowserSupabaseClient } from "@/lib/supabase-browser";
-import { useGuestMode } from "@/context/guest-mode-context";
 
 interface AuthContextValue {
   session: Session | null;
@@ -22,7 +21,6 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const supabase = useMemo(() => getBrowserSupabaseClient(), []);
-  const { isGuestMode } = useGuestMode();
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -30,15 +28,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let subscription: ReturnType<typeof supabase.auth.onAuthStateChange> | null =
       null;
-
-    if (isGuestMode) {
-      setSession(null);
-      setUser(null);
-      setLoading(false);
-      return () => {
-        subscription?.data.subscription.unsubscribe();
-      };
-    }
 
     supabase.auth
       .getSession()
@@ -56,7 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       subscription?.data.subscription.unsubscribe();
     };
-  }, [isGuestMode, supabase]);
+  }, [supabase]);
 
   const value = useMemo(
     () => ({ session, user, loading }),

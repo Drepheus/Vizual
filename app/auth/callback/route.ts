@@ -19,6 +19,5 @@ export async function GET(request: NextRequest) {
   }
 
   // URL to redirect to after sign in process completes
-  // Add a flag to clear guest mode after successful OAuth
-  return NextResponse.redirect(`${origin}/chat?auth=success`)
+  return NextResponse.redirect(`${origin}/command-hub`)
 }

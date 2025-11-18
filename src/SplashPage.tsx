@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
 import FormattedText from './FormattedText';
 import Dock from './Dock';
@@ -16,7 +16,6 @@ import SearchModal from './SearchModal';
 import ImagePreviewTooltip from './ImagePreviewTooltip';
 import VideoPreviewTooltip from './VideoPreviewTooltip';
 import { useAuth } from '@/context/auth-context';
-import { useGuestMode } from '@/context/guest-mode-context';
 import { supabase } from './supabaseClient';
 import * as db from './databaseService';
 import type { DbConversation } from './databaseService';
@@ -45,21 +44,8 @@ interface Message {
 function SplashPage() {
   // Authentication
   const { user } = useAuth();
-  const { clearGuestMode } = useGuestMode();
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
-  
-  // Clear guest mode if auth=success is present (after OAuth callback)
-  useEffect(() => {
-    if (searchParams?.get('auth') === 'success') {
-      clearGuestMode();
-      // Clean up the URL
-      const url = new URL(window.location.href);
-      url.searchParams.delete('auth');
-      window.history.replaceState({}, '', url.toString());
-    }
-  }, [searchParams, clearGuestMode]);
   
   // Chat state management (replacing AI SDK)
   const [messages, setMessages] = useState<Message[]>([]);

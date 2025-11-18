@@ -1,7 +1,7 @@
 {
-  "/ai-workflows/page": "app/ai-workflows/page.js",
   "/chat/page": "app/chat/page.js",
   "/command-hub/page": "app/command-hub/page.js",
-  "/media-studio/page": "app/media-studio/page.js",
-  "/web-search/page": "app/web-search/page.js"
+  "/custom-omis/page": "app/custom-omis/page.js",
+  "/login/page": "app/login/page.js",
+  "/page": "app/page.js"
 }

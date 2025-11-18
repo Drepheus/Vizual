@@ -4,17 +4,15 @@ import { useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { getBrowserSupabaseClient } from "@/lib/supabase-browser";
 import { useAuth } from "@/context/auth-context";
-import { useGuestMode } from "@/context/guest-mode-context";
 
 export function LoginPage() {
   const router = useRouter();
   const supabase = useMemo(() => getBrowserSupabaseClient(), []);
   const { session, loading } = useAuth();
-  const { setGuestMode } = useGuestMode();
 
   useEffect(() => {
     if (session) {
-      router.replace("/chat");
+      router.replace("/command-hub");
     }
   }, [router, session]);
 
@@ -35,11 +33,6 @@ export function LoginPage() {
       console.error("Error signing in with Google", error);
       alert(`Error signing in with Google: ${error.message}`);
     }
-  };
-
-  const handleGuestMode = () => {
-    setGuestMode(true);
-    router.push("/chat");
   };
 
   if (loading) {
@@ -93,34 +86,10 @@ export function LoginPage() {
               </svg>
               Continue with Google
             </button>
-
-            <div className="divider">
-              <span className="divider-text">or</span>
-            </div>
-
-            <button onClick={handleGuestMode} className="login-guest-btn">
-              <svg
-                className="guest-icon"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
-              </svg>
-              Continue as Guest
-            </button>
           </div>
 
           <div className="login-footer">
             <p className="login-info">
-              <strong>Guest mode:</strong> Try without signing in. Your conversations won't be saved.
-            </p>
-            <p className="login-info" style={{ marginTop: "0.5rem" }}>
               By signing in, you agree to our Terms of Service and Privacy Policy
             </p>
           </div>
