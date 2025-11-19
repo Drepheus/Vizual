@@ -1,0 +1,437 @@
+.google-ai-page {
+  min-height: 100vh;
+  background: #0a0a0a;
+  color: white;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Futuristic Neon Banner */
+.google-ai-banner {
+  position: relative;
+  width: 100%;
+  height: 120px;
+  background: linear-gradient(
+    135deg,
+    rgba(66, 133, 244, 0.1) 0%,
+    rgba(234, 67, 53, 0.1) 25%,
+    rgba(251, 188, 4, 0.1) 50%,
+    rgba(52, 168, 83, 0.1) 75%,
+    rgba(66, 133, 244, 0.1) 100%
+  );
+  border-bottom: 2px solid rgba(66, 133, 244, 0.3);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.banner-gradient-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.6;
+  animation: float 8s ease-in-out infinite;
+}
+
+.orb-1 {
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, #4285F4 0%, transparent 70%);
+  top: -50%;
+  left: 10%;
+  animation-delay: 0s;
+}
+
+.orb-2 {
+  width: 250px;
+  height: 250px;
+  background: radial-gradient(circle, #EA4335 0%, transparent 70%);
+  top: -60%;
+  right: 20%;
+  animation-delay: 2s;
+}
+
+.orb-3 {
+  width: 180px;
+  height: 180px;
+  background: radial-gradient(circle, #34A853 0%, transparent 70%);
+  bottom: -50%;
+  left: 50%;
+  animation-delay: 4s;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-20px) scale(1.1);
+  }
+}
+
+.banner-content {
+  position: relative;
+  z-index: 2;
+}
+
+.banner-link {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  transition: transform 0.3s ease;
+}
+
+.banner-link:hover {
+  transform: scale(1.05);
+}
+
+.banner-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 42px;
+  font-weight: 700;
+  letter-spacing: -1px;
+}
+
+.banner-google {
+  background: linear-gradient(
+    90deg,
+    #4285F4 0%,
+    #EA4335 25%,
+    #FBBC04 50%,
+    #34A853 75%,
+    #4285F4 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradientShift 3s ease infinite;
+  text-shadow: 0 0 30px rgba(66, 133, 244, 0.5);
+}
+
+.banner-ai {
+  color: white;
+  text-shadow: 
+    0 0 10px rgba(66, 133, 244, 0.8),
+    0 0 20px rgba(66, 133, 244, 0.6),
+    0 0 30px rgba(66, 133, 244, 0.4);
+  font-weight: 800;
+}
+
+@keyframes gradientShift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.banner-tagline {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-weight: 500;
+  text-shadow: 0 0 10px rgba(66, 133, 244, 0.6);
+}
+
+/* Close Button */
+.google-ai-close-btn {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  z-index: 1000;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.google-ai-close-btn:hover {
+  background: rgba(234, 67, 53, 0.2);
+  border-color: rgba(234, 67, 53, 0.5);
+  transform: rotate(90deg);
+}
+
+/* Container */
+.google-ai-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 60px 40px;
+}
+
+/* Hero Section */
+.hero-section {
+  text-align: center;
+  margin-bottom: 80px;
+}
+
+.hero-title {
+  font-size: 64px;
+  font-weight: 700;
+  margin-bottom: 40px;
+  background: linear-gradient(135deg, #4285F4 0%, #EA4335 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gemini-sparkle {
+  display: inline-block;
+  animation: sparkle 2s ease-in-out infinite;
+}
+
+@keyframes sparkle {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2) rotate(180deg);
+    opacity: 0.8;
+  }
+}
+
+.hero-search {
+  max-width: 600px;
+  margin: 0 auto;
+  display: flex;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50px;
+  padding: 8px;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.hero-search:focus-within {
+  border-color: #4285F4;
+  box-shadow: 0 0 20px rgba(66, 133, 244, 0.3);
+}
+
+.hero-search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 16px;
+  padding: 12px 20px;
+  outline: none;
+}
+
+.hero-search-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.hero-search-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4285F4 0%, #34A853 100%);
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-search-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 20px rgba(66, 133, 244, 0.5);
+}
+
+/* Gemini Cards Section */
+.gemini-cards-section {
+  margin-bottom: 100px;
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.gemini-card {
+  border-radius: 16px;
+  padding: 24px;
+  min-height: 140px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.gemini-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.05);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.gemini-card:hover::before {
+  opacity: 1;
+}
+
+.gemini-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.card-content {
+  position: relative;
+  z-index: 1;
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: white;
+  line-height: 1.5;
+}
+
+/* Get Started Section */
+.get-started-section {
+  margin-bottom: 80px;
+}
+
+.section-title {
+  font-size: 48px;
+  font-weight: 700;
+  margin-bottom: 40px;
+  text-align: center;
+  background: linear-gradient(90deg, #4285F4 0%, #EA4335 50%, #34A853 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.ai-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 24px;
+}
+
+.ai-card {
+  border-radius: 20px;
+  padding: 32px;
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  position: relative;
+  overflow: hidden;
+}
+
+.ai-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.05);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.ai-card:hover::before {
+  opacity: 1;
+}
+
+.ai-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+}
+
+.ai-card-content {
+  position: relative;
+  z-index: 1;
+}
+
+.ai-card-title {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: white;
+  line-height: 1.4;
+}
+
+.ai-card-description {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+.ai-card-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 24px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  width: fit-content;
+}
+
+.ai-card-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .banner-logo {
+    font-size: 32px;
+  }
+  
+  .hero-title {
+    font-size: 42px;
+  }
+  
+  .section-title {
+    font-size: 36px;
+  }
+  
+  .cards-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  }
+  
+  .ai-cards-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .google-ai-container {
+    padding: 40px 20px;
+  }
+}

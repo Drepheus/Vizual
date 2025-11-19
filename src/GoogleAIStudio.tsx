@@ -1,7 +1,9 @@
 ﻿"use client";
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import gsap from 'gsap';
+import { LiquidChrome } from './LiquidChrome';
 
 interface GoogleAIStudioProps {
   onClose?: () => void;
@@ -174,6 +176,27 @@ export default function GoogleAIStudio({ onClose }: GoogleAIStudioProps) {
   const [hoveredTool, setHoveredTool] = useState<string | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const router = useRouter();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const heroRef = useRef<HTMLDivElement>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const tl = gsap.timeline();
+
+    tl.fromTo(heroRef.current,
+      { opacity: 0, y: 50 },
+      { opacity: 1, y: 0, duration: 1, ease: "power3.out" }
+    )
+      .fromTo(".studio-tool-card",
+        { opacity: 0, y: 30 },
+        { opacity: 1, y: 0, duration: 0.8, stagger: 0.05, ease: "power2.out" },
+        "-=0.5"
+      );
+
+    return () => {
+      tl.kill();
+    };
+  }, []);
 
   const handleToolClick = (url: string) => {
     window.open(url, '_blank', 'noopener,noreferrer');
@@ -188,7 +211,7 @@ export default function GoogleAIStudio({ onClose }: GoogleAIStudioProps) {
   };
 
   return (
-    <div className="google-studio-page">
+    <div className="google-studio-page" ref={containerRef}>
       <div className="studio-background">
         <div className="studio-gradient-orb studio-orb-1"></div>
         <div className="studio-gradient-orb studio-orb-2"></div>
@@ -209,29 +232,29 @@ export default function GoogleAIStudio({ onClose }: GoogleAIStudioProps) {
         </div>
 
         <div className="sidebar-nav">
-          <button className="sidebar-item active">
+          <button className="sidebar-item">
             <span className="sidebar-icon">🏠</span>
             {!sidebarCollapsed && <span className="sidebar-label">Home</span>}
           </button>
-          <button className="sidebar-item">
-            <span className="sidebar-icon">🎨</span>
-            {!sidebarCollapsed && <span className="sidebar-label">Model Garden</span>}
+          <button className="sidebar-item active" onClick={() => router.push('/google-ai')}>
+            <span className="sidebar-icon">🤖</span>
+            {!sidebarCollapsed && <span className="sidebar-label">Google AI</span>}
           </button>
           <button className="sidebar-item">
-            <span className="sidebar-icon">⚡</span>
-            {!sidebarCollapsed && <span className="sidebar-label">Generative AI</span>}
+            <span className="sidebar-icon">💎</span>
+            {!sidebarCollapsed && <span className="sidebar-label">Gemini</span>}
           </button>
           <button className="sidebar-item">
-            <span className="sidebar-icon">📊</span>
-            {!sidebarCollapsed && <span className="sidebar-label">Datasets</span>}
+            <span className="sidebar-icon">🧠</span>
+            {!sidebarCollapsed && <span className="sidebar-label">DeepMind</span>}
+          </button>
+          <button className="sidebar-item" onClick={() => router.push('/veo')}>
+            <span className="sidebar-icon">🎬</span>
+            {!sidebarCollapsed && <span className="sidebar-label">Veo</span>}
           </button>
           <button className="sidebar-item">
-            <span className="sidebar-icon">🔧</span>
-            {!sidebarCollapsed && <span className="sidebar-label">Pipelines</span>}
-          </button>
-          <button className="sidebar-item">
-            <span className="sidebar-icon">📈</span>
-            {!sidebarCollapsed && <span className="sidebar-label">Experiments</span>}
+            <span className="sidebar-icon">💻</span>
+            {!sidebarCollapsed && <span className="sidebar-label">Code Assist</span>}
           </button>
         </div>
       </div>
@@ -266,30 +289,30 @@ export default function GoogleAIStudio({ onClose }: GoogleAIStudioProps) {
       </div>
 
       <button className="studio-close-btn" onClick={handleClose}>
-        ✕
+        <span className="studio-back-arrow">←</span> Command Hub
       </button>
 
       <div className="studio-container">
-        <div className="studio-hero">
+        <div className="studio-hero" ref={heroRef}>
           <h1 className="studio-main-title">
             Get started with <span className="studio-google-text">Google</span> <span className="studio-labs-text">Labs</span>
           </h1>
           <p className="studio-hero-description">
-            Google Labs empowers creators, developers, and innovators to explore the cutting edge of AI. 
+            Google Labs empowers creators, developers, and innovators to explore the cutting edge of AI.
             Experiment with generative models and transform your creative projects from ideation to deployment.{' '}
             <a href="https://labs.google" target="_blank" rel="noopener noreferrer" className="studio-learn-more">
-              Learn more about Google Labs 
+              Learn more about Google Labs
             </a>
           </p>
-          
+
           <button className="studio-enable-btn">
-            <span className="enable-btn-icon"></span>
+            <span className="enable-btn-icon">✨</span>
             Enable all recommended tools
           </button>
         </div>
 
         <div className="studio-section">
-          <div className="studio-tools-grid">
+          <div className="studio-tools-grid" ref={gridRef}>
             {studioTools.map((tool) => (
               <div
                 key={tool.name}
@@ -299,7 +322,7 @@ export default function GoogleAIStudio({ onClose }: GoogleAIStudioProps) {
                 onMouseLeave={() => setHoveredTool(null)}
               >
                 <div className="tool-card-glow" style={{ background: tool.gradient }}></div>
-                
+
                 <div className="tool-card-header">
                   <div className="tool-icon-wrapper">
                     <div className="tool-icon" style={{ color: tool.color }}>
@@ -317,7 +340,7 @@ export default function GoogleAIStudio({ onClose }: GoogleAIStudioProps) {
                   <button className="tool-launch-btn">
                     <span>Try now</span>
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                      <path d="M6 3L11 8L6 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M6 3L11 8L6 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                   </button>
                 </div>
@@ -334,7 +357,7 @@ export default function GoogleAIStudio({ onClose }: GoogleAIStudioProps) {
             <p className="tutorials-subtitle">Learn how to use generative AI and explore advanced features</p>
           </div>
           <button className="view-tutorials-btn">
-            <span className="tutorials-icon"></span>
+            <span className="tutorials-icon">📚</span>
             View tutorials
           </button>
         </div>
