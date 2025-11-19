@@ -397,15 +397,15 @@ html, body {
 }
 
 .upgrade-btn {
-  background: linear-gradient(135deg, #c0c0c033 0%, #ffffff1a 100%);
-  border: 1px solid #c0c0c04d;
+  background: linear-gradient(135deg, #dcdcdc40 0%, #fff3 50%, #dcdcdc40 100%);
+  border: 1px solid #ffffff59;
   position: relative;
   overflow: hidden;
 }
 
 .upgrade-btn:before {
   content: "";
-  background: linear-gradient(90deg, #0000, #fff3, #0000);
+  background: linear-gradient(90deg, #0000, #fff6, #0000);
   width: 100%;
   height: 100%;
   transition: left .5s;
@@ -419,10 +419,10 @@ html, body {
 }
 
 .upgrade-btn:hover {
-  background: linear-gradient(135deg, #c0c0c04d 0%, #ffffff26 100%);
-  border-color: #c0c0c066;
+  background: linear-gradient(135deg, #f0f0f059 0%, #ffffff40 50%, #f0f0f059 100%);
+  border-color: #ffffff80;
   transform: translateY(-2px);
-  box-shadow: 0 4px 16px #c0c0c04d;
+  box-shadow: 0 4px 20px #ffffff4d, inset 0 1px #fff6;
 }
 
 .chat-title {

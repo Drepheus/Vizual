@@ -1,5 +1,6 @@
 /* Ensure dock stays fixed */
-html, body {
+html,
+body {
   position: relative !important;
 }
 
@@ -15,10 +16,10 @@ html, body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, 
-    rgba(255, 255, 255, 0.2) 0%, 
-    rgba(255, 255, 255, 0.1) 50%, 
-    rgba(255, 255, 255, 0.15) 100%);
+  background: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.2) 0%,
+      rgba(255, 255, 255, 0.1) 50%,
+      rgba(255, 255, 255, 0.15) 100%);
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(20px);
@@ -26,22 +27,22 @@ html, body {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(135deg, 
-    rgba(255, 255, 255, 0.35) 0%, 
-    rgba(255, 255, 255, 0.25) 50%, 
-    rgba(255, 255, 255, 0.3) 100%);
-  box-shadow: 
+  background: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.35) 0%,
+      rgba(255, 255, 255, 0.25) 50%,
+      rgba(255, 255, 255, 0.3) 100%);
+  box-shadow:
     0 0 10px rgba(255, 255, 255, 0.2),
     inset 0 0 5px rgba(255, 255, 255, 0.1);
   transform: scaleY(1.1);
 }
 
 ::-webkit-scrollbar-thumb:active {
-  background: linear-gradient(135deg, 
-    rgba(255, 255, 255, 0.45) 0%, 
-    rgba(255, 255, 255, 0.35) 50%, 
-    rgba(255, 255, 255, 0.4) 100%);
-  box-shadow: 
+  background: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.45) 0%,
+      rgba(255, 255, 255, 0.35) 50%,
+      rgba(255, 255, 255, 0.4) 100%);
+  box-shadow:
     0 0 15px rgba(255, 255, 255, 0.3),
     inset 0 0 8px rgba(255, 255, 255, 0.15);
 }
@@ -65,7 +66,8 @@ html, body {
   align-items: flex-start;
   justify-content: center;
   padding-top: 2rem;
-  padding-bottom: 4rem; /* Extra bottom padding for scrolling clearance */
+  padding-bottom: 4rem;
+  /* Extra bottom padding for scrolling clearance */
 }
 
 /* LaserFlow Background Animation */
@@ -87,6 +89,7 @@ html, body {
     opacity: 0;
     transform: scale(0.8);
   }
+
   100% {
     opacity: 0.4;
     transform: scale(1);
@@ -106,14 +109,12 @@ html, body {
 .splash-title {
   font-size: clamp(3rem, 8vw, 6rem);
   font-weight: 700;
-  background: linear-gradient(
-    135deg,
-    #ffffff 0%,
-    #e5e5e5 25%,
-    #cccccc 50%,
-    #e5e5e5 75%,
-    #ffffff 100%
-  );
+  background: linear-gradient(135deg,
+      #ffffff 0%,
+      #e5e5e5 25%,
+      #cccccc 50%,
+      #e5e5e5 75%,
+      #ffffff 100%);
   background-size: 300% 300%;
   background-clip: text;
   -webkit-background-clip: text;
@@ -135,9 +136,11 @@ html, body {
   0% {
     background-position: 0% 50%;
   }
+
   50% {
     background-position: 100% 50%;
   }
+
   100% {
     background-position: 0% 50%;
   }
@@ -152,8 +155,10 @@ html, body {
   align-items: center;
   width: 100%;
   max-width: 1200px;
-  min-height: 100vh; /* Changed from fixed height to min-height to allow scrolling */
-  padding: 0.5rem 2rem 12rem 2rem; /* Increased bottom padding for scroll clearance */
+  min-height: 100vh;
+  /* Changed from fixed height to min-height to allow scrolling */
+  padding: 0.5rem 2rem 12rem 2rem;
+  /* Increased bottom padding for scroll clearance */
   gap: 0.5rem;
 }
 
@@ -208,12 +213,11 @@ html, body {
 }
 
 .new-conversation-btn {
-  background: 
-    linear-gradient(135deg, 
-      rgba(192, 192, 192, 0.15) 0%, 
+  background:
+    linear-gradient(135deg,
+      rgba(192, 192, 192, 0.15) 0%,
       rgba(169, 169, 169, 0.2) 50%,
-      rgba(128, 128, 128, 0.15) 100%
-    ),
+      rgba(128, 128, 128, 0.15) 100%),
     radial-gradient(circle at top left, rgba(220, 220, 220, 0.1), transparent 60%);
   border: 1px solid rgba(192, 192, 192, 0.3);
   position: relative;
@@ -227,11 +231,10 @@ html, body {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, 
-    transparent, 
-    rgba(255, 255, 255, 0.3), 
-    transparent
-  );
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(255, 255, 255, 0.3),
+      transparent);
   transition: left 0.6s ease;
 }
 
@@ -240,15 +243,14 @@ html, body {
 }
 
 .new-conversation-btn:hover {
-  background: 
-    linear-gradient(135deg, 
-      rgba(211, 211, 211, 0.25) 0%, 
+  background:
+    linear-gradient(135deg,
+      rgba(211, 211, 211, 0.25) 0%,
       rgba(192, 192, 192, 0.3) 50%,
-      rgba(169, 169, 169, 0.25) 100%
-    ),
+      rgba(169, 169, 169, 0.25) 100%),
     radial-gradient(circle at top left, rgba(240, 240, 240, 0.15), transparent 60%);
   border-color: rgba(211, 211, 211, 0.5);
-  box-shadow: 
+  box-shadow:
     0 4px 20px rgba(192, 192, 192, 0.4),
     0 0 30px rgba(211, 211, 211, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
@@ -262,10 +264,13 @@ html, body {
 }
 
 @keyframes sparkle {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: scale(1) rotate(0deg);
     filter: brightness(1) drop-shadow(0 0 8px rgba(255, 255, 255, 0.5));
   }
+
   50% {
     transform: scale(1.1) rotate(180deg);
     filter: brightness(1.5) drop-shadow(0 0 12px rgba(255, 255, 255, 0.8));
@@ -391,7 +396,8 @@ html, body {
 /* Fixed Free Account Badge - Bottom Left */
 .account-tier-badge-fixed {
   position: fixed;
-  bottom: 52px; /* Above news ticker */
+  bottom: 52px;
+  /* Above news ticker */
   left: 20px;
   display: flex;
   align-items: center;
@@ -406,7 +412,8 @@ html, body {
   font-weight: 600;
   letter-spacing: 0.3px;
   text-transform: uppercase;
-  z-index: 9998; /* Below news ticker */
+  z-index: 9998;
+  /* Below news ticker */
   box-shadow: 0 0 6px rgba(0, 255, 170, 0.15);
   animation: slideInLeft 0.5s ease-out;
 }
@@ -416,6 +423,7 @@ html, body {
     transform: translateX(-100%);
     opacity: 0;
   }
+
   to {
     transform: translateX(0);
     opacity: 1;
@@ -434,8 +442,8 @@ html, body {
 
 /* Upgrade Button */
 .upgrade-btn {
-  background: linear-gradient(135deg, rgba(192, 192, 192, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
-  border: 1px solid rgba(192, 192, 192, 0.3);
+  background: linear-gradient(135deg, rgba(220, 220, 220, 0.25) 0%, rgba(255, 255, 255, 0.2) 50%, rgba(220, 220, 220, 0.25) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.35);
   position: relative;
   overflow: hidden;
 }
@@ -447,7 +455,7 @@ html, body {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
   transition: left 0.5s ease;
 }
 
@@ -456,9 +464,9 @@ html, body {
 }
 
 .upgrade-btn:hover {
-  background: linear-gradient(135deg, rgba(192, 192, 192, 0.3) 0%, rgba(255, 255, 255, 0.15) 100%);
-  border-color: rgba(192, 192, 192, 0.4);
-  box-shadow: 0 4px 16px rgba(192, 192, 192, 0.3);
+  background: linear-gradient(135deg, rgba(240, 240, 240, 0.35) 0%, rgba(255, 255, 255, 0.25) 50%, rgba(240, 240, 240, 0.35) 100%);
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 4px 20px rgba(255, 255, 255, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.4);
   transform: translateY(-2px);
 }
 
@@ -568,7 +576,7 @@ html, body {
   font-size: 0.9rem;
   font-weight: 300;
   color: rgba(255, 255, 255, 0.95);
-  text-shadow: 
+  text-shadow:
     0 0 10px rgba(255, 255, 255, 0.4),
     0 0 20px rgba(255, 255, 255, 0.2),
     0 0 30px rgba(255, 255, 255, 0.1);
@@ -604,9 +612,12 @@ html, body {
 }
 
 @keyframes proBadgePulse {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 0 10px rgba(192, 192, 192, 0.3);
   }
+
   50% {
     box-shadow: 0 0 15px rgba(224, 224, 224, 0.5);
   }
@@ -636,7 +647,7 @@ html, body {
   pointer-events: none;
   backdrop-filter: blur(15px);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 
+  box-shadow:
     0 4px 20px rgba(0, 0, 0, 0.4),
     0 0 0 1px rgba(255, 255, 255, 0.1);
   z-index: 1000;
@@ -664,6 +675,7 @@ html, body {
     opacity: 0;
     transform: translateY(20px) scale(0.9);
   }
+
   100% {
     opacity: 1;
     transform: translateY(0) scale(1);
@@ -678,16 +690,16 @@ html, body {
     margin-top: 1rem;
     padding: 0 0.5rem;
   }
-  
+
   .feature-button-horizontal {
     padding: 10px 16px;
   }
-  
+
   .feature-button-selected-text,
   .feature-button-static-text {
     font-size: 0.85rem;
   }
-  
+
   .feature-button-tooltip {
     font-size: 0.75rem;
     padding: 6px 10px;
@@ -698,16 +710,16 @@ html, body {
   .feature-buttons-horizontal {
     gap: 0.4rem;
   }
-  
+
   .feature-button-horizontal {
     padding: 8px 12px;
   }
-  
+
   .feature-button-selected-text,
   .feature-button-static-text {
     font-size: 0.8rem;
   }
-  
+
   .feature-button-tooltip {
     font-size: 0.7rem;
     padding: 5px 8px;
@@ -742,7 +754,8 @@ html, body {
   display: flex;
   flex-direction: column;
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  padding-left: 6rem; /* Add padding for vertical dock */
+  padding-left: 6rem;
+  /* Add padding for vertical dock */
   padding-right: 1rem;
   padding-bottom: 2rem;
 }
@@ -766,6 +779,7 @@ html, body {
     opacity: 0;
     transform: scale(0.95);
   }
+
   to {
     opacity: 1;
     transform: scale(1);
@@ -797,6 +811,7 @@ html, body {
     opacity: 0;
     transform: translateX(-30px) scale(0.95);
   }
+
   to {
     opacity: 1;
     transform: translateX(0) scale(1);
@@ -830,6 +845,7 @@ html, body {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -838,9 +854,9 @@ html, body {
 
 .panel-header {
   padding: 1rem 1.5rem;
-  background: linear-gradient(135deg, 
-    rgba(255, 255, 255, 0.1) 0%, 
-    rgba(255, 255, 255, 0.05) 100%);
+  background: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      rgba(255, 255, 255, 0.05) 100%);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(20px);
   display: flex;
@@ -937,10 +953,10 @@ html, body {
 }
 
 .chat-messages::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, 
-    rgba(255, 255, 255, 0.25) 0%, 
-    rgba(255, 255, 255, 0.15) 50%, 
-    rgba(255, 255, 255, 0.2) 100%);
+  background: linear-gradient(180deg,
+      rgba(255, 255, 255, 0.25) 0%,
+      rgba(255, 255, 255, 0.15) 50%,
+      rgba(255, 255, 255, 0.2) 100%);
   border-radius: 6px;
   border: 1px solid rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(15px);
@@ -948,11 +964,11 @@ html, body {
 }
 
 .chat-messages::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, 
-    rgba(255, 255, 255, 0.4) 0%, 
-    rgba(255, 255, 255, 0.3) 50%, 
-    rgba(255, 255, 255, 0.35) 100%);
-  box-shadow: 
+  background: linear-gradient(180deg,
+      rgba(255, 255, 255, 0.4) 0%,
+      rgba(255, 255, 255, 0.3) 50%,
+      rgba(255, 255, 255, 0.35) 100%);
+  box-shadow:
     inset 0 0 5px rgba(255, 255, 255, 0.15),
     0 0 8px rgba(255, 255, 255, 0.1);
 }
@@ -1138,7 +1154,7 @@ html, body {
 
 .chat-input-container:focus-within {
   border: 3px solid rgba(255, 255, 255, 0.6);
-  box-shadow: 
+  box-shadow:
     0 0 40px rgba(255, 255, 255, 0.3),
     0 0 80px rgba(255, 255, 255, 0.15),
     inset 0 0 20px rgba(255, 255, 255, 0.1);
@@ -1178,10 +1194,10 @@ html, body {
   left: -6px;
   right: -6px;
   bottom: -6px;
-  background: linear-gradient(45deg, 
-    rgba(229, 229, 229, 0.1), 
-    rgba(229, 229, 229, 0.3), 
-    rgba(229, 229, 229, 0.1));
+  background: linear-gradient(45deg,
+      rgba(229, 229, 229, 0.1),
+      rgba(229, 229, 229, 0.3),
+      rgba(229, 229, 229, 0.1));
   border-radius: 20px;
   filter: blur(8px);
   opacity: 0.8;
@@ -1203,30 +1219,37 @@ html, body {
 }
 
 @keyframes electricPulse {
-  0%, 100% { 
-    opacity: 0.6; 
-    transform: scale(1); 
+
+  0%,
+  100% {
+    opacity: 0.6;
+    transform: scale(1);
   }
-  50% { 
-    opacity: 1; 
-    transform: scale(1.02); 
+
+  50% {
+    opacity: 1;
+    transform: scale(1.02);
   }
 }
 
 @keyframes electricBorder {
-  0% { 
+  0% {
     box-shadow: 0 0 5px rgba(229, 229, 229, 0.5);
   }
-  25% { 
+
+  25% {
     box-shadow: 0 0 20px rgba(229, 229, 229, 0.8), 0 0 30px rgba(229, 229, 229, 0.4);
   }
-  50% { 
+
+  50% {
     box-shadow: 0 0 15px rgba(229, 229, 229, 0.9), 0 0 25px rgba(229, 229, 229, 0.6);
   }
-  75% { 
+
+  75% {
     box-shadow: 0 0 25px rgba(229, 229, 229, 0.7), 0 0 35px rgba(229, 229, 229, 0.3);
   }
-  100% { 
+
+  100% {
     box-shadow: 0 0 5px rgba(229, 229, 229, 0.5);
   }
 }
@@ -1365,16 +1388,21 @@ html, body {
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
 }
 
 @keyframes typing {
-  0%, 60%, 100% {
+
+  0%,
+  60%,
+  100% {
     transform: translateY(0);
     opacity: 0.4;
   }
+
   30% {
     transform: translateY(-10px);
     opacity: 1;
@@ -1386,6 +1414,7 @@ html, body {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -1417,79 +1446,82 @@ html, body {
   .splash-content {
     padding: 1rem;
   }
-  
+
   .splash-title {
     margin-bottom: 0.5rem;
   }
-  
+
   .chat-interface {
-    padding: 1rem 0.5rem 10rem 0.5rem; /* Increased bottom padding for mobile scroll */
+    padding: 1rem 0.5rem 10rem 0.5rem;
+    /* Increased bottom padding for mobile scroll */
     max-width: 95vw;
-    min-height: 100vh; /* Allow full scrolling on mobile */
+    min-height: 100vh;
+    /* Allow full scrolling on mobile */
   }
-  
+
   .chat-messages {
     min-height: 250px;
     max-height: calc(85vh - 180px);
     padding: 0.75rem 0.25rem;
   }
-  
+
   .chat-header {
     margin-bottom: 2rem;
   }
-  
+
   .chat-input-container {
     border-radius: 12px;
   }
-  
+
   /* Image Gen on Mobile */
   .generated-image-container {
     margin: 1rem auto 6rem;
     padding: 1rem;
   }
-  
+
   .generated-image {
-    max-height: 50vh; /* Smaller on mobile to ensure buttons are visible */
+    max-height: 50vh;
+    /* Smaller on mobile to ensure buttons are visible */
   }
-  
+
   .generated-image-actions {
     gap: 0.5rem;
   }
-  
+
   .image-action-btn {
     padding: 0.5rem 1rem;
     font-size: 0.8rem;
   }
-  
+
   /* Compare Mode Responsive */
   .chat-container.compare-mode {
     flex-direction: column;
     gap: 1rem;
     height: auto;
   }
-  
+
   .chat-panel {
     min-height: 300px;
   }
-  
+
   .panel-header {
     padding: 0.75rem 1rem;
   }
-  
+
   .panel-header h3 {
     font-size: 1rem;
   }
-  
+
   .model-selector {
     font-size: 0.85rem;
     padding: 6px 10px;
   }
-  
+
   .chat-input {
     padding: 14px 16px;
     font-size: 1rem;
   }
-  
+
   .chat-submit {
     padding: 10px;
   }
@@ -1602,6 +1634,7 @@ html, body {
     opacity: 0;
     backdrop-filter: blur(0px);
   }
+
   to {
     opacity: 1;
     backdrop-filter: blur(5px);
@@ -1619,10 +1652,10 @@ html, body {
   align-items: center;
   justify-content: center;
   padding: 4rem 2rem;
-  background: linear-gradient(180deg, 
-    rgba(0, 0, 0, 0.8) 0%, 
-    rgba(0, 0, 0, 0.9) 50%, 
-    rgba(0, 0, 0, 0.95) 100%);
+  background: linear-gradient(180deg,
+      rgba(0, 0, 0, 0.8) 0%,
+      rgba(0, 0, 0, 0.9) 50%,
+      rgba(0, 0, 0, 0.95) 100%);
   z-index: 1000;
   opacity: 0;
   pointer-events: none;
@@ -1709,13 +1742,13 @@ html, body {
   .ai-models-section {
     padding: 2rem 1rem;
   }
-  
+
   .ai-model-card {
     margin: 0.5rem;
     padding: 1.5rem;
     min-width: 250px;
   }
-  
+
   .ai-models-title {
     margin-bottom: 2rem;
   }
@@ -1740,6 +1773,7 @@ html, body {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -1750,9 +1784,9 @@ html, body {
   align-items: center;
   justify-content: space-between;
   padding: 1.5rem 2rem;
-  background: linear-gradient(135deg, 
-    rgba(138, 43, 226, 0.2) 0%,
-    rgba(75, 0, 130, 0.2) 100%);
+  background: linear-gradient(135deg,
+      rgba(138, 43, 226, 0.2) 0%,
+      rgba(75, 0, 130, 0.2) 100%);
   border-bottom: 1px solid rgba(138, 43, 226, 0.3);
   backdrop-filter: blur(10px);
 }
@@ -1818,9 +1852,12 @@ html, body {
 }
 
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 0.4;
   }
+
   50% {
     opacity: 1;
   }
@@ -1835,13 +1872,13 @@ html, body {
   padding: 0.4rem 0.9rem;
   width: fit-content;
   margin: 0 auto 0.65rem;
-  background: linear-gradient(135deg, 
-    rgba(138, 43, 226, 0.08) 0%,
-    rgba(138, 43, 226, 0.12) 100%);
+  background: linear-gradient(135deg,
+      rgba(138, 43, 226, 0.08) 0%,
+      rgba(138, 43, 226, 0.12) 100%);
   border: 1px solid rgba(138, 43, 226, 0.25);
   border-radius: 16px;
   backdrop-filter: blur(12px);
-  box-shadow: 
+  box-shadow:
     0 2px 8px rgba(138, 43, 226, 0.12),
     0 0 20px rgba(138, 43, 226, 0.08),
     inset 0 1px 1px rgba(255, 255, 255, 0.1);
@@ -1850,11 +1887,11 @@ html, body {
 
 .instant-gen-indicator:hover {
   transform: translateY(-1px);
-  background: linear-gradient(135deg, 
-    rgba(138, 43, 226, 0.12) 0%,
-    rgba(138, 43, 226, 0.16) 100%);
+  background: linear-gradient(135deg,
+      rgba(138, 43, 226, 0.12) 0%,
+      rgba(138, 43, 226, 0.16) 100%);
   border-color: rgba(138, 43, 226, 0.35);
-  box-shadow: 
+  box-shadow:
     0 4px 12px rgba(138, 43, 226, 0.18),
     0 0 25px rgba(138, 43, 226, 0.12),
     inset 0 1px 1px rgba(255, 255, 255, 0.15);
@@ -1867,8 +1904,15 @@ html, body {
 }
 
 @keyframes subtlePulse {
-  0%, 100% { opacity: 0.9; }
-  50% { opacity: 1; }
+
+  0%,
+  100% {
+    opacity: 0.9;
+  }
+
+  50% {
+    opacity: 1;
+  }
 }
 
 .instant-gen-text {
@@ -1881,35 +1925,39 @@ html, body {
 
 .chat-input-container.instant-gen-active {
   border-color: rgba(138, 43, 226, 0.5);
-  box-shadow: 
+  box-shadow:
     0 0 25px rgba(138, 43, 226, 0.25),
     inset 0 0 15px rgba(138, 43, 226, 0.08);
 }
 
 .generated-image-container {
-  margin: 1.5rem auto 8rem; /* Increased bottom margin for button visibility and scrolling */
+  margin: 1.5rem auto 8rem;
+  /* Increased bottom margin for button visibility and scrolling */
   padding: 1.75rem;
   max-width: 700px;
   background: linear-gradient(135deg,
-    rgba(138, 43, 226, 0.04) 0%,
-    rgba(75, 0, 130, 0.06) 50%,
-    rgba(138, 43, 226, 0.04) 100%);
+      rgba(138, 43, 226, 0.04) 0%,
+      rgba(75, 0, 130, 0.06) 50%,
+      rgba(138, 43, 226, 0.04) 100%);
   border-radius: 16px;
   border: 1.5px solid rgba(138, 43, 226, 0.18);
   min-height: 250px;
   display: flex;
-  align-items: flex-start; /* Changed from center to allow content to flow from top */
+  align-items: flex-start;
+  /* Changed from center to allow content to flow from top */
   justify-content: center;
   backdrop-filter: blur(15px);
-  box-shadow: 
+  box-shadow:
     0 8px 30px rgba(138, 43, 226, 0.15),
     inset 0 0 30px rgba(138, 43, 226, 0.04);
-  overflow: visible; /* Ensure content isn't clipped */
+  overflow: visible;
+  /* Ensure content isn't clipped */
 }
 
 .generating-indicator {
   text-align: center;
-  pointer-events: none; /* Allow clicks to pass through when generating */
+  pointer-events: none;
+  /* Allow clicks to pass through when generating */
   z-index: 1;
 }
 
@@ -1938,13 +1986,15 @@ html, body {
   border-right-color: #c0c0c0;
   border-radius: 50%;
   animation: spin 1s linear infinite;
-  box-shadow: 
+  box-shadow:
     0 0 20px rgba(192, 192, 192, 0.3),
     inset 0 0 15px rgba(192, 192, 192, 0.1);
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .generating-icon {
@@ -1980,6 +2030,7 @@ html, body {
     opacity: 0;
     transform: scale(0.92) translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: scale(1) translateY(0);
@@ -1995,7 +2046,8 @@ html, body {
   border-bottom: 1.5px solid rgba(138, 43, 226, 0.25);
   position: relative;
   z-index: 10;
-  width: 100%; /* Ensure full width */
+  width: 100%;
+  /* Ensure full width */
 }
 
 .generated-image-header h3 {
@@ -2021,8 +2073,8 @@ html, body {
 
 .image-action-btn {
   background: linear-gradient(135deg,
-    rgba(138, 43, 226, 0.18) 0%,
-    rgba(75, 0, 130, 0.22) 100%);
+      rgba(138, 43, 226, 0.18) 0%,
+      rgba(75, 0, 130, 0.22) 100%);
   border: 1.5px solid rgba(138, 43, 226, 0.35);
   border-radius: 10px;
   padding: 0.6rem 1.25rem;
@@ -2039,23 +2091,24 @@ html, body {
   box-shadow: 0 4px 15px rgba(138, 43, 226, 0.2);
   position: relative;
   z-index: 10;
-  pointer-events: auto; /* Ensure buttons are always clickable */
+  pointer-events: auto;
+  /* Ensure buttons are always clickable */
 }
 
 .image-action-btn:hover {
   background: linear-gradient(135deg,
-    rgba(138, 43, 226, 0.4) 0%,
-    rgba(75, 0, 130, 0.45) 100%);
+      rgba(138, 43, 226, 0.4) 0%,
+      rgba(75, 0, 130, 0.45) 100%);
   border-color: rgba(138, 43, 226, 0.7);
   transform: translateY(-3px);
-  box-shadow: 
+  box-shadow:
     0 8px 25px rgba(138, 43, 226, 0.4),
     0 0 20px rgba(138, 43, 226, 0.3);
 }
 
 .image-action-btn:active {
   transform: translateY(-1px);
-  box-shadow: 
+  box-shadow:
     0 4px 15px rgba(138, 43, 226, 0.3),
     0 0 15px rgba(138, 43, 226, 0.2);
 }
@@ -2063,9 +2116,9 @@ html, body {
 /* Percify Button - Special Styling */
 .percify-btn {
   background: linear-gradient(135deg,
-    rgba(255, 215, 0, 0.25) 0%,
-    rgba(255, 165, 0, 0.3) 50%,
-    rgba(255, 140, 0, 0.25) 100%);
+      rgba(255, 215, 0, 0.25) 0%,
+      rgba(255, 165, 0, 0.3) 50%,
+      rgba(255, 140, 0, 0.25) 100%);
   border: 2px solid rgba(255, 215, 0, 0.5);
   color: #fff;
   text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
@@ -2073,7 +2126,7 @@ html, body {
   letter-spacing: 0.5px;
   position: relative;
   overflow: hidden;
-  box-shadow: 
+  box-shadow:
     0 4px 20px rgba(255, 215, 0, 0.3),
     0 0 30px rgba(255, 165, 0, 0.2);
 }
@@ -2085,20 +2138,21 @@ html, body {
   left: -50%;
   width: 200%;
   height: 200%;
-  background: linear-gradient(
-    45deg,
-    transparent,
-    rgba(255, 255, 255, 0.1),
-    transparent
-  );
+  background: linear-gradient(45deg,
+      transparent,
+      rgba(255, 255, 255, 0.1),
+      transparent);
   transform: rotate(45deg);
   animation: percifyShine 3s infinite;
 }
 
 @keyframes percifyShine {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateX(-100%) translateY(-100%) rotate(45deg);
   }
+
   50% {
     transform: translateX(100%) translateY(100%) rotate(45deg);
   }
@@ -2106,12 +2160,12 @@ html, body {
 
 .percify-btn:hover {
   background: linear-gradient(135deg,
-    rgba(255, 215, 0, 0.4) 0%,
-    rgba(255, 165, 0, 0.5) 50%,
-    rgba(255, 140, 0, 0.4) 100%);
+      rgba(255, 215, 0, 0.4) 0%,
+      rgba(255, 165, 0, 0.5) 50%,
+      rgba(255, 140, 0, 0.4) 100%);
   border-color: rgba(255, 215, 0, 0.8);
   transform: translateY(-4px) scale(1.05);
-  box-shadow: 
+  box-shadow:
     0 10px 35px rgba(255, 215, 0, 0.5),
     0 0 50px rgba(255, 165, 0, 0.4),
     inset 0 0 20px rgba(255, 215, 0, 0.2);
@@ -2120,7 +2174,7 @@ html, body {
 
 .percify-btn:active {
   transform: translateY(-2px) scale(1.02);
-  box-shadow: 
+  box-shadow:
     0 6px 25px rgba(255, 215, 0, 0.4),
     0 0 40px rgba(255, 165, 0, 0.3);
 }
@@ -2128,21 +2182,24 @@ html, body {
 .generated-image {
   width: 100%;
   height: auto;
-  max-height: 55vh; /* Reduced from 60vh to allow more space for buttons */
-  object-fit: contain; /* Maintain aspect ratio */
+  max-height: 55vh;
+  /* Reduced from 60vh to allow more space for buttons */
+  object-fit: contain;
+  /* Maintain aspect ratio */
   border-radius: 12px;
   border: 2px solid rgba(138, 43, 226, 0.3);
-  box-shadow: 
+  box-shadow:
     0 10px 40px rgba(138, 43, 226, 0.25),
     0 0 30px rgba(138, 43, 226, 0.15),
     inset 0 0 20px rgba(138, 43, 226, 0.04);
   transition: all 0.3s ease;
-  margin-bottom: 0; /* Ensure no extra bottom margin on image itself */
+  margin-bottom: 0;
+  /* Ensure no extra bottom margin on image itself */
 }
 
 .generated-image:hover {
   border-color: rgba(138, 43, 226, 0.5);
-  box-shadow: 
+  box-shadow:
     0 15px 50px rgba(138, 43, 226, 0.35),
     0 0 45px rgba(138, 43, 226, 0.25),
     inset 0 0 25px rgba(138, 43, 226, 0.06);
@@ -2163,10 +2220,13 @@ html, body {
 }
 
 @keyframes placeholderPulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 0.2;
     transform: scale(1);
   }
+
   50% {
     opacity: 0.35;
     transform: scale(1.05);
@@ -2196,13 +2256,13 @@ html, body {
   padding: 0.4rem 0.9rem;
   width: fit-content;
   margin: 0 auto 0.65rem;
-  background: linear-gradient(135deg, 
-    rgba(0, 191, 255, 0.08) 0%,
-    rgba(0, 191, 255, 0.12) 100%);
+  background: linear-gradient(135deg,
+      rgba(0, 191, 255, 0.08) 0%,
+      rgba(0, 191, 255, 0.12) 100%);
   border: 1px solid rgba(0, 191, 255, 0.25);
   border-radius: 16px;
   backdrop-filter: blur(12px);
-  box-shadow: 
+  box-shadow:
     0 2px 8px rgba(0, 191, 255, 0.12),
     0 0 20px rgba(0, 191, 255, 0.08),
     inset 0 1px 1px rgba(255, 255, 255, 0.1);
@@ -2211,11 +2271,11 @@ html, body {
 
 .video-gen-indicator:hover {
   transform: translateY(-1px);
-  background: linear-gradient(135deg, 
-    rgba(0, 191, 255, 0.12) 0%,
-    rgba(0, 191, 255, 0.16) 100%);
+  background: linear-gradient(135deg,
+      rgba(0, 191, 255, 0.12) 0%,
+      rgba(0, 191, 255, 0.16) 100%);
   border-color: rgba(0, 191, 255, 0.35);
-  box-shadow: 
+  box-shadow:
     0 4px 12px rgba(0, 191, 255, 0.18),
     0 0 25px rgba(0, 191, 255, 0.12),
     inset 0 1px 1px rgba(255, 255, 255, 0.15);
@@ -2237,19 +2297,20 @@ html, body {
 
 .chat-input-container.video-gen-active {
   border-color: rgba(0, 191, 255, 0.5);
-  box-shadow: 
+  box-shadow:
     0 0 25px rgba(0, 191, 255, 0.25),
     inset 0 0 15px rgba(0, 191, 255, 0.08);
 }
 
 .generated-video-container {
-  margin: 1.5rem auto 6rem; /* Increased bottom margin for button visibility */
+  margin: 1.5rem auto 6rem;
+  /* Increased bottom margin for button visibility */
   padding: 1.75rem;
   max-width: 800px;
   background: linear-gradient(135deg,
-    rgba(0, 191, 255, 0.04) 0%,
-    rgba(0, 128, 255, 0.06) 50%,
-    rgba(0, 191, 255, 0.04) 100%);
+      rgba(0, 191, 255, 0.04) 0%,
+      rgba(0, 128, 255, 0.06) 50%,
+      rgba(0, 191, 255, 0.04) 100%);
   border-radius: 16px;
   border: 1.5px solid rgba(0, 191, 255, 0.18);
   min-height: 250px;
@@ -2257,7 +2318,7 @@ html, body {
   align-items: center;
   justify-content: center;
   backdrop-filter: blur(15px);
-  box-shadow: 
+  box-shadow:
     0 8px 30px rgba(0, 191, 255, 0.15),
     inset 0 0 30px rgba(0, 191, 255, 0.04);
 }
@@ -2298,8 +2359,8 @@ html, body {
 
 .video-action-btn {
   background: linear-gradient(135deg,
-    rgba(0, 191, 255, 0.18) 0%,
-    rgba(0, 128, 255, 0.22) 100%);
+      rgba(0, 191, 255, 0.18) 0%,
+      rgba(0, 128, 255, 0.22) 100%);
   border: 1.5px solid rgba(0, 191, 255, 0.35);
   border-radius: 10px;
   padding: 0.6rem 1.25rem;
@@ -2321,18 +2382,18 @@ html, body {
 
 .video-action-btn:hover {
   background: linear-gradient(135deg,
-    rgba(0, 191, 255, 0.35) 0%,
-    rgba(0, 128, 255, 0.4) 100%);
+      rgba(0, 191, 255, 0.35) 0%,
+      rgba(0, 128, 255, 0.4) 100%);
   border-color: rgba(0, 191, 255, 0.7);
   transform: translateY(-3px);
-  box-shadow: 
+  box-shadow:
     0 8px 25px rgba(0, 191, 255, 0.4),
     0 0 20px rgba(0, 191, 255, 0.3);
 }
 
 .video-action-btn:active {
   transform: translateY(-1px);
-  box-shadow: 
+  box-shadow:
     0 4px 15px rgba(0, 191, 255, 0.3),
     0 0 15px rgba(0, 191, 255, 0.2);
 }
@@ -2340,11 +2401,13 @@ html, body {
 .generated-video {
   width: 100%;
   height: auto;
-  max-height: 60vh; /* Limit video height to allow button visibility */
-  object-fit: contain; /* Maintain aspect ratio */
+  max-height: 60vh;
+  /* Limit video height to allow button visibility */
+  object-fit: contain;
+  /* Maintain aspect ratio */
   border-radius: 12px;
   border: 2px solid rgba(0, 191, 255, 0.3);
-  box-shadow: 
+  box-shadow:
     0 10px 40px rgba(0, 191, 255, 0.25),
     0 0 30px rgba(0, 191, 255, 0.15),
     inset 0 0 20px rgba(0, 191, 255, 0.04);
@@ -2353,7 +2416,7 @@ html, body {
 
 .generated-video:hover {
   border-color: rgba(0, 191, 255, 0.5);
-  box-shadow: 
+  box-shadow:
     0 15px 50px rgba(0, 191, 255, 0.35),
     0 0 45px rgba(0, 191, 255, 0.25),
     inset 0 0 25px rgba(0, 191, 255, 0.06);

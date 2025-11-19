@@ -6,6 +6,7 @@
   "/google-ai-studio/page": "app/google-ai-studio/page.js",
   "/google-ai/page": "app/google-ai/page.js",
   "/media-studio/page": "app/media-studio/page.js",
+  "/page": "app/page.js",
   "/veo/page": "app/veo/page.js",
   "/web-search/page": "app/web-search/page.js"
 }
