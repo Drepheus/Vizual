@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import gsap from 'gsap';
 import './veo.css';
+import { VertexSidebar } from '../../src/components/VertexSidebar';
 
 export default function VeoPage() {
     const router = useRouter();
@@ -59,15 +60,10 @@ export default function VeoPage() {
     return (
         <div className="veo-page">
             {/* Navigation */}
-            <nav className="veo-nav">
-                <div className="veo-logo">
-                    <span className="veo-logo-icon">◆</span>
-                    <span className="veo-logo-text">Veo</span>
-                </div>
-                <button className="veo-close-btn" onClick={() => router.push('/google-ai-studio')}>
-                    ✕
-                </button>
-            </nav>
+            <VertexSidebar />
+            <button className="veo-close-btn" onClick={() => router.push('/google-ai-studio')}>
+                ✕
+            </button>
 
             {/* Hero Section */}
             <section className="veo-hero" ref={heroRef}>

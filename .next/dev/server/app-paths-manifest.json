@@ -1,6 +1,10 @@
 {
+  "/chat/page": "app/chat/page.js",
   "/code-assist/page": "app/code-assist/page.js",
+  "/command-hub/page": "app/command-hub/page.js",
+  "/gemini/page": "app/gemini/page.js",
   "/google-ai-studio/page": "app/google-ai-studio/page.js",
   "/google-ai/page": "app/google-ai/page.js",
+  "/replicate-studio/page": "app/replicate-studio/page.js",
   "/veo/page": "app/veo/page.js"
 }

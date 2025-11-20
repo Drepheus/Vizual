@@ -110,6 +110,15 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
   type __Unused = __Check
 }
 
+// Validate ../../../app/gemini/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/gemini">> = Specific
+  const handler = {} as typeof import("../../../app/gemini/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
 // Validate ../../../app/google-ai-studio/page.tsx
 {
   type __IsExpected<Specific extends AppPageConfig<"/google-ai-studio">> = Specific

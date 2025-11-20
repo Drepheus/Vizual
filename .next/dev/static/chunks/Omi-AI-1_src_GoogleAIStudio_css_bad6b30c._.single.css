@@ -491,6 +491,109 @@
   line-height: 1.5;
 }
 
+@media (max-width: 1024px) {
+  .studio-container {
+    padding: 40px;
+  }
+
+  .studio-main-title {
+    font-size: 3rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .studio-sidebar, .search-history-sidebar {
+    z-index: 100;
+    background: #0a0a0ff2;
+    width: 280px;
+    height: 100%;
+    position: fixed;
+    left: -100%;
+    box-shadow: 10px 0 30px #00000080;
+  }
+
+  .studio-sidebar.mobile-open {
+    left: 0;
+  }
+
+  .studio-mobile-toggle {
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    color: #fff;
+    z-index: 200;
+    cursor: pointer;
+    background: #141419cc;
+    border: 1px solid #ffffff1a;
+    border-radius: 12px;
+    justify-content: center;
+    align-items: center;
+    width: 44px;
+    height: 44px;
+    font-size: 1.5rem;
+    transition: all .2s;
+    display: flex;
+    position: fixed;
+    top: 20px;
+    left: 20px;
+  }
+
+  .studio-mobile-toggle:hover {
+    background: #ffffff1a;
+  }
+
+  .studio-container {
+    padding: 80px 20px;
+  }
+
+  .studio-main-title {
+    font-size: 2.5rem;
+  }
+
+  .studio-tools-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .studio-tutorials-section {
+    padding: 32px 24px;
+  }
+
+  .tutorials-title {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .studio-container {
+    padding: 80px 16px 24px;
+  }
+
+  .studio-main-title {
+    font-size: 1.5rem;
+  }
+
+  .studio-enable-btn {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .studio-close-btn {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    top: 20px;
+    right: 16px;
+  }
+
+  .studio-close-btn span:not(.studio-back-arrow) {
+    display: none;
+  }
+
+  .tool-icon-wrapper {
+    width: 56px;
+    height: 56px;
+  }
+}
+
 .tool-card-footer {
   z-index: 1;
   justify-content: flex-end;
@@ -692,10 +795,34 @@
 }
 
 .labs-buttons-group {
-  justify-content: center;
-  align-items: center;
-  font-size: 2rem;
+  gap: 16px;
+  margin-top: 32px;
   display: flex;
+}
+
+.labs-btn {
+  color: #fff;
+  cursor: pointer;
+  background: #ffffff1a;
+  border: 1px solid #fff3;
+  border-radius: 100px;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 28px;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: all .2s;
+  display: inline-flex;
+}
+
+.labs-btn:hover {
+  background: #fff3;
+  border-color: #fff6;
+  transform: translateY(-2px);
+}
+
+.labs-icon {
+  font-size: 1.2rem;
 }
 
 /*# sourceMappingURL=Omi-AI-1_src_GoogleAIStudio_css_bad6b30c._.single.css.map*/

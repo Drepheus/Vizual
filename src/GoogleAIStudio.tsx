@@ -161,6 +161,46 @@ const studioTools = [
     icon: '✍️',
     gradient: 'linear-gradient(135deg, #FBBC04 0%, #EA4335 100%)',
     color: '#FBBC04'
+  },
+  {
+    name: 'Genie 3',
+    description: 'A new frontier for world models',
+    url: 'https://deepmind.google/blog/genie-3-a-new-frontier-for-world-models/',
+    icon: '🧞',
+    gradient: 'linear-gradient(135deg, #8E2DE2 0%, #4A00E0 100%)',
+    color: '#8E2DE2'
+  },
+  {
+    name: 'AlphaGo',
+    description: 'The first computer program to defeat a professional human Go player',
+    url: 'https://deepmind.google/research/alphago/',
+    icon: '⚫',
+    gradient: 'linear-gradient(135deg, #00b09b 0%, #96c93d 100%)',
+    color: '#00b09b'
+  },
+  {
+    name: 'SIMA 2',
+    description: 'An agent that plays, reasons, and learns with you in virtual 3D worlds',
+    url: 'https://deepmind.google/blog/sima-2-an-agent-that-plays-reasons-and-learns-with-you-in-virtual-3d-worlds/',
+    icon: '🎮',
+    gradient: 'linear-gradient(135deg, #ff00cc 0%, #333399 100%)',
+    color: '#ff00cc'
+  },
+  {
+    name: 'Doppl',
+    description: 'Explore and create with AI-powered digital twins',
+    url: 'https://labs.google/doppl',
+    icon: '👥',
+    gradient: 'linear-gradient(135deg, #FF512F 0%, #DD2476 100%)',
+    color: '#FF512F'
+  },
+  {
+    name: 'Firebase Studio',
+    description: 'Build, test, and deploy AI-powered apps with Firebase',
+    url: 'https://firebase.studio/',
+    icon: '🔥',
+    gradient: 'linear-gradient(135deg, #FFCA28 0%, #FF6F00 100%)',
+    color: '#FFCA28'
   }
 ];
 
@@ -249,7 +289,7 @@ export default function GoogleAIStudio({ onClose }: GoogleAIStudioProps) {
             <span className="sidebar-icon">🤖</span>
             {!sidebarCollapsed && <span className="sidebar-label">Google AI</span>}
           </button>
-          <button className="sidebar-item">
+          <button className="sidebar-item" onClick={() => router.push('/gemini')}>
             <span className="sidebar-icon">💎</span>
             {!sidebarCollapsed && <span className="sidebar-label">Gemini</span>}
           </button>
