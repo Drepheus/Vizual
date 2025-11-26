@@ -39,5 +39,3 @@ env/
 *.swo
 *~
 .vercel
-codebase.jsonl
-generate-jsonl.js

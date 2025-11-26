@@ -1,71 +1,82 @@
+import { VertexAI } from '@google-cloud/vertexai';
 import { NextRequest, NextResponse } from 'next/server';
-import { getGenerativeModel } from '@/lib/vertex-client';
+
+const project = process.env.GOOGLE_CLOUD_PROJECT_ID;
+const location = process.env.GOOGLE_CLOUD_LOCATION || 'us-central1';
+const dataStoreId = process.env.VERTEX_DATA_STORE_ID;
 
 export const runtime = 'nodejs'; // Vertex SDK requires Node.js runtime
 
 export async function POST(req: NextRequest) {
     try {
-        const { message, history } = await req.json();
-        const dataStoreId = process.env.VERTEX_DATA_STORE_ID;
-        const projectId = process.env.GOOGLE_CLOUD_PROJECT_ID;
-
-        if (!dataStoreId || !projectId) {
+        if (!project || !dataStoreId) {
             return NextResponse.json(
-                { error: 'Configuration missing: VERTEX_DATA_STORE_ID or GOOGLE_CLOUD_PROJECT_ID not set' },
+                { error: 'Vertex AI is not configured. Please set GOOGLE_CLOUD_PROJECT_ID and VERTEX_DATA_STORE_ID.' },
                 { status: 500 }
             );
         }
 
-        // Use Gemini 1.5 Pro for better RAG reasoning
-        const model = getGenerativeModel('gemini-1.5-pro-001');
+        const { message, history } = await req.json();
 
-        // Configure the Vertex AI Search tool (Grounding)
+        if (!message) {
+            return NextResponse.json({ error: 'Message is required' }, { status: 400 });
+        }
+
+        // Initialize Vertex AI
+        const vertexAI = new VertexAI({ project, location });
+        const model = vertexAI.getGenerativeModel({
+            model: 'gemini-1.5-pro-001', // Better for RAG reasoning
+        });
+
+        // Configure grounding with Vertex AI Search
         const tools = [
             {
                 retrieval: {
                     vertexAiSearch: {
-                        datastore: `projects/${projectId}/locations/global/collections/default_collection/dataStores/${dataStoreId}`,
+                        datastore: `projects/${project}/locations/global/collections/default_collection/dataStores/${dataStoreId}`,
                     },
                 },
             },
         ];
 
+        // Start chat with grounding
         const chat = model.startChat({
             tools: tools,
             history: history || [],
         });
 
+        // Send message and stream response
         const result = await chat.sendMessageStream(message);
 
-        // Create a streaming response
+        // Create a readable stream for the response
         const encoder = new TextEncoder();
         const stream = new ReadableStream({
             async start(controller) {
                 try {
                     for await (const chunk of result.stream) {
-                        const text = chunk.candidates?.[0]?.content?.parts?.[0]?.text;
+                        const text = chunk.candidates?.[0]?.content?.parts?.[0]?.text || '';
                         if (text) {
                             controller.enqueue(encoder.encode(text));
                         }
                     }
                     controller.close();
-                } catch (err) {
-                    console.error('Streaming error:', err);
-                    controller.error(err);
+                } catch (error) {
+                    console.error('Streaming error:', error);
+                    controller.error(error);
                 }
             },
         });
 
-        return new NextResponse(stream, {
+        return new Response(stream, {
             headers: {
                 'Content-Type': 'text/plain; charset=utf-8',
+                'Transfer-Encoding': 'chunked',
             },
         });
-
     } catch (error: any) {
-        console.error('Vertex RAG Error:', error);
+        console.error('RAG Chat Error:', error);
         return NextResponse.json(
-            { error: error.message || 'Internal Server Error' },
+            { error: error.message || 'Internal server error' },
             { status: 500 }
         );
     }

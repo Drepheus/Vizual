@@ -1,12 +1,14 @@
-/**
- * Service for interacting with Vertex AI RAG endpoints
- */
-
 export interface ChatMessage {
     role: 'user' | 'model';
     parts: { text: string }[];
 }
 
+/**
+ * Chat with Vertex AI RAG using the backend API
+ * @param message - User's message
+ * @param history - Previous chat history
+ * @param onChunk - Callback for streaming response chunks
+ */
 export async function chatWithVertexRAG(
     message: string,
     history: ChatMessage[],
@@ -25,22 +27,23 @@ export async function chatWithVertexRAG(
         });
 
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || 'Failed to get response from Vertex AI');
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to get response from Vertex AI');
         }
 
-        if (!response.body) {
+        // Handle streaming response
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
+
+        if (!reader) {
             throw new Error('No response body');
         }
-
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
 
         while (true) {
             const { done, value } = await reader.read();
             if (done) break;
 
-            const chunk = decoder.decode(value, { stream: true });
+            const chunk = decoder.decode(value);
             onChunk(chunk);
         }
     } catch (error) {

@@ -9,14 +9,13 @@ This guide explains how to set up the **Vertex AI Search & Conversation** infras
 2. Select your project.
 3. Navigate to **APIs & Services > Library**.
 4. Enable the following APIs:
-   - **Vertex AI API** (`aiplatform.googleapis.com`)
-   - **Agent Builder** (formerly Gen App Builder / Vertex AI Search). If you can't find it, search for **"Discovery Engine API"**.
+   - **Vertex AI API**
+   - **Vertex AI Search and Conversation API** (formerly Gen App Builder)
 
-### Step 2: Create a Data Store (in Agent Builder)
-1. Search for **"Agent Builder"** in the top search bar of the Google Cloud Console.
-2. Click **Agent Builder** (under Products & Resources).
-3. Click **+ CREATE APP**.
-4. Select **Search** (or "Search for your website/data").
+### Step 2: Create a Data Store
+1. Search for "Vertex AI Search and Conversation" in the top bar.
+2. Click **New App**.
+3. Select **Search** as the app type.
 4. Enable **Enterprise Edition** features if asked (required for some advanced features, but Standard is fine for basic text).
 5. **Configure Data Store**:
    - Click **Create New Data Store**.
