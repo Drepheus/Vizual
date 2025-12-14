@@ -2,8 +2,8 @@
 # Run this script from the project root directory
 
 param(
-    [Parameter(Mandatory=$true)]
-    [string]$ProjectId
+    [string]$ProjectId = "omi-ai-474603",
+    [string]$VertexDataStoreId = "codebase-rag-datastore_1764052581651"
 )
 
 Write-Host "🚀 Google Cloud Run Deployment Script" -ForegroundColor Cyan
@@ -19,6 +19,9 @@ Write-Host "📋 Configuration:" -ForegroundColor Yellow
 Write-Host "  Project ID: $ProjectId"
 Write-Host "  Service Name: $ServiceName"
 Write-Host "  Region: $Region"
+if ($VertexDataStoreId) {
+    Write-Host "  Data Store ID: $VertexDataStoreId"
+}
 Write-Host ""
 
 # Check if gcloud is installed
@@ -26,12 +29,14 @@ $gcloudPath = "$env:LOCALAPPDATA\Google\Cloud SDK\google-cloud-sdk\bin\gcloud.cm
 if (Test-Path $gcloudPath) {
     Write-Host "✅ gcloud CLI found" -ForegroundColor Green
     $gcloud = $gcloudPath
-} else {
+}
+else {
     try {
         $null = Get-Command gcloud -ErrorAction Stop
         Write-Host "✅ gcloud CLI found in PATH" -ForegroundColor Green
         $gcloud = "gcloud"
-    } catch {
+    }
+    catch {
         Write-Host "❌ Error: gcloud CLI is not installed" -ForegroundColor Red
         Write-Host "Install from: https://cloud.google.com/sdk/docs/install"
         exit 1
@@ -49,6 +54,8 @@ Write-Host "🔌 Enabling required Google Cloud APIs..." -ForegroundColor Yellow
 & $gcloud services enable cloudbuild.googleapis.com
 & $gcloud services enable run.googleapis.com
 & $gcloud services enable containerregistry.googleapis.com
+& $gcloud services enable aiplatform.googleapis.com
+& $gcloud services enable discoveryengine.googleapis.com
 
 # Environment variables - Add your actual values here
 $NEXT_PUBLIC_SUPABASE_URL = "https://cnysdbjajxnpmrugnpme.supabase.co"
@@ -73,12 +80,14 @@ $envVars = @(
     "NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL",
     "NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY",
     "GOOGLE_GENERATIVE_AI_API_KEY=AIzaSyAPUrVUTLGnhPOY6KFypgSqqFB3hRKLEug",
-    "TAVILY_API_KEY=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"
-    # Add Stripe keys if needed:
-    # "STRIPE_SECRET_KEY=your-stripe-secret-key",
-    # "STRIPE_WEBHOOK_SECRET=your-webhook-secret",
-    # "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your-publishable-key"
+    "TAVILY_API_KEY=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",
+    "GOOGLE_CLOUD_PROJECT_ID=$ProjectId",
+    "GOOGLE_CLOUD_LOCATION=us-central1"
 )
+
+if ($VertexDataStoreId) {
+    $envVars += "VERTEX_DATA_STORE_ID=$VertexDataStoreId"
+}
 
 # Deploy to Cloud Run
 Write-Host ""

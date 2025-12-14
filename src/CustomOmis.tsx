@@ -402,7 +402,7 @@ const CustomOmis: React.FC<CustomOmisProps> = ({ onClose }) => {
                           handleTestBot(bot);
                         }}
                       >
-                        <span>💬</span> Test
+                        <span>💬</span> Test Bot
                       </button>
                       <button
                         className="bot-action-btn delete"

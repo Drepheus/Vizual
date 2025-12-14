@@ -10788,6 +10788,31 @@ main.sphere-main {
   font-size: 1.1rem;
 }
 
+.studio-hero {
+  max-width: 800px;
+  margin-bottom: 60px;
+}
+
+.studio-main-title {
+  letter-spacing: -.03em;
+  color: #fff;
+  margin-bottom: 24px;
+  font-size: 4.5rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.studio-learn-more {
+  border-bottom: 1px solid #8ab4f84d;
+  margin-left: 4px;
+  transition: all .2s;
+}
+
+.studio-learn-more:hover {
+  color: #aecbfa;
+  border-bottom-color: #8ab4f8;
+}
+
 .studio-tool-card {
   cursor: pointer;
   background: #ffffff08;

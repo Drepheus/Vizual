@@ -303,7 +303,28 @@
   box-shadow: 0 0 30px #a855f799, 0 0 60px #ec48994d, inset 0 0 15px #a855f733;
 }
 
-.hero-banner, .media-studio-card {
+.hero-banner {
+  background: linear-gradient(135deg, #1a0f2e 0%, #2d1b4e 50%, #0d0d0d 100%);
+  border: 1px solid #a855f733;
+  border-radius: 20px;
+  margin-bottom: 32px;
+  animation: 4s ease-in-out infinite neonGlow;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 40px #a855f733, 0 8px 32px #0006, inset 0 0 60px #a855f70d;
+}
+
+.hero-video-background {
+  -o-object-fit: cover;
+  object-fit: cover;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+}
+
+.media-studio-card {
   background: linear-gradient(135deg, #1a0f2e 0%, #2d1b4e 50%, #0d0d0d 100%);
   border: 1px solid #a855f733;
   border-radius: 20px;
@@ -740,6 +761,277 @@
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     gap: 12px;
   }
+}
+
+.image-studio-container {
+  background: #000;
+  height: 100%;
+  position: relative;
+  overflow-y: auto;
+}
+
+.image-studio-hero {
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 65vh;
+  display: flex;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-background-image {
+  opacity: .6;
+  z-index: 0;
+  background-position: center;
+  background-size: cover;
+  position: absolute;
+  inset: 0;
+  -webkit-mask-image: linear-gradient(#000 50%, #0000 100%);
+  mask-image: linear-gradient(#000 50%, #0000 100%);
+}
+
+.hero-content-center {
+  z-index: 2;
+  text-align: center;
+  width: 100%;
+  max-width: 900px;
+  padding: 0 20px;
+  position: relative;
+}
+
+.hero-large-text {
+  color: #fff;
+  text-shadow: 0 4px 20px #00000080;
+  letter-spacing: -2px;
+  margin-bottom: 10px;
+  font-size: 5rem;
+  font-weight: 800;
+}
+
+@media (max-width: 768px) {
+  .hero-large-text {
+    font-size: 3rem;
+  }
+}
+
+.prompt-bar-wrapper {
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  background: #14141e99;
+  border: 1px solid #ffffff1a;
+  border-radius: 50px;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 30px;
+  padding: 8px 8px 8px 24px;
+  transition: all .3s;
+  display: flex;
+  box-shadow: 0 8px 32px #0000004d;
+}
+
+.prompt-bar-wrapper:focus-within {
+  background: #14141ecc;
+  border-color: #a855f780;
+  box-shadow: 0 12px 40px #00000080, 0 0 20px #a855f733;
+}
+
+.prompt-icon {
+  opacity: .7;
+  font-size: 1.2rem;
+}
+
+.prompt-input {
+  color: #fff;
+  background: none;
+  border: none;
+  outline: none;
+  flex: 1;
+  font-size: 1.1rem;
+}
+
+.prompt-input::placeholder {
+  color: #fff6;
+}
+
+.generate-btn-small {
+  color: #fff;
+  cursor: pointer;
+  background: #ffffff1a;
+  border: none;
+  border-radius: 40px;
+  padding: 10px 24px;
+  font-weight: 600;
+  transition: all .2s;
+}
+
+.generate-btn-small:hover {
+  color: #000;
+  background: #fff;
+}
+
+.quick-tools-row {
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 30px;
+  display: flex;
+}
+
+.quick-tool-item {
+  cursor: pointer;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  display: flex;
+}
+
+.quick-tool-icon-circle {
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
+  background: #ffffff0d;
+  border: 1px solid #ffffff1a;
+  border-radius: 50%;
+  justify-content: center;
+  align-items: center;
+  width: 50px;
+  height: 50px;
+  font-size: 1.5rem;
+  transition: all .3s;
+  display: flex;
+  position: relative;
+}
+
+.quick-tool-item:hover .quick-tool-icon-circle {
+  background: #ffffff26;
+  border-color: #ffffff4d;
+  transform: translateY(-5px);
+}
+
+.tool-badge-floating {
+  color: #fff;
+  background: linear-gradient(135deg, #d946ef, #a855f7);
+  border-radius: 10px;
+  padding: 2px 6px;
+  font-size: .6rem;
+  font-weight: 800;
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  box-shadow: 0 2px 5px #0000004d;
+}
+
+.quick-tool-label {
+  color: #ffffffb3;
+  font-size: .85rem;
+  font-weight: 500;
+  transition: color .3s;
+}
+
+.quick-tool-item:hover .quick-tool-label {
+  color: #fff;
+}
+
+.horizontal-scroll-section {
+  padding: 20px 40px 60px;
+}
+
+.section-header-row {
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 20px;
+  display: flex;
+}
+
+.horizontal-cards-scroller {
+  scrollbar-width: none;
+  gap: 16px;
+  padding-bottom: 20px;
+  display: flex;
+  overflow-x: auto;
+}
+
+.horizontal-cards-scroller::-webkit-scrollbar {
+  display: none;
+}
+
+.horizontal-card {
+  cursor: pointer;
+  border-radius: 20px;
+  min-width: 240px;
+  height: 320px;
+  transition: all .3s cubic-bezier(.25, .46, .45, .94);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 15px #0000004d;
+}
+
+.horizontal-card img {
+  -o-object-fit: cover;
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+  transition: transform .5s;
+}
+
+.horizontal-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 30px #00000080;
+}
+
+.horizontal-card:hover img {
+  transform: scale(1.1);
+}
+
+.card-badge-new {
+  color: #fff;
+  z-index: 2;
+  background: #d946ef;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: .7rem;
+  font-weight: 700;
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  box-shadow: 0 2px 8px #0000004d;
+}
+
+.card-overlay-title {
+  color: #fff;
+  z-index: 2;
+  text-shadow: 0 2px 4px #00000080;
+  background: linear-gradient(to top, #000000e6 0%, #0000 100%);
+  width: 100%;
+  padding: 40px 16px 16px;
+  font-size: .95rem;
+  font-weight: 600;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+}
+
+.purple-text {
+  color: #d946ef;
+}
+
+.view-more {
+  color: #fff9;
+  cursor: pointer;
+  font-size: .9rem;
+  transition: color .2s;
+}
+
+.view-more:hover {
+  color: #fff;
+}
+
+.media-studio-shiny-text {
+  background: linear-gradient(120deg, #d946ef 0%, #a855f7 25%, #3b82f6 50%, #a855f7 75%, #d946ef 100%) 0 0 / 200% 100%;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 30px #d946ef80;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: 3s linear infinite shine;
 }
 
 /*# sourceMappingURL=Omi-AI-1_src_MediaStudio_css_bad6b30c._.single.css.map*/

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useCallback } from 'react';
 import { useGesture } from '@use-gesture/react';
 
-type ImageItem = string | { src: string; alt?: string };
+type ImageItem = string | { src: string; alt?: string; type?: 'image' | 'video' };
 
 type DomeGalleryProps = {
   images?: ImageItem[];
@@ -28,6 +28,7 @@ type DomeGalleryProps = {
 type ItemDef = {
   src: string;
   alt: string;
+  type: 'image' | 'video';
   x: number;
   y: number;
   sizeX: number;
@@ -37,7 +38,8 @@ type ItemDef = {
 const DEFAULT_IMAGES: ImageItem[] = [
   {
     src: 'https://images.unsplash.com/photo-1755331039789-7e5680e26e8f?q=80&w=774&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-    alt: 'Abstract art'
+    alt: 'Abstract art',
+    type: 'image'
   },
   {
     src: 'https://images.unsplash.com/photo-1755569309049-98410b94f66d?q=80&w=772&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
@@ -86,8 +88,8 @@ const getDataNumber = (el: HTMLElement, name: string, fallback: number) => {
 
 function buildItems(pool: ImageItem[], seg: number): ItemDef[] {
   const xCols = Array.from({ length: seg }, (_, i) => -37 + i * 2);
-  const evenYs = [-4, -2, 0, 2, 4];
-  const oddYs = [-3, -1, 1, 3, 5];
+  const evenYs = [-2, 0, 2];
+  const oddYs = [-1, 1];
 
   const coords = xCols.flatMap((x, c) => {
     const ys = c % 2 === 0 ? evenYs : oddYs;
@@ -96,7 +98,7 @@ function buildItems(pool: ImageItem[], seg: number): ItemDef[] {
 
   const totalSlots = coords.length;
   if (pool.length === 0) {
-    return coords.map(c => ({ ...c, src: '', alt: '' }));
+    return coords.map(c => ({ ...c, src: '', alt: '', type: 'image' as const }));
   }
   if (pool.length > totalSlots) {
     console.warn(
@@ -106,9 +108,13 @@ function buildItems(pool: ImageItem[], seg: number): ItemDef[] {
 
   const normalizedImages = pool.map(image => {
     if (typeof image === 'string') {
-      return { src: image, alt: '' };
+      return { src: image, alt: '', type: 'image' as const };
     }
-    return { src: image.src || '', alt: image.alt || '' };
+    return {
+      src: image.src || '',
+      alt: image.alt || '',
+      type: (image.type || 'image') as 'image' | 'video'
+    };
   });
 
   const usedImages = Array.from({ length: totalSlots }, (_, i) => normalizedImages[i % normalizedImages.length]);
@@ -129,7 +135,8 @@ function buildItems(pool: ImageItem[], seg: number): ItemDef[] {
   return coords.map((c, i) => ({
     ...c,
     src: usedImages[i].src,
-    alt: usedImages[i].alt
+    alt: usedImages[i].alt,
+    type: usedImages[i].type
   }));
 }
 
@@ -303,6 +310,135 @@ export default function DomeGallery({
     }
   }, []);
 
+  const closeItem = useCallback(() => {
+    // 250ms delay check to prevent immediate closing if triggered too fast (optional, but kept from original)
+    if (performance.now() - openStartedAtRef.current < 250) return;
+
+    const el = focusedElRef.current;
+    if (!el) return;
+    const parent = el.parentElement as HTMLElement;
+    const overlay = viewerRef.current?.querySelector('.enlarge') as HTMLElement | null;
+    if (!overlay) return;
+
+    const refDiv = parent.querySelector('.item__image--reference') as HTMLElement | null;
+
+    const originalPos = originalTilePositionRef.current;
+    if (!originalPos) {
+      overlay.remove();
+      if (refDiv) refDiv.remove();
+      parent.style.setProperty('--rot-y-delta', `0deg`);
+      parent.style.setProperty('--rot-x-delta', `0deg`);
+      el.style.visibility = '';
+      (el.style as any).zIndex = 0;
+      focusedElRef.current = null;
+      rootRef.current?.removeAttribute('data-enlarging');
+      openingRef.current = false;
+      unlockScroll();
+      return;
+    }
+
+    const currentRect = overlay.getBoundingClientRect();
+    const rootRect = rootRef.current!.getBoundingClientRect();
+
+    const originalPosRelativeToRoot = {
+      left: originalPos.left - rootRect.left,
+      top: originalPos.top - rootRect.top,
+      width: originalPos.width,
+      height: originalPos.height
+    };
+
+    const overlayRelativeToRoot = {
+      left: currentRect.left - rootRect.left,
+      top: currentRect.top - rootRect.top,
+      width: currentRect.width,
+      height: currentRect.height
+    };
+
+    const animatingOverlay = document.createElement('div');
+    animatingOverlay.className = 'enlarge-closing';
+    animatingOverlay.style.cssText = `
+        position: absolute;
+        left: ${overlayRelativeToRoot.left}px;
+        top: ${overlayRelativeToRoot.top}px;
+        width: ${overlayRelativeToRoot.width}px;
+        height: ${overlayRelativeToRoot.height}px;
+        z-index: 9999;
+        border-radius: var(--enlarge-radius, 32px);
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0,0,0,.35);
+        transition: all ${enlargeTransitionMs}ms ease-out;
+        pointer-events: none;
+        margin: 0;
+        transform: none;
+      `;
+
+    const originalMedia = overlay.querySelector('img, video');
+    if (originalMedia) {
+      const media = originalMedia.cloneNode(true) as HTMLElement;
+      media.style.cssText = 'width: 100%; height: 100%; object-fit: cover;';
+      if (media instanceof HTMLVideoElement) {
+        // Ensure closing animation video is muted or paused if desired, but here just copy state
+        // Usually better to mute closing video to avoid audio glitches
+        media.muted = true;
+      }
+      animatingOverlay.appendChild(media);
+    }
+
+    overlay.remove();
+    rootRef.current!.appendChild(animatingOverlay);
+
+    void animatingOverlay.getBoundingClientRect();
+
+    requestAnimationFrame(() => {
+      animatingOverlay.style.left = originalPosRelativeToRoot.left + 'px';
+      animatingOverlay.style.top = originalPosRelativeToRoot.top + 'px';
+      animatingOverlay.style.width = originalPosRelativeToRoot.width + 'px';
+      animatingOverlay.style.height = originalPosRelativeToRoot.height + 'px';
+      animatingOverlay.style.opacity = '0';
+    });
+
+    const cleanup = () => {
+      animatingOverlay.remove();
+      originalTilePositionRef.current = null;
+
+      if (refDiv) refDiv.remove();
+      parent.style.transition = 'none';
+      el.style.transition = 'none';
+
+      parent.style.setProperty('--rot-y-delta', `0deg`);
+      parent.style.setProperty('--rot-x-delta', `0deg`);
+
+      requestAnimationFrame(() => {
+        el.style.visibility = '';
+        el.style.opacity = '0';
+        (el.style as any).zIndex = 0;
+        focusedElRef.current = null;
+        rootRef.current?.removeAttribute('data-enlarging');
+
+        requestAnimationFrame(() => {
+          parent.style.transition = '';
+          el.style.transition = 'opacity 300ms ease-out';
+
+          requestAnimationFrame(() => {
+            el.style.opacity = '1';
+            setTimeout(() => {
+              el.style.transition = '';
+              el.style.opacity = '';
+              openingRef.current = false;
+              if (!draggingRef.current && rootRef.current?.getAttribute('data-enlarging') !== 'true') {
+                document.body.classList.remove('dg-scroll-lock');
+              }
+            }, 300);
+          });
+        });
+      });
+    };
+
+    animatingOverlay.addEventListener('transitionend', cleanup, {
+      once: true
+    });
+  }, [enlargeTransitionMs, unlockScroll]);
+
   const startInertia = useCallback(
     (vx: number, vy: number) => {
       const MAX_V = 1.4;
@@ -325,6 +461,7 @@ export default function DomeGallery({
         if (++frames > maxFrames) {
           inertiaRAF.current = null;
           return;
+
         }
         const nextX = clamp(rotationRef.current.x - vY / 200, -maxVerticalRotationDeg, maxVerticalRotationDeg);
         const nextY = wrapAngleSigned(rotationRef.current.y + vX / 200);
@@ -409,6 +546,7 @@ export default function DomeGallery({
     const parent = el.parentElement as HTMLElement;
     focusedElRef.current = el;
     el.setAttribute('data-focused', 'true');
+    const isVideo = parent.dataset.type === 'video';
 
     const offsetX = getDataNumber(parent, 'offsetX', 0);
     const offsetY = getDataNumber(parent, 'offsetY', 0);
@@ -467,10 +605,24 @@ export default function DomeGallery({
     overlay.style.transformOrigin = 'top left';
     overlay.style.transition = `transform ${enlargeTransitionMs}ms ease, opacity ${enlargeTransitionMs}ms ease`;
 
-    const rawSrc = parent.dataset.src || (el.querySelector('img') as HTMLImageElement)?.src || '';
-    const img = document.createElement('img');
-    img.src = rawSrc;
-    overlay.appendChild(img);
+
+
+    const rawSrc = parent.dataset.src || '';
+
+    let mediaEl: HTMLImageElement | HTMLVideoElement;
+    if (isVideo) {
+      mediaEl = document.createElement('video');
+      mediaEl.src = rawSrc;
+      (mediaEl as HTMLVideoElement).autoplay = true;
+      (mediaEl as HTMLVideoElement).loop = true;
+      // UNMUTED for expanded view
+      (mediaEl as HTMLVideoElement).muted = false;
+      (mediaEl as HTMLVideoElement).playsInline = true;
+    } else {
+      mediaEl = document.createElement('img');
+      mediaEl.src = rawSrc;
+    }
+    overlay.appendChild(mediaEl);
     viewerRef.current!.appendChild(overlay);
 
     const tx0 = tileR.left - frameR.left;
@@ -553,128 +705,8 @@ export default function DomeGallery({
     const scrim = scrimRef.current;
     if (!scrim) return;
 
-    const close = () => {
-      if (performance.now() - openStartedAtRef.current < 250) return;
-
-      const el = focusedElRef.current;
-      if (!el) return;
-      const parent = el.parentElement as HTMLElement;
-      const overlay = viewerRef.current?.querySelector('.enlarge') as HTMLElement | null;
-      if (!overlay) return;
-
-      const refDiv = parent.querySelector('.item__image--reference') as HTMLElement | null;
-
-      const originalPos = originalTilePositionRef.current;
-      if (!originalPos) {
-        overlay.remove();
-        if (refDiv) refDiv.remove();
-        parent.style.setProperty('--rot-y-delta', `0deg`);
-        parent.style.setProperty('--rot-x-delta', `0deg`);
-        el.style.visibility = '';
-        (el.style as any).zIndex = 0;
-        focusedElRef.current = null;
-        rootRef.current?.removeAttribute('data-enlarging');
-        openingRef.current = false;
-        unlockScroll();
-        return;
-      }
-
-      const currentRect = overlay.getBoundingClientRect();
-      const rootRect = rootRef.current!.getBoundingClientRect();
-
-      const originalPosRelativeToRoot = {
-        left: originalPos.left - rootRect.left,
-        top: originalPos.top - rootRect.top,
-        width: originalPos.width,
-        height: originalPos.height
-      };
-
-      const overlayRelativeToRoot = {
-        left: currentRect.left - rootRect.left,
-        top: currentRect.top - rootRect.top,
-        width: currentRect.width,
-        height: currentRect.height
-      };
-
-      const animatingOverlay = document.createElement('div');
-      animatingOverlay.className = 'enlarge-closing';
-      animatingOverlay.style.cssText = `
-        position: absolute;
-        left: ${overlayRelativeToRoot.left}px;
-        top: ${overlayRelativeToRoot.top}px;
-        width: ${overlayRelativeToRoot.width}px;
-        height: ${overlayRelativeToRoot.height}px;
-        z-index: 9999;
-        border-radius: var(--enlarge-radius, 32px);
-        overflow: hidden;
-        box-shadow: 0 10px 30px rgba(0,0,0,.35);
-        transition: all ${enlargeTransitionMs}ms ease-out;
-        pointer-events: none;
-        margin: 0;
-        transform: none;
-      `;
-
-      const originalImg = overlay.querySelector('img');
-      if (originalImg) {
-        const img = originalImg.cloneNode() as HTMLImageElement;
-        img.style.cssText = 'width: 100%; height: 100%; object-fit: cover;';
-        animatingOverlay.appendChild(img);
-      }
-
-      overlay.remove();
-      rootRef.current!.appendChild(animatingOverlay);
-
-      void animatingOverlay.getBoundingClientRect();
-
-      requestAnimationFrame(() => {
-        animatingOverlay.style.left = originalPosRelativeToRoot.left + 'px';
-        animatingOverlay.style.top = originalPosRelativeToRoot.top + 'px';
-        animatingOverlay.style.width = originalPosRelativeToRoot.width + 'px';
-        animatingOverlay.style.height = originalPosRelativeToRoot.height + 'px';
-        animatingOverlay.style.opacity = '0';
-      });
-
-      const cleanup = () => {
-        animatingOverlay.remove();
-        originalTilePositionRef.current = null;
-
-        if (refDiv) refDiv.remove();
-        parent.style.transition = 'none';
-        el.style.transition = 'none';
-
-        parent.style.setProperty('--rot-y-delta', `0deg`);
-        parent.style.setProperty('--rot-x-delta', `0deg`);
-
-        requestAnimationFrame(() => {
-          el.style.visibility = '';
-          el.style.opacity = '0';
-          (el.style as any).zIndex = 0;
-          focusedElRef.current = null;
-          rootRef.current?.removeAttribute('data-enlarging');
-
-          requestAnimationFrame(() => {
-            parent.style.transition = '';
-            el.style.transition = 'opacity 300ms ease-out';
-
-            requestAnimationFrame(() => {
-              el.style.opacity = '1';
-              setTimeout(() => {
-                el.style.transition = '';
-                el.style.opacity = '';
-                openingRef.current = false;
-                if (!draggingRef.current && rootRef.current?.getAttribute('data-enlarging') !== 'true') {
-                  document.body.classList.remove('dg-scroll-lock');
-                }
-              }, 300);
-            });
-          });
-        });
-      };
-
-      animatingOverlay.addEventListener('transitionend', cleanup, {
-        once: true
-      });
-    };
+    // Use the component-level closeItem
+    const close = () => closeItem();
 
     scrim.addEventListener('click', close);
     const onKey = (e: KeyboardEvent) => {
@@ -686,7 +718,7 @@ export default function DomeGallery({
       scrim.removeEventListener('click', close);
       window.removeEventListener('keydown', onKey);
     };
-  }, [enlargeTransitionMs, unlockScroll]);
+  }, [closeItem]);
 
   useEffect(() => {
     return () => {
@@ -717,6 +749,7 @@ export default function DomeGallery({
                 key={`${it.x},${it.y},${i}`}
                 className="item"
                 data-src={it.src}
+                data-type={it.type}
                 data-offset-x={it.x}
                 data-offset-y={it.y}
                 data-size-x={it.sizeX}
@@ -734,11 +767,61 @@ export default function DomeGallery({
                   className="item__image"
                   role="button"
                   tabIndex={0}
-                  aria-label={it.alt || 'Open image'}
+                  aria-label={it.alt || 'Open media'}
                   onClick={onTileClick}
                   onPointerUp={onTilePointerUp}
                 >
-                  <img src={it.src} draggable={false} alt={it.alt} />
+                  {it.type === 'video' ? (
+                    <>
+                      <video
+                        src={it.src}
+                        muted
+                        loop
+                        playsInline
+                        webkit-playsinline
+                        preload="metadata"
+                        style={{ width: '100%', height: '100%', objectFit: 'cover', background: '#000' }}
+                      />
+                      <div
+                        style={{
+                          position: 'absolute',
+                          top: '50%',
+                          left: '50%',
+                          transform: 'translate(-50%, -50%)',
+                          width: '40px',
+                          height: '40px',
+                          borderRadius: '50%',
+                          backgroundColor: 'rgba(0, 0, 0, 0.4)',
+                          backdropFilter: 'blur(4px)',
+                          border: '1px solid rgba(255, 255, 255, 0.3)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          pointerEvents: 'none',
+                          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.2)'
+                        }}
+                      >
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          style={{ marginLeft: '2px' }}
+                        >
+                          <path d="M8 5v14l11-7z" />
+                        </svg>
+                      </div>
+                    </>
+                  ) : (
+                    <img
+                      src={it.src}
+                      draggable={false}
+                      alt={it.alt}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  )}
                 </div>
               </div>
             ))}

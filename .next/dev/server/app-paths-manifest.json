@@ -1,7 +1,5 @@
 {
-  "/chat/page": "app/chat/page.js",
-  "/command-hub/page": "app/command-hub/page.js",
-  "/custom-omis/page": "app/custom-omis/page.js",
-  "/login/page": "app/login/page.js",
-  "/page": "app/page.js"
+  "/_not-found/page": "app/_not-found/page.js",
+  "/api/generate-image/route": "app-edge-has-no-entrypoint",
+  "/media-studio/page": "app/media-studio/page.js"
 }

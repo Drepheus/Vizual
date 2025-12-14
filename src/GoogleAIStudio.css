@@ -254,6 +254,32 @@
     font-size: 1.1rem;
 }
 
+/* Hero Section */
+.studio-hero {
+    margin-bottom: 60px;
+    max-width: 800px;
+}
+
+.studio-main-title {
+    font-size: 4.5rem;
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 24px;
+    letter-spacing: -0.03em;
+    color: white;
+}
+
+.studio-learn-more {
+    border-bottom: 1px solid rgba(138, 180, 248, 0.3);
+    transition: all 0.2s ease;
+    margin-left: 4px;
+}
+
+.studio-learn-more:hover {
+    border-bottom-color: #8ab4f8;
+    color: #aecbfa;
+}
+
 /* Tool Cards */
 .studio-tool-card {
     position: relative;

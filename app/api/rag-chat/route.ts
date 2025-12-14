@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
         // Initialize Vertex AI
         const vertexAI = new VertexAI({ project, location });
         const model = vertexAI.getGenerativeModel({
-            model: 'gemini-1.5-pro-001', // Better for RAG reasoning
+            model: 'gemini-2.5-flash', // Latest stable version
         });
 
         // Configure grounding with Vertex AI Search

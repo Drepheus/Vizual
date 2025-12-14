@@ -224,14 +224,24 @@ export default function GoogleAIStudio({ onClose }: GoogleAIStudioProps) {
   useEffect(() => {
     const tl = gsap.timeline();
 
-    tl.fromTo(heroRef.current,
-      { opacity: 0, y: 50 },
-      { opacity: 1, y: 0, duration: 1, ease: "power3.out" }
+    tl.fromTo(".studio-main-title",
+      { opacity: 0, y: 40, filter: "blur(12px)" },
+      { opacity: 1, y: 0, filter: "blur(0px)", duration: 1.2, ease: "power3.out" }
     )
+      .fromTo(".studio-hero-description",
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" },
+        "-=0.8"
+      )
+      .fromTo(".labs-buttons-group",
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" },
+        "-=0.6"
+      )
       .fromTo(".studio-tool-card",
         { opacity: 0, y: 30 },
         { opacity: 1, y: 0, duration: 0.8, stagger: 0.05, ease: "power2.out" },
-        "-=0.5"
+        "-=0.4"
       );
 
     return () => {

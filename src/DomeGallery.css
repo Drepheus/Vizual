@@ -1,3 +1,4 @@
+/* Optimized sphere root */
 .sphere-root {
   position: relative;
   width: 100%;
@@ -44,8 +45,11 @@ main.sphere-main {
 }
 
 .sphere {
-  transform: translateZ(calc(var(--radius) * -1));
+  /* Force GPU promotion */
+  transform: translateZ(calc(var(--radius) * -1)) translate3d(0, 0, 0);
   will-change: transform;
+  /* Ensure cheap composite */
+  pointer-events: auto;
 }
 
 .overlay,
@@ -64,7 +68,10 @@ main.sphere-main {
 .overlay--blur {
   -webkit-mask-image: radial-gradient(rgba(235, 235, 235, 0) 70%, var(--overlay-blur-color, #060010) 90%);
   mask-image: radial-gradient(rgba(235, 235, 235, 0) 70%, var(--overlay-blur-color, #060010) 90%);
-  backdrop-filter: blur(3px);
+  /* Optimize or remove heavy blur if causing lag. WebGL/Canvas preferred for heavy blur, CSS is expensive. 
+     Keeping it simple or removing for performance. */
+  /* backdrop-filter: blur(3px); */
+  background: radial-gradient(transparent 60%, rgba(6, 0, 16, 0.4) 100%);
 }
 
 .item {
@@ -79,9 +86,13 @@ main.sphere-main {
   transform-origin: 50% 50%;
   backface-visibility: hidden;
   transition: transform 300ms;
-  transform: rotateY(calc(var(--rot-y) * (var(--offset-x) + ((var(--item-size-x) - 1) / 2)) + var(--rot-y-delta, 0deg)))
-    rotateX(calc(var(--rot-x) * (var(--offset-y) - ((var(--item-size-y) - 1) / 2)) + var(--rot-x-delta, 0deg)))
-    translateZ(var(--radius));
+  transform: rotateY(calc(var(--rot-y) * (var(--offset-x) + ((var(--item-size-x) - 1) / 2)) + var(--rot-y-delta, 0deg))) rotateX(calc(var(--rot-x) * (var(--offset-y) - ((var(--item-size-y) - 1) / 2)) + var(--rot-x-delta, 0deg))) translateZ(var(--radius));
+
+  /* Performance Optimizations */
+  content-visibility: auto;
+  contain-intrinsic-size: 200px 200px;
+  /* Placeholder size to preventing layout thrashing */
+  contain: layout style;
 }
 
 .item__image {
@@ -89,7 +100,8 @@ main.sphere-main {
   display: block;
   inset: 10px;
   border-radius: var(--tile-radius, 12px);
-  background: transparent;
+  background: #111;
+  /* Default background to avoid transparency composite cost */
   overflow: hidden;
   backface-visibility: hidden;
   transition: transform 300ms;
@@ -99,6 +111,7 @@ main.sphere-main {
   pointer-events: auto;
   -webkit-transform: translateZ(0);
   transform: translateZ(0);
+  will-change: transform;
 }
 
 .item__image:focus {
@@ -112,6 +125,8 @@ main.sphere-main {
   pointer-events: none;
   backface-visibility: hidden;
   filter: var(--image-filter, none);
+  /* Optimize image rendering */
+  image-rendering: -webkit-optimize-contrast;
 }
 
 .viewer {
@@ -143,11 +158,13 @@ main.sphere-main {
   position: absolute;
   inset: 0;
   z-index: 10;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.6);
+  /* Slightly darker for better focus */
   pointer-events: none;
   opacity: 0;
   transition: opacity 500ms ease;
-  backdrop-filter: blur(3px);
+  /* backdrop-filter: blur(3px); Remove for performance if needed, but scrim usually needs it. */
+  backdrop-filter: blur(5px);
 }
 
 .sphere-root[data-enlarging='true'] .viewer .scrim {
@@ -161,10 +178,10 @@ main.sphere-main {
   border-radius: var(--enlarge-radius, 32px);
   overflow: hidden;
   transition:
-    transform 500ms ease,
+    transform 500ms cubic-bezier(0.2, 0.8, 0.2, 1),
     opacity 500ms ease;
   transform-origin: top left;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
 }
 
 .viewer .enlarge img {

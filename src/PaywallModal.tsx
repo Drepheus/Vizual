@@ -32,29 +32,29 @@ const PaywallModal: React.FC<PaywallModalProps> = ({
         window.location.href = 'https://buy.stripe.com/fZu14ndCtdVZfvf4Y8dfG0g';
         return;
       }
-      
+
       // For Pro plan, use the API checkout session
       // Get current user from Supabase
       const { data: { user } } = await supabase.auth.getUser();
-      
+
       if (!user) {
         alert('Please log in to upgrade');
         return;
       }
-      
+
       // Create checkout session with plan type
       const response = await fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          userId: user.id, 
+        body: JSON.stringify({
+          userId: user.id,
           email: user.email,
           plan: plan
         }),
       });
-      
+
       const data = await response.json();
-      
+
       if (data.url) {
         window.location.href = data.url;
       } else {
@@ -70,16 +70,16 @@ const PaywallModal: React.FC<PaywallModalProps> = ({
     <div className="paywall-overlay" onClick={onClose}>
       <div className="paywall-modal" onClick={(e) => e.stopPropagation()}>
         <button className="paywall-close" onClick={onClose}>×</button>
-        
+
         <div className="paywall-content">
           <h2 className="plans-title">Choose Your Plan</h2>
-          
+
           <div className="plans-container">
             {/* PRO PLAN */}
             <div className="pro-plan-card">
               <div className="card-glow"></div>
               <div className="card-border"></div>
-              
+
               <div className="plan-header">
                 <div className="plan-icon-badge">
                   <div className="icon-inner">⚡</div>
@@ -93,9 +93,9 @@ const PaywallModal: React.FC<PaywallModalProps> = ({
               <div className="plan-pricing">
                 <div className="price-wrapper">
                   <span className="currency">$</span>
-                  <span className="amount">4.99</span>
+                  <span className="amount">5</span>
+                  <span className="billing-text">/ month</span>
                 </div>
-                <p className="billing-text">per month</p>
               </div>
 
               <div className="features-list">
@@ -103,7 +103,7 @@ const PaywallModal: React.FC<PaywallModalProps> = ({
                   <div className="feature-icon-box">
                     <span className="icon">∞</span>
                   </div>
-                  <span className="feature-text">Unlimited AI Conversations</span>
+                  <span className="feature-text">Unlimited Chat</span>
                 </div>
                 <div className="feature-item">
                   <div className="feature-icon-box">
@@ -115,7 +115,19 @@ const PaywallModal: React.FC<PaywallModalProps> = ({
                   <div className="feature-icon-box">
                     <span className="icon">◇</span>
                   </div>
-                  <span className="feature-text">10 Videos per day</span>
+                  <span className="feature-text">10 Videos per month</span>
+                </div>
+                <div className="feature-item">
+                  <div className="feature-icon-box">
+                    <span className="icon">☺</span>
+                  </div>
+                  <span className="feature-text">2 Custom Omi's</span>
+                </div>
+                <div className="feature-item">
+                  <div className="feature-icon-box">
+                    <span className="icon">⎇</span>
+                  </div>
+                  <span className="feature-text">5 AI Workflows</span>
                 </div>
                 <div className="feature-item">
                   <div className="feature-icon-box">
@@ -125,7 +137,7 @@ const PaywallModal: React.FC<PaywallModalProps> = ({
                 </div>
               </div>
 
-              <button 
+              <button
                 className="cta-button"
                 onClick={() => handleUpgrade('pro')}
               >
@@ -143,13 +155,13 @@ const PaywallModal: React.FC<PaywallModalProps> = ({
             <ElectricBorder
               color="#C0C0C0"
               speed={1}
-              chaos={0.5}
-              thickness={3.5}
-              style={{ borderRadius: 20 }}
+              chaos={0.3}
+              thickness={2}
+              style={{ borderRadius: 16, width: '100%', display: 'flex' }}
             >
-              <div className="ultra-plan-card">
+              <div className="ultra-plan-card" style={{ width: '100%', flex: 1 }}>
                 <div className="ultra-badge">ULTRA</div>
-                
+
                 <div className="plan-header">
                   <div className="plan-icon-badge ultra-icon">
                     <div className="icon-inner">✦</div>
@@ -164,8 +176,8 @@ const PaywallModal: React.FC<PaywallModalProps> = ({
                   <div className="price-wrapper">
                     <span className="currency">$</span>
                     <span className="amount">20</span>
+                    <span className="billing-text">/ month</span>
                   </div>
-                  <p className="billing-text">per month</p>
                 </div>
 
                 <div className="features-list">
@@ -173,7 +185,7 @@ const PaywallModal: React.FC<PaywallModalProps> = ({
                     <div className="feature-icon-box ultra-feature">
                       <span className="icon">∞</span>
                     </div>
-                    <span className="feature-text">Unlimited Everything</span>
+                    <span className="feature-text">Unlimited Chat</span>
                   </div>
                   <div className="feature-item">
                     <div className="feature-icon-box ultra-feature">
@@ -185,7 +197,13 @@ const PaywallModal: React.FC<PaywallModalProps> = ({
                     <div className="feature-icon-box ultra-feature">
                       <span className="icon">◇</span>
                     </div>
-                    <span className="feature-text">Unlimited Video Creation</span>
+                    <span className="feature-text">50 Videos per month</span>
+                  </div>
+                  <div className="feature-item">
+                    <div className="feature-icon-box ultra-feature">
+                      <span className="icon">★</span>
+                    </div>
+                    <span className="feature-text">Unlimited AI Workflows & Custom Omi's</span>
                   </div>
                   <div className="feature-item">
                     <div className="feature-icon-box ultra-feature">
@@ -201,11 +219,10 @@ const PaywallModal: React.FC<PaywallModalProps> = ({
                   </div>
                 </div>
 
-                <button 
+                <button
                   className="cta-button ultra-button"
                   onClick={() => handleUpgrade('ultra')}
                 >
-                  <div className="button-glow"></div>
                   <span className="button-text">Choose Ultra</span>
                 </button>
 

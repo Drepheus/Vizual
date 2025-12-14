@@ -2,5 +2,42 @@
   "version": 3,
   "middleware": {},
   "sortedMiddleware": [],
-  "functions": {}
+  "functions": {
+    "/api/generate-image/route": {
+      "files": [
+        "server/middleware-build-manifest.js",
+        "server/interception-route-rewrite-manifest.js",
+        "server/server-reference-manifest.js",
+        "server/app/api/generate-image/route_client-reference-manifest.js",
+        "server/edge/chunks/Omi-AI-1__next-internal_server_app_api_generate-image_route_actions_b1a3b65a.js",
+        "server/edge/chunks/b2346_next_dist_esm_shared_lib_005b7768._.js",
+        "server/edge/chunks/b2346_next_dist_esm_server_3f6e3ba1._.js",
+        "server/edge/chunks/b2346_next_dist_esm_8c5a3337._.js",
+        "server/edge/chunks/b2346_next_dist_compiled_cfc1a1fb._.js",
+        "server/edge/chunks/b2346_next_dist_f6fa525d._.js",
+        "server/edge/chunks/Omi-AI-1_edge-wrapper_95888e49.js",
+        "server/edge/chunks/9e73c_@opentelemetry_api_build_esm_9160013a._.js",
+        "server/edge/chunks/f8232_replicate_9171fe7d._.js",
+        "server/edge/chunks/[root-of-the-server]__4d6c2d94._.js",
+        "server/edge/chunks/turbopack-Omi-AI-1_edge-wrapper_57ade7df.js"
+      ],
+      "name": "app/api/generate-image/route",
+      "page": "/api/generate-image/route",
+      "matchers": [
+        {
+          "regexp": "^/api/generate-image(?:/)?$",
+          "originalSource": "/api/generate-image"
+        }
+      ],
+      "wasm": [],
+      "assets": [],
+      "env": {
+        "__NEXT_BUILD_ID": "development",
+        "NEXT_SERVER_ACTIONS_ENCRYPTION_KEY": "uvGAP7MmByndSk2KecWdZXxsvQO4e1MmkFxNCBpvGDs=",
+        "__NEXT_PREVIEW_MODE_ID": "1447ba07f29cd49bd966129c4cb5bba4",
+        "__NEXT_PREVIEW_MODE_ENCRYPTION_KEY": "1d10a3bf79111d64303929a82dbef10ae02d6deba2a551943b791eba953be787",
+        "__NEXT_PREVIEW_MODE_SIGNING_KEY": "a5b25f7f9664ec328b0e25830581b0141fdd6521f6f892e52fa4e4a4cffd6cb2"
+      }
+    }
+  }
 }

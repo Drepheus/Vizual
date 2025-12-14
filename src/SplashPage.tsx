@@ -46,7 +46,7 @@ function SplashPage() {
   const { user } = useAuth();
   const router = useRouter();
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
-  
+
   // Chat state management (replacing AI SDK)
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -79,10 +79,10 @@ function SplashPage() {
   // Paywall and subscription management
   const [showPaywall, setShowPaywall] = useState(false);
   const [paywallLimitType, setPaywallLimitType] = useState<'chat' | 'image' | 'video'>('chat');
-  const [paywallUsage, setPaywallUsage] = useState<{ current: number; limit: number; resetAt: string | null }>({ 
-    current: 0, 
-    limit: 15, 
-    resetAt: null 
+  const [paywallUsage, setPaywallUsage] = useState<{ current: number; limit: number; resetAt: string | null }>({
+    current: 0,
+    limit: 15,
+    resetAt: null
   });
 
   // Conversation management
@@ -187,10 +187,10 @@ function SplashPage() {
   // Helper function to check usage and show paywall if needed
   const checkAndShowPaywall = async (usageType: UsageType): Promise<boolean> => {
     if (!user) return true; // Allow guests to use without limits for now
-    
+
     try {
       const result = await checkUsageLimit(user.id, usageType);
-      
+
       if (!result.canPerform) {
         setPaywallLimitType(usageType === 'chat' ? 'chat' : usageType === 'image_gen' ? 'image' : 'video');
         setPaywallUsage({
@@ -201,7 +201,7 @@ function SplashPage() {
         setShowPaywall(true);
         return false;
       }
-      
+
       return true;
     } catch (error) {
       console.error('Error checking usage limit:', error);
@@ -244,14 +244,14 @@ function SplashPage() {
   // Fetch subscription tier
   const fetchSubscriptionTier = async () => {
     if (!user) return;
-    
+
     try {
       const { data, error } = await supabase
         .from('users')
         .select('subscription_tier')
         .eq('id', user.id)
         .single();
-      
+
       if (error) throw error;
       setSubscriptionTier(data?.subscription_tier || 'free');
     } catch (error) {
@@ -275,7 +275,7 @@ function SplashPage() {
   // Load just the list of conversations (don't auto-load messages)
   const loadConversationsOnly = async () => {
     if (!user) return;
-    
+
     const userConversations = await db.getUserConversations(user.id);
     setConversations(userConversations);
   };
@@ -283,14 +283,14 @@ function SplashPage() {
   const loadConversation = async (conversationId: string) => {
     setCurrentConversationId(conversationId);
     const dbMessages = await db.getConversationMessages(conversationId);
-    
+
     // Convert database messages to simple Message format
     const aiMessages: Message[] = dbMessages.map(msg => ({
       id: msg.id || `msg-${Date.now()}-${Math.random()}`,
       role: msg.role as 'user' | 'assistant',
       content: msg.content,
     }));
-    
+
     setMessages(aiMessages);
   };
 
@@ -312,13 +312,13 @@ function SplashPage() {
 
   const handleDeleteConversation = async (conversationId: string) => {
     await db.deleteConversation(conversationId);
-    
+
     // If deleting current conversation, clear it
     if (conversationId === currentConversationId) {
       setCurrentConversationId(null);
       setMessages([]);
     }
-    
+
     await loadConversationsOnly(); // Refresh list only
   };
 
@@ -346,31 +346,31 @@ function SplashPage() {
     e.preventDefault();
     console.log('handleSubmit called - Input:', input.trim(), '| isLoading:', isLoading);
     console.log('Messages count:', messages.length);
-    
+
     if (input.trim() && !isLoading && !isGeneratingImage && !isGeneratingVideo) {
       // If Video Gen mode is active, generate a video instead of sending a chat message
       if (isVideoGenActive) {
         // Check usage limit before proceeding
         const canProceed = await checkAndShowPaywall('video_gen');
         if (!canProceed) return;
-        
+
         console.log('Generating video with prompt:', input.trim());
         setIsGeneratingVideo(true);
         setGeneratedVideo(null);
-        
+
         try {
           const response = await fetch('/api/generate-video', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ prompt: input.trim() }),
           });
-          
+
           const data = await response.json();
-          
+
           if (response.ok && data.videoUrl) {
             console.log('Video generated successfully:', data.videoUrl);
             setGeneratedVideo(data.videoUrl);
-            
+
             // Save generated video to database
             if (user) {
               try {
@@ -380,17 +380,17 @@ function SplashPage() {
                 console.error('Failed to save video to gallery:', saveError);
               }
             }
-            
+
             // Increment usage after successful generation
             if (user) {
               await incrementUsage(user.id, 'video_gen');
             }
-            
+
             // Scroll to video after a short delay to allow render
             setTimeout(() => {
-              videoContainerRef.current?.scrollIntoView({ 
-                behavior: 'smooth', 
-                block: 'start' 
+              videoContainerRef.current?.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
               });
             }, 100);
           } else {
@@ -406,30 +406,30 @@ function SplashPage() {
         }
         return;
       }
-      
+
       // If Instant Gen mode is active, generate an image instead of sending a chat message
       if (isInstantGenActive) {
         // Check usage limit before proceeding
         const canProceed = await checkAndShowPaywall('image_gen');
         if (!canProceed) return;
-        
+
         console.log('Generating image with prompt:', input.trim());
         setIsGeneratingImage(true);
         setGeneratedImage(null);
-        
+
         try {
           const response = await fetch('/api/generate-image', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ prompt: input.trim(), aspectRatio: '3:2' }),
           });
-          
+
           const data = await response.json();
-          
+
           if (response.ok && data.imageUrl) {
             console.log('Image generated successfully:', data.imageUrl);
             setGeneratedImage(data.imageUrl);
-            
+
             // Save generated image to database
             if (user) {
               try {
@@ -439,17 +439,17 @@ function SplashPage() {
                 console.error('Failed to save image to gallery:', saveError);
               }
             }
-            
+
             // Increment usage after successful generation
             if (user) {
               await incrementUsage(user.id, 'image_gen');
             }
-            
+
             // Scroll to image after a short delay to allow render
             setTimeout(() => {
-              imageContainerRef.current?.scrollIntoView({ 
-                behavior: 'smooth', 
-                block: 'start' 
+              imageContainerRef.current?.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
               });
             }, 100);
           } else {
@@ -465,15 +465,15 @@ function SplashPage() {
         }
         return;
       }
-      
+
       console.log('Processing message submission...');
       console.log('=== CURRENT STATE CHECK ===');
       console.log('isVideoGenActive:', isVideoGenActive);
       console.log('isInstantGenActive:', isInstantGenActive);
       console.log('selectedFeature:', selectedFeature);
-      
+
       // NO USAGE LIMIT FOR CHAT - unlimited messages for all users
-      
+
       // Create a new conversation if this is the first message and user is logged in
       if (user && !currentConversationId && messages.length === 0) {
         console.log('Creating new conversation for logged-in user...');
@@ -490,18 +490,18 @@ function SplashPage() {
       try {
         setIsLoading(true);
         console.log('Sending message:', { text: input.trim() });
-        
+
         // Add user message to UI immediately
         const userMessage: Message = {
           id: `user-${Date.now()}`,
           role: 'user',
           content: input.trim(),
         };
-        
+
         setMessages(prev => [...prev, userMessage]);
         setInput(''); // Clear input immediately
         setAttachedFiles([]);
-        
+
         // Call chat API
         const response = await fetch('/api/chat', {
           method: 'POST',
@@ -510,26 +510,26 @@ function SplashPage() {
             messages: [...messages, userMessage]
           }),
         });
-        
+
         if (!response.ok) {
           throw new Error('API call failed');
         }
-        
+
         const data = await response.json();
         console.log('API response:', data);
-        
+
         // Add assistant message to UI
         const assistantMessage: Message = {
           id: `assistant-${Date.now()}`,
           role: 'assistant',
           content: data.message,
         };
-        
+
         setMessages(prev => [...prev, assistantMessage]);
         setIsLoading(false);
-        
+
         // NO USAGE TRACKING FOR CHAT - unlimited messages
-        
+
       } catch (error) {
         console.error('Error in sendMessage:', error);
         console.error('Error details:', {
@@ -583,7 +583,7 @@ function SplashPage() {
   // Handle AI model selection
   const handleModelSelect = (modelName: string) => {
     setSelectedModel(modelName);
-    
+
     // Add fade out animation to models section
     const aiModelsSection = document.getElementById('ai-models-section');
     if (aiModelsSection) {
@@ -593,16 +593,16 @@ function SplashPage() {
     // After fade out, scroll back to chat and hide models
     setTimeout(() => {
       setShowAIModels(false);
-      
+
       // Smooth scroll back to chat interface
       const chatInterface = document.querySelector('.chat-interface');
       if (chatInterface) {
-        chatInterface.scrollIntoView({ 
+        chatInterface.scrollIntoView({
           behavior: 'smooth',
           block: 'center'
         });
       }
-      
+
       // Remove fade out class after animation
       setTimeout(() => {
         if (aiModelsSection) {
@@ -618,8 +618,8 @@ function SplashPage() {
   // Transform data for InfiniteScroll component
   const infiniteScrollItems = aiModelsData.map((modelName) => ({
     content: (
-      <div 
-        className="ai-model-card clickable" 
+      <div
+        className="ai-model-card clickable"
         onClick={() => handleModelSelect(modelName)}
       >
         {modelName}
@@ -645,7 +645,7 @@ function SplashPage() {
       <div className="splash-page">
         {/* Hamburger Menu - Fixed to top-left corner */}
         {user && (
-          <button 
+          <button
             className="conversations-btn"
             onClick={() => setShowConversations(true)}
             title="Conversations"
@@ -723,7 +723,7 @@ function SplashPage() {
               <div className="selected-model">
                 <span className="model-label">Active Model:</span>
                 <span className="model-name">{selectedModel}</span>
-                <button 
+                <button
                   className="model-change-btn"
                   onClick={() => setShowAIModels(true)}
                   title="Change AI model"
@@ -742,7 +742,7 @@ function SplashPage() {
               const isVideoGenButton = button.name === 'Video Gen';
               const isCompareButton = button.name === 'Compare';
               const isPro = isCompareButton || isVideoGenButton;
-              
+
               return (
                 <button
                   key={button.name}
@@ -779,7 +779,7 @@ function SplashPage() {
           </div>
 
 
-          
+
           {/* Chat Container - Show in Compare Mode or when messages exist */}
           {(messages.length > 0 || isCompareMode) && (
             <div className={`chat-container ${isCompareMode ? 'compare-mode' : ''} ${isFullscreen ? 'fullscreen' : ''}`}>
@@ -788,7 +788,7 @@ function SplashPage() {
                 <div className="panel-header">
                   <h3>
                     {isCompareMode ? (
-                      <select 
+                      <select
                         className="model-selector"
                         value={selectedModel}
                         onChange={(e) => setSelectedModel(e.target.value)}
@@ -802,7 +802,7 @@ function SplashPage() {
                       selectedModel || 'Primary AI'
                     )}
                   </h3>
-                  <button 
+                  <button
                     className="fullscreen-toggle"
                     onClick={() => setIsFullscreen(!isFullscreen)}
                     title={isFullscreen ? "Exit Fullscreen (ESC)" : "Fullscreen"}
@@ -821,8 +821,8 @@ function SplashPage() {
                         <div key={message.id} className={`message ${message.role}`}>
                           <div className="message-content">
                             {message.role === 'assistant' ? (
-                              <FormattedText 
-                                text={getMessageText(message)} 
+                              <FormattedText
+                                text={getMessageText(message)}
                                 delay={0.2}
                               />
                             ) : (
@@ -853,7 +853,7 @@ function SplashPage() {
                   <div className="panel-header">
                     <h3>
                       {secondaryModel || (
-                        <select 
+                        <select
                           className="model-selector"
                           value={secondaryModel || ''}
                           onChange={(e) => setSecondaryModel(e.target.value)}
@@ -878,8 +878,8 @@ function SplashPage() {
                           <div key={index} className={`message ${message.role}`}>
                             <div className="message-content">
                               {message.role === 'assistant' ? (
-                                <FormattedText 
-                                  text={message.content} 
+                                <FormattedText
+                                  text={message.content}
                                   delay={0.2}
                                 />
                               ) : (
@@ -906,9 +906,9 @@ function SplashPage() {
                 {attachedFiles.map((file, index) => (
                   <div key={index} className="attached-file">
                     <span className="file-icon">
-                      {file.type.startsWith('image/') ? '🖼️' : 
-                       file.type.startsWith('video/') ? '🎥' : 
-                       file.type.includes('pdf') ? '📄' : '📎'}
+                      {file.type.startsWith('image/') ? '🖼️' :
+                        file.type.startsWith('video/') ? '🎥' :
+                          file.type.includes('pdf') ? '📄' : '📎'}
                     </span>
                     <span className="file-name">{file.name}</span>
                     <button
@@ -923,7 +923,7 @@ function SplashPage() {
                 ))}
               </div>
             )}
-            
+
             {/* Image Gen Mode Indicator */}
             {isInstantGenActive && (
               <div className="instant-gen-indicator">
@@ -943,7 +943,7 @@ function SplashPage() {
                 </span>
               </div>
             )}
-            
+
             <div className={`chat-input-container ${isSynthesizeActive ? 'synthesize-active' : ''} ${isInstantGenActive ? 'instant-gen-active' : ''} ${isVideoGenActive ? 'video-gen-active' : ''}`}>
               <input
                 type="file"
@@ -972,35 +972,35 @@ function SplashPage() {
                 placeholder={
                   isVideoGenActive
                     ? "🎬 Describe your video scene (e.g., 'a woman walking through Tokyo at night')..."
-                    : isInstantGenActive 
-                    ? "⚡ Describe your image (e.g., 'A sunset over mountains')..." 
-                    : isSynthesizeActive 
-                      ? "Type your message in Synthesize mode..." 
-                      : "Type your message..."
+                    : isInstantGenActive
+                      ? "⚡ Describe your image (e.g., 'A sunset over mountains')..."
+                      : isSynthesizeActive
+                        ? "Type your message in Synthesize mode..."
+                        : "Type your message..."
                 }
                 className="chat-input"
                 autoFocus
                 disabled={isLoading || isGeneratingImage || isGeneratingVideo}
               />
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 className="chat-submit"
                 disabled={!input.trim() || isLoading || isGeneratingImage || isGeneratingVideo}
               >
                 {isLoading ? (
                   <div className="loading-spinner">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" opacity="0.3"/>
-                      <path d="M12 2A10 10 0 0 1 22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" opacity="0.3" />
+                      <path d="M12 2A10 10 0 0 1 22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                     </svg>
                   </div>
                 ) : (
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M2 12L22 2L13 21L11 13L2 12Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M2 12L22 2L13 21L11 13L2 12Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 )}
               </button>
-              
+
               {/* Electric Border Animation Overlay for Synthesize Mode */}
               {isSynthesizeActive && (
                 <div className="electric-border-overlay">
@@ -1008,48 +1008,48 @@ function SplashPage() {
                     <defs>
                       <filter id="electric-glow">
                         <feTurbulence baseFrequency="0.02" numOctaves="3" result="noise" seed="1">
-                          <animate attributeName="seed" values="1;5;1" dur="3s" repeatCount="indefinite"/>
+                          <animate attributeName="seed" values="1;5;1" dur="3s" repeatCount="indefinite" />
                         </feTurbulence>
-                        <feDisplacementMap in="SourceGraphic" in2="noise" scale="2"/>
-                        <feGaussianBlur stdDeviation="0.5"/>
-                        <feColorMatrix values="0 0 0 0 0.9 0 0 0 0 0.9 0 0 0 0 0.9 0 0 0 1 0"/>
+                        <feDisplacementMap in="SourceGraphic" in2="noise" scale="2" />
+                        <feGaussianBlur stdDeviation="0.5" />
+                        <feColorMatrix values="0 0 0 0 0.9 0 0 0 0 0.9 0 0 0 0 0.9 0 0 0 1 0" />
                       </filter>
                     </defs>
-                    <rect 
-                      x="1" 
-                      y="1" 
-                      width="98" 
-                      height="98" 
-                      fill="none" 
-                      stroke="#e5e5e5" 
+                    <rect
+                      x="1"
+                      y="1"
+                      width="98"
+                      height="98"
+                      fill="none"
+                      stroke="#e5e5e5"
                       strokeWidth="0.5"
                       filter="url(#electric-glow)"
                       rx="3"
                       ry="3"
                     >
-                      <animate 
-                        attributeName="stroke-opacity" 
-                        values="0.3;1;0.3" 
-                        dur="2s" 
+                      <animate
+                        attributeName="stroke-opacity"
+                        values="0.3;1;0.3"
+                        dur="2s"
                         repeatCount="indefinite"
                       />
                     </rect>
-                    <rect 
-                      x="0.5" 
-                      y="0.5" 
-                      width="99" 
-                      height="99" 
-                      fill="none" 
-                      stroke="#e5e5e5" 
+                    <rect
+                      x="0.5"
+                      y="0.5"
+                      width="99"
+                      height="99"
+                      fill="none"
+                      stroke="#e5e5e5"
                       strokeWidth="0.3"
                       rx="3"
                       ry="3"
                       opacity="0.6"
                     >
-                      <animate 
-                        attributeName="stroke-dasharray" 
-                        values="0,400;200,200;400,0;0,400" 
-                        dur="4s" 
+                      <animate
+                        attributeName="stroke-dasharray"
+                        values="0,400;200,200;400,0;0,400"
+                        dur="4s"
                         repeatCount="indefinite"
                       />
                     </rect>
@@ -1076,18 +1076,18 @@ function SplashPage() {
                   <div className="generated-image-header">
                     <h3>⚡ Generated Image</h3>
                     <div className="generated-image-actions">
-                      <a 
-                        href="https://percify.io" 
-                        target="_blank" 
+                      <a
+                        href="https://percify.io"
+                        target="_blank"
                         rel="noopener noreferrer"
                         className="image-action-btn percify-btn"
                         title="Edit with Percify"
                       >
                         ✨ Percify It
                       </a>
-                      <a 
-                        href={generatedImage} 
-                        target="_blank" 
+                      <a
+                        href={generatedImage}
+                        target="_blank"
                         rel="noopener noreferrer"
                         className="image-action-btn"
                         title="Open in new tab"
@@ -1103,9 +1103,9 @@ function SplashPage() {
                       </button>
                     </div>
                   </div>
-                  <img 
-                    src={generatedImage} 
-                    alt="Generated" 
+                  <img
+                    src={generatedImage}
+                    alt="Generated"
                     className="generated-image"
                   />
                 </div>
@@ -1136,17 +1136,17 @@ function SplashPage() {
                   <div className="generated-video-header">
                     <h3>🎬 Generated Video</h3>
                     <div className="generated-video-actions">
-                      <a 
-                        href={generatedVideo} 
-                        target="_blank" 
+                      <a
+                        href={generatedVideo}
+                        target="_blank"
                         rel="noopener noreferrer"
                         className="video-action-btn"
                         title="Open in new tab"
                       >
                         🔗 Open
                       </a>
-                      <a 
-                        href={generatedVideo} 
+                      <a
+                        href={generatedVideo}
                         download="generated-video.mp4"
                         className="video-action-btn"
                         title="Download video"
@@ -1162,8 +1162,8 @@ function SplashPage() {
                       </button>
                     </div>
                   </div>
-                  <video 
-                    src={generatedVideo} 
+                  <video
+                    src={generatedVideo}
                     controls
                     className="generated-video"
                     autoPlay
@@ -1180,14 +1180,14 @@ function SplashPage() {
             </div>
           )}
         </div>
-      
-      {/* AI Models Section */}
-      {showAIModels && (
-        <div className="ai-models-overlay" onClick={() => setShowAIModels(false)}>
-          <div id="ai-models-section" className={`ai-models-section ${showAIModels ? 'show' : ''}`} onClick={(e) => e.stopPropagation()}>
-            <h2 className="ai-models-title">Popular AI Models</h2>
+
+        {/* AI Models Section */}
+        {showAIModels && (
+          <div className="ai-models-overlay" onClick={() => setShowAIModels(false)}>
+            <div id="ai-models-section" className={`ai-models-section ${showAIModels ? 'show' : ''}`} onClick={(e) => e.stopPropagation()}>
+              <h2 className="ai-models-title">Popular AI Models</h2>
               <div className="ai-models-container">
-                <InfiniteScroll 
+                <InfiniteScroll
                   items={infiniteScrollItems}
                   width="100%"
                   maxHeight="400px"
@@ -1200,11 +1200,11 @@ function SplashPage() {
                   pauseOnHover={true}
                 />
               </div>
+            </div>
           </div>
-        </div>
-      )}
-    </div>
-      
+        )}
+      </div>
+
       {/* ChromaGrid Overlay Animation for Personas */}
       {isPersonasActive && (
         <ChromaGrid
@@ -1303,14 +1303,14 @@ function SplashPage() {
           />
         </div>
       )}
-      
+
       {/* Dock - always visible - Outside scrollable container */}
       <Dock items={dockItems} />
-      
+
       {/* Infinite Menu Overlay */}
-      <InfiniteMenu 
-        isVisible={showCreateMenu} 
-        onClose={() => setShowCreateMenu(false)} 
+      <InfiniteMenu
+        isVisible={showCreateMenu}
+        onClose={() => setShowCreateMenu(false)}
       />
 
       {/* Paywall Modal */}

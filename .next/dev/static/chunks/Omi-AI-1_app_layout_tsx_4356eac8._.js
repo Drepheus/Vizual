@@ -8,9 +8,9 @@
   "static/chunks/a6f6b_@sentry_core_build_esm_7132d2a7._.js",
   "static/chunks/8d473_@sentry-internal_browser-utils_build_esm_af378d5b._.js",
   "static/chunks/747af_@sentry-internal_replay_build_npm_esm_index_bfb4d7e7.js",
-  "static/chunks/3a5a7__pnpm_85a980c8._.js",
-  "static/chunks/Omi-AI-1_00039f33._.js",
-  "static/chunks/Omi-AI-1_c1e01803._.css"
+  "static/chunks/3a5a7__pnpm_4d0ab279._.js",
+  "static/chunks/Omi-AI-1_fbad5d62._.js",
+  "static/chunks/Omi-AI-1_d2f9ab8f._.css"
 ],
     source: "dynamic"
 });

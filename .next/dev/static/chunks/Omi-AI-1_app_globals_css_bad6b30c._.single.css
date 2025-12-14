@@ -1904,6 +1904,10 @@ body {
   animation-play-state: running;
 }
 
+.paused {
+  animation-play-state: paused;
+}
+
 .\[mask-image\:linear-gradient\(white\,transparent\)\] {
   -webkit-mask-image: linear-gradient(#fff, #0000);
   mask-image: linear-gradient(#fff, #0000);
