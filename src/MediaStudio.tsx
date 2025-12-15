@@ -22,13 +22,10 @@ const sidebarTools = [
   { name: 'Image', icon: '🎨', section: 'AI Tools' },
   { name: 'Video', icon: '🎬', section: 'AI Tools' },
   { name: 'Blueprints', icon: '📋', section: 'AI Tools', badge: 'Beta' },
-  { name: 'Flow State', icon: '∞', section: 'AI Tools' },
-  { name: 'Realtime Canvas', icon: '⚡', section: 'AI Tools' },
-  { name: 'Realtime Generation', icon: '✨', section: 'AI Tools' },
-  { name: 'Canvas Editor', icon: '🖼️', section: 'AI Tools' },
-  { name: 'Universal Upscaler', icon: '🔍', section: 'AI Tools' },
-  { name: 'Models & Training', icon: '🧠', section: 'Advanced' },
-  { name: 'Texture Generation', icon: '🎭', section: 'Advanced', badge: 'Alpha' },
+  { name: 'Voice', icon: '🎙️', section: 'AI Tools' },
+  { name: 'Music', icon: '🎵', section: 'AI Tools' },
+  { name: 'Avatars', icon: '👤', section: 'AI Tools' },
+  { name: 'Assistant', icon: '🤖', section: 'AI Tools' },
 ];
 
 const categoryTabs = [
@@ -38,6 +35,16 @@ const categoryTabs = [
   { name: 'Image', icon: '🎨' },
   { name: 'Upscaler', icon: '🔍' },
   { name: 'Canvas Editor', icon: '🖼️' },
+  { name: 'More', icon: '⋯' },
+];
+
+const modelTabs = [
+  { name: 'Flux Schnell', icon: '⚡' },
+  { name: 'Midjourney V6', icon: '🎨' },
+  { name: 'Kling', icon: '🎬' },
+  { name: 'Runway Gen-3', icon: '🎥' },
+  { name: 'Luma Dream Machine', icon: '☁️' },
+  { name: 'Stable Diffusion 3', icon: 'Stability' },
   { name: 'More', icon: '⋯' },
 ];
 
@@ -165,6 +172,7 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
   const [activeFilter, setActiveFilter] = useState('Trending');
   const [activeTool, setActiveTool] = useState('Home');
   const [showPaywall, setShowPaywall] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { user } = useAuth();
 
   // Image Generation State
@@ -207,6 +215,48 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
       alert('Failed to generate image. Please try again.');
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  // Video Generation State
+  const [videoPromptInput, setVideoPromptInput] = useState('');
+  const [generatedVideo, setGeneratedVideo] = useState<string | null>(null);
+  const [isGeneratingVideo, setIsGeneratingVideo] = useState(false);
+
+  const handleGenerateVideo = async () => {
+    if (!videoPromptInput.trim() || isGeneratingVideo) return;
+
+    setIsGeneratingVideo(true);
+    setGeneratedVideo(null);
+
+    try {
+      const response = await fetch('/api/generate-video', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: videoPromptInput.trim() }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.videoUrl) {
+        setGeneratedVideo(data.videoUrl);
+
+        if (user) {
+          try {
+            await saveGeneratedMedia(user.id, 'video', data.videoUrl, videoPromptInput.trim());
+            await incrementUsage(user.id, 'video_gen');
+          } catch (error) {
+            console.error('Failed to save generated video:', error);
+          }
+        }
+      } else {
+        alert('Failed to generate video: ' + (data.error || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Error generating video:', error);
+      alert('Failed to generate video. Please try again.');
+    } finally {
+      setIsGeneratingVideo(false);
     }
   };
 
@@ -268,6 +318,34 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
     },
   ];
 
+  /* Video Studio Tools */
+  const videoStudioTools = [
+    {
+      name: 'Duration',
+      icon: '⏱️',
+      tooltip: 'Video Duration',
+      options: ['3s', '5s', '10s']
+    },
+    {
+      name: 'Mode',
+      icon: '⚡',
+      tooltip: 'Generation Mode',
+      options: ['Fast', 'High Quality']
+    },
+    {
+      name: 'Aspect',
+      icon: '📐',
+      tooltip: 'Aspect Ratio',
+      options: ['16:9', '9:16', '1:1']
+    },
+    {
+      name: 'Motion',
+      icon: '🏃',
+      tooltip: 'Motion Strength',
+      options: ['Low', 'Medium', 'High']
+    }
+  ];
+
   /* Dropdown State */
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [selectedModel, setSelectedModel] = useState('Flux Schnell');
@@ -287,6 +365,19 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
     setActiveDropdown(null);
   };
 
+  const [selectedVideoDuration, setSelectedVideoDuration] = useState('3s');
+  const [selectedVideoMode, setSelectedVideoMode] = useState('Fast');
+  const [selectedVideoAspect, setSelectedVideoAspect] = useState('16:9');
+  const [selectedVideoMotion, setSelectedVideoMotion] = useState('Medium');
+
+  const handleVideoOptionSelect = (toolName: string, option: string) => {
+    if (toolName === 'Duration') setSelectedVideoDuration(option);
+    if (toolName === 'Mode') setSelectedVideoMode(option);
+    if (toolName === 'Aspect') setSelectedVideoAspect(option);
+    if (toolName === 'Motion') setSelectedVideoMotion(option);
+    setActiveDropdown(null);
+  };
+
   const holidayBlueprints = [
     { title: 'Bauble Macro Portrait', image: 'https://images.unsplash.com/photo-1606830733403-ad01843b23d9?w=400&h=400&fit=crop' },
     { title: 'Pet Christmas Portrait', image: 'https://images.unsplash.com/photo-1545048702-79362596cdc9?w=400&h=400&fit=crop' },
@@ -300,6 +391,73 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
     { title: 'Abstract Oil Painting', image: 'https://images.unsplash.com/photo-1541963463532-d68292c34b19?w=400&h=400&fit=crop' },
     { title: 'Realistic Space Suit', image: 'https://images.unsplash.com/photo-1614728853913-1e32005e3073?w=400&h=400&fit=crop' },
     { title: 'Underwater Coral Reef', image: 'https://images.unsplash.com/photo-1546026423-cc4642628d2b?w=400&h=400&fit=crop' },
+    { title: 'Underwater Coral Reef', image: 'https://images.unsplash.com/photo-1546026423-cc4642628d2b?w=400&h=400&fit=crop' },
+  ];
+
+  const featuredVideos = [
+    { title: 'Cosmic Journey', image: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=400&h=400&fit=crop' },
+    { title: 'Ocean Depth', image: 'https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=400&h=400&fit=crop' },
+    { title: 'City Lights', image: 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=400&h=400&fit=crop' },
+    { title: 'Forest Mist', image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=400&fit=crop' },
+    { title: 'Desert Dunes', image: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?w=400&h=400&fit=crop' },
+  ];
+
+  const featuredVoices = [
+    { title: 'Natural Narrator', description: 'Warm, conversational voice', icon: '🎙️' },
+    { title: 'Professional Host', description: 'Clear, authoritative tone', icon: '📢' },
+    { title: 'Storyteller', description: 'Expressive, dramatic delivery', icon: '📖' },
+    { title: 'Podcast Voice', description: 'Friendly, engaging style', icon: '🎧' },
+    { title: 'Documentary', description: 'Deep, cinematic narrator', icon: '🎬' },
+  ];
+
+  const voiceStudioTools = [
+    { name: 'Voice', icon: '🎙️', tooltip: 'Select voice type', options: ['Natural', 'Professional', 'Whisper', 'Energetic'] },
+    { name: 'Language', icon: '🌐', tooltip: 'Output language', options: ['English', 'Spanish', 'French', 'German', 'Japanese'] },
+    { name: 'Speed', icon: '⚡', tooltip: 'Speaking speed', options: ['0.5x', '0.75x', '1x', '1.25x', '1.5x'] },
+    { name: 'Emotion', icon: '😊', tooltip: 'Voice emotion', options: ['Neutral', 'Happy', 'Serious', 'Excited'] },
+  ];
+
+  const featuredMusic = [
+    { title: 'Ambient Dreams', genre: 'Ambient', duration: '3:45', icon: '🌙' },
+    { title: 'Epic Orchestral', genre: 'Cinematic', duration: '4:20', icon: '🎻' },
+    { title: 'Lo-Fi Beats', genre: 'Lo-Fi', duration: '2:30', icon: '🎹' },
+    { title: 'Electronic Pulse', genre: 'EDM', duration: '3:15', icon: '⚡' },
+    { title: 'Acoustic Sunrise', genre: 'Acoustic', duration: '3:00', icon: '🎸' },
+  ];
+
+  const musicStudioTools = [
+    { name: 'Genre', icon: '🎵', tooltip: 'Music genre', options: ['Ambient', 'Cinematic', 'Lo-Fi', 'EDM', 'Rock', 'Jazz'] },
+    { name: 'Mood', icon: '😌', tooltip: 'Track mood', options: ['Calm', 'Upbeat', 'Dramatic', 'Melancholic'] },
+    { name: 'Duration', icon: '⏱️', tooltip: 'Track length', options: ['30s', '1min', '2min', '3min'] },
+    { name: 'Tempo', icon: '🥁', tooltip: 'Beats per minute', options: ['Slow', 'Medium', 'Fast', 'Very Fast'] },
+  ];
+
+  const featuredAvatars = [
+    { title: 'Professional', description: 'Business-ready avatar', image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=faces' },
+    { title: 'Creative Artist', description: 'Artistic personality', image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&h=200&fit=crop&crop=faces' },
+    { title: 'Tech Expert', description: 'Modern tech persona', image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&h=200&fit=crop&crop=faces' },
+    { title: 'Friendly Guide', description: 'Approachable helper', image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&h=200&fit=crop&crop=faces' },
+  ];
+
+  const avatarStudioTools = [
+    { name: 'Style', icon: '🎨', tooltip: 'Avatar style', options: ['Realistic', 'Cartoon', '3D Render', 'Anime'] },
+    { name: 'Expression', icon: '😊', tooltip: 'Facial expression', options: ['Neutral', 'Smiling', 'Professional', 'Friendly'] },
+    { name: 'Background', icon: '🖼️', tooltip: 'Background type', options: ['Transparent', 'Gradient', 'Office', 'Studio'] },
+    { name: 'Pose', icon: '👤', tooltip: 'Avatar pose', options: ['Front', 'Side', '3/4 View', 'Dynamic'] },
+  ];
+
+  const featuredAssistants = [
+    { title: 'General Assistant', description: 'All-purpose AI helper', icon: '🤖', color: '#a855f7' },
+    { title: 'Code Companion', description: 'Programming expert', icon: '💻', color: '#22c55e' },
+    { title: 'Writing Partner', description: 'Creative writing help', icon: '✍️', color: '#f59e0b' },
+    { title: 'Research Analyst', description: 'Deep research assistant', icon: '🔍', color: '#3b82f6' },
+  ];
+
+  const assistantStudioTools = [
+    { name: 'Personality', icon: '🧠', tooltip: 'AI personality', options: ['Friendly', 'Professional', 'Creative', 'Technical'] },
+    { name: 'Expertise', icon: '📚', tooltip: 'Knowledge area', options: ['General', 'Coding', 'Writing', 'Research'] },
+    { name: 'Response', icon: '💬', tooltip: 'Response style', options: ['Concise', 'Detailed', 'Step-by-step', 'Conversational'] },
+    { name: 'Creativity', icon: '✨', tooltip: 'Creative level', options: ['Conservative', 'Balanced', 'Creative', 'Wild'] },
   ];
 
   return (
@@ -321,8 +479,16 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
         />
       )}
 
+      {/* Mobile Sidebar Overlay */}
+      {isSidebarOpen && (
+        <div
+          className="sidebar-overlay"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       {/* Left Sidebar */}
-      <div className="media-sidebar">
+      <div className={`media-sidebar ${isSidebarOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
           <div className="sidebar-logo">
             <span className="logo-avatar">👤</span>
@@ -330,6 +496,13 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
               <span className="user-name">Omi.AI</span>
               <button className="user-dropdown">▼</button>
             </div>
+            {/* Close Sidebar Button (Mobile) */}
+            <button
+              className="mobile-sidebar-close"
+              onClick={() => setIsSidebarOpen(false)}
+            >
+              ✕
+            </button>
           </div>
           <div className="sidebar-credits">
             <span className="credits-icon">⚡</span>
@@ -379,7 +552,10 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
               )}
               <button
                 className={`sidebar-item ${activeTool === tool.name ? 'active' : ''}`}
-                onClick={() => setActiveTool(tool.name)}
+                onClick={() => {
+                  setActiveTool(tool.name);
+                  setIsSidebarOpen(false);
+                }}
               >
                 <span className="sidebar-icon">{tool.icon}</span>
                 <span className="sidebar-label">{tool.name}</span>
@@ -398,6 +574,14 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
       </div>
 
       <motion.div className="media-main-content">
+        {/* Mobile Hamburger Menu */}
+        <button
+          className="mobile-menu-btn"
+          onClick={() => setIsSidebarOpen(true)}
+        >
+          ☰
+        </button>
+
         <motion.button
           className="close-btn"
           onClick={onClose}
@@ -595,9 +779,652 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
               </div>
             </div>
           </motion.div>
+        ) : activeTool === 'Video' ? (
+          <motion.div
+            className="video-studio-container"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            <div className="image-studio-hero">
+              <div
+                className="hero-background-image"
+                style={{ overflow: 'hidden' }}
+              >
+                <AnimatePresence mode="wait">
+                  <motion.video
+                    key={heroVideos[currentVideoIndex]}
+                    className="hero-video-background"
+                    autoPlay
+                    muted
+                    playsInline
+                    src={heroVideos[currentVideoIndex]}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 1.5 }}
+                    style={{ position: 'absolute', inset: 0, objectFit: 'cover', width: '100%', height: '100%' }}
+                    onEnded={() => {
+                      setCurrentVideoIndex((prev) => (prev + 1) % heroVideos.length);
+                    }}
+                  />
+                </AnimatePresence>
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 0%, rgba(10,5,15,0.9) 100%)' }} />
+              </div>
+
+              <div className="hero-content-center">
+                <h1 className="hero-large-text">Create <ShinyText text="Video" speed={10} className="media-studio-shiny-text" /></h1>
+                <div className="prompt-bar-wrapper">
+                  <div className="prompt-icon">🎬</div>
+                  <input
+                    type="text"
+                    placeholder="Describe a video..."
+                    className="prompt-input"
+                    value={videoPromptInput}
+                    onChange={(e) => setVideoPromptInput(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleGenerateVideo()}
+                  />
+                  <button
+                    className="generate-btn-small"
+                    onClick={handleGenerateVideo}
+                    disabled={isGeneratingVideo}
+                  >
+                    {isGeneratingVideo ? 'Generating...' : 'Generate'}
+                  </button>
+                </div>
+
+                <div className="quick-tools-row">
+                  {videoStudioTools.map(t => (
+                    <div
+                      className="quick-tool-item relative-container"
+                      key={t.name}
+                      onClick={() => handleToolClick(t.name)}
+                    >
+                      <div className={`quick-tool-icon-circle ${activeDropdown === t.name ? 'active-tool' : ''}`}>
+                        {t.icon}
+                      </div>
+                      <span className="quick-tool-label">
+                        {t.name === 'Duration' ? selectedVideoDuration :
+                          t.name === 'Mode' ? selectedVideoMode :
+                            t.name === 'Aspect' ? selectedVideoAspect :
+                              t.name === 'Motion' ? selectedVideoMotion : t.name}
+                      </span>
+
+                      {/* Custom Tooltip */}
+                      <div className="custom-tooltip">
+                        {t.tooltip}
+                      </div>
+
+                      {/* Dropdown Menu */}
+                      <AnimatePresence>
+                        {activeDropdown === t.name && (
+                          <motion.div
+                            className="tool-dropdown-menu"
+                            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            {t.options.map(option => (
+                              <div
+                                key={option}
+                                className="dropdown-option"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleVideoOptionSelect(t.name, option);
+                                }}
+                              >
+                                {option}
+                              </div>
+                            ))}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {generatedVideo && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="generated-image-section"
+                style={{ padding: '0 40px 40px' }}
+              >
+                <h2 className="section-title"><span className="title-highlight">Generated</span> Result</h2>
+                <div className="generated-image-container" style={{
+                  marginTop: '20px',
+                  borderRadius: '20px',
+                  overflow: 'hidden',
+                  border: '1px solid rgba(168, 85, 247, 0.3)',
+                  boxShadow: '0 0 40px rgba(168, 85, 247, 0.2)',
+                  maxWidth: '800px',
+                  margin: '20px auto 0'
+                }}>
+                  <video src={generatedVideo} controls autoPlay loop style={{ width: '100%', display: 'block' }} />
+                </div>
+              </motion.div>
+            )}
+
+            <div className="horizontal-scroll-section">
+              <div className="section-header-row">
+                <h2 className="section-title"><span className="title-highlight">Featured</span> Videos</h2>
+                <span className="view-more">View More →</span>
+              </div>
+              <div className="horizontal-cards-scroller-container">
+                <div className="horizontal-cards-scroller-track">
+                  {/* Original Items */}
+                  {featuredVideos.map((vid, i) => (
+                    <div className="horizontal-card" key={`orig-${i}`}>
+                      <img src={vid.image} alt={vid.title} />
+                      <span className="card-badge-new">New</span>
+                      <div className="card-overlay-title">{vid.title}</div>
+                      <div className="card-overlay-icon" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', fontSize: '2rem' }}>▶</div>
+                    </div>
+                  ))}
+                  {/* Duplicated Items for Loop */}
+                  {featuredVideos.map((vid, i) => (
+                    <div className="horizontal-card" key={`dup-${i}`}>
+                      <img src={vid.image} alt={vid.title} />
+                      <span className="card-badge-new">New</span>
+                      <div className="card-overlay-title">{vid.title}</div>
+                      <div className="card-overlay-icon" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', fontSize: '2rem' }}>▶</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        ) : activeTool === 'Blueprints' ? (
+          <motion.div
+            className="blueprints-page-container"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            {/* Blueprints Hero */}
+            <motion.div
+              className="hero-banner"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+            >
+              <AnimatePresence mode="wait">
+                <motion.video
+                  key="kling-hero"
+                  className="hero-video-background"
+                  autoPlay
+                  muted
+                  playsInline
+                  loop
+                  src="/videos/klingnextgen.mp4"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.5 }}
+                />
+              </AnimatePresence>
+              <div className="banner-content">
+                <h1 className="banner-title">
+                  Create with Omi <ShinyText text="Studio" speed={8} className="media-studio-shiny-text" />
+                </h1>
+              </div>
+            </motion.div>
+
+            {/* Model Tabs */}
+            <div className="category-tabs">
+              {modelTabs.map((tab, index) => (
+                <motion.button
+                  key={tab.name}
+                  className={`category-tab ${activeCategory === tab.name ? 'active' : ''}`}
+                  onClick={() => setActiveCategory(tab.name)}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 + (index * 0.05), duration: 0.3 }}
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <span className="tab-icon">{tab.icon}</span>
+                  <span className="tab-label">{tab.name}</span>
+                </motion.button>
+              ))}
+            </div>
+
+            {/* Blueprints Grid */}
+            <div className="category-content" style={{ padding: '0 40px 60px' }}>
+              <div className="blueprints-grid">
+                {featuredBlueprints.map((bp, i) => (
+                  <motion.div
+                    key={i}
+                    className="blueprint-card"
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: i * 0.05, duration: 0.3 }}
+                    whileHover={{ y: -5, transition: { duration: 0.2 } }}
+                  >
+                    <div className="card-image-wrapper">
+                      {bp.type === 'video' ? (
+                        <div style={{ position: 'absolute', inset: 0, background: bp.gradient }}>
+                          <video
+                            src={bp.image}
+                            muted
+                            loop
+                            playsInline
+                            className="card-image"
+                            style={{ objectFit: 'cover', width: '100%', height: '100%' }}
+                            onMouseOver={e => e.currentTarget.play()}
+                            onMouseOut={e => {
+                              e.currentTarget.pause();
+                              e.currentTarget.currentTime = 0;
+                            }}
+                          />
+                          <div className="card-gradient" />
+                          <div style={{ position: 'absolute', top: '10px', right: '10px', fontSize: '1.2rem', zIndex: 10 }}>▶</div>
+                        </div>
+                      ) : (
+                        <>
+                          <img src={bp.image} alt={bp.title} className="card-image" />
+                          <div className="card-gradient" />
+                        </>
+                      )}
+                    </div>
+                    <div className="card-content">
+                      <h3 className="card-title">{bp.title}</h3>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px', fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)' }}>
+                        <span>By Omi Team</span>
+                        <span>❤️ {Math.floor(Math.random() * 1000) + 100}</span>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+
+          </motion.div>
+        ) : activeTool === 'Voice' ? (
+          <motion.div
+            className="voice-studio-container"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            <div className="image-studio-hero" style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)' }}>
+              <div className="hero-background-image" style={{ overflow: 'hidden' }}>
+                {/* Soundwave Animation Background */}
+                <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                  {[...Array(40)].map((_, i) => (
+                    <motion.div
+                      key={i}
+                      style={{
+                        width: '4px',
+                        background: 'linear-gradient(180deg, #a855f7, #ec4899)',
+                        borderRadius: '2px',
+                      }}
+                      animate={{
+                        height: [20, Math.random() * 80 + 20, 20],
+                      }}
+                      transition={{
+                        duration: 0.8,
+                        repeat: Infinity,
+                        delay: i * 0.05,
+                        ease: 'easeInOut',
+                      }}
+                    />
+                  ))}
+                </div>
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 0%, rgba(10,5,15,0.95) 100%)' }} />
+              </div>
+
+              <div className="hero-content-center">
+                <h1 className="hero-large-text">Create <ShinyText text="Voice" speed={10} className="media-studio-shiny-text" /></h1>
+                <div className="prompt-bar-wrapper">
+                  <div className="prompt-icon">🎙️</div>
+                  <input
+                    type="text"
+                    placeholder="Enter text to convert to speech..."
+                    className="prompt-input"
+                  />
+                  <button className="generate-btn-small">
+                    Generate
+                  </button>
+                </div>
+
+                <div className="quick-tools-row">
+                  {voiceStudioTools.map(t => (
+                    <div className="quick-tool-item relative-container" key={t.name}>
+                      <div className="quick-tool-icon-circle">{t.icon}</div>
+                      <span className="quick-tool-label">{t.name}</span>
+                      <div className="custom-tooltip">{t.tooltip}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Featured Voices */}
+            <div className="horizontal-scroll-section">
+              <div className="section-header-row">
+                <h2 className="section-title"><span className="title-highlight">Featured</span> Voice Presets</h2>
+                <span className="view-more">View More →</span>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '16px', padding: '0 40px 60px' }}>
+                {featuredVoices.map((voice, i) => (
+                  <motion.div
+                    key={i}
+                    style={{
+                      background: 'rgba(168, 85, 247, 0.1)',
+                      border: '1px solid rgba(168, 85, 247, 0.3)',
+                      borderRadius: '16px',
+                      padding: '24px',
+                      cursor: 'pointer',
+                    }}
+                    whileHover={{ scale: 1.02, borderColor: 'rgba(168, 85, 247, 0.6)' }}
+                  >
+                    <div style={{ fontSize: '2rem', marginBottom: '12px' }}>{voice.icon}</div>
+                    <h3 style={{ color: 'white', marginBottom: '8px' }}>{voice.title}</h3>
+                    <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem' }}>{voice.description}</p>
+                    <button style={{ marginTop: '16px', padding: '8px 16px', background: 'rgba(168, 85, 247, 0.3)', border: '1px solid rgba(168, 85, 247, 0.5)', borderRadius: '8px', color: 'white', cursor: 'pointer' }}>
+                      Use Voice
+                    </button>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        ) : activeTool === 'Music' ? (
+          <motion.div
+            className="music-studio-container"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            <div className="image-studio-hero" style={{ background: 'linear-gradient(135deg, #0f0f23 0%, #1a0a2e 100%)' }}>
+              <div className="hero-background-image" style={{ overflow: 'hidden' }}>
+                {/* Waveform Animation Background */}
+                <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0.3 }} viewBox="0 0 1000 200" preserveAspectRatio="none">
+                  <motion.path
+                    d="M0,100 Q250,20 500,100 T1000,100"
+                    fill="none"
+                    stroke="url(#musicGradient)"
+                    strokeWidth="3"
+                    animate={{
+                      d: [
+                        "M0,100 Q250,20 500,100 T1000,100",
+                        "M0,100 Q250,180 500,100 T1000,100",
+                        "M0,100 Q250,20 500,100 T1000,100",
+                      ],
+                    }}
+                    transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+                  />
+                  <defs>
+                    <linearGradient id="musicGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stopColor="#22c55e" />
+                      <stop offset="50%" stopColor="#3b82f6" />
+                      <stop offset="100%" stopColor="#a855f7" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 0%, rgba(10,5,15,0.95) 100%)' }} />
+              </div>
+
+              <div className="hero-content-center">
+                <h1 className="hero-large-text">Create <ShinyText text="Music" speed={10} className="media-studio-shiny-text" /></h1>
+                <div className="prompt-bar-wrapper">
+                  <div className="prompt-icon">🎵</div>
+                  <input
+                    type="text"
+                    placeholder="Describe the music you want to create..."
+                    className="prompt-input"
+                  />
+                  <button className="generate-btn-small">
+                    Generate
+                  </button>
+                </div>
+
+                <div className="quick-tools-row">
+                  {musicStudioTools.map(t => (
+                    <div className="quick-tool-item relative-container" key={t.name}>
+                      <div className="quick-tool-icon-circle">{t.icon}</div>
+                      <span className="quick-tool-label">{t.name}</span>
+                      <div className="custom-tooltip">{t.tooltip}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Featured Music */}
+            <div className="horizontal-scroll-section">
+              <div className="section-header-row">
+                <h2 className="section-title"><span className="title-highlight">Featured</span> Tracks</h2>
+                <span className="view-more">View More →</span>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px', padding: '0 40px 60px' }}>
+                {featuredMusic.map((track, i) => (
+                  <motion.div
+                    key={i}
+                    style={{
+                      background: 'rgba(34, 197, 94, 0.1)',
+                      border: '1px solid rgba(34, 197, 94, 0.3)',
+                      borderRadius: '16px',
+                      padding: '20px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '16px',
+                      cursor: 'pointer',
+                    }}
+                    whileHover={{ scale: 1.02, borderColor: 'rgba(34, 197, 94, 0.6)' }}
+                  >
+                    <div style={{ fontSize: '2.5rem', background: 'rgba(34, 197, 94, 0.2)', padding: '16px', borderRadius: '12px' }}>{track.icon}</div>
+                    <div style={{ flex: 1 }}>
+                      <h3 style={{ color: 'white', marginBottom: '4px' }}>{track.title}</h3>
+                      <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem' }}>{track.genre} • {track.duration}</p>
+                    </div>
+                    <button style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(34, 197, 94, 0.5)', border: 'none', color: 'white', fontSize: '1.2rem', cursor: 'pointer' }}>▶</button>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        ) : activeTool === 'Avatars' ? (
+          <motion.div
+            className="avatars-studio-container"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            <div className="image-studio-hero" style={{ background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)' }}>
+              <div className="hero-background-image" style={{ overflow: 'hidden' }}>
+                {/* Floating circles background */}
+                <div style={{ position: 'absolute', inset: 0 }}>
+                  {[...Array(10)].map((_, i) => (
+                    <motion.div
+                      key={i}
+                      style={{
+                        position: 'absolute',
+                        width: `${Math.random() * 100 + 50}px`,
+                        height: `${Math.random() * 100 + 50}px`,
+                        borderRadius: '50%',
+                        background: `radial-gradient(circle, rgba(99, 102, 241, 0.3), transparent)`,
+                        left: `${Math.random() * 100}%`,
+                        top: `${Math.random() * 100}%`,
+                      }}
+                      animate={{
+                        y: [0, -30, 0],
+                        opacity: [0.3, 0.6, 0.3],
+                      }}
+                      transition={{
+                        duration: 4 + Math.random() * 2,
+                        repeat: Infinity,
+                        delay: i * 0.3,
+                      }}
+                    />
+                  ))}
+                </div>
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 0%, rgba(10,5,15,0.95) 100%)' }} />
+              </div>
+
+              <div className="hero-content-center">
+                <h1 className="hero-large-text">Create <ShinyText text="Avatar" speed={10} className="media-studio-shiny-text" /></h1>
+                <div className="prompt-bar-wrapper">
+                  <div className="prompt-icon">👤</div>
+                  <input
+                    type="text"
+                    placeholder="Describe your avatar..."
+                    className="prompt-input"
+                  />
+                  <button className="generate-btn-small">
+                    Generate
+                  </button>
+                </div>
+
+                <div className="quick-tools-row">
+                  {avatarStudioTools.map(t => (
+                    <div className="quick-tool-item relative-container" key={t.name}>
+                      <div className="quick-tool-icon-circle">{t.icon}</div>
+                      <span className="quick-tool-label">{t.name}</span>
+                      <div className="custom-tooltip">{t.tooltip}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Featured Avatars */}
+            <div className="horizontal-scroll-section">
+              <div className="section-header-row">
+                <h2 className="section-title"><span className="title-highlight">Featured</span> Avatars</h2>
+                <span className="view-more">View More →</span>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '20px', padding: '0 40px 60px' }}>
+                {featuredAvatars.map((avatar, i) => (
+                  <motion.div
+                    key={i}
+                    style={{
+                      background: 'rgba(99, 102, 241, 0.1)',
+                      border: '1px solid rgba(99, 102, 241, 0.3)',
+                      borderRadius: '20px',
+                      padding: '24px',
+                      textAlign: 'center',
+                      cursor: 'pointer',
+                    }}
+                    whileHover={{ scale: 1.03, borderColor: 'rgba(99, 102, 241, 0.6)' }}
+                  >
+                    <img src={avatar.image} alt={avatar.title} style={{ width: '100px', height: '100px', borderRadius: '50%', marginBottom: '16px', border: '3px solid rgba(99, 102, 241, 0.5)' }} />
+                    <h3 style={{ color: 'white', marginBottom: '8px' }}>{avatar.title}</h3>
+                    <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem', marginBottom: '16px' }}>{avatar.description}</p>
+                    <button style={{ padding: '10px 20px', background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', border: 'none', borderRadius: '10px', color: 'white', cursor: 'pointer', fontWeight: '600' }}>
+                      Customize
+                    </button>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        ) : activeTool === 'Assistant' ? (
+          <motion.div
+            className="assistant-studio-container"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            <div className="image-studio-hero" style={{ background: 'linear-gradient(135deg, #0c0c1d 0%, #1a1a3e 100%)' }}>
+              <div className="hero-background-image" style={{ overflow: 'hidden' }}>
+                {/* Neural network background */}
+                <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0.2 }}>
+                  {[...Array(20)].map((_, i) => (
+                    <motion.circle
+                      key={i}
+                      cx={`${Math.random() * 100}%`}
+                      cy={`${Math.random() * 100}%`}
+                      r="4"
+                      fill="#a855f7"
+                      animate={{
+                        opacity: [0.3, 1, 0.3],
+                        scale: [1, 1.5, 1],
+                      }}
+                      transition={{
+                        duration: 2 + Math.random(),
+                        repeat: Infinity,
+                        delay: i * 0.1,
+                      }}
+                    />
+                  ))}
+                </svg>
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 0%, rgba(10,5,15,0.95) 100%)' }} />
+              </div>
+
+              <div className="hero-content-center">
+                <h1 className="hero-large-text">Create <ShinyText text="Assistant" speed={10} className="media-studio-shiny-text" /></h1>
+                <div className="prompt-bar-wrapper">
+                  <div className="prompt-icon">🤖</div>
+                  <input
+                    type="text"
+                    placeholder="Describe your AI assistant's personality..."
+                    className="prompt-input"
+                  />
+                  <button className="generate-btn-small">
+                    Create
+                  </button>
+                </div>
+
+                <div className="quick-tools-row">
+                  {assistantStudioTools.map(t => (
+                    <div className="quick-tool-item relative-container" key={t.name}>
+                      <div className="quick-tool-icon-circle">{t.icon}</div>
+                      <span className="quick-tool-label">{t.name}</span>
+                      <div className="custom-tooltip">{t.tooltip}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Featured Assistants */}
+            <div className="horizontal-scroll-section">
+              <div className="section-header-row">
+                <h2 className="section-title"><span className="title-highlight">Featured</span> Assistant Templates</h2>
+                <span className="view-more">View More →</span>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '20px', padding: '0 40px 60px' }}>
+                {featuredAssistants.map((assistant, i) => (
+                  <motion.div
+                    key={i}
+                    style={{
+                      background: `linear-gradient(135deg, ${assistant.color}15, ${assistant.color}25)`,
+                      border: `1px solid ${assistant.color}50`,
+                      borderRadius: '20px',
+                      padding: '28px',
+                      cursor: 'pointer',
+                    }}
+                    whileHover={{ scale: 1.02, boxShadow: `0 0 30px ${assistant.color}30` }}
+                  >
+                    <div style={{ fontSize: '3rem', marginBottom: '16px' }}>{assistant.icon}</div>
+                    <h3 style={{ color: 'white', marginBottom: '8px', fontSize: '1.2rem' }}>{assistant.title}</h3>
+                    <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem', marginBottom: '20px' }}>{assistant.description}</p>
+                    <button style={{
+                      width: '100%',
+                      padding: '12px',
+                      background: assistant.color,
+                      border: 'none',
+                      borderRadius: '10px',
+                      color: 'white',
+                      cursor: 'pointer',
+                      fontWeight: '600',
+                      fontSize: '0.95rem'
+                    }}>
+                      Use Template
+                    </button>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
         ) : (
           <>
-            {/* Hero Banner */}
+            {/* Hero Banner (Home Default) */}
             <motion.div
               className="hero-banner"
               initial={{ opacity: 0, y: 30 }}
@@ -631,7 +1458,7 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
               </div>
             </motion.div>
 
-            {/* Category Tabs */}
+            {/* Category Tabs (Home Default) */}
             <div
               className="category-tabs"
             >

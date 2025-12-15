@@ -267,6 +267,10 @@
   box-shadow: 0 -1px 10px #a855f71a;
 }
 
+.mobile-menu-btn, .mobile-sidebar-close, .sidebar-overlay {
+  display: none;
+}
+
 .media-main-content {
   background: #0a0a0f;
   flex: 1;
@@ -760,6 +764,64 @@
   .blueprints-grid {
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     gap: 12px;
+  }
+
+  .media-sidebar.open {
+    left: 0;
+    box-shadow: 0 0 50px #000c;
+  }
+
+  .sidebar-overlay {
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+    z-index: 40;
+    background: #0009;
+    animation: .3s fadeIn;
+    display: block;
+    position: fixed;
+    inset: 0;
+  }
+
+  .mobile-menu-btn {
+    z-index: 30;
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    color: #fff;
+    cursor: pointer;
+    background: #140f2399;
+    border: 1px solid #a855f74d;
+    border-radius: 12px;
+    justify-content: center;
+    align-items: center;
+    width: 44px;
+    height: 44px;
+    font-size: 1.5rem;
+    display: flex;
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    box-shadow: 0 4px 12px #0000004d;
+  }
+
+  .mobile-sidebar-close {
+    color: #ffffff80;
+    cursor: pointer;
+    background: none;
+    border: none;
+    margin-left: auto;
+    padding: 8px;
+    font-size: 1.2rem;
+    display: block;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
   }
 }
 

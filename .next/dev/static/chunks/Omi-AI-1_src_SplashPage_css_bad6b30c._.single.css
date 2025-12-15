@@ -1333,13 +1333,108 @@ html, body {
     font-size: .85rem;
   }
 
+  .chat-submit {
+    padding: 10px;
+  }
+
+  .top-right-actions {
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    max-width: none;
+    display: flex;
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    right: 12px;
+  }
+
+  .header-action-btn {
+    padding: 8px 12px;
+    font-size: .8rem;
+  }
+
+  .header-btn-icon {
+    font-size: .9rem;
+  }
+
+  .conversations-btn {
+    display: none;
+  }
+
+  .chat-header {
+    margin-top: 60px;
+    padding: .5rem 1rem;
+  }
+
+  .chat-title {
+    font-size: 1.3rem;
+  }
+
+  .selected-model {
+    padding: .35rem .7rem;
+    font-size: .8rem;
+  }
+
+  .feature-buttons-horizontal {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    width: 100%;
+    padding: 8px 16px;
+    display: grid;
+  }
+
+  .feature-button-horizontal {
+    text-align: center;
+    border-radius: 10px;
+    justify-content: center;
+    padding: 10px 8px;
+    font-size: .8rem;
+  }
+
+  .feature-button-selected-text, .feature-button-static-text {
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    font-size: .8rem;
+    display: flex;
+  }
+
+  .pro-badge-inline {
+    padding: 2px 5px;
+    font-size: .6rem;
+  }
+
+  .feature-button-tooltip {
+    display: none !important;
+  }
+
+  .chat-container {
+    padding-bottom: 5rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .chat-input-container {
+    border-radius: 20px;
+    margin: 0 8px;
+  }
+
   .chat-input {
-    padding: 14px 16px;
+    padding: 12px 14px;
     font-size: 1rem;
   }
 
-  .chat-submit {
-    padding: 10px;
+  .instant-gen-indicator, .video-gen-indicator {
+    margin: 8px auto;
+    padding: 6px 12px;
+    font-size: .75rem;
+  }
+
+  .account-tier-badge-fixed {
+    bottom: 55px;
+    left: 50%;
+    transform: translateX(-50%);
   }
 }
 

@@ -68,4 +68,30 @@
   transform: translateY(-50%);
 }
 
+@media (max-width: 768px) {
+  .dock-panel {
+    background: #060010f2;
+    border-radius: 20px;
+    flex-direction: row;
+    gap: .75rem;
+    padding: .4rem .75rem;
+    top: auto;
+    bottom: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .dock-item {
+    width: 40px !important;
+    height: 40px !important;
+  }
+
+  .dock-label {
+    top: auto;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+
 /*# sourceMappingURL=Omi-AI-1_src_Dock_css_bad6b30c._.single.css.map*/

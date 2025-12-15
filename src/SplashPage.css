@@ -1451,6 +1451,118 @@ body {
   .chat-submit {
     padding: 10px;
   }
+
+  /* Mobile Header - Stack vertically and center */
+  .top-right-actions {
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    left: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    max-width: none;
+  }
+
+  .header-action-btn {
+    padding: 8px 12px;
+    font-size: 0.8rem;
+  }
+
+  .header-btn-icon {
+    font-size: 0.9rem;
+  }
+
+  .conversations-btn {
+    display: none;
+    /* Hide hamburger since we have sidebar */
+  }
+
+  /* Mobile Chat Header - Center everything */
+  .chat-header {
+    margin-top: 60px;
+    /* Space for fixed header */
+    padding: 0.5rem 1rem;
+  }
+
+  .chat-title {
+    font-size: 1.3rem;
+  }
+
+  .selected-model {
+    padding: 0.35rem 0.7rem;
+    font-size: 0.8rem;
+  }
+
+  /* Mobile Feature Buttons - Clean 2-column grid */
+  .feature-buttons-horizontal {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding: 8px 16px;
+    width: 100%;
+  }
+
+  .feature-button-horizontal {
+    padding: 10px 8px;
+    font-size: 0.8rem;
+    border-radius: 10px;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .feature-button-selected-text,
+  .feature-button-static-text {
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+  }
+
+  .pro-badge-inline {
+    font-size: 0.6rem;
+    padding: 2px 5px;
+  }
+
+  /* Hide tooltips on mobile */
+  .feature-button-tooltip {
+    display: none !important;
+  }
+
+  /* Mobile Chat Container */
+  .chat-container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-bottom: 5rem;
+  }
+
+  /* Mobile Input */
+  .chat-input-container {
+    margin: 0 8px;
+    border-radius: 20px;
+  }
+
+  .chat-input {
+    font-size: 1rem;
+    padding: 12px 14px;
+  }
+
+  /* Mobile Mode Indicators */
+  .instant-gen-indicator,
+  .video-gen-indicator {
+    padding: 6px 12px;
+    font-size: 0.75rem;
+    margin: 8px auto;
+  }
+
+  /* Mobile Account Badge */
+  .account-tier-badge-fixed {
+    bottom: 55px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
 }
 
 /* Formatted Text Styles */
