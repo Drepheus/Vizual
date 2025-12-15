@@ -29,13 +29,10 @@ const sidebarTools = [
 ];
 
 const categoryTabs = [
-  { name: 'Blueprints', icon: '📋' },
-  { name: 'Flow State', icon: '∞' },
-  { name: 'Video', icon: '🎬' },
-  { name: 'Image', icon: '🎨' },
-  { name: 'Upscaler', icon: '🔍' },
-  { name: 'Canvas Editor', icon: '🖼️' },
-  { name: 'More', icon: '⋯' },
+  { name: 'Blueprints', icon: '📋', sectionId: 'blueprints-section' },
+  { name: 'Community Creations', icon: '🎨', sectionId: 'community-section' },
+  { name: 'Models', icon: '🧠', sectionId: 'models-section' },
+  { name: 'Events', icon: '🎉', sectionId: 'events-section' },
 ];
 
 const modelTabs = [
@@ -154,16 +151,12 @@ const featuredBlueprints = [
 ];
 
 const communityFilters = [
-  { name: 'Trending', icon: '🔥' },
   { name: 'All', icon: '🌐' },
+  { name: 'Trending', icon: '🔥' },
   { name: 'Video', icon: '🎬' },
-  { name: 'Photography', icon: '📷' },
-  { name: 'Animals', icon: '🦁' },
-  { name: 'Anime', icon: '🎌' },
-  { name: 'Architecture', icon: '🏛️' },
-  { name: 'Character', icon: '👤' },
-  { name: 'Food', icon: '🍕' },
-  { name: 'Sci-Fi', icon: '🚀' },
+  { name: 'Images', icon: '🖼️' },
+  { name: 'Audio', icon: '🎵' },
+  { name: 'Avatars', icon: '👤' },
 ];
 
 export default function MediaStudio({ onClose }: MediaStudioProps) {
@@ -296,7 +289,7 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
       name: 'Model',
       icon: '🧠',
       tooltip: 'Choose your AI Model',
-      options: ['Flux Schnell', 'Flux Dev', 'Stable Diffusion 3', 'DALL-E 3', 'Midjourney V6']
+      options: ['Flux Schnell', 'Midjourney V6', 'Stable Diffusion 3', 'DALL-E 3', 'Ideogram', 'Flux Dev']
     },
     {
       name: 'Mode',
@@ -320,6 +313,12 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
 
   /* Video Studio Tools */
   const videoStudioTools = [
+    {
+      name: 'Model',
+      icon: '🧠',
+      tooltip: 'Choose Video AI Model',
+      options: ['Kling AI', 'Runway Gen-3', 'Luma Dream Machine', 'Pika Labs', 'Sora']
+    },
     {
       name: 'Duration',
       icon: '⏱️',
@@ -366,11 +365,13 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
   };
 
   const [selectedVideoDuration, setSelectedVideoDuration] = useState('3s');
+  const [selectedVideoModel, setSelectedVideoModel] = useState('Kling AI');
   const [selectedVideoMode, setSelectedVideoMode] = useState('Fast');
   const [selectedVideoAspect, setSelectedVideoAspect] = useState('16:9');
   const [selectedVideoMotion, setSelectedVideoMotion] = useState('Medium');
 
   const handleVideoOptionSelect = (toolName: string, option: string) => {
+    if (toolName === 'Model') setSelectedVideoModel(option);
     if (toolName === 'Duration') setSelectedVideoDuration(option);
     if (toolName === 'Mode') setSelectedVideoMode(option);
     if (toolName === 'Aspect') setSelectedVideoAspect(option);
@@ -844,10 +845,11 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
                         {t.icon}
                       </div>
                       <span className="quick-tool-label">
-                        {t.name === 'Duration' ? selectedVideoDuration :
-                          t.name === 'Mode' ? selectedVideoMode :
-                            t.name === 'Aspect' ? selectedVideoAspect :
-                              t.name === 'Motion' ? selectedVideoMotion : t.name}
+                        {t.name === 'Model' ? selectedVideoModel :
+                          t.name === 'Duration' ? selectedVideoDuration :
+                            t.name === 'Mode' ? selectedVideoMode :
+                              t.name === 'Aspect' ? selectedVideoAspect :
+                                t.name === 'Motion' ? selectedVideoMotion : t.name}
                       </span>
 
                       {/* Custom Tooltip */}
@@ -1466,7 +1468,13 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
                 <motion.button
                   key={tab.name}
                   className={`category-tab ${activeCategory === tab.name ? 'active' : ''}`}
-                  onClick={() => setActiveCategory(tab.name)}
+                  onClick={() => {
+                    setActiveCategory(tab.name);
+                    const section = document.getElementById(tab.sectionId);
+                    if (section) {
+                      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                  }}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 + (index * 0.05), duration: 0.3 }}
@@ -1480,7 +1488,7 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
             </div>
 
             {/* Featured Blueprints */}
-            <section className="featured-section">
+            <section id="blueprints-section" className="featured-section">
               <div
                 className="section-header"
               >
@@ -1509,10 +1517,15 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
             </section>
 
             {/* Community Creations */}
-            <section className="community-section">
-              <h2 className="section-title">
-                <span className="title-highlight">Community</span> Creations
-              </h2>
+            <section id="community-section" className="community-section">
+              <div className="section-header">
+                <h2 className="section-title">
+                  <span className="title-highlight">Community</span> Creations
+                </h2>
+                <button className="view-more-btn">
+                  View All <span className="arrow">→</span>
+                </button>
+              </div>
 
               <div className="community-filters">
                 {communityFilters.map((filter) => (
@@ -1526,9 +1539,405 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
                 ))}
               </div>
 
-              <div className="community-grid">
-                {/* Placeholder for community content */}
-                <p className="coming-soon">Community creations coming soon...</p>
+              {/* Scrolling Carousel */}
+              <div className="horizontal-cards-scroller-container" style={{ marginTop: '24px' }}>
+                <div className="horizontal-cards-scroller-track">
+                  {/* Community Creations - Mix of videos and images */}
+                  {(() => {
+                    const allItems = [
+                      { type: 'video', src: '/videos/veo1.mp4', title: 'Veo Creation', creator: 'AI Studio' },
+                      { type: 'image', src: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=400&h=400&fit=crop', title: 'Cosmic Dreams', creator: 'StarGazer' },
+                      { type: 'video', src: '/videos/rockbug.mp4', title: 'Nature Macro', creator: 'NatureLens' },
+                      { type: 'image', src: 'https://images.unsplash.com/photo-1541963463532-d68292c34b19?w=400&h=400&fit=crop', title: 'Abstract Art', creator: 'PixelArtist' },
+                      { type: 'video', src: '/videos/dogclimb.mp4', title: 'Adventure Dog', creator: 'PetLovers' },
+                      { type: 'image', src: 'https://images.unsplash.com/photo-1555680202-c86f0e12f086?w=400&h=400&fit=crop', title: 'Neon City', creator: 'CyberPunk' },
+                      { type: 'video', src: '/videos/matrixcode.mp4', title: 'Matrix Effect', creator: 'CodeArt' },
+                      { type: 'image', src: 'https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=400&h=400&fit=crop', title: 'Ocean Depths', creator: 'DeepDive' },
+                      { type: 'video', src: '/videos/klingmodel.mp4', title: 'Model Showcase', creator: 'Omi Team' },
+                      { type: 'image', src: 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=400&h=400&fit=crop', title: 'Urban Lights', creator: 'CityScape' },
+                      { type: 'video', src: '/videos/veo2.mp4', title: 'Veo Magic', creator: 'AI Studio' },
+                      { type: 'image', src: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=400&h=400&fit=crop', title: 'Aurora Night', creator: 'NightSky' },
+                      { type: 'audio', src: '', title: 'Ambient Waves', creator: 'SoundScape' },
+                      { type: 'audio', src: '', title: 'Lo-Fi Dreams', creator: 'ChillBeats' },
+                      { type: 'avatar', src: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=faces', title: 'Pro Avatar', creator: 'AvatarPro' },
+                      { type: 'avatar', src: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&h=200&fit=crop&crop=faces', title: 'Creative Avatar', creator: 'ArtStyle' },
+                    ];
+
+                    // Filter based on activeFilter
+                    let filteredItems = allItems;
+                    if (activeFilter === 'Video') {
+                      filteredItems = allItems.filter(item => item.type === 'video');
+                    } else if (activeFilter === 'Images') {
+                      filteredItems = allItems.filter(item => item.type === 'image');
+                    } else if (activeFilter === 'Audio') {
+                      filteredItems = allItems.filter(item => item.type === 'audio');
+                    } else if (activeFilter === 'Avatars') {
+                      filteredItems = allItems.filter(item => item.type === 'avatar');
+                    } else if (activeFilter === 'Trending') {
+                      filteredItems = allItems.slice(0, 6);
+                    }
+
+                    // Duplicate for infinite scroll
+                    const displayItems = [...filteredItems, ...filteredItems];
+
+                    return displayItems.map((item, i) => (
+                      <div className="horizontal-card community-card" key={`item-${i}`}>
+                        {item.type === 'video' ? (
+                          <video
+                            src={item.src}
+                            muted
+                            loop
+                            playsInline
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            onMouseOver={e => e.currentTarget.play()}
+                            onMouseOut={e => {
+                              e.currentTarget.pause();
+                              e.currentTarget.currentTime = 0;
+                            }}
+                          />
+                        ) : item.type === 'audio' ? (
+                          <div style={{
+                            width: '100%',
+                            height: '100%',
+                            background: 'linear-gradient(135deg, #22c55e20, #3b82f620)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '12px'
+                          }}>
+                            <span style={{ fontSize: '3rem' }}>🎵</span>
+                            <div style={{ display: 'flex', gap: '3px', alignItems: 'center' }}>
+                              {[...Array(12)].map((_, j) => (
+                                <div key={j} style={{
+                                  width: '3px',
+                                  height: `${Math.random() * 30 + 10}px`,
+                                  background: 'linear-gradient(180deg, #22c55e, #3b82f6)',
+                                  borderRadius: '2px'
+                                }} />
+                              ))}
+                            </div>
+                          </div>
+                        ) : item.type === 'avatar' ? (
+                          <div style={{
+                            width: '100%',
+                            height: '100%',
+                            background: 'linear-gradient(135deg, #8b5cf620, #ec489920)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}>
+                            <img
+                              src={item.src}
+                              alt={item.title}
+                              style={{
+                                width: '80px',
+                                height: '80px',
+                                borderRadius: '50%',
+                                border: '3px solid rgba(139, 92, 246, 0.5)'
+                              }}
+                            />
+                          </div>
+                        ) : (
+                          <img src={item.src} alt={item.title} />
+                        )}
+                        <div className="card-overlay-title">{item.title}</div>
+                        <div style={{
+                          position: 'absolute',
+                          bottom: '8px',
+                          right: '10px',
+                          fontSize: '0.7rem',
+                          color: 'rgba(255,255,255,0.6)',
+                          background: 'rgba(0,0,0,0.5)',
+                          padding: '2px 8px',
+                          borderRadius: '10px'
+                        }}>
+                          by {item.creator}
+                        </div>
+                        {item.type === 'video' && (
+                          <div style={{
+                            position: 'absolute',
+                            top: '10px',
+                            right: '10px',
+                            fontSize: '1rem',
+                            background: 'rgba(168, 85, 247, 0.8)',
+                            padding: '4px 8px',
+                            borderRadius: '6px'
+                          }}>
+                            ▶
+                          </div>
+                        )}
+                        {item.type === 'audio' && (
+                          <div style={{
+                            position: 'absolute',
+                            top: '10px',
+                            right: '10px',
+                            fontSize: '0.8rem',
+                            background: 'rgba(34, 197, 94, 0.8)',
+                            padding: '4px 8px',
+                            borderRadius: '6px'
+                          }}>
+                            🎵
+                          </div>
+                        )}
+                        {item.type === 'avatar' && (
+                          <div style={{
+                            position: 'absolute',
+                            top: '10px',
+                            right: '10px',
+                            fontSize: '0.8rem',
+                            background: 'rgba(139, 92, 246, 0.8)',
+                            padding: '4px 8px',
+                            borderRadius: '6px'
+                          }}>
+                            👤
+                          </div>
+                        )}
+                      </div>
+                    ));
+                  })()}
+                </div>
+              </div>
+            </section>
+
+            {/* Models Section */}
+            <section id="models-section" className="models-section" style={{ padding: '60px 40px' }}>
+              <div className="section-header">
+                <h2 className="section-title">
+                  <span className="title-highlight">AI</span> Models
+                </h2>
+                <button className="view-more-btn">
+                  View All <span className="arrow">→</span>
+                </button>
+              </div>
+
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+                gap: '24px',
+                marginTop: '30px'
+              }}>
+                {[
+                  { name: 'Flux Schnell', description: 'Ultra-fast image generation', icon: '⚡', color: '#f59e0b', speed: 'Fast', type: 'image' },
+                  { name: 'Midjourney V6', description: 'Artistic and creative outputs', icon: '🎨', color: '#ec4899', speed: 'Medium', type: 'image' },
+                  { name: 'Kling AI', description: 'Advanced video generation', icon: '🎬', color: '#8b5cf6', speed: 'Medium', type: 'video' },
+                  { name: 'Runway Gen-3', description: 'Professional video synthesis', icon: '🎥', color: '#06b6d4', speed: 'Slow', type: 'video' },
+                  { name: 'Stable Diffusion 3', description: 'Open-source image model', icon: '🖼️', color: '#22c55e', speed: 'Fast', type: 'image' },
+                  { name: 'Luma Dream Machine', description: 'Dreamy visual effects', icon: '☁️', color: '#a855f7', speed: 'Medium', type: 'video' },
+                ].map((model, i) => (
+                  <motion.div
+                    key={i}
+                    style={{
+                      background: `linear-gradient(135deg, ${model.color}15, ${model.color}08)`,
+                      border: `1px solid ${model.color}40`,
+                      borderRadius: '20px',
+                      padding: '24px',
+                      cursor: 'pointer',
+                    }}
+                    whileHover={{ scale: 1.02, borderColor: model.color }}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.1 }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '16px' }}>
+                      <div style={{
+                        fontSize: '2.5rem',
+                        background: `${model.color}20`,
+                        padding: '12px',
+                        borderRadius: '12px'
+                      }}>
+                        {model.icon}
+                      </div>
+                      <div>
+                        <h3 style={{ color: 'white', fontSize: '1.1rem', marginBottom: '4px' }}>{model.name}</h3>
+                        <div style={{ display: 'flex', gap: '6px' }}>
+                          <span style={{
+                            fontSize: '0.75rem',
+                            background: `${model.color}30`,
+                            color: model.color,
+                            padding: '2px 8px',
+                            borderRadius: '4px'
+                          }}>
+                            {model.speed}
+                          </span>
+                          <span style={{
+                            fontSize: '0.75rem',
+                            background: model.type === 'video' ? 'rgba(168, 85, 247, 0.3)' : 'rgba(59, 130, 246, 0.3)',
+                            color: model.type === 'video' ? '#a855f7' : '#3b82f6',
+                            padding: '2px 8px',
+                            borderRadius: '4px'
+                          }}>
+                            {model.type === 'video' ? '🎬 Video' : '🖼️ Image'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem', marginBottom: '16px' }}>
+                      {model.description}
+                    </p>
+                    <button
+                      onClick={() => {
+                        if (model.type === 'video') {
+                          setActiveTool('Video');
+                          // Pre-select the model if applicable
+                        } else {
+                          setActiveTool('Image');
+                          setSelectedModel(model.name);
+                        }
+                        // Scroll to top
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }}
+                      style={{
+                        width: '100%',
+                        padding: '10px',
+                        background: `${model.color}25`,
+                        border: `1px solid ${model.color}50`,
+                        borderRadius: '10px',
+                        color: 'white',
+                        cursor: 'pointer',
+                        fontSize: '0.9rem',
+                        fontWeight: '500'
+                      }}
+                    >
+                      Try Model
+                    </button>
+                  </motion.div>
+                ))}
+              </div>
+            </section>
+
+            {/* Events Section */}
+            <section id="events-section" className="events-section" style={{ padding: '60px 40px', marginBottom: '40px' }}>
+              <div className="section-header">
+                <h2 className="section-title">
+                  <span className="title-highlight">Upcoming</span> Events
+                </h2>
+                <button className="view-more-btn">
+                  View Calendar <span className="arrow">→</span>
+                </button>
+              </div>
+
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+                gap: '24px',
+                marginTop: '30px'
+              }}>
+                {[
+                  {
+                    title: 'AI Art Challenge',
+                    date: 'Dec 20, 2024',
+                    time: '2:00 PM PST',
+                    description: 'Weekly community art challenge with prizes',
+                    type: 'Challenge',
+                    color: '#f59e0b',
+                    live: true
+                  },
+                  {
+                    title: 'Prompt Engineering Workshop',
+                    date: 'Dec 22, 2024',
+                    time: '10:00 AM PST',
+                    description: 'Learn advanced prompting techniques',
+                    type: 'Workshop',
+                    color: '#3b82f6',
+                    live: false
+                  },
+                  {
+                    title: 'New Model Launch: Flux Pro',
+                    date: 'Dec 28, 2024',
+                    time: '5:00 PM PST',
+                    description: 'Be the first to try our latest model',
+                    type: 'Launch',
+                    color: '#8b5cf6',
+                    live: false
+                  },
+                  {
+                    title: 'Community Showcase',
+                    date: 'Jan 5, 2025',
+                    time: '3:00 PM PST',
+                    description: 'Top creators share their workflows',
+                    type: 'Showcase',
+                    color: '#22c55e',
+                    live: false
+                  },
+                ].map((event, i) => (
+                  <motion.div
+                    key={i}
+                    style={{
+                      background: 'rgba(255,255,255,0.03)',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      borderRadius: '20px',
+                      padding: '24px',
+                      cursor: 'pointer',
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}
+                    whileHover={{ scale: 1.02, borderColor: event.color }}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.1 }}
+                  >
+                    {event.live && (
+                      <div style={{
+                        position: 'absolute',
+                        top: '16px',
+                        right: '16px',
+                        background: '#ef4444',
+                        color: 'white',
+                        padding: '4px 10px',
+                        borderRadius: '20px',
+                        fontSize: '0.7rem',
+                        fontWeight: '600',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}>
+                        <span style={{ width: '6px', height: '6px', background: 'white', borderRadius: '50%', animation: 'pulse 1s infinite' }} />
+                        LIVE
+                      </div>
+                    )}
+                    <div style={{
+                      display: 'inline-block',
+                      background: `${event.color}20`,
+                      color: event.color,
+                      padding: '4px 12px',
+                      borderRadius: '6px',
+                      fontSize: '0.75rem',
+                      fontWeight: '600',
+                      marginBottom: '16px'
+                    }}>
+                      {event.type}
+                    </div>
+                    <h3 style={{ color: 'white', fontSize: '1.2rem', marginBottom: '8px' }}>{event.title}</h3>
+                    <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem', marginBottom: '16px' }}>
+                      {event.description}
+                    </p>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '16px',
+                      color: 'rgba(255,255,255,0.5)',
+                      fontSize: '0.85rem'
+                    }}>
+                      <span>📅 {event.date}</span>
+                      <span>⏰ {event.time}</span>
+                    </div>
+                    <button style={{
+                      width: '100%',
+                      marginTop: '20px',
+                      padding: '12px',
+                      background: event.live ? event.color : 'rgba(255,255,255,0.1)',
+                      border: 'none',
+                      borderRadius: '10px',
+                      color: 'white',
+                      cursor: 'pointer',
+                      fontSize: '0.9rem',
+                      fontWeight: '600'
+                    }}>
+                      {event.live ? 'Join Now' : 'Set Reminder'}
+                    </button>
+                  </motion.div>
+                ))}
               </div>
             </section>
           </>
