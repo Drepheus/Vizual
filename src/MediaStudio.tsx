@@ -256,7 +256,7 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
   /* Video Hero State */
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const heroVideos = [
-    '/videos/modelsvidspol.mp4',
+    '/videos/klingnextgen.mp4',
     '/videos/examples.mp4',
     '/videos/klingmodel.mp4'
   ];
@@ -491,12 +491,20 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
       {/* Left Sidebar */}
       <div className={`media-sidebar ${isSidebarOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
-          <div className="sidebar-logo">
-            <span className="logo-avatar">👤</span>
-            <div className="logo-user">
-              <span className="user-name">Omi.AI</span>
-              <button className="user-dropdown">▼</button>
+          {/* User Profile Section */}
+          <div className="user-profile-section">
+            <div className="user-avatar-container">
+              <span className="logo-avatar">👤</span>
+              <div className="online-status-indicator" />
             </div>
+            <div className="user-info-group">
+              <div className="user-name-row">
+                <span className="user-name">Omi.AI</span>
+                <span className="dropdown-icon">▼</span>
+              </div>
+              <span className="user-plan-text">Free Plan</span>
+            </div>
+            
             {/* Close Sidebar Button (Mobile) */}
             <button
               className="mobile-sidebar-close"
@@ -505,11 +513,18 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
               ✕
             </button>
           </div>
-          <div className="sidebar-credits">
-            <span className="credits-icon">⚡</span>
-            <span className="credits-value">150</span>
+
+          {/* Credits Section */}
+          <div className="sidebar-credits-card">
+            <div className="credits-row">
+              <div className="credits-left">
+                <span className="credits-icon">⚡</span>
+                <span className="credits-amount">150</span>
+              </div>
+              <span className="credits-label">Available Credits</span>
+            </div>
             <button
-              className="upgrade-btn"
+              className="credits-add-btn"
               onClick={() => setShowPaywall(true)}
             >
               Upgrade
@@ -961,7 +976,7 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
                   muted
                   playsInline
                   loop
-                  src="/videos/klingnextgen.mp4"
+                  src="/videos/modelsvidspol.mp4"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}

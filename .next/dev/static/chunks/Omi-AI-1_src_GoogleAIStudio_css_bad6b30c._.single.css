@@ -261,6 +261,15 @@
   line-height: 1.1;
 }
 
+.studio-google-text, .studio-labs-text {
+  background: linear-gradient(90deg, #4285f4 0%, #ea4335 33%, #fbbc04 66%, #34a853 100%);
+  -webkit-text-fill-color: transparent;
+  color: #0000;
+  -webkit-background-clip: text;
+  background-clip: text;
+  display: inline-block;
+}
+
 .studio-learn-more {
   border-bottom: 1px solid #8ab4f84d;
   margin-left: 4px;

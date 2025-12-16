@@ -1,14 +1,20 @@
 {
   "/_not-found/page": "app/_not-found/page.js",
   "/ai-workflows/page": "app/ai-workflows/page.js",
+  "/api-studio/page": "app/api-studio/page.js",
+  "/api/chat/route": "app-edge-has-no-entrypoint",
   "/api/generate-image/route": "app-edge-has-no-entrypoint",
-  "/api/generate-video/route": "app-edge-has-no-entrypoint",
   "/chat/page": "app/chat/page.js",
+  "/code-assist/page": "app/code-assist/page.js",
   "/command-hub/page": "app/command-hub/page.js",
   "/custom-omis/page": "app/custom-omis/page.js",
   "/gemini/page": "app/gemini/page.js",
   "/google-ai-studio/page": "app/google-ai-studio/page.js",
+  "/google-ai/page": "app/google-ai/page.js",
+  "/login/page": "app/login/page.js",
   "/media-studio/page": "app/media-studio/page.js",
   "/page": "app/page.js",
+  "/replicate-studio/page": "app/replicate-studio/page.js",
+  "/veo/page": "app/veo/page.js",
   "/web-search/page": "app/web-search/page.js"
 }

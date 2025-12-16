@@ -269,6 +269,16 @@
     color: white;
 }
 
+.studio-google-text,
+.studio-labs-text {
+    background: linear-gradient(90deg, #4285F4 0%, #EA4335 33%, #FBBC04 66%, #34A853 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    display: inline-block;
+}
+
 .studio-learn-more {
     border-bottom: 1px solid rgba(138, 180, 248, 0.3);
     transition: all 0.2s ease;

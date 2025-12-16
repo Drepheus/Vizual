@@ -31,7 +31,7 @@ export function LandingPage() {
       </div>
       <div className="content">
         <h1>Omi AI</h1>
-        <p>Innovating the conversational AI experience</p>
+        <p>Modern AI, without the complexity. Chat, create, and generate — simply.</p>
         <div className="button-container">
           <button
             className="start-button"

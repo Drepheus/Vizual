@@ -80,9 +80,10 @@ const cardData = [
     {
         color: '#0a0a0a',
         icon: '⚙️',
-        title: 'API Settings',
-        description: 'Configure API\'s',
-        label: 'Metrics'
+        title: 'Account and API Settings',
+        description: 'Configure API\'s and Account',
+        label: 'Settings',
+        action: 'settings'
     }
 ];
 const createParticleElement = (x, y, color = DEFAULT_GLOW_COLOR)=>{
@@ -352,7 +353,7 @@ const ParticleCard = ({ children, className = '', disableAnimations = false, sty
         children: children
     }, void 0, false, {
         fileName: "[project]/Omi-AI-1/src/MagicBento.tsx",
-        lineNumber: 359,
+        lineNumber: 362,
         columnNumber: 5
     }, ("TURBOPACK compile-time value", void 0));
 };
@@ -487,7 +488,7 @@ const BentoCardGrid = ({ children, gridRef })=>/*#__PURE__*/ (0, __TURBOPACK__im
         children: children
     }, void 0, false, {
         fileName: "[project]/Omi-AI-1/src/MagicBento.tsx",
-        lineNumber: 516,
+        lineNumber: 519,
         columnNumber: 3
     }, ("TURBOPACK compile-time value", void 0));
 _c2 = BentoCardGrid;
@@ -553,7 +554,7 @@ const MagicBento = ({ textAutoHide = true, enableStars = true, enableSpotlight =
                 glowColor: glowColor
             }, void 0, false, {
                 fileName: "[project]/Omi-AI-1/src/MagicBento.tsx",
-                lineNumber: 600,
+                lineNumber: 603,
                 columnNumber: 9
             }, ("TURBOPACK compile-time value", void 0)),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Omi$2d$AI$2d$1$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$3_$40$opentelemetry$2b$_162ef2eee2977cfe0d3476575909914c$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(BentoCardGrid, {
@@ -589,12 +590,12 @@ const MagicBento = ({ textAutoHide = true, enableStars = true, enableSpotlight =
                                         children: card.label
                                     }, void 0, false, {
                                         fileName: "[project]/Omi-AI-1/src/MagicBento.tsx",
-                                        lineNumber: 638,
+                                        lineNumber: 641,
                                         columnNumber: 19
                                     }, ("TURBOPACK compile-time value", void 0))
                                 }, void 0, false, {
                                     fileName: "[project]/Omi-AI-1/src/MagicBento.tsx",
-                                    lineNumber: 637,
+                                    lineNumber: 640,
                                     columnNumber: 17
                                 }, ("TURBOPACK compile-time value", void 0)),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Omi$2d$AI$2d$1$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$3_$40$opentelemetry$2b$_162ef2eee2977cfe0d3476575909914c$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -605,7 +606,7 @@ const MagicBento = ({ textAutoHide = true, enableStars = true, enableSpotlight =
                                             children: card.icon
                                         }, void 0, false, {
                                             fileName: "[project]/Omi-AI-1/src/MagicBento.tsx",
-                                            lineNumber: 641,
+                                            lineNumber: 644,
                                             columnNumber: 19
                                         }, ("TURBOPACK compile-time value", void 0)),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Omi$2d$AI$2d$1$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$3_$40$opentelemetry$2b$_162ef2eee2977cfe0d3476575909914c$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
@@ -613,7 +614,7 @@ const MagicBento = ({ textAutoHide = true, enableStars = true, enableSpotlight =
                                             children: card.title
                                         }, void 0, false, {
                                             fileName: "[project]/Omi-AI-1/src/MagicBento.tsx",
-                                            lineNumber: 642,
+                                            lineNumber: 645,
                                             columnNumber: 19
                                         }, ("TURBOPACK compile-time value", void 0)),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Omi$2d$AI$2d$1$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$3_$40$opentelemetry$2b$_162ef2eee2977cfe0d3476575909914c$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -621,19 +622,19 @@ const MagicBento = ({ textAutoHide = true, enableStars = true, enableSpotlight =
                                             children: card.description
                                         }, void 0, false, {
                                             fileName: "[project]/Omi-AI-1/src/MagicBento.tsx",
-                                            lineNumber: 643,
+                                            lineNumber: 646,
                                             columnNumber: 19
                                         }, ("TURBOPACK compile-time value", void 0))
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/Omi-AI-1/src/MagicBento.tsx",
-                                    lineNumber: 640,
+                                    lineNumber: 643,
                                     columnNumber: 17
                                 }, ("TURBOPACK compile-time value", void 0))
                             ]
                         }, index, true, {
                             fileName: "[project]/Omi-AI-1/src/MagicBento.tsx",
-                            lineNumber: 622,
+                            lineNumber: 625,
                             columnNumber: 15
                         }, ("TURBOPACK compile-time value", void 0));
                     }
@@ -652,12 +653,12 @@ const MagicBento = ({ textAutoHide = true, enableStars = true, enableSpotlight =
                                     children: card.label
                                 }, void 0, false, {
                                     fileName: "[project]/Omi-AI-1/src/MagicBento.tsx",
-                                    lineNumber: 660,
+                                    lineNumber: 663,
                                     columnNumber: 17
                                 }, ("TURBOPACK compile-time value", void 0))
                             }, void 0, false, {
                                 fileName: "[project]/Omi-AI-1/src/MagicBento.tsx",
-                                lineNumber: 659,
+                                lineNumber: 662,
                                 columnNumber: 15
                             }, ("TURBOPACK compile-time value", void 0)),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Omi$2d$AI$2d$1$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$3_$40$opentelemetry$2b$_162ef2eee2977cfe0d3476575909914c$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -668,7 +669,7 @@ const MagicBento = ({ textAutoHide = true, enableStars = true, enableSpotlight =
                                         children: card.icon
                                     }, void 0, false, {
                                         fileName: "[project]/Omi-AI-1/src/MagicBento.tsx",
-                                        lineNumber: 663,
+                                        lineNumber: 666,
                                         columnNumber: 17
                                     }, ("TURBOPACK compile-time value", void 0)),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Omi$2d$AI$2d$1$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$3_$40$opentelemetry$2b$_162ef2eee2977cfe0d3476575909914c$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
@@ -676,7 +677,7 @@ const MagicBento = ({ textAutoHide = true, enableStars = true, enableSpotlight =
                                         children: card.title
                                     }, void 0, false, {
                                         fileName: "[project]/Omi-AI-1/src/MagicBento.tsx",
-                                        lineNumber: 664,
+                                        lineNumber: 667,
                                         columnNumber: 17
                                     }, ("TURBOPACK compile-time value", void 0)),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Omi$2d$AI$2d$1$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$3_$40$opentelemetry$2b$_162ef2eee2977cfe0d3476575909914c$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -684,25 +685,25 @@ const MagicBento = ({ textAutoHide = true, enableStars = true, enableSpotlight =
                                         children: card.description
                                     }, void 0, false, {
                                         fileName: "[project]/Omi-AI-1/src/MagicBento.tsx",
-                                        lineNumber: 665,
+                                        lineNumber: 668,
                                         columnNumber: 17
                                     }, ("TURBOPACK compile-time value", void 0))
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/Omi-AI-1/src/MagicBento.tsx",
-                                lineNumber: 662,
+                                lineNumber: 665,
                                 columnNumber: 15
                             }, ("TURBOPACK compile-time value", void 0))
                         ]
                     }, index, true, {
                         fileName: "[project]/Omi-AI-1/src/MagicBento.tsx",
-                        lineNumber: 650,
+                        lineNumber: 653,
                         columnNumber: 13
                     }, ("TURBOPACK compile-time value", void 0));
                 })
             }, void 0, false, {
                 fileName: "[project]/Omi-AI-1/src/MagicBento.tsx",
-                lineNumber: 609,
+                lineNumber: 612,
                 columnNumber: 7
             }, ("TURBOPACK compile-time value", void 0))
         ]

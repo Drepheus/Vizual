@@ -31,9 +31,9 @@
   backdrop-filter: blur(60px) saturate(180%) brightness(1.1);
   -webkit-backdrop-filter: blur(60px) saturate(180%) brightness(1.1);
   border-radius: 20px;
-  max-width: 700px;
-  /* Reduced width */
-  width: 90%;
+  max-width: 1000px;
+  /* Increased width for 3 columns */
+  width: 95%;
   max-height: 90vh;
   overflow-y: auto;
   position: relative;
@@ -116,13 +116,14 @@
 
 .plans-container {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 16px;
   /* Compact gap */
   align-items: stretch;
 }
 
 /* Card Common Styles */
+.free-plan-card,
 .pro-plan-card,
 .ultra-plan-card {
   position: relative;
@@ -131,6 +132,36 @@
   /* Compact padding */
   display: flex;
   flex-direction: column;
+}
+
+/* Free Plan Card */
+.free-plan-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.free-plan-card:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.free-button {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.free-button:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.feature-item.disabled {
+  opacity: 0.5;
+}
+
+.feature-item.disabled .icon {
+  color: #ff4d4d;
 }
 
 /* Pro Plan Card */

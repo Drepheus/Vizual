@@ -75,6 +75,73 @@ const PaywallModal: React.FC<PaywallModalProps> = ({
           <h2 className="plans-title">Choose Your Plan</h2>
 
           <div className="plans-container">
+            {/* FREE PLAN */}
+            <div className="free-plan-card">
+              <div className="card-border"></div>
+              
+              <div className="plan-header">
+                <div className="plan-icon-badge">
+                  <div className="icon-inner">🆓</div>
+                </div>
+                <div className="plan-title-group">
+                  <h3 className="plan-name">OMI FREE</h3>
+                  <p className="plan-subtitle">For trying Omi</p>
+                </div>
+              </div>
+
+              <div className="plan-pricing">
+                <div className="price-wrapper">
+                  <span className="amount">Free</span>
+                </div>
+              </div>
+
+              <div className="features-list">
+                <div className="feature-item">
+                  <div className="feature-icon-box">
+                    <span className="icon">🪙</span>
+                  </div>
+                  <span className="feature-text">500 credits / month</span>
+                </div>
+                <div className="feature-item">
+                  <div className="feature-icon-box">
+                    <span className="icon">💬</span>
+                  </div>
+                  <span className="feature-text">Basic models only</span>
+                </div>
+                <div className="feature-item">
+                  <div className="feature-icon-box">
+                    <span className="icon">🖼️</span>
+                  </div>
+                  <span className="feature-text">~20–30 images/month</span>
+                </div>
+                <div className="feature-item disabled">
+                  <div className="feature-icon-box">
+                    <span className="icon">❌</span>
+                  </div>
+                  <span className="feature-text">No Video Generation</span>
+                </div>
+                <div className="feature-item disabled">
+                  <div className="feature-icon-box">
+                    <span className="icon">❌</span>
+                  </div>
+                  <span className="feature-text">No Long-term Memory</span>
+                </div>
+                <div className="feature-item">
+                  <div className="feature-icon-box">
+                    <span className="icon">⚡</span>
+                  </div>
+                  <span className="feature-text">Standard Processing</span>
+                </div>
+              </div>
+
+              <button
+                className="cta-button free-button"
+                onClick={onClose}
+              >
+                <span className="button-text">Current Plan</span>
+              </button>
+            </div>
+
             {/* PRO PLAN */}
             <div className="pro-plan-card">
               <div className="card-glow"></div>
@@ -86,14 +153,14 @@ const PaywallModal: React.FC<PaywallModalProps> = ({
                 </div>
                 <div className="plan-title-group">
                   <h3 className="plan-name">OMI PRO</h3>
-                  <p className="plan-subtitle">Essential AI power</p>
+                  <p className="plan-subtitle">Your main conversion plan</p>
                 </div>
               </div>
 
               <div className="plan-pricing">
                 <div className="price-wrapper">
                   <span className="currency">$</span>
-                  <span className="amount">5</span>
+                  <span className="amount">4.99</span>
                   <span className="billing-text">/ month</span>
                 </div>
               </div>
@@ -101,21 +168,27 @@ const PaywallModal: React.FC<PaywallModalProps> = ({
               <div className="features-list">
                 <div className="feature-item">
                   <div className="feature-icon-box">
-                    <span className="icon">∞</span>
+                    <span className="icon">🪙</span>
                   </div>
-                  <span className="feature-text">Unlimited Chat</span>
+                  <span className="feature-text">5,000 credits / month</span>
                 </div>
                 <div className="feature-item">
                   <div className="feature-icon-box">
-                    <span className="icon">◈</span>
+                    <span className="icon">🧠</span>
                   </div>
-                  <span className="feature-text">50 Images per day</span>
+                  <span className="feature-text">Long-term Memory ✅</span>
                 </div>
                 <div className="feature-item">
                   <div className="feature-icon-box">
-                    <span className="icon">◇</span>
+                    <span className="icon">🖼️</span>
                   </div>
-                  <span className="feature-text">10 Videos per month</span>
+                  <span className="feature-text">~100–150 images/month</span>
+                </div>
+                <div className="feature-item">
+                  <div className="feature-icon-box">
+                    <span className="icon">🎬</span>
+                  </div>
+                  <span className="feature-text">~10 short videos/month</span>
                 </div>
                 <div className="feature-item">
                   <div className="feature-icon-box">
@@ -125,15 +198,9 @@ const PaywallModal: React.FC<PaywallModalProps> = ({
                 </div>
                 <div className="feature-item">
                   <div className="feature-icon-box">
-                    <span className="icon">⎇</span>
-                  </div>
-                  <span className="feature-text">5 AI Workflows</span>
-                </div>
-                <div className="feature-item">
-                  <div className="feature-icon-box">
                     <span className="icon">⚡</span>
                   </div>
-                  <span className="feature-text">Standard Processing</span>
+                  <span className="feature-text">Faster Queue</span>
                 </div>
               </div>
 
@@ -168,14 +235,14 @@ const PaywallModal: React.FC<PaywallModalProps> = ({
                   </div>
                   <div className="plan-title-group">
                     <h3 className="plan-name ultra-name">OMI ULTRA</h3>
-                    <p className="plan-subtitle">Maximum AI power</p>
+                    <p className="plan-subtitle">For power users & creators</p>
                   </div>
                 </div>
 
                 <div className="plan-pricing">
                   <div className="price-wrapper">
                     <span className="currency">$</span>
-                    <span className="amount">20</span>
+                    <span className="amount">19.99</span>
                     <span className="billing-text">/ month</span>
                   </div>
                 </div>
@@ -183,39 +250,39 @@ const PaywallModal: React.FC<PaywallModalProps> = ({
                 <div className="features-list">
                   <div className="feature-item">
                     <div className="feature-icon-box ultra-feature">
-                      <span className="icon">∞</span>
+                      <span className="icon">🪙</span>
                     </div>
-                    <span className="feature-text">Unlimited Chat</span>
+                    <span className="feature-text">25,000 credits / month</span>
                   </div>
                   <div className="feature-item">
                     <div className="feature-icon-box ultra-feature">
-                      <span className="icon">◈</span>
+                      <span className="icon">🧠</span>
                     </div>
-                    <span className="feature-text">Unlimited Image Generation</span>
+                    <span className="feature-text">Infinite Memory ✅</span>
                   </div>
                   <div className="feature-item">
                     <div className="feature-icon-box ultra-feature">
-                      <span className="icon">◇</span>
+                      <span className="icon">🖼️</span>
                     </div>
-                    <span className="feature-text">50 Videos per month</span>
+                    <span className="feature-text">Unlimited Image Gen (soft cap)</span>
+                  </div>
+                  <div className="feature-item">
+                    <div className="feature-icon-box ultra-feature">
+                      <span className="icon">🎬</span>
+                    </div>
+                    <span className="feature-text">~50 videos/month</span>
                   </div>
                   <div className="feature-item">
                     <div className="feature-icon-box ultra-feature">
                       <span className="icon">★</span>
                     </div>
-                    <span className="feature-text">Unlimited AI Workflows & Custom Omi's</span>
+                    <span className="feature-text">Unlimited Custom Omi's</span>
                   </div>
                   <div className="feature-item">
                     <div className="feature-icon-box ultra-feature">
                       <span className="icon">⚡</span>
                     </div>
-                    <span className="feature-text">Priority Processing Speed</span>
-                  </div>
-                  <div className="feature-item">
-                    <div className="feature-icon-box ultra-feature">
-                      <span className="icon">✦</span>
-                    </div>
-                    <span className="feature-text">Early Access Features</span>
+                    <span className="feature-text">Priority Processing</span>
                   </div>
                 </div>
 

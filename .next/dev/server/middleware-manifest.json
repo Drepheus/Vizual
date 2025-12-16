@@ -3,6 +3,42 @@
   "middleware": {},
   "sortedMiddleware": [],
   "functions": {
+    "/api/chat/route": {
+      "files": [
+        "server/middleware-build-manifest.js",
+        "server/interception-route-rewrite-manifest.js",
+        "server/server-reference-manifest.js",
+        "server/app/api/chat/route_client-reference-manifest.js",
+        "server/edge/chunks/Omi-AI-1__next-internal_server_app_api_chat_route_actions_6160f540.js",
+        "server/edge/chunks/b2346_next_dist_esm_shared_lib_005b7768._.js",
+        "server/edge/chunks/b2346_next_dist_esm_server_3f6e3ba1._.js",
+        "server/edge/chunks/b2346_next_dist_esm_b4d95e4e._.js",
+        "server/edge/chunks/b2346_next_dist_compiled_cfc1a1fb._.js",
+        "server/edge/chunks/b2346_next_dist_f6fa525d._.js",
+        "server/edge/chunks/Omi-AI-1_edge-wrapper_a795f3ea.js",
+        "server/edge/chunks/9e73c_@opentelemetry_api_build_esm_9160013a._.js",
+        "server/edge/chunks/ad6a8_@google_generative-ai_dist_index_mjs_3a3a2aae._.js",
+        "server/edge/chunks/[root-of-the-server]__f03d38c4._.js",
+        "server/edge/chunks/turbopack-Omi-AI-1_edge-wrapper_e304373f.js"
+      ],
+      "name": "app/api/chat/route",
+      "page": "/api/chat/route",
+      "matchers": [
+        {
+          "regexp": "^/api/chat(?:/)?$",
+          "originalSource": "/api/chat"
+        }
+      ],
+      "wasm": [],
+      "assets": [],
+      "env": {
+        "__NEXT_BUILD_ID": "development",
+        "NEXT_SERVER_ACTIONS_ENCRYPTION_KEY": "uvGAP7MmByndSk2KecWdZXxsvQO4e1MmkFxNCBpvGDs=",
+        "__NEXT_PREVIEW_MODE_ID": "a520ac0c92cb3119f8b1fa76095635d6",
+        "__NEXT_PREVIEW_MODE_ENCRYPTION_KEY": "010e3c39123de001c730d9d5dbd06d2cad0d37d8647c17896e748d651e9c4616",
+        "__NEXT_PREVIEW_MODE_SIGNING_KEY": "c79e28371f23bc8eb1454909049c94f30a396ed8e9978b4527869856beb26c37"
+      }
+    },
     "/api/generate-image/route": {
       "files": [
         "server/middleware-build-manifest.js",
@@ -34,45 +70,9 @@
       "env": {
         "__NEXT_BUILD_ID": "development",
         "NEXT_SERVER_ACTIONS_ENCRYPTION_KEY": "uvGAP7MmByndSk2KecWdZXxsvQO4e1MmkFxNCBpvGDs=",
-        "__NEXT_PREVIEW_MODE_ID": "1447ba07f29cd49bd966129c4cb5bba4",
-        "__NEXT_PREVIEW_MODE_ENCRYPTION_KEY": "1d10a3bf79111d64303929a82dbef10ae02d6deba2a551943b791eba953be787",
-        "__NEXT_PREVIEW_MODE_SIGNING_KEY": "a5b25f7f9664ec328b0e25830581b0141fdd6521f6f892e52fa4e4a4cffd6cb2"
-      }
-    },
-    "/api/generate-video/route": {
-      "files": [
-        "server/middleware-build-manifest.js",
-        "server/interception-route-rewrite-manifest.js",
-        "server/server-reference-manifest.js",
-        "server/app/api/generate-video/route_client-reference-manifest.js",
-        "server/edge/chunks/Omi-AI-1__next-internal_server_app_api_generate-video_route_actions_07d2a128.js",
-        "server/edge/chunks/b2346_next_dist_esm_shared_lib_005b7768._.js",
-        "server/edge/chunks/b2346_next_dist_esm_server_3f6e3ba1._.js",
-        "server/edge/chunks/b2346_next_dist_esm_c00bf57e._.js",
-        "server/edge/chunks/b2346_next_dist_compiled_cfc1a1fb._.js",
-        "server/edge/chunks/b2346_next_dist_f6fa525d._.js",
-        "server/edge/chunks/Omi-AI-1_edge-wrapper_18247c5f.js",
-        "server/edge/chunks/9e73c_@opentelemetry_api_build_esm_9160013a._.js",
-        "server/edge/chunks/f8232_replicate_9171fe7d._.js",
-        "server/edge/chunks/[root-of-the-server]__7a14c705._.js",
-        "server/edge/chunks/turbopack-Omi-AI-1_edge-wrapper_d6ca3491.js"
-      ],
-      "name": "app/api/generate-video/route",
-      "page": "/api/generate-video/route",
-      "matchers": [
-        {
-          "regexp": "^/api/generate-video(?:/)?$",
-          "originalSource": "/api/generate-video"
-        }
-      ],
-      "wasm": [],
-      "assets": [],
-      "env": {
-        "__NEXT_BUILD_ID": "development",
-        "NEXT_SERVER_ACTIONS_ENCRYPTION_KEY": "uvGAP7MmByndSk2KecWdZXxsvQO4e1MmkFxNCBpvGDs=",
-        "__NEXT_PREVIEW_MODE_ID": "1447ba07f29cd49bd966129c4cb5bba4",
-        "__NEXT_PREVIEW_MODE_ENCRYPTION_KEY": "1d10a3bf79111d64303929a82dbef10ae02d6deba2a551943b791eba953be787",
-        "__NEXT_PREVIEW_MODE_SIGNING_KEY": "a5b25f7f9664ec328b0e25830581b0141fdd6521f6f892e52fa4e4a4cffd6cb2"
+        "__NEXT_PREVIEW_MODE_ID": "a520ac0c92cb3119f8b1fa76095635d6",
+        "__NEXT_PREVIEW_MODE_ENCRYPTION_KEY": "010e3c39123de001c730d9d5dbd06d2cad0d37d8647c17896e748d651e9c4616",
+        "__NEXT_PREVIEW_MODE_SIGNING_KEY": "c79e28371f23bc8eb1454909049c94f30a396ed8e9978b4527869856beb26c37"
       }
     }
   }

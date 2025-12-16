@@ -65,6 +65,7 @@ function SplashPage() {
   const [isSynthesizeActive, setIsSynthesizeActive] = useState(false);
   const [isPulseActive, setIsPulseActive] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isChatHidden, setIsChatHidden] = useState(false);
   const [isInstantGenActive, setIsInstantGenActive] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
@@ -75,6 +76,7 @@ function SplashPage() {
   const videoContainerRef = useRef<HTMLDivElement>(null);
   const [isHoveringImageGen, setIsHoveringImageGen] = useState(false);
   const [isHoveringVideoGen, setIsHoveringVideoGen] = useState(false);
+  const [isVoiceModeActive, setIsVoiceModeActive] = useState(false);
 
   // Paywall and subscription management
   const [showPaywall, setShowPaywall] = useState(false);
@@ -109,6 +111,18 @@ function SplashPage() {
   // Feature buttons data
   const featureButtons = [
     {
+      name: 'Focus',
+      icon: '⊙',
+      description: 'Enter distraction-free fullscreen mode',
+      onClick: () => {
+        setIsFullscreen(true);
+        setIsPersonasActive(false);
+        setIsSynthesizeActive(false);
+        setIsPulseActive(false);
+        console.log('Focus mode activated');
+      }
+    },
+    {
       name: 'Personas',
       icon: '◐',
       description: selectedPersona ? `Active: ${selectedPersona}` : 'Shift Omi\'s voice (teacher, critic, explorer, poet)',
@@ -118,17 +132,6 @@ function SplashPage() {
         setIsPersonasActive(isActivating); // Toggle ChromaGrid overlay
         setIsSynthesizeActive(false); // Turn off ElectricBorder animation
         console.log('Personas clicked - ChromaGrid', isActivating ? 'activated' : 'deactivated');
-      }
-    },
-    {
-      name: 'Create',
-      icon: '◇',
-      description: 'Generate visuals, stories, or creative ideas',
-      onClick: () => {
-        setShowCreateMenu(true);
-        setIsPersonasActive(false); // Turn off ChromaGrid animation
-        setIsSynthesizeActive(false); // Turn off ElectricBorder animation
-        console.log('Create clicked - showing infinite menu');
       }
     },
     {
@@ -644,7 +647,7 @@ function SplashPage() {
 
       <div className="splash-page">
         {/* Hamburger Menu - Fixed to top-left corner */}
-        {user && (
+        {user && !isFullscreen && (
           <button
             className="conversations-btn"
             onClick={() => setShowConversations(true)}
@@ -655,61 +658,63 @@ function SplashPage() {
         )}
 
         {/* Top Right Action Buttons - Fixed to top-right corner */}
-        <div className="top-right-actions">
-          {/* New Conversation Button - FIRST */}
-          <button
-            className="header-action-btn new-conversation-btn"
-            onClick={createNewConversation}
-            title="Start new conversation"
-          >
-            <span className="header-btn-icon">✦</span>
-            <span className="header-btn-text">New Chat</span>
-          </button>
-
-          {/* Upgrade Button (for free users) - No badge in header */}
-          {user && subscriptionTier === 'free' && (
+        {!isFullscreen && (
+          <div className="top-right-actions">
+            {/* New Conversation Button - FIRST */}
             <button
-              className="header-action-btn upgrade-btn"
-              onClick={() => setShowPaywall(true)}
-              title="Upgrade to Pro"
+              className="header-action-btn new-conversation-btn"
+              onClick={createNewConversation}
+              title="Start new conversation"
             >
-              <span className="header-btn-icon">◈</span>
-              <span className="header-btn-text">Upgrade</span>
+              <span className="header-btn-icon">✦</span>
+              <span className="header-btn-text">New Chat</span>
             </button>
-          )}
 
-          {/* Account Tier Indicator (for pro users only) */}
-          {user && subscriptionTier === 'pro' && (
-            <div className="account-tier-badge pro-badge">
-              <span className="tier-icon">◆</span>
-              <span className="tier-text">Pro Account</span>
-            </div>
-          )}
+            {/* Upgrade Button (for free users) - No badge in header */}
+            {user && subscriptionTier === 'free' && (
+              <button
+                className="header-action-btn upgrade-btn"
+                onClick={() => setShowPaywall(true)}
+                title="Upgrade to Pro"
+              >
+                <span className="header-btn-icon">◈</span>
+                <span className="header-btn-text">Upgrade</span>
+              </button>
+            )}
 
-          {/* Account Button */}
-          {user ? (
-            <button
-              className="header-action-btn account-btn"
-              onClick={() => setShowSettings(true)}
-              title="Account settings"
-            >
-              <span className="header-btn-icon">◉</span>
-              <span className="header-btn-text">{user.email?.split('@')[0] || 'Account'}</span>
-            </button>
-          ) : (
-            <button
-              className="header-action-btn guest-mode-btn"
-              onClick={() => window.location.href = '/login'}
-              title="Sign in to save your conversations"
-            >
-              <span className="header-btn-icon">◎</span>
-              <span className="header-btn-text">Guest Mode</span>
-            </button>
-          )}
-        </div>
+            {/* Account Tier Indicator (for pro users only) */}
+            {user && subscriptionTier === 'pro' && (
+              <div className="account-tier-badge pro-badge">
+                <span className="tier-icon">◆</span>
+                <span className="tier-text">Pro Account</span>
+              </div>
+            )}
+
+            {/* Account Button */}
+            {user ? (
+              <button
+                className="header-action-btn account-btn"
+                onClick={() => setShowSettings(true)}
+                title="Account settings"
+              >
+                <span className="header-btn-icon">◉</span>
+                <span className="header-btn-text">{user.email?.split('@')[0] || 'Account'}</span>
+              </button>
+            ) : (
+              <button
+                className="header-action-btn guest-mode-btn"
+                onClick={() => window.location.href = '/login'}
+                title="Sign in to save your conversations"
+              >
+                <span className="header-btn-icon">◎</span>
+                <span className="header-btn-text">Guest Mode</span>
+              </button>
+            )}
+          </div>
+        )}
 
         {/* Free Account Badge - Bottom Left Corner */}
-        {user && subscriptionTier === 'free' && (
+        {user && subscriptionTier === 'free' && !isFullscreen && (
           <div className="account-tier-badge-fixed">
             <span className="tier-icon">◎</span>
             <span className="tier-text">Free Account</span>
@@ -780,284 +785,320 @@ function SplashPage() {
 
 
 
-          {/* Chat Container - Show in Compare Mode or when messages exist */}
-          {(messages.length > 0 || isCompareMode) && (
-            <div className={`chat-container ${isCompareMode ? 'compare-mode' : ''} ${isFullscreen ? 'fullscreen' : ''}`}>
-              {/* Primary Chat Panel */}
-              <div className="chat-panel primary-panel">
-                <div className="panel-header">
-                  <h3>
-                    {isCompareMode ? (
-                      <select
-                        className="model-selector"
-                        value={selectedModel}
-                        onChange={(e) => setSelectedModel(e.target.value)}
-                      >
-                        <option value="Gemini Pro">Gemini Pro</option>
-                        <option value="Claude">Claude</option>
-                        <option value="GPT-4">GPT-4</option>
-                        <option value="Llama">Llama</option>
-                      </select>
-                    ) : (
-                      selectedModel || 'Primary AI'
-                    )}
-                  </h3>
-                  <button
-                    className="fullscreen-toggle"
-                    onClick={() => setIsFullscreen(!isFullscreen)}
-                    title={isFullscreen ? "Exit Fullscreen (ESC)" : "Fullscreen"}
-                  >
-                    {isFullscreen ? '⤓' : '⤢'}
-                  </button>
-                </div>
-                <div className="chat-messages">
-                  {messages.length === 0 && isCompareMode ? (
-                    <div className="empty-chat-message">
-                      <p>Compare mode activated. Start chatting to see responses from both models side-by-side.</p>
-                    </div>
-                  ) : (
-                    <>
-                      {messages.map((message) => (
-                        <div key={message.id} className={`message ${message.role}`}>
-                          <div className="message-content">
-                            {message.role === 'assistant' ? (
-                              <FormattedText
-                                text={getMessageText(message)}
-                                delay={0.2}
-                              />
-                            ) : (
-                              getMessageText(message)
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                      {isLoading && (
-                        <div className="message assistant loading">
-                          <div className="message-content">
-                            <div className="typing-indicator">
-                              <span></span>
-                              <span></span>
-                              <span></span>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
-              </div>
-
-              {/* Secondary Chat Panel (Compare Mode) */}
-              {isCompareMode && (
-                <div className="chat-panel secondary-panel">
+          {/* Chat Wrapper - Handles Fullscreen Mode */}
+          <div className={`chat-wrapper ${isFullscreen ? 'fullscreen' : ''} ${isChatHidden ? 'hidden' : ''}`}>
+            {/* Chat Container - Show in Compare Mode or when messages exist */}
+            {(messages.length > 0 || isCompareMode) && (
+              <div className={`chat-container ${isCompareMode ? 'compare-mode' : ''}`}>
+                {/* Primary Chat Panel */}
+                <div className="chat-panel primary-panel">
                   <div className="panel-header">
                     <h3>
-                      {secondaryModel || (
+                      {isCompareMode ? (
                         <select
                           className="model-selector"
-                          value={secondaryModel || ''}
-                          onChange={(e) => setSecondaryModel(e.target.value)}
+                          value={selectedModel}
+                          onChange={(e) => setSelectedModel(e.target.value)}
                         >
-                          <option value="">Select Model</option>
+                          <option value="Gemini Pro">Gemini Pro</option>
                           <option value="Claude">Claude</option>
                           <option value="GPT-4">GPT-4</option>
-                          <option value="Gemini Pro">Gemini Pro</option>
                           <option value="Llama">Llama</option>
                         </select>
+                      ) : (
+                        selectedModel || 'Primary AI'
                       )}
                     </h3>
+                    <div className="panel-controls">
+                      <button
+                        className="panel-control-btn hide-chat-btn"
+                        onClick={() => setIsChatHidden(true)}
+                        title="Hide Chat"
+                      >
+                        ─
+                      </button>
+                      <button
+                        className="panel-control-btn fullscreen-toggle"
+                        onClick={() => setIsFullscreen(!isFullscreen)}
+                        title={isFullscreen ? "Exit Fullscreen (ESC)" : "Fullscreen"}
+                      >
+                        {isFullscreen ? '⤓' : '⤢'}
+                      </button>
+                    </div>
                   </div>
                   <div className="chat-messages">
-                    {secondaryMessages.length === 0 ? (
+                    {messages.length === 0 && isCompareMode ? (
                       <div className="empty-chat-message">
-                        <p>Select a model above to compare responses.</p>
+                        <p>Compare mode activated. Start chatting to see responses from both models side-by-side.</p>
                       </div>
                     ) : (
                       <>
-                        {secondaryMessages.map((message, index) => (
-                          <div key={index} className={`message ${message.role}`}>
+                        {messages.map((message) => (
+                          <div key={message.id} className={`message ${message.role}`}>
                             <div className="message-content">
                               {message.role === 'assistant' ? (
                                 <FormattedText
-                                  text={message.content}
+                                  text={getMessageText(message)}
                                   delay={0.2}
                                 />
                               ) : (
-                                message.content
+                                getMessageText(message)
                               )}
                             </div>
-                            <div className="message-time">
-                              {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </div>
+                            {message.role === 'assistant' && (
+                              <div className="message-actions">
+                                <button className="msg-action-btn" title="Want a shorter version?">Shorten</button>
+                                <button className="msg-action-btn" title="Turn this into an email?">Email</button>
+                                <button className="msg-action-btn" title="Make this visual?">Visual</button>
+                              </div>
+                            )}
                           </div>
                         ))}
+                        {isLoading && (
+                          <div className="message assistant loading">
+                            <div className="message-content">
+                              <div className="typing-indicator">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       </>
                     )}
                   </div>
                 </div>
-              )}
-            </div>
-          )}
 
-          <form className="chat-form" onSubmit={handleSubmit}>
-            {/* Attached files display */}
-            {attachedFiles.length > 0 && (
-              <div className="attached-files">
-                {attachedFiles.map((file, index) => (
-                  <div key={index} className="attached-file">
-                    <span className="file-icon">
-                      {file.type.startsWith('image/') ? '🖼️' :
-                        file.type.startsWith('video/') ? '🎥' :
-                          file.type.includes('pdf') ? '📄' : '📎'}
-                    </span>
-                    <span className="file-name">{file.name}</span>
-                    <button
-                      type="button"
-                      className="remove-file"
-                      onClick={() => removeAttachedFile(index)}
-                      title="Remove file"
-                    >
-                      ×
-                    </button>
+                {/* Secondary Chat Panel (Compare Mode) */}
+                {isCompareMode && (
+                  <div className="chat-panel secondary-panel">
+                    <div className="panel-header">
+                      <h3>
+                        {secondaryModel || (
+                          <select
+                            className="model-selector"
+                            value={secondaryModel || ''}
+                            onChange={(e) => setSecondaryModel(e.target.value)}
+                          >
+                            <option value="">Select Model</option>
+                            <option value="Claude">Claude</option>
+                            <option value="GPT-4">GPT-4</option>
+                            <option value="Gemini Pro">Gemini Pro</option>
+                            <option value="Llama">Llama</option>
+                          </select>
+                        )}
+                      </h3>
+                    </div>
+                    <div className="chat-messages">
+                      {secondaryMessages.length === 0 ? (
+                        <div className="empty-chat-message">
+                          <p>Select a model above to compare responses.</p>
+                        </div>
+                      ) : (
+                        <>
+                          {secondaryMessages.map((message, index) => (
+                            <div key={index} className={`message ${message.role}`}>
+                              <div className="message-content">
+                                {message.role === 'assistant' ? (
+                                  <FormattedText
+                                    text={message.content}
+                                    delay={0.2}
+                                  />
+                                ) : (
+                                  message.content
+                                )}
+                              </div>
+                              <div className="message-time">
+                                {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              </div>
+                            </div>
+                          ))}
+                        </>
+                      )}
+                    </div>
                   </div>
-                ))}
-              </div>
-            )}
-
-            {/* Image Gen Mode Indicator */}
-            {isInstantGenActive && (
-              <div className="instant-gen-indicator">
-                <span className="instant-gen-icon">⚡</span>
-                <span className="instant-gen-text">
-                  Image Gen Mode Active - Describe the image you want to create
-                </span>
-              </div>
-            )}
-
-            {/* Video Gen Mode Indicator */}
-            {isVideoGenActive && (
-              <div className="video-gen-indicator">
-                <span className="video-gen-icon">🎬</span>
-                <span className="video-gen-text">
-                  Video Gen Mode Active - Describe the video scene you want to create
-                </span>
-              </div>
-            )}
-
-            <div className={`chat-input-container ${isSynthesizeActive ? 'synthesize-active' : ''} ${isInstantGenActive ? 'instant-gen-active' : ''} ${isVideoGenActive ? 'video-gen-active' : ''}`}>
-              <input
-                type="file"
-                id="file-input"
-                className="file-input"
-                onChange={handleFileAttach}
-                multiple
-                accept="image/*,video/*,.pdf,.doc,.docx,.txt"
-                style={{ display: 'none' }}
-              />
-              {!isInstantGenActive && (
-                <button
-                  type="button"
-                  className="attach-file-btn"
-                  onClick={() => document.getElementById('file-input')?.click()}
-                  title="Attach files"
-                  disabled={isLoading}
-                >
-                  📎
-                </button>
-              )}
-              <input
-                type="text"
-                value={input}
-                onChange={handleInputChange}
-                placeholder={
-                  isVideoGenActive
-                    ? "🎬 Describe your video scene (e.g., 'a woman walking through Tokyo at night')..."
-                    : isInstantGenActive
-                      ? "⚡ Describe your image (e.g., 'A sunset over mountains')..."
-                      : isSynthesizeActive
-                        ? "Type your message in Synthesize mode..."
-                        : "Type your message..."
-                }
-                className="chat-input"
-                autoFocus
-                disabled={isLoading || isGeneratingImage || isGeneratingVideo}
-              />
-              <button
-                type="submit"
-                className="chat-submit"
-                disabled={!input.trim() || isLoading || isGeneratingImage || isGeneratingVideo}
-              >
-                {isLoading ? (
-                  <div className="loading-spinner">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" opacity="0.3" />
-                      <path d="M12 2A10 10 0 0 1 22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                    </svg>
-                  </div>
-                ) : (
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M2 12L22 2L13 21L11 13L2 12Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
                 )}
-              </button>
+              </div>
+            )}
 
-              {/* Electric Border Animation Overlay for Synthesize Mode */}
-              {isSynthesizeActive && (
-                <div className="electric-border-overlay">
-                  <svg className="electric-border-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-                    <defs>
-                      <filter id="electric-glow">
-                        <feTurbulence baseFrequency="0.02" numOctaves="3" result="noise" seed="1">
-                          <animate attributeName="seed" values="1;5;1" dur="3s" repeatCount="indefinite" />
-                        </feTurbulence>
-                        <feDisplacementMap in="SourceGraphic" in2="noise" scale="2" />
-                        <feGaussianBlur stdDeviation="0.5" />
-                        <feColorMatrix values="0 0 0 0 0.9 0 0 0 0 0.9 0 0 0 0 0.9 0 0 0 1 0" />
-                      </filter>
-                    </defs>
-                    <rect
-                      x="1"
-                      y="1"
-                      width="98"
-                      height="98"
-                      fill="none"
-                      stroke="#e5e5e5"
-                      strokeWidth="0.5"
-                      filter="url(#electric-glow)"
-                      rx="3"
-                      ry="3"
-                    >
-                      <animate
-                        attributeName="stroke-opacity"
-                        values="0.3;1;0.3"
-                        dur="2s"
-                        repeatCount="indefinite"
-                      />
-                    </rect>
-                    <rect
-                      x="0.5"
-                      y="0.5"
-                      width="99"
-                      height="99"
-                      fill="none"
-                      stroke="#e5e5e5"
-                      strokeWidth="0.3"
-                      rx="3"
-                      ry="3"
-                      opacity="0.6"
-                    >
-                      <animate
-                        attributeName="stroke-dasharray"
-                        values="0,400;200,200;400,0;0,400"
-                        dur="4s"
-                        repeatCount="indefinite"
-                      />
-                    </rect>
-                  </svg>
+            <form className="chat-form" onSubmit={handleSubmit}>
+              {/* Attached files display */}
+              {attachedFiles.length > 0 && (
+                <div className="attached-files">
+                  {attachedFiles.map((file, index) => (
+                    <div key={index} className="attached-file">
+                      <span className="file-icon">
+                        {file.type.startsWith('image/') ? '🖼️' :
+                          file.type.startsWith('video/') ? '🎥' :
+                            file.type.includes('pdf') ? '📄' : '📎'}
+                      </span>
+                      <span className="file-name">{file.name}</span>
+                      <button
+                        type="button"
+                        className="remove-file"
+                        onClick={() => removeAttachedFile(index)}
+                        title="Remove file"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
                 </div>
               )}
-            </div>
-          </form>
+
+              {/* Image Gen Mode Indicator */}
+              {isInstantGenActive && (
+                <div className="instant-gen-indicator">
+                  <span className="instant-gen-icon">⚡</span>
+                  <span className="instant-gen-text">
+                    Image Gen Mode Active - Describe the image you want to create
+                  </span>
+                </div>
+              )}
+
+              {/* Video Gen Mode Indicator */}
+              {isVideoGenActive && (
+                <div className="video-gen-indicator">
+                  <span className="video-gen-icon">🎬</span>
+                  <span className="video-gen-text">
+                    Video Gen Mode Active - Describe the video scene you want to create
+                  </span>
+                </div>
+              )}
+
+              <div className={`chat-input-container ${isSynthesizeActive ? 'synthesize-active' : ''} ${isInstantGenActive ? 'instant-gen-active' : ''} ${isVideoGenActive ? 'video-gen-active' : ''}`}>
+                <input
+                  type="file"
+                  id="file-input"
+                  className="file-input"
+                  onChange={handleFileAttach}
+                  multiple
+                  accept="image/*,video/*,.pdf,.doc,.docx,.txt"
+                  style={{ display: 'none' }}
+                />
+                {!isInstantGenActive && (
+                  <>
+                    <button
+                      type="button"
+                      className="attach-file-btn"
+                      onClick={() => document.getElementById('file-input')?.click()}
+                      title="Attach files"
+                      disabled={isLoading}
+                    >
+                      📎
+                    </button>
+                    <button
+                      type="button"
+                      className={`voice-mode-btn ${isVoiceModeActive ? 'active' : ''}`}
+                      onClick={() => setIsVoiceModeActive(!isVoiceModeActive)}
+                      title={isVoiceModeActive ? "Disable Voice Mode" : "Enable Voice Mode"}
+                      disabled={isLoading}
+                    >
+                      <div className="sound-wave-icon">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                      </div>
+                    </button>
+                  </>
+                )}
+                <input
+                  type="text"
+                  value={input}
+                  onChange={handleInputChange}
+                  placeholder={
+                    isVideoGenActive
+                      ? "🎬 Describe your video scene (e.g., 'a woman walking through Tokyo at night')..."
+                      : isInstantGenActive
+                        ? "⚡ Describe your image (e.g., 'A sunset over mountains')..."
+                        : isSynthesizeActive
+                          ? "Type your message in Synthesize mode..."
+                          : "Type your message..."
+                  }
+                  className="chat-input"
+                  autoFocus
+                  disabled={isLoading || isGeneratingImage || isGeneratingVideo}
+                />
+                <button
+                  type="submit"
+                  className="chat-submit"
+                  disabled={!input.trim() || isLoading || isGeneratingImage || isGeneratingVideo}
+                >
+                  {isLoading ? (
+                    <div className="loading-spinner">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" opacity="0.3" />
+                        <path d="M12 2A10 10 0 0 1 22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                      </svg>
+                    </div>
+                  ) : (
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M2 12L22 2L13 21L11 13L2 12Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  )}
+                </button>
+
+                {/* Electric Border Animation Overlay for Synthesize Mode */}
+                {isSynthesizeActive && (
+                  <div className="electric-border-overlay">
+                    <svg className="electric-border-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+                      <defs>
+                        <filter id="electric-glow">
+                          <feTurbulence baseFrequency="0.02" numOctaves="3" result="noise" seed="1">
+                            <animate attributeName="seed" values="1;5;1" dur="3s" repeatCount="indefinite" />
+                          </feTurbulence>
+                          <feDisplacementMap in="SourceGraphic" in2="noise" scale="2" />
+                          <feGaussianBlur stdDeviation="0.5" />
+                          <feColorMatrix values="0 0 0 0 0.9 0 0 0 0 0.9 0 0 0 0 0.9 0 0 0 1 0" />
+                        </filter>
+                      </defs>
+                      <rect
+                        x="1"
+                        y="1"
+                        width="98"
+                        height="98"
+                        fill="none"
+                        stroke="#e5e5e5"
+                        strokeWidth="0.5"
+                        filter="url(#electric-glow)"
+                        rx="3"
+                        ry="3"
+                      >
+                        <animate
+                          attributeName="stroke-opacity"
+                          values="0.3;1;0.3"
+                          dur="2s"
+                          repeatCount="indefinite"
+                        />
+                      </rect>
+                      <rect
+                        x="0.5"
+                        y="0.5"
+                        width="99"
+                        height="99"
+                        fill="none"
+                        stroke="#e5e5e5"
+                        strokeWidth="0.3"
+                        rx="3"
+                        ry="3"
+                        opacity="0.6"
+                      >
+                        <animate
+                          attributeName="stroke-dasharray"
+                          values="0,400;200,200;400,0;0,400"
+                          dur="4s"
+                          repeatCount="indefinite"
+                        />
+                      </rect>
+                    </svg>
+                  </div>
+                )}
+              </div>
+            </form>
+          </div>
 
           {/* Generated Image Display */}
           {isInstantGenActive && (
@@ -1101,6 +1142,9 @@ function SplashPage() {
                       >
                         ✕ Clear
                       </button>
+                      <button className="image-action-btn" title="See variations?">Variations</button>
+                      <button className="image-action-btn" title="Turn into video?">Video</button>
+                      <button className="image-action-btn" title="Refine this?">Refine</button>
                     </div>
                   </div>
                   <img
@@ -1160,6 +1204,8 @@ function SplashPage() {
                       >
                         ✕ Clear
                       </button>
+                      <button className="video-action-btn" title="Add captions?">Captions</button>
+                      <button className="video-action-btn" title="Change tone?">Tone</button>
                     </div>
                   </div>
                   <video
@@ -1304,8 +1350,19 @@ function SplashPage() {
         </div>
       )}
 
+      {/* Show Chat Button - Visible when chat is hidden */}
+      {isChatHidden && (
+        <button
+          className="show-chat-btn"
+          onClick={() => setIsChatHidden(false)}
+          title="Show Chat"
+        >
+          💬 Show Chat
+        </button>
+      )}
+
       {/* Dock - always visible - Outside scrollable container */}
-      <Dock items={dockItems} />
+      {!isFullscreen && <Dock items={dockItems} />}
 
       {/* Infinite Menu Overlay */}
       <InfiniteMenu
@@ -1344,7 +1401,7 @@ function SplashPage() {
       />
 
       {/* News Ticker - Fixed at bottom */}
-      <NewsTicker />
+      {!isFullscreen && <NewsTicker />}
     </>
   );
 }

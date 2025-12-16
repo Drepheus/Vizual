@@ -19,7 +19,6 @@ export function VertexSidebar({ showApiKeyButton = false }: VertexSidebarProps) 
         { label: 'Gemini', icon: '💎', path: '/gemini' },
         { label: 'DeepMind', icon: '🧠', path: '#' },
         { label: 'Veo', icon: '🎬', path: '/veo' },
-        { label: 'Code Assist', icon: '💻', path: '/code-assist' },
     ];
 
     return (
@@ -27,7 +26,7 @@ export function VertexSidebar({ showApiKeyButton = false }: VertexSidebarProps) 
             <div className="sidebar-header">
                 <div className="sidebar-logo">
                     <span className="logo-icon">◆</span>
-                    {!collapsed && <span className="logo-text">Vertex AI</span>}
+                    {!collapsed && <span className="logo-text">Google AI Studio</span>}
                 </div>
                 <button className="sidebar-toggle" onClick={() => setCollapsed(!collapsed)}>
                     {collapsed ? '→' : '←'}

@@ -3,6 +3,8 @@
 import { useRef, useEffect, useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { gsap } from 'gsap';
+import SettingsModal from './SettingsModal';
+import { supabase } from './supabaseClient';
 
 const DEFAULT_PARTICLE_COUNT = 12;
 const DEFAULT_SPOTLIGHT_RADIUS = 300;
@@ -61,17 +63,18 @@ const cardData = [
   {
     color: '#0a0a0a',
     icon: '🔮',
-    title: 'Replicate Studio',
+    title: 'API Studio',
     description: 'Explore and run thousands of AI models - from image generation to language models',
     label: 'Models',
-    action: 'replicatestudio'
+    action: 'apistudio'
   },
   {
     color: '#0a0a0a',
     icon: '⚙️',
-    title: 'API Settings',
-    description: 'Configure API\'s',
-    label: 'Metrics'
+    title: 'Account and API Settings',
+    description: 'Configure API\'s and Account',
+    label: 'Settings',
+    action: 'settings'
   }
 ];
 
@@ -564,6 +567,16 @@ const MagicBento: React.FC<MagicBentoProps> = ({
   const router = useRouter();
   const isMobile = useMobileDetection();
   const shouldDisableAnimations = disableAnimations || isMobile;
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    getUser();
+  }, []);
 
   // Handle card clicks
   const handleCardClick = (card: typeof cardData[0]) => {
@@ -586,8 +599,11 @@ const MagicBento: React.FC<MagicBentoProps> = ({
       case 'googleaistudio':
         router.push('/google-ai-studio');
         break;
-      case 'replicatestudio':
-        router.push('/replicate-studio');
+      case 'apistudio':
+        router.push('/api-studio');
+        break;
+      case 'settings':
+        setIsSettingsOpen(true);
         break;
       default:
         break;
@@ -596,6 +612,11 @@ const MagicBento: React.FC<MagicBentoProps> = ({
 
   return (
     <>
+      <SettingsModal 
+        isOpen={isSettingsOpen} 
+        onClose={() => setIsSettingsOpen(false)} 
+        user={user} 
+      />
       {enableSpotlight && (
         <GlobalSpotlight
           gridRef={gridRef}
