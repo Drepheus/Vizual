@@ -70,6 +70,14 @@ const cardData = [
   },
   {
     color: '#0a0a0a',
+    icon: '📅',
+    title: 'Events & Calendar',
+    description: 'View upcoming AI challenges, workshops, and product launches',
+    label: 'Schedule',
+    action: 'calendar'
+  },
+  {
+    color: '#0a0a0a',
     icon: '⚙️',
     title: 'Account and API Settings',
     description: 'Configure API\'s and Account',
@@ -598,6 +606,9 @@ const MagicBento: React.FC<MagicBentoProps> = ({
         break;
       case 'googleaistudio':
         router.push('/google-ai-studio');
+        break;
+      case 'calendar':
+        router.push('/calendar');
         break;
       case 'apistudio':
         router.push('/api-studio');

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import DomeGallery from './DomeGallery';
 import LogoLoop from './LogoLoop';
@@ -160,6 +161,7 @@ const communityFilters = [
 ];
 
 export default function MediaStudio({ onClose }: MediaStudioProps) {
+  const router = useRouter();
   /* Existing state */
   const [activeCategory, setActiveCategory] = useState('Blueprints');
   const [activeFilter, setActiveFilter] = useState('Trending');
@@ -1484,6 +1486,10 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
                   key={tab.name}
                   className={`category-tab ${activeCategory === tab.name ? 'active' : ''}`}
                   onClick={() => {
+                    if (tab.name === 'Events') {
+                      router.push('/calendar');
+                      return;
+                    }
                     setActiveCategory(tab.name);
                     const section = document.getElementById(tab.sectionId);
                     if (section) {
@@ -1510,7 +1516,13 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
                 <h2 className="section-title">
                   <span className="title-highlight"><ShinyText text="Featured" speed={10} /></span> Blueprints
                 </h2>
-                <button className="view-more-btn">
+                <button 
+                  className="view-more-btn"
+                  onClick={() => {
+                    setActiveTool('Blueprints');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                >
                   View More <span className="arrow">→</span>
                 </button>
               </div>
@@ -1537,7 +1549,13 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
                 <h2 className="section-title">
                   <span className="title-highlight">Community</span> Creations
                 </h2>
-                <button className="view-more-btn">
+                <button 
+                  className="view-more-btn"
+                  onClick={() => {
+                    setActiveTool('Blueprints');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                >
                   View All <span className="arrow">→</span>
                 </button>
               </div>
@@ -1721,7 +1739,13 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
                 <h2 className="section-title">
                   <span className="title-highlight">AI</span> Models
                 </h2>
-                <button className="view-more-btn">
+                <button 
+                  className="view-more-btn"
+                  onClick={() => {
+                    setActiveTool('Image');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                >
                   View All <span className="arrow">→</span>
                 </button>
               </div>
@@ -1827,7 +1851,10 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
                 <h2 className="section-title">
                   <span className="title-highlight">Upcoming</span> Events
                 </h2>
-                <button className="view-more-btn">
+                <button 
+                  className="view-more-btn"
+                  onClick={() => router.push('/calendar')}
+                >
                   View Calendar <span className="arrow">→</span>
                 </button>
               </div>
@@ -1878,6 +1905,7 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
                 ].map((event, i) => (
                   <motion.div
                     key={i}
+                    onClick={() => router.push('/calendar')}
                     style={{
                       background: 'rgba(255,255,255,0.03)',
                       border: '1px solid rgba(255,255,255,0.1)',

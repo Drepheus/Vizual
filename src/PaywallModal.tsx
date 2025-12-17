@@ -100,7 +100,7 @@ const PaywallModal: React.FC<PaywallModalProps> = ({
                   <div className="feature-icon-box">
                     <span className="icon">🪙</span>
                   </div>
-                  <span className="feature-text">500 credits / month</span>
+                  <span className="feature-text"><span className="credit-amount">500</span> credits / month</span>
                 </div>
                 <div className="feature-item">
                   <div className="feature-icon-box">
@@ -170,7 +170,7 @@ const PaywallModal: React.FC<PaywallModalProps> = ({
                   <div className="feature-icon-box">
                     <span className="icon">🪙</span>
                   </div>
-                  <span className="feature-text">5,000 credits / month</span>
+                  <span className="feature-text"><span className="credit-amount highlight">5,000</span> credits / month</span>
                 </div>
                 <div className="feature-item">
                   <div className="feature-icon-box">
@@ -252,7 +252,7 @@ const PaywallModal: React.FC<PaywallModalProps> = ({
                     <div className="feature-icon-box ultra-feature">
                       <span className="icon">🪙</span>
                     </div>
-                    <span className="feature-text">25,000 credits / month</span>
+                    <span className="feature-text"><span className="credit-amount ultra">25,000</span> credits / month</span>
                   </div>
                   <div className="feature-item">
                     <div className="feature-icon-box ultra-feature">
