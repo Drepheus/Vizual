@@ -9,6 +9,7 @@
   "/gemini/page": "app/gemini/page.js",
   "/google-ai-studio/page": "app/google-ai-studio/page.js",
   "/google-ai/page": "app/google-ai/page.js",
+  "/login/page": "app/login/page.js",
   "/media-studio/page": "app/media-studio/page.js",
   "/page": "app/page.js",
   "/veo/page": "app/veo/page.js",

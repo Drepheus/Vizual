@@ -102,6 +102,78 @@
   overflow: hidden;
 }
 
+/* Tooltip Styles */
+.calendar-tooltip {
+  background: rgba(20, 20, 25, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 16px;
+  width: 280px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+}
+
+.tooltip-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tooltip-date {
+  font-weight: 600;
+  color: #fff;
+  font-size: 0.95rem;
+}
+
+.tooltip-count {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.tooltip-events {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tooltip-event-item {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.tooltip-event-indicator {
+  width: 4px;
+  height: 32px;
+  border-radius: 2px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.tooltip-event-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tooltip-event-title {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.tooltip-event-time {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
 .calendar-day-header {
   background: rgba(30, 30, 30, 0.8);
   padding: 1rem;

@@ -1778,7 +1778,7 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
                 className="section-header"
               >
                 <h2 className="section-title">
-                  <span className="title-highlight"><ShinyText text="Featured" speed={10} /></span> Blueprints
+                  <span style={{ color: 'white' }}>Featured</span> <ShinyText text="Blueprints" speed={6} className="premium-gradient-text" />
                 </h2>
                 <button 
                   className="view-more-btn"
@@ -1811,7 +1811,7 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
             <section id="community-section" className="community-section">
               <div className="section-header">
                 <h2 className="section-title">
-                  <span className="title-highlight">Community</span> Creations
+                  <span style={{ color: 'white' }}>Community</span> <ShinyText text="Creations" speed={6} className="premium-gradient-text" />
                 </h2>
                 <button 
                   className="view-more-btn"
@@ -2001,7 +2001,7 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
             <section id="models-section" className="models-section" style={{ padding: '60px 40px' }}>
               <div className="section-header">
                 <h2 className="section-title">
-                  <span className="title-highlight">AI</span> Models
+                  <span style={{ color: 'white' }}>AI</span> <ShinyText text="Models" speed={6} className="premium-gradient-text" />
                 </h2>
                 <button 
                   className="view-more-btn"
@@ -2113,7 +2113,7 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
             <section id="events-section" className="events-section" style={{ padding: '60px 40px', marginBottom: '40px' }}>
               <div className="section-header">
                 <h2 className="section-title">
-                  <span className="title-highlight">Upcoming</span> Events
+                  <span style={{ color: 'white' }}>Upcoming</span> <ShinyText text="Events" speed={6} className="premium-gradient-text" />
                 </h2>
                 <button 
                   className="view-more-btn"

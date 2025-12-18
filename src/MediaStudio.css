@@ -1322,3 +1322,13 @@
   animation: shine 3s linear infinite;
   text-shadow: 0 0 30px rgba(217, 70, 239, 0.5);
 }
+
+.premium-gradient-text {
+  background: linear-gradient(120deg, #c084fc 0%, #f472b6 25%, #e879f9 50%, #818cf8 75%, #c084fc 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shine 3s linear infinite;
+  filter: drop-shadow(0 0 10px rgba(192, 132, 252, 0.3));
+}

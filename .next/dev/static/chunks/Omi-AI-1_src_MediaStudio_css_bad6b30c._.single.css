@@ -1286,4 +1286,13 @@
   animation: 3s linear infinite shine;
 }
 
+.premium-gradient-text {
+  background: linear-gradient(120deg, #c084fc 0%, #f472b6 25%, #e879f9 50%, #818cf8 75%, #c084fc 100%) 0 0 / 200% 100%;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 10px #c084fc4d);
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: 3s linear infinite shine;
+}
+
 /*# sourceMappingURL=Omi-AI-1_src_MediaStudio_css_bad6b30c._.single.css.map*/

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, MapPin, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import './EventsCalendar.css';
 
 interface Event {
@@ -56,6 +57,8 @@ const EventsCalendar: React.FC = () => {
   const router = useRouter();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [hoveredDay, setHoveredDay] = useState<number | null>(null);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
   const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear();
@@ -151,14 +154,26 @@ const EventsCalendar: React.FC = () => {
             const dayEvents = getEventsForDay(dayObj.day);
 
             return (
-              <div key={dayObj.day} className={`calendar-day ${isToday ? 'today' : ''}`}>
+              <div 
+                key={dayObj.day} 
+                className={`calendar-day ${isToday ? 'today' : ''}`}
+                onMouseEnter={(e) => {
+                  setHoveredDay(dayObj.day);
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  setMousePos({ x: rect.left + rect.width / 2, y: rect.top });
+                }}
+                onMouseLeave={() => setHoveredDay(null)}
+              >
                 <div className="day-number">{dayObj.day}</div>
                 <div className="day-events">
                   {dayEvents.map(event => (
                     <div 
                       key={event.id} 
                       className={`event-pill ${event.type}`}
-                      onClick={() => setSelectedEvent(event)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedEvent(event);
+                      }}
                     >
                       {event.title}
                     </div>
@@ -169,6 +184,49 @@ const EventsCalendar: React.FC = () => {
           })}
         </div>
       </div>
+
+      {/* Modern Tooltip */}
+      <AnimatePresence>
+        {hoveredDay && getEventsForDay(hoveredDay).length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+            animate={{ opacity: 1, y: -10, scale: 1 }}
+            exit={{ opacity: 0, y: 10, scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+            style={{
+              position: 'fixed',
+              left: mousePos.x,
+              top: mousePos.y,
+              transform: 'translate(-50%, -100%)',
+              zIndex: 100,
+              pointerEvents: 'none'
+            }}
+            className="calendar-tooltip"
+          >
+            <div className="tooltip-content">
+              <div className="tooltip-header">
+                <span className="tooltip-date">
+                  {monthNames[currentDate.getMonth()]} {hoveredDay}
+                </span>
+                <span className="tooltip-count">
+                  {getEventsForDay(hoveredDay).length} Event{getEventsForDay(hoveredDay).length > 1 ? 's' : ''}
+                </span>
+              </div>
+              <div className="tooltip-events">
+                {getEventsForDay(hoveredDay).map(event => (
+                  <div key={event.id} className="tooltip-event-item">
+                    <div className="tooltip-event-indicator" style={{ background: getTypeColor(event.type) }} />
+                    <div className="tooltip-event-info">
+                      <span className="tooltip-event-title">{event.title}</span>
+                      <span className="tooltip-event-time">{event.time}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {selectedEvent && (
         <div className="event-modal-overlay" onClick={() => setSelectedEvent(null)}>
