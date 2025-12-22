@@ -586,25 +586,6 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
           ☰
         </button>
 
-        <motion.button
-          className="close-btn"
-          onClick={onClose}
-          whileHover={{ scale: 1.1, rotate: 90 }}
-          whileTap={{ scale: 0.95 }}
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.2 }}
-        >
-          ✕
-        </motion.button>
-
-        {/* Conditional Rendering for Main Content */}
-        {activeTool === 'Library' ? (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-            style={{ padding: '40px', height: '100%' }}
           >
             <h2 className="section-title" style={{ marginBottom: '30px' }}>
               <span className="title-highlight">My</span> Library
@@ -2009,7 +1990,7 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
                 </h2>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '24px', marginTop: '30px' }}>
+              <div className="spotlight-grid">
                 {[
                   {
                     name: 'Snap Research EgoEdit',
@@ -2109,12 +2090,7 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
                 </button>
               </div>
 
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-                gap: '24px',
-                marginTop: '30px'
-              }}>
+              <div className="models-grid">
                 {[
                   { name: 'Flux Schnell', description: 'Ultra-fast image generation', icon: '⚡', color: '#f59e0b', speed: 'Fast', type: 'image' },
                   { name: 'Midjourney V6', description: 'Artistic and creative outputs', icon: '🎨', color: '#ec4899', speed: 'Medium', type: 'image' },
@@ -2218,12 +2194,7 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
                 </button>
               </div>
 
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-                gap: '24px',
-                marginTop: '30px'
-              }}>
+              <div className="events-grid">
                 {[
                   {
                     title: 'AI Art Challenge',
@@ -2365,12 +2336,7 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
                 gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', 
                 gap: '24px',
                 marginTop: '30px'
-              }}>
-                {featuredBlueprints.map((bp, i) => (
-                  <motion.div
-                    key={i}
-                    style={{
-                      borderRadius: '20px',
+              }}>className="blueprints-grid-container"      borderRadius: '20px',
                       overflow: 'hidden',
                       position: 'relative',
                       aspectRatio: '2/3',

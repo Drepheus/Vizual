@@ -133,7 +133,6 @@ export default function APIStudio({ onClose }: APIStudioProps) {
           </div>
         </div>
         <div className="header-right">
-          <button className="close-btn" onClick={onClose}>✕</button>
         </div>
       </header>
 

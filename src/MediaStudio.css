@@ -366,8 +366,10 @@
 .media-main-content {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   background: #0a0a0f;
   position: relative;
+  width: 100%;
 }
 
 .close-btn {
@@ -1496,4 +1498,80 @@
  .community-card {
  min-height: 200px;
  }
+}
+
+
+/* Grid Layouts for Desktop */
+.spotlight-grid {
+ display: grid;
+ grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+ gap: 24px;
+ margin-top: 30px;
+}
+
+.models-grid {
+ display: grid;
+ grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+ gap: 24px;
+ margin-top: 30px;
+}
+
+.events-grid {
+ display: grid;
+ grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+ gap: 24px;
+ margin-top: 30px;
+}
+
+.blueprints-grid-container {
+ display: grid;
+ grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+ gap: 24px;
+ margin-top: 30px;
+}
+
+/* Mobile Horizontal Scrolling */
+@media (max-width: 768px) {
+ .spotlight-grid,
+ .models-grid,
+ .events-grid,
+ .blueprints-grid-container {
+ display: flex;
+ overflow-x: auto;
+ flex-wrap: nowrap;
+ gap: 16px;
+ padding-bottom: 20px;
+ scroll-snap-type: x mandatory;
+ -webkit-overflow-scrolling: touch;
+ margin-right: -16px; /* Offset padding */
+ padding-right: 16px;
+    margin-left: -16px;
+    padding-left: 16px;
+  }
+
+  .spotlight-grid > div,
+  .models-grid > div,
+  .events-grid > div,
+  .blueprints-grid-container > div {
+    min-width: 280px;
+    scroll-snap-align: start;
+    flex-shrink: 0;
+  }
+
+  /* Ensure Community Creations is scrollable manually */
+  .horizontal-cards-scroller-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x pan-y;
+    margin-left: -16px;
+    margin-right: -16px;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  
+  /* Pause animation on touch to allow manual scrolling */
+  .horizontal-cards-scroller-track:active,
+  .horizontal-cards-scroller-track:focus {
+    animation-play-state: paused;
+  }
 }

@@ -44,6 +44,9 @@ body {
   min-height: 100%;
   background: radial-gradient(circle at top, #050516, #010103 60%);
   color: #fefefe;
+  overflow-x: hidden;
+  width: 100%;
+  position: relative;
 }
 
 * {

@@ -87,9 +87,6 @@ export default function AIWorkflowsPage({ onClose }: AIWorkflowsPageProps) {
 
   return (
     <div className="workflow-builder">
-      {/* Close Button - Top Right */}
-      <button className="workflow-close-btn" onClick={handleClose}>✕</button>
-
       {/* Left Sidebar - Components Panel */}
       <aside className="workflow-sidebar">
         <div className="workflow-sidebar-header">

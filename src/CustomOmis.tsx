@@ -324,9 +324,6 @@ const CustomOmis: React.FC<CustomOmisProps> = ({ onClose }) => {
           </nav>
         </div>
         <div className="header-right">
-          {onClose && (
-            <button className="close-btn" onClick={onClose}>✕</button>
-          )}
         </div>
       </header>
 
