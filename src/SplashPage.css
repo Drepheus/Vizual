@@ -1714,14 +1714,31 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 14px;
-    font-size: 0.9rem;
-    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 0.95rem;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    backdrop-filter: blur(10px);
+    transition: all 0.2s ease;
+  }
+
+  .mobile-mode-trigger:active {
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(0.98);
   }
 
   .mobile-mode-dropdown {
     width: calc(100% - 1rem);
     left: 0.5rem;
+    background: rgba(20, 20, 20, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    margin-top: 8px;
+    overflow: hidden;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
   }
 
   /* Mobile Chat Container */

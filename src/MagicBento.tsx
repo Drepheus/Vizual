@@ -610,6 +610,12 @@ const MagicBento: React.FC<MagicBentoProps> = ({
 
   // Handle card clicks
   const handleCardClick = (card: typeof cardData[0]) => {
+    // Require login or guest mode for all tools
+    if (!user && !isGuestMode) {
+      router.push('/login');
+      return;
+    }
+
     switch (card.action) {
       case 'chat':
         router.push('/chat');

@@ -16,11 +16,8 @@ export function LandingPage() {
   const handleStartClick = () => {
     setIsTransitioning(true);
     setTimeout(() => {
-      if (session || isGuestMode) {
-        router.push("/command-hub");
-      } else {
-        router.push("/login");
-      }
+      // Always go to Command Hub first, auth check happens there on interaction
+      router.push("/command-hub");
     }, 800);
   };
 

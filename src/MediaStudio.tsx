@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import LogoLoop from './LogoLoop';
 import { ShinyText } from '@/components/typography/shiny-text';
 import './MediaStudio.css';
+import { useDraggableScroll } from '../hooks/useDraggableScroll';
 
 import PaywallModal from './PaywallModal';
 import { useAuth } from '@/context/auth-context';
@@ -169,6 +170,22 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { user } = useAuth();
   const [spotlightUrl, setSpotlightUrl] = useState<string | null>(null);
+  
+  // View All Modal State
+  const [viewAllModal, setViewAllModal] = useState<{ isOpen: boolean, title: string, items: any[], renderItem: (item: any, index: number) => React.ReactNode } | null>(null);
+
+  // Draggable Scroll Refs
+  const modelsScrollRef = useDraggableScroll();
+  const voiceScrollRef = useDraggableScroll();
+  const musicScrollRef = useDraggableScroll();
+  const avatarsScrollRef = useDraggableScroll();
+  const assistantsScrollRef = useDraggableScroll();
+  const eventsScrollRef = useDraggableScroll();
+  const blueprintsScrollRef = useDraggableScroll();
+  const communityScrollRef = useDraggableScroll();
+  const spotlightScrollRef = useDraggableScroll();
+  const videoScrollRef = useDraggableScroll();
+  const imageScrollRef = useDraggableScroll();
 
   // Image Generation State
   const [promptInput, setPromptInput] = useState('');
@@ -472,6 +489,113 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
     { name: 'Creativity', icon: '✨', tooltip: 'Creative level', options: ['Conservative', 'Balanced', 'Creative', 'Wild'] },
   ];
 
+const spotlightItems = [
+  {
+    name: 'Snap Research EgoEdit',
+    description: 'Explore the latest in ego-centric video editing from Snap Research.',
+    url: 'https://snap-research.github.io/EgoEdit/',
+    icon: '👻'
+  },
+  {
+    name: 'Black Forest Labs',
+    description: 'Creators of the Flux image generation models.',
+    url: 'https://bfl.ai/',
+    icon: '🌲'
+  },
+  {
+    name: 'LongCat Video Avatar',
+    description: 'Generate long videos from a single portrait image.',
+    url: 'https://meigen-ai.github.io/LongCat-Video-Avatar/',
+    icon: '🐱'
+  },
+  {
+    name: 'Microsoft TRELLIS',
+    description: 'Structured 3D generation from a single image.',
+    url: 'https://microsoft.github.io/TRELLIS.2/',
+    icon: '🧊'
+  },
+  {
+    name: 'Luma Labs',
+    description: 'Building the future of visual AI with Dream Machine.',
+    url: 'https://lumalabs.ai/#team',
+    icon: '☁️'
+  },
+  {
+    name: 'Kling AI',
+    description: 'Next-generation video generation model.',
+    url: 'https://klingai.com/global/',
+    icon: '🎬'
+  },
+  {
+    name: 'Wan Video',
+    description: 'Advanced video synthesis technology.',
+    url: 'https://wan.video/',
+    icon: '🎥'
+  },
+  {
+    name: 'Seedance 1.5 Pro',
+    description: 'Advanced dance generation model by ByteDance.',
+    url: 'https://seed.bytedance.com/en/seedance1_5_pro',
+    icon: '💃'
+  }
+];
+
+const aiModelsItems = [
+  { name: 'Flux Schnell', description: 'Ultra-fast image generation', icon: '⚡', color: '#f59e0b', speed: 'Fast', type: 'image' },
+  { name: 'Midjourney V6', description: 'Artistic and creative outputs', icon: '🎨', color: '#ec4899', speed: 'Medium', type: 'image' },
+  { name: 'Kling AI', description: 'Advanced video generation', icon: '🎬', color: '#8b5cf6', speed: 'Medium', type: 'video' },
+  { name: 'Runway Gen-3', description: 'Professional video synthesis', icon: '🎥', color: '#06b6d4', speed: 'Slow', type: 'video' },
+  { name: 'Stable Diffusion 3', description: 'Open-source image model', icon: '🖼️', color: '#22c55e', speed: 'Fast', type: 'image' },
+  { name: 'Luma Dream Machine', description: 'Dreamy visual effects', icon: '☁️', color: '#a855f7', speed: 'Medium', type: 'video' },
+];
+
+interface ViewAllModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  title: string;
+  items: any[];
+  renderItem: (item: any, index: number) => React.ReactNode;
+}
+
+const ViewAllModal = ({ isOpen, onClose, title, items, renderItem }: ViewAllModalProps) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/90 backdrop-blur-md p-4" onClick={onClose}>
+      <motion.div 
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        className="w-full max-w-6xl h-[85vh] bg-[#0f0f1a] rounded-2xl border border-purple-500/20 flex flex-col overflow-hidden shadow-2xl"
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between p-6 border-b border-white/10 bg-[#13131f]">
+          <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+            <span className="w-1 h-6 bg-gradient-to-b from-purple-500 to-pink-500 rounded-full"></span>
+            {title}
+          </h2>
+          <button 
+            onClick={onClose}
+            className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/70 hover:text-white transition-colors"
+          >
+            ✕
+          </button>
+        </div>
+        
+        <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
+          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            {items.map((item, index) => (
+              <div key={index} className="animate-fadeIn" style={{ animationDelay: `${index * 0.05}s` }}>
+                {renderItem(item, index)}
+              </div>
+            ))}
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  );
+};
+
   return (
     <motion.div
       className="media-studio-page"
@@ -750,9 +874,25 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
             <div className="horizontal-scroll-section">
               <div className="section-header-row">
                 <h2 className="section-title"><span className="title-highlight">Featured</span> Blueprints</h2>
-                <span className="view-more">View More →</span>
+                <span className="view-more" onClick={() => setViewAllModal({
+                  isOpen: true,
+                  title: 'Featured Blueprints',
+                  items: imageBlueprints,
+                  renderItem: (bp, i) => (
+                    <div className="relative aspect-[2/3] rounded-xl overflow-hidden group cursor-pointer border border-white/10">
+                      {bp.type === 'video' ? (
+                        <video src={bp.image} muted loop playsInline className="w-full h-full object-cover" onMouseOver={e => e.currentTarget.play()} onMouseOut={e => {e.currentTarget.pause(); e.currentTarget.currentTime = 0;}} />
+                      ) : (
+                        <img src={bp.image} alt={bp.title} className="w-full h-full object-cover" />
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-100 flex items-end p-4">
+                        <span className="text-white font-medium">{bp.title}</span>
+                      </div>
+                    </div>
+                  )
+                })}>View More →</span>
               </div>
-              <div className="horizontal-cards-scroller-container">
+              <div className="horizontal-cards-scroller-container" ref={imageScrollRef}>
                 <div className="horizontal-cards-scroller-track">
                   {/* Original Items */}
                   {imageBlueprints.map((bp, i) => (
@@ -945,9 +1085,24 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
             <div className="horizontal-scroll-section">
               <div className="section-header-row">
                 <h2 className="section-title"><span className="title-highlight">Featured</span> Videos</h2>
-                <span className="view-more">View More →</span>
+                <span className="view-more" onClick={() => setViewAllModal({
+                  isOpen: true,
+                  title: 'Featured Videos',
+                  items: featuredVideos,
+                  renderItem: (vid, i) => (
+                    <div className="relative aspect-video rounded-xl overflow-hidden group cursor-pointer border border-white/10">
+                      <video src={vid.image} loop playsInline className="w-full h-full object-cover" onMouseOver={e => e.currentTarget.play()} onMouseOut={e => {e.currentTarget.pause(); e.currentTarget.currentTime = 0;}} />
+                      <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors flex items-center justify-center">
+                        <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white text-xl">▶</div>
+                      </div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent flex items-end p-4">
+                        <span className="text-white font-medium">{vid.title}</span>
+                      </div>
+                    </div>
+                  )
+                })}>View More →</span>
               </div>
-              <div className="horizontal-cards-scroller-container">
+              <div className="horizontal-cards-scroller-container" ref={videoScrollRef}>
                 <div className="horizontal-cards-scroller-track">
                   {/* Original Items */}
                   {featuredVideos.map((vid, i) => (
@@ -1021,7 +1176,7 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
                   muted
                   playsInline
                   loop
-                  src="/videos/modelsvidspol.mp4"
+                  src="/videos/klingdemovid.mp4"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
@@ -1169,9 +1324,23 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
             <div className="horizontal-scroll-section">
               <div className="section-header-row">
                 <h2 className="section-title"><span className="title-highlight">Featured</span> Voice Presets</h2>
-                <span className="view-more">View More →</span>
+                <span className="view-more" onClick={() => setViewAllModal({
+                  isOpen: true,
+                  title: 'Featured Voice Presets',
+                  items: featuredVoices,
+                  renderItem: (voice, i) => (
+                    <div className="bg-purple-500/10 border border-purple-500/30 rounded-2xl p-6 hover:bg-purple-500/20 transition-colors cursor-pointer">
+                      <div className="text-4xl mb-4">{voice.icon}</div>
+                      <h3 className="text-white text-lg font-semibold mb-2">{voice.title}</h3>
+                      <p className="text-white/60 text-sm mb-4">{voice.description}</p>
+                      <button className="w-full py-2 bg-purple-500/30 border border-purple-500/50 rounded-lg text-white text-sm hover:bg-purple-500/50 transition-colors">
+                        Use Voice
+                      </button>
+                    </div>
+                  )
+                })}>View More →</span>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '16px', padding: '0 40px 60px' }}>
+              <div className="voice-presets-grid" ref={voiceScrollRef}>
                 {featuredVoices.map((voice, i) => (
                   <motion.div
                     key={i}
@@ -1261,9 +1430,30 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
             <div className="horizontal-scroll-section">
               <div className="section-header-row">
                 <h2 className="section-title"><span className="title-highlight">Featured</span> Tracks</h2>
-                <span className="view-more">View More →</span>
+                <span className="view-more" onClick={() => setViewAllModal({
+                  isOpen: true,
+                  title: 'Featured Tracks',
+                  items: featuredMusic,
+                  renderItem: (track, i) => (
+                    <div className="bg-white/5 border border-white/10 rounded-2xl p-6 flex items-center gap-4 hover:bg-white/10 transition-colors cursor-pointer">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-xl shadow-lg shadow-purple-500/30">
+                        {track.icon}
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-white font-semibold mb-1">{track.title}</h3>
+                        <div className="flex items-center gap-2 text-xs">
+                          <span className="bg-purple-500/20 text-purple-200 px-2 py-0.5 rounded-full border border-purple-500/30">{track.genre}</span>
+                          <span className="text-white/40">• {track.duration}</span>
+                        </div>
+                      </div>
+                      <button className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors">
+                        ▶
+                      </button>
+                    </div>
+                  )
+                })}>View More →</span>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px', padding: '0 40px 60px' }}>
+              <div className="music-tracks-grid" ref={musicScrollRef}>
                 {featuredMusic.map((track, i) => (
                   <motion.div
                     key={i}
@@ -1590,9 +1780,23 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
             <div className="horizontal-scroll-section">
               <div className="section-header-row">
                 <h2 className="section-title"><span className="title-highlight">Featured</span> Avatars</h2>
-                <span className="view-more">View More →</span>
+                <span className="view-more" onClick={() => setViewAllModal({
+                  isOpen: true,
+                  title: 'Featured Avatars',
+                  items: featuredAvatars,
+                  renderItem: (avatar, i) => (
+                    <div className="bg-indigo-500/10 border border-indigo-500/30 rounded-2xl p-6 flex flex-col items-center text-center hover:bg-indigo-500/20 transition-colors cursor-pointer">
+                      <img src={avatar.image} alt={avatar.title} className="w-24 h-24 rounded-full border-4 border-indigo-500/30 mb-4 object-cover" />
+                      <h3 className="text-white font-semibold mb-2">{avatar.title}</h3>
+                      <p className="text-white/60 text-sm mb-4">{avatar.description}</p>
+                      <button className="px-6 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg text-white text-sm font-medium hover:shadow-lg hover:shadow-indigo-500/30 transition-all">
+                        Customize
+                      </button>
+                    </div>
+                  )
+                })}>View More →</span>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '20px', padding: '0 40px 60px' }}>
+              <div className="avatars-grid" ref={avatarsScrollRef}>
                 {featuredAvatars.map((avatar, i) => (
                   <motion.div
                     key={i}
@@ -1680,9 +1884,29 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
             <div className="horizontal-scroll-section">
               <div className="section-header-row">
                 <h2 className="section-title"><span className="title-highlight">Featured</span> Assistant Templates</h2>
-                <span className="view-more">View More →</span>
+                <span className="view-more" onClick={() => setViewAllModal({
+                  isOpen: true,
+                  title: 'Featured Assistant Templates',
+                  items: featuredAssistants,
+                  renderItem: (assistant, i) => (
+                    <div 
+                      className="rounded-2xl p-6 hover:scale-[1.02] transition-transform cursor-pointer border border-white/10"
+                      style={{ background: `linear-gradient(135deg, ${assistant.color}15, ${assistant.color}25)`, borderColor: `${assistant.color}50` }}
+                    >
+                      <div className="text-4xl mb-4">{assistant.icon}</div>
+                      <h3 className="text-white text-lg font-semibold mb-2">{assistant.title}</h3>
+                      <p className="text-white/60 text-sm mb-6">{assistant.description}</p>
+                      <button 
+                        className="w-full py-2.5 rounded-lg text-white text-sm font-medium transition-colors"
+                        style={{ background: assistant.color }}
+                      >
+                        Use Template
+                      </button>
+                    </div>
+                  )
+                })}>View More →</span>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '20px', padding: '0 40px 60px' }}>
+              <div className="assistants-grid" ref={assistantsScrollRef}>
                 {featuredAssistants.map((assistant, i) => (
                   <motion.div
                     key={i}
@@ -1806,10 +2030,37 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
                 </h2>
                 <button 
                   className="view-more-btn"
-                  onClick={() => {
-                    setActiveTool('Blueprints');
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                  }}
+                  onClick={() => setViewAllModal({
+                    isOpen: true,
+                    title: 'Community Creations',
+                    items: communityItems,
+                    renderItem: (item, i) => (
+                      <div className="relative aspect-square rounded-xl overflow-hidden group cursor-pointer border border-white/10">
+                        {item.type === 'video' ? (
+                          <video src={item.src} muted loop playsInline className="w-full h-full object-cover" onMouseOver={e => e.currentTarget.play()} onMouseOut={e => {e.currentTarget.pause(); e.currentTarget.currentTime = 0;}} />
+                        ) : item.type === 'audio' ? (
+                          <div className="w-full h-full bg-gradient-to-br from-green-500/20 to-blue-500/20 flex flex-col items-center justify-center gap-3">
+                            <span className="text-4xl">🎵</span>
+                            <div className="flex gap-1 items-center h-8">
+                              {[...Array(5)].map((_, j) => (
+                                <div key={j} className="w-1 bg-green-500 rounded-full animate-pulse" style={{ height: `${Math.random() * 100}%`, animationDelay: `${j * 0.1}s` }} />
+                              ))}
+                            </div>
+                          </div>
+                        ) : item.type === 'avatar' ? (
+                          <div className="w-full h-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center">
+                            <img src={item.src} alt={item.title} className="w-20 h-20 rounded-full border-2 border-purple-500/50" />
+                          </div>
+                        ) : (
+                          <img src={item.src} alt={item.title} className="w-full h-full object-cover" />
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
+                          <span className="text-white font-medium">{item.title}</span>
+                          <span className="text-white/60 text-xs">by {item.creator}</span>
+                        </div>
+                      </div>
+                    )
+                  })}
                 >
                   View All <span className="arrow">→</span>
                 </button>
@@ -1828,8 +2079,8 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
               </div>
 
               {/* Scrolling Carousel */}
-              <div className="horizontal-cards-scroller-container" style={{ marginTop: '24px' }}>
-                <div className="horizontal-cards-scroller-track">
+              <div className="infinite-scroller-container" style={{ marginTop: '24px' }}>
+                <div className="infinite-scroller-track">
                   {/* Community Creations - Mix of videos and images */}
                   {(() => {
                     const allItems = [
@@ -1994,59 +2245,34 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
                 <h2 className="section-title">
                   <span style={{ color: 'white' }}>Spotlighted</span> <ShinyText text="Models & Partners" speed={6} className="premium-gradient-text" />
                 </h2>
+                <button 
+                  className="view-more-btn"
+                  onClick={() => setViewAllModal({
+                    isOpen: true,
+                    title: 'Spotlighted Models & Partners',
+                    items: spotlightItems,
+                    renderItem: (item, i) => (
+                      <div 
+                        className="bg-white/5 border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-colors cursor-pointer flex flex-col gap-4"
+                        onClick={() => window.open(item.url, '_blank')}
+                      >
+                        <div className="h-32 bg-black rounded-xl overflow-hidden flex items-center justify-center text-5xl">
+                          {item.icon}
+                        </div>
+                        <div>
+                          <h3 className="text-white text-lg font-semibold mb-2">{item.name}</h3>
+                          <p className="text-white/60 text-sm">{item.description}</p>
+                        </div>
+                      </div>
+                    )
+                  })}
+                >
+                  View All <span className="arrow">→</span>
+                </button>
               </div>
 
-              <div className="spotlight-grid">
-                {[
-                  {
-                    name: 'Snap Research EgoEdit',
-                    description: 'Explore the latest in ego-centric video editing from Snap Research.',
-                    url: 'https://snap-research.github.io/EgoEdit/',
-                    icon: '👻'
-                  },
-                  {
-                    name: 'Black Forest Labs',
-                    description: 'Creators of the Flux image generation models.',
-                    url: 'https://bfl.ai/',
-                    icon: '🌲'
-                  },
-                  {
-                    name: 'LongCat Video Avatar',
-                    description: 'Generate long videos from a single portrait image.',
-                    url: 'https://meigen-ai.github.io/LongCat-Video-Avatar/',
-                    icon: '🐱'
-                  },
-                  {
-                    name: 'Microsoft TRELLIS',
-                    description: 'Structured 3D generation from a single image.',
-                    url: 'https://microsoft.github.io/TRELLIS.2/',
-                    icon: '🧊'
-                  },
-                  {
-                    name: 'Luma Labs',
-                    description: 'Building the future of visual AI with Dream Machine.',
-                    url: 'https://lumalabs.ai/#team',
-                    icon: '☁️'
-                  },
-                  {
-                    name: 'Kling AI',
-                    description: 'Next-generation video generation model.',
-                    url: 'https://klingai.com/global/',
-                    icon: '🎬'
-                  },
-                  {
-                    name: 'Wan Video',
-                    description: 'Advanced video synthesis technology.',
-                    url: 'https://wan.video/',
-                    icon: '🎥'
-                  },
-                  {
-                    name: 'Seedance 1.5 Pro',
-                    description: 'Advanced dance generation model by ByteDance.',
-                    url: 'https://seed.bytedance.com/en/seedance1_5_pro',
-                    icon: '💃'
-                  }
-                ].map((item, i) => (
+              <div className="spotlight-grid" ref={spotlightScrollRef}>
+                {spotlightItems.map((item, i) => (
                   <motion.div
                     key={i}
                     whileHover={{ scale: 1.02 }}
@@ -2087,34 +2313,68 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
                 </h2>
                 <button 
                   className="view-more-btn"
-                  onClick={() => {
-                    setActiveTool('Image');
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                  }}
+                  onClick={() => setViewAllModal({
+                    isOpen: true,
+                    title: 'AI Models',
+                    items: aiModelsItems,
+                    renderItem: (model, i) => (
+                      <div 
+                        className="bg-transparent border rounded-2xl p-6 cursor-pointer hover:scale-[1.02] transition-transform"
+                        style={{ borderColor: model.color }}
+                        onClick={() => {
+                          if (model.type === 'video') {
+                            setActiveTool('Video');
+                          } else {
+                            setActiveTool('Image');
+                            setSelectedModel(model.name);
+                          }
+                          setViewAllModal(null);
+                          window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }}
+                      >
+                        <div className="flex items-center gap-4 mb-4">
+                          <div className="text-4xl p-3 rounded-xl border" style={{ borderColor: `${model.color}40` }}>
+                            {model.icon}
+                          </div>
+                          <div>
+                            <h3 className="text-white text-lg font-semibold">{model.name}</h3>
+                            <div className="flex gap-2 mt-1">
+                              <span className="text-xs px-2 py-0.5 rounded border" style={{ borderColor: `${model.color}60`, color: model.color }}>
+                                {model.speed}
+                              </span>
+                              <span className="text-xs px-2 py-0.5 rounded border" style={{ 
+                                borderColor: model.type === 'video' ? 'rgba(168, 85, 247, 0.6)' : 'rgba(59, 130, 246, 0.6)',
+                                color: model.type === 'video' ? '#a855f7' : '#3b82f6'
+                              }}>
+                                {model.type === 'video' ? '🎬 Video' : '🖼️ Image'}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <p className="text-white/60 text-sm mb-4">{model.description}</p>
+                        <button className="w-full py-2 rounded-lg text-white text-sm font-medium" style={{ background: `${model.color}25`, border: `1px solid ${model.color}50` }}>
+                          Try Model
+                        </button>
+                      </div>
+                    )
+                  })}
                 >
                   View All <span className="arrow">→</span>
                 </button>
               </div>
 
-              <div className="models-grid">
-                {[
-                  { name: 'Flux Schnell', description: 'Ultra-fast image generation', icon: '⚡', color: '#f59e0b', speed: 'Fast', type: 'image' },
-                  { name: 'Midjourney V6', description: 'Artistic and creative outputs', icon: '🎨', color: '#ec4899', speed: 'Medium', type: 'image' },
-                  { name: 'Kling AI', description: 'Advanced video generation', icon: '🎬', color: '#8b5cf6', speed: 'Medium', type: 'video' },
-                  { name: 'Runway Gen-3', description: 'Professional video synthesis', icon: '🎥', color: '#06b6d4', speed: 'Slow', type: 'video' },
-                  { name: 'Stable Diffusion 3', description: 'Open-source image model', icon: '🖼️', color: '#22c55e', speed: 'Fast', type: 'image' },
-                  { name: 'Luma Dream Machine', description: 'Dreamy visual effects', icon: '☁️', color: '#a855f7', speed: 'Medium', type: 'video' },
-                ].map((model, i) => (
+              <div className="models-grid" ref={modelsScrollRef}>
+                {aiModelsItems.map((model, i) => (
                   <motion.div
                     key={i}
                     style={{
-                      background: `linear-gradient(135deg, ${model.color}15, ${model.color}08)`,
-                      border: `1px solid ${model.color}40`,
+                      background: 'transparent',
+                      border: `1px solid ${model.color}`,
                       borderRadius: '20px',
                       padding: '24px',
                       cursor: 'pointer',
                     }}
-                    whileHover={{ scale: 1.02, borderColor: model.color }}
+                    whileHover={{ scale: 1.02, boxShadow: `0 0 20px ${model.color}40` }}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.1 }}
@@ -2122,9 +2382,10 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '16px' }}>
                       <div style={{
                         fontSize: '2.5rem',
-                        background: `${model.color}20`,
+                        background: 'transparent',
                         padding: '12px',
-                        borderRadius: '12px'
+                        borderRadius: '12px',
+                        border: `1px solid ${model.color}40`
                       }}>
                         {model.icon}
                       </div>
@@ -2133,7 +2394,8 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
                         <div style={{ display: 'flex', gap: '6px' }}>
                           <span style={{
                             fontSize: '0.75rem',
-                            background: `${model.color}30`,
+                            background: 'transparent',
+                            border: `1px solid ${model.color}60`,
                             color: model.color,
                             padding: '2px 8px',
                             borderRadius: '4px'
@@ -2142,7 +2404,8 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
                           </span>
                           <span style={{
                             fontSize: '0.75rem',
-                            background: model.type === 'video' ? 'rgba(168, 85, 247, 0.3)' : 'rgba(59, 130, 246, 0.3)',
+                            background: 'transparent',
+                            border: model.type === 'video' ? '1px solid rgba(168, 85, 247, 0.6)' : '1px solid rgba(59, 130, 246, 0.6)',
                             color: model.type === 'video' ? '#a855f7' : '#3b82f6',
                             padding: '2px 8px',
                             borderRadius: '4px'
@@ -2261,17 +2524,19 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
                         position: 'absolute',
                         top: '16px',
                         right: '16px',
-                        background: '#ef4444',
-                        color: 'white',
-                        padding: '4px 10px',
+                        background: 'rgba(239, 68, 68, 0.1)',
+                        border: '1px solid rgba(239, 68, 68, 0.2)',
+                        color: '#ef4444',
+                        padding: '6px 12px',
                         borderRadius: '20px',
-                        fontSize: '0.7rem',
-                        fontWeight: '600',
+                        fontSize: '0.75rem',
+                        fontWeight: '700',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '4px'
+                        gap: '8px',
+                        backdropFilter: 'blur(4px)'
                       }}>
-                        <span style={{ width: '6px', height: '6px', background: 'white', borderRadius: '50%', animation: 'pulse 1s infinite' }} />
+                        <span className="live-dot" />
                         LIVE
                       </div>
                     )}
@@ -2305,8 +2570,8 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
                       width: '100%',
                       marginTop: '20px',
                       padding: '12px',
-                      background: event.live ? event.color : 'rgba(255,255,255,0.1)',
-                      border: 'none',
+                      background: event.live ? 'transparent' : 'rgba(255,255,255,0.1)',
+                      border: event.live ? '1px solid #a855f7' : 'none',
                       borderRadius: '10px',
                       color: 'white',
                       cursor: 'pointer',
@@ -2320,56 +2585,7 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
               </div>
             </section>
 
-            {/* Featured Blueprints (Moved to Bottom) */}
-            <section id="blueprints-section" className="featured-section" style={{ padding: '40px', marginBottom: '40px' }}>
-              <div className="section-header">
-                <h2 className="section-title">
-                  <span style={{ color: 'white' }}>Featured</span> <ShinyText text="Blueprints" speed={6} className="premium-gradient-text" />
-                </h2>
-                <button 
-                  className="view-more-btn"
-                  onClick={() => {
-                    setActiveTool('Blueprints');
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                  }}
-                >
-                  View More <span className="arrow">→</span>
-                </button>
-              </div>
 
-              <div className="blueprints-grid-container">
-                {featuredBlueprints.map((bp, i) => (
-                  <motion.div
-                    key={i}
-                    style={{
-                      borderRadius: '20px',
-                      overflow: 'hidden',
-                      position: 'relative',
-                      aspectRatio: '2/3',
-                      cursor: 'pointer',
-                      border: '1px solid rgba(255,255,255,0.1)'
-                    }}
-                    whileHover={{ scale: 1.02 }}
-                  >
-                    {bp.type === 'video' ? (
-                      <video src={bp.image} style={{ width: '100%', height: '100%', objectFit: 'cover' }} muted loop />
-                    ) : (
-                      <img src={bp.image} alt={bp.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    )}
-                    <div style={{ 
-                      position: 'absolute', 
-                      bottom: 0, 
-                      left: 0, 
-                      right: 0, 
-                      padding: '20px', 
-                      background: 'linear-gradient(to top, rgba(0,0,0,0.9), transparent)' 
-                    }}>
-                      <h3 style={{ color: 'white', fontSize: '1rem', margin: 0 }}>{bp.title}</h3>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </section>
           </>
         )}
       </motion.div>
@@ -2482,6 +2698,17 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.div >
+
+      {/* View All Modal */}
+      {viewAllModal && (
+        <ViewAllModal
+          isOpen={viewAllModal.isOpen}
+          onClose={() => setViewAllModal(null)}
+          title={viewAllModal.title}
+          items={viewAllModal.items}
+          renderItem={viewAllModal.renderItem}
+        />
+      )}
+    </motion.div>
   );
 }
