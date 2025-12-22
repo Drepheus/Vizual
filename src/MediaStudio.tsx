@@ -585,8 +585,6 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
         >
           ☰
         </button>
-
-          >
             <h2 className="section-title" style={{ marginBottom: '30px' }}>
               <span className="title-highlight">My</span> Library
             </h2>
@@ -2331,12 +2329,12 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
                 </button>
               </div>
 
-              <div style={{ 
-                display: 'grid', 
-                gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', 
-                gap: '24px',
-                marginTop: '30px'
-              }}>className="blueprints-grid-container"      borderRadius: '20px',
+              <div className="blueprints-grid-container">
+                {featuredBlueprints.map((bp, i) => (
+                  <motion.div
+                    key={i}
+                    style={{
+                      borderRadius: '20px',
                       overflow: 'hidden',
                       position: 'relative',
                       aspectRatio: '2/3',
