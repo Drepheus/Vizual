@@ -68,11 +68,11 @@ Plus any Stripe keys:
 3. **Build and deploy**:
    ```powershell
    # Build
-   gcloud builds submit --tag gcr.io/YOUR_PROJECT_ID/omi-ai
+   gcloud builds submit --tag gcr.io/YOUR_PROJECT_ID/vizual-ai
    
    # Deploy
-   gcloud run deploy omi-ai `
-     --image gcr.io/YOUR_PROJECT_ID/omi-ai `
+   gcloud run deploy vizual-ai `
+     --image gcr.io/YOUR_PROJECT_ID/vizual-ai `
      --platform managed `
      --region us-central1 `
      --allow-unauthenticated `
@@ -88,7 +88,7 @@ Plus any Stripe keys:
 
 1. **Get your Cloud Run URL**:
    ```powershell
-   gcloud run services describe omi-ai --region us-central1 --format 'value(status.url)'
+   gcloud run services describe vizual-ai --region us-central1 --format 'value(status.url)'
    ```
 
 2. **Update Frontend API Calls**:
@@ -127,20 +127,20 @@ After free tier (~$5-10/month for moderate traffic):
 **502 errors?**
 - Check port 8080 is exposed
 - Verify application starts correctly
-- Check logs: `gcloud run logs read --service omi-ai`
+- Check logs: `gcloud run logs read --service vizual-ai`
 
 ## Useful Commands
 
 ```powershell
 # View logs
-gcloud run logs tail --service omi-ai
+gcloud run logs tail --service vizual-ai
 
 # Update environment variable
-gcloud run services update omi-ai --set-env-vars KEY=VALUE
+gcloud run services update vizual-ai --set-env-vars KEY=VALUE
 
 # Redeploy
-gcloud run deploy omi-ai --image gcr.io/YOUR_PROJECT_ID/omi-ai
+gcloud run deploy vizual-ai --image gcr.io/YOUR_PROJECT_ID/vizual-ai
 
 # Delete service
-gcloud run services delete omi-ai
+gcloud run services delete vizual-ai
 ```

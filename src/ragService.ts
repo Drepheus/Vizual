@@ -3,7 +3,7 @@ import { chatWithVertexRAG } from './vertexService';
 
 export { chatWithVertexRAG };
 
-export interface CustomOmi {
+export interface CustomVizual {
     id: string;
     name: string;
     description: string;
@@ -25,9 +25,9 @@ export interface KnowledgeDocument {
 }
 
 // Load all custom bots for the current user
-export async function loadCustomOmis(userId: string): Promise<CustomOmi[]> {
+export async function loadCustomVizuals(userId: string): Prvizualse<CustomVizual[]> {
     const { data: bots, error } = await supabase
-        .from('custom_omis')
+        .from('custom_vizuals')
         .select('*')
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
@@ -38,7 +38,7 @@ export async function loadCustomOmis(userId: string): Promise<CustomOmi[]> {
     }
 
     // Get document counts for each bot
-    const botsWithCounts = await Promise.all(
+    const botsWithCounts = await Prvizualse.all(
         (bots || []).map(async (bot: any) => {
             const { count: docCount } = await supabase
                 .from('knowledge_documents')
@@ -61,7 +61,7 @@ export async function loadCustomOmis(userId: string): Promise<CustomOmi[]> {
 }
 
 // Load all documents for a specific bot
-export async function loadDocuments(botId?: string): Promise<KnowledgeDocument[]> {
+export async function loadDocuments(botId?: string): Prvizualse<KnowledgeDocument[]> {
     let query = supabase
         .from('knowledge_documents')
         .select('*')
@@ -82,9 +82,9 @@ export async function loadDocuments(botId?: string): Promise<KnowledgeDocument[]
 }
 
 // Create a new custom bot
-export async function createCustomOmi(userId: string, name: string, description: string) {
+export async function createCustomVizual(userId: string, name: string, description: string) {
     const { data, error } = await supabase
-        .from('custom_omis')
+        .from('custom_vizuals')
         .insert({
             user_id: userId,
             name,
@@ -108,7 +108,7 @@ export async function uploadDocument(
     file: File,
     botId: string,
     onProgress?: (status: string) => void
-): Promise<void> {
+): Prvizualse<void> {
     onProgress?.('Note: For Vertex AI RAG, please upload files directly to your GCS bucket linked to the Data Store.');
 
     // For now, we'll just register the document in Supabase for tracking
@@ -149,7 +149,7 @@ export async function deleteDocument(documentId: string) {
 // Delete a bot
 export async function deleteBot(botId: string) {
     const { error } = await supabase
-        .from('custom_omis')
+        .from('custom_vizuals')
         .delete()
         .eq('id', botId);
 

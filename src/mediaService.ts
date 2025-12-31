@@ -15,7 +15,7 @@ export async function saveGeneratedMedia(
   type: 'image' | 'video',
   url: string,
   prompt: string
-): Promise<boolean> {
+): Prvizualse<boolean> {
   try {
     const { error } = await supabase
       .from('generated_media')
@@ -44,7 +44,7 @@ export async function saveGeneratedMedia(
 // Get all generated media for a user
 export async function getUserGeneratedMedia(
   userId: string
-): Promise<GeneratedMedia[]> {
+): Prvizualse<GeneratedMedia[]> {
   try {
     const { data, error } = await supabase
       .from('generated_media')
@@ -65,7 +65,7 @@ export async function getUserGeneratedMedia(
 }
 
 // Delete a generated media item
-export async function deleteGeneratedMedia(mediaId: string): Promise<boolean> {
+export async function deleteGeneratedMedia(mediaId: string): Prvizualse<boolean> {
   try {
     const { error } = await supabase
       .from('generated_media')

@@ -18,7 +18,7 @@ const cardData = [
   {
     color: '#0a0a0a',
     icon: '💬',
-    title: 'Omi Chat',
+    title: 'Vizual Chat',
     description: 'Conversational AI with advanced reasoning',
     label: 'Intelligence',
     action: 'chat' // Add action identifier
@@ -63,10 +63,10 @@ const cardData = [
   {
     color: '#0a0a0a',
     icon: '🧪',
-    title: 'Custom Omi\'s',
+    title: 'Custom Vizual\'s',
     description: 'Design personalized AI assistants that adapt to your style, tone, and workflow',
     label: 'Creative',
-    action: 'customomis'
+    action: 'customvizuals'
   },
   {
     color: '#0a0a0a',
@@ -88,7 +88,7 @@ const cardData = [
     color: '#0a0a0a',
     icon: '📅',
     title: 'Events & Calendar',
-    description: 'View upcoming AI challenges, workshops, and product launches',
+    description: 'View upcvizualng AI challenges, workshops, and product launches',
     label: 'Schedule',
     action: 'calendar'
   },
@@ -639,8 +639,8 @@ const MagicBento: React.FC<MagicBentoProps> = ({
       case 'mediastudio':
         router.push('/media-studio');
         break;
-      case 'customomis':
-        router.push('/custom-omis');
+      case 'customvizuals':
+        router.push('/custom-vizuals');
         break;
       case 'aiworkflows':
         router.push('/ai-workflows');
@@ -692,7 +692,7 @@ const MagicBento: React.FC<MagicBentoProps> = ({
       <BentoCardGrid gridRef={gridRef}>
         {cardData.map((card, index) => {
           const baseClassName = `card ${textAutoHide ? 'card--text-autohide' : ''} ${enableBorderGlow ? 'card--border-glow' : ''}`;
-          const isLocked = ['aiworkflows', 'customomis', 'apistudio'].includes(card.action) && subscriptionTier !== 'pro';
+          const isLocked = ['aiworkflows', 'customvizuals', 'apistudio'].includes(card.action) && subscriptionTier !== 'pro';
           
           const cardProps = {
             className: baseClassName,

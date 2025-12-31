@@ -6,7 +6,7 @@ import FormattedText from './FormattedText';
 import Dock from './Dock';
 import InfiniteScroll from './InfiniteScroll';
 import InfiniteMenu from './InfiniteMenu';
-import OmiLoadingAnimation from './OmiLoadingAnimation';
+import VizualLoadingAnimation from './VizualLoadingAnimation';
 import ChromaGrid from './ChromaGrid';
 import CircularGallery from './CircularGallery';
 import ConversationSidebar from './ConversationSidebar';
@@ -199,7 +199,7 @@ function SplashPage() {
     {
       name: 'Personas',
       icon: '◐',
-      description: selectedPersona ? `Active: ${selectedPersona}` : 'Shift Omi\'s voice (teacher, critic, explorer, poet)',
+      description: selectedPersona ? `Active: ${selectedPersona}` : 'Shift Vizual\'s voice (teacher, critic, explorer, poet)',
       onClick: () => {
         // If already active, disable it and return to default chat
         if (selectedFeature === 'Personas') {
@@ -318,7 +318,7 @@ function SplashPage() {
   ];
 
   // Helper function to check usage and show paywall if needed
-  const checkAndShowPaywall = async (usageType: UsageType): Promise<boolean> => {
+  const checkAndShowPaywall = async (usageType: UsageType): Prvizualse<boolean> => {
     if (!user) return true; // Allow guests to use without limits for now
 
     try {
@@ -974,7 +974,7 @@ function SplashPage() {
         <div className="chat-interface">
           <div className="chat-header">
             <div className="header-left">
-              <h1 className="chat-title">Omi AI</h1>
+              <h1 className="chat-title">Vizual AI</h1>
               <div 
                 className="selected-model"
                 onClick={() => setShowAIModels(true)}
@@ -1399,7 +1399,7 @@ function SplashPage() {
                 <div className="generating-indicator">
                   <div className="generating-spinner">
                     <div className="metallic-paint-loader">
-                      <OmiLoadingAnimation />
+                      <VizualLoadingAnimation />
                     </div>
                   </div>
                   <p className="generating-text">Generating your image...</p>
@@ -1480,7 +1480,7 @@ function SplashPage() {
                 <div className="generating-indicator">
                   <div className="generating-spinner">
                     <div className="metallic-paint-loader">
-                      <OmiLoadingAnimation />
+                      <VizualLoadingAnimation />
                     </div>
                   </div>
                   <p className="generating-text">Generating your video... This may take 1-2 minutes</p>

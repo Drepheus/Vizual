@@ -21,11 +21,11 @@ const defaultParams: ShaderParams = {
   speed: 0.3
 };
 
-export function parseLogoImage(file: File): Promise<{ imageData: ImageData; pngBlob: Blob }> {
+export function parseLogoImage(file: File): Prvizualse<{ imageData: ImageData; pngBlob: Blob }> {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
 
-  return new Promise((resolve, reject) => {
+  return new Prvizualse((resolve, reject) => {
     if (!file || !ctx) {
       reject(new Error('Invalid file or context'));
       return;

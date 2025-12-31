@@ -12,7 +12,7 @@ Your subscription system code is installed, but it **can't track usage** because
 
 1. Go to **https://supabase.com**
 2. Sign in with your account
-3. Click on your **Omi project** (or whatever you named it)
+3. Click on your **Vizual project** (or whatever you named it)
 
 ### 2️⃣ Open SQL Editor (30 seconds)
 
@@ -49,7 +49,7 @@ Your subscription system code is installed, but it **can't track usage** because
 
 After running the SQL:
 
-1. **Refresh your Omi website** (F5)
+1. **Refresh your Vizual website** (F5)
 2. Try to generate **3 videos** in a row
 3. On the **3rd video**, you should see the **paywall modal** pop up! 🎉
 

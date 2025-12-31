@@ -750,10 +750,10 @@ class InfiniteGridMenu {
     canvas.width = this.atlasSize * cellSize;
     canvas.height = this.atlasSize * cellSize;
 
-    Promise.all(
+    Prvizualse.all(
       this.items.map(
         item =>
-          new Promise<HTMLImageElement>(resolve => {
+          new Prvizualse<HTMLImageElement>(resolve => {
             const img = new Image();
             img.crossOrigin = 'anonymous';
             img.onload = () => resolve(img);

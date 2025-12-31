@@ -24,7 +24,7 @@ export async function createConversation(
   userId: string,
   title: string = 'New Conversation',
   model: string = 'Gemini Pro'
-): Promise<DbConversation | null> {
+): Prvizualse<DbConversation | null> {
   try {
     const { data, error } = await supabase
       .from('conversations')
@@ -51,7 +51,7 @@ export async function createConversation(
 /**
  * Get all conversations for a user
  */
-export async function getUserConversations(userId: string): Promise<DbConversation[]> {
+export async function getUserConversations(userId: string): Prvizualse<DbConversation[]> {
   try {
     const { data, error } = await supabase
       .from('conversations')
@@ -74,7 +74,7 @@ export async function getUserConversations(userId: string): Promise<DbConversati
 /**
  * Get messages for a specific conversation
  */
-export async function getConversationMessages(conversationId: string): Promise<DbMessage[]> {
+export async function getConversationMessages(conversationId: string): Prvizualse<DbMessage[]> {
   try {
     const { data, error } = await supabase
       .from('messages')
@@ -101,7 +101,7 @@ export async function saveMessage(
   conversationId: string,
   role: 'user' | 'assistant',
   content: string
-): Promise<DbMessage | null> {
+): Prvizualse<DbMessage | null> {
   try {
     const { data, error } = await supabase
       .from('messages')
@@ -137,7 +137,7 @@ export async function saveMessage(
 export async function updateConversationTitle(
   conversationId: string,
   title: string
-): Promise<boolean> {
+): Prvizualse<boolean> {
   try {
     const { error } = await supabase
       .from('conversations')
@@ -159,7 +159,7 @@ export async function updateConversationTitle(
 /**
  * Delete a conversation and all its messages
  */
-export async function deleteConversation(conversationId: string): Promise<boolean> {
+export async function deleteConversation(conversationId: string): Prvizualse<boolean> {
   try {
     const { error } = await supabase
       .from('conversations')

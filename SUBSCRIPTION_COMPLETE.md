@@ -2,7 +2,7 @@
 
 ## ✅ What's Been Created
 
-I've built a complete subscription and rate limiting system for Omi AI with:
+I've built a complete subscription and rate limiting system for Vizual AI with:
 
 ### 📊 **Database Schema**
 - ✅ User subscription fields (tier, status, Stripe IDs)
@@ -30,7 +30,7 @@ I've built a complete subscription and rate limiting system for Omi AI with:
 ✓ 2 video generations (lifetime)
 ```
 
-#### **👑 Omi Pro** ($5/month)
+#### **👑 Vizual Pro** ($5/month)
 ```
 ✓ Unlimited chat prompts
 ✓ Unlimited image generation
@@ -158,7 +158,7 @@ if (user && data.videoUrl) {
 
 ### Test Pro Upgrade
 1. Hit any limit → paywall appears
-2. Click "Upgrade to Omi Pro"
+2. Click "Upgrade to Vizual Pro"
 3. Use test card: `4242 4242 4242 4242`
 4. Complete checkout
 5. Verify unlimited access ✓
@@ -177,7 +177,7 @@ if (user && data.videoUrl) {
 3. User tries 11th image → **Paywall modal appears**
 4. Modal shows: "You've used all 10 image generations"
 5. User sees Pro features and $5/month price
-6. User clicks "Upgrade to Omi Pro"
+6. User clicks "Upgrade to Vizual Pro"
 7. Redirected to Stripe checkout
 8. Completes payment
 9. Redirected back to dashboard
@@ -194,7 +194,7 @@ if (user && data.videoUrl) {
 ## 📁 Files Created
 
 ```
-📦 Omi-AI-1
+📦 Vizual-AI-1
 ├── 📂 api/
 │   ├── ✨ check-usage.ts          (Check limits)
 │   ├── ✨ increment-usage.ts      (Track usage)

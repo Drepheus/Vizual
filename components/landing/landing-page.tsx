@@ -33,7 +33,7 @@ export function LandingPage() {
         <Orb hue={220} hoverIntensity={0.3} rotateOnHover forceHoverState={false} />
       </div>
       <div className="content">
-        <h1>Omi AI</h1>
+        <h1>Vizual AI</h1>
         <p>Modern AI, without the complexity. Chat, create, and generate — simply.</p>
         <div className="button-container">
           <button

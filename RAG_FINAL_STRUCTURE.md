@@ -3,7 +3,7 @@
 ## 📁 Complete Folder Structure
 
 ```
-Omi-AI-1/
+Vizual-AI-1/
 ├── api/
 │   ├── lib/
 │   │   ├── rag-types.ts           # Type definitions (DocumentChunk, SearchResult, etc.)
@@ -150,7 +150,7 @@ Omi-AI-1/
 
 | Table | Purpose | Key Fields |
 |-------|---------|------------|
-| `custom_omis` | User's AI bots | id, user_id, name, status |
+| `custom_vizuals` | User's AI bots | id, user_id, name, status |
 | `knowledge_documents` | Uploaded documents | id, bot_id, user_id, name, type, size, status, chunk_count |
 | `document_embeddings` | Text chunks + vectors | id, document_id, user_id, content, embedding (vector), metadata |
 

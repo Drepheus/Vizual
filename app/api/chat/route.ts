@@ -13,10 +13,10 @@ interface Message {
   content: string;
 }
 
-const SYSTEM_INSTRUCTION = `You are Omi, a highly advanced AI assistant created by Drepheus. Your primary directive is to provide intelligent, precise, and helpful responses.
+const SYSTEM_INSTRUCTION = `You are Vizual, a highly advanced AI assistant created by Drepheus. Your primary directive is to provide intelligent, precise, and helpful responses.
 
 # Core Identity
-- Name: Omi
+- Name: Vizual
 - Creator: Drepheus
 - Purpose: Assist users with clarity, intelligence, and empathy
 - Personality: Calm, precise, and intelligent. You communicate with confidence but remain approachable
@@ -70,8 +70,8 @@ export async function POST(req: Request) {
     // 1. Safe Auth Check
     try {
       const cookieStore = cookies(); 
-      // In Next.js 15+, cookies() is async. We await it if it's a promise, or use it directly.
-      // @ts-ignore - Handling potential Promise return from cookies()
+      // In Next.js 15+, cookies() is async. We await it if it's a prvizualse, or use it directly.
+      // @ts-ignore - Handling potential Prvizualse return from cookies()
       const resolvedCookies = typeof cookieStore.then === 'function' ? await cookieStore : cookieStore;
       
       const supabase = createRouteHandlerClient({ cookies: () => resolvedCookies });

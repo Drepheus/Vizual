@@ -11,7 +11,7 @@ You need to run the `supabase-subscription-schema.sql` file in your Supabase dat
 
 1. **Go to Supabase Dashboard**
    - Visit https://supabase.com/dashboard
-   - Select your project: **Omi-AI**
+   - Select your project: **Vizual-AI**
 
 2. **Open SQL Editor**
    - Click on **SQL Editor** in the left sidebar

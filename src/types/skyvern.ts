@@ -193,7 +193,7 @@ export interface SkyvernTaskResponse {
 }
 
 /**
- * Omi AI internal response structure
+ * Vizual AI internal response structure
  * Includes usage tracking and educational context
  */
 export interface WebTaskResult {

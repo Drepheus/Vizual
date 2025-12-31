@@ -44,11 +44,11 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
   const features: SearchResult[] = [
     {
       type: 'feature',
-      title: 'Omi Chat',
+      title: 'Vizual Chat',
       description: 'Conversational AI with advanced reasoning',
       icon: '💬',
       onClick: () => {
-        console.log('Navigate to Omi Chat');
+        console.log('Navigate to Vizual Chat');
         onClose();
       }
     },

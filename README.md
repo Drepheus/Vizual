@@ -1,4 +1,4 @@
-# Omi AI
+# Vizual AI
 
 An innovative conversational AI experience powered by multiple LLMs. - Advanced AI Chat Interface
 
@@ -47,7 +47,7 @@ This project is automatically deployed to GitHub Pages using GitHub Actions. Eve
 
 ## Live Demo
 
-Visit: https://dretrader25.github.io/Omi-AI-1/
+Visit: https://dretrader25.github.io/Vizual-AI-1/
 
 ## License
 

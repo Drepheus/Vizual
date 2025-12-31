@@ -59,7 +59,7 @@ TAVILY_API_KEY=your_tavily_api_key_here
 ## ⚠️ Important Notes
 
 - Only **"Search + Summarize"** mode is implemented
-- Other modes show "Coming Soon" alert
+- Other modes show "Cvizualng Soon" alert
 - Requires both `TAVILY_API_KEY` and `GROQ_API_KEY` (already set)
 - Free tier available for testing
 

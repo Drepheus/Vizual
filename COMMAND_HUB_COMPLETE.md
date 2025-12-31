@@ -1,7 +1,7 @@
 # Command Hub - MagicBento Integration
 
 ## Summary
-Created a new Command Hub page featuring a beautiful MagicBento grid layout with Omi AI-related feature tiles. The Command button in the dock now opens this full-screen interactive hub.
+Created a new Command Hub page featuring a beautiful MagicBento grid layout with Vizual AI-related feature tiles. The Command button in the dock now opens this full-screen interactive hub.
 
 ## ✅ What Was Added
 
@@ -21,11 +21,11 @@ A fully interactive, animated bento grid with:
 - Smooth animations powered by GSAP
 - Auto-hiding text on hover
 - Responsive grid layout
-- Purple/violet theme matching Omi branding
+- Purple/violet theme matching Vizual branding
 
 ### 3. **CommandHub Page** (`src/CommandHub.tsx`)
 Full-screen overlay with:
-- Header with "Omi Command Hub" title and gradient text
+- Header with "Vizual Command Hub" title and gradient text
 - Integrated MagicBento grid
 - Back button to return to chat
 - Centered, modern layout
@@ -42,11 +42,11 @@ Full-screen overlay with:
 - Overlay rendering with z-index management
 - Back button functionality
 
-## 🎨 Omi AI Feature Tiles
+## 🎨 Vizual AI Feature Tiles
 
 The bento grid includes 6 AI-powered tiles:
 
-1. **Omi Chat**
+1. **Vizual Chat**
    - Label: "Intelligence"
    - Description: "Conversational AI with advanced reasoning"
 
@@ -142,7 +142,7 @@ Potential additions to make tiles functional:
 - Usage statistics on hover
 - Quick actions menu
 - Drag-to-reorder tiles
-- Customizable grid layout
+- Custvizualzable grid layout
 - Add/remove tiles
 - Favorites system
 
@@ -210,4 +210,4 @@ After deployment:
 
 ## 🎉 Result
 
-A stunning, interactive Command Hub that showcases Omi AI's features with modern visual effects and smooth animations. The MagicBento grid provides an engaging way for users to explore and navigate to different AI-powered tools!
+A stunning, interactive Command Hub that showcases Vizual AI's features with modern visual effects and smooth animations. The MagicBento grid provides an engaging way for users to explore and navigate to different AI-powered tools!

@@ -13,7 +13,7 @@ export type UsageType = 'chat' | 'image_gen' | 'video_gen';
 export async function checkUsageLimit(
   userId: string,
   usageType: UsageType
-): Promise<UsageCheckResult> {
+): Prvizualse<UsageCheckResult> {
   try {
     const response = await fetch('/api/usage?action=check', {
       method: 'POST',
@@ -35,7 +35,7 @@ export async function checkUsageLimit(
 export async function incrementUsage(
   userId: string,
   usageType: UsageType
-): Promise<{ success: boolean; limitReached?: boolean }> {
+): Prvizualse<{ success: boolean; limitReached?: boolean }> {
   try {
     const response = await fetch('/api/usage?action=increment', {
       method: 'POST',
@@ -63,7 +63,7 @@ export async function incrementUsage(
 export async function createCheckoutSession(
   userId: string,
   email: string
-): Promise<string> {
+): Prvizualse<string> {
   try {
     const response = await fetch('/api/create-checkout-session', {
       method: 'POST',

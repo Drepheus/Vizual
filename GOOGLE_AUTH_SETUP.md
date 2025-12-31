@@ -1,4 +1,4 @@
-# Google OAuth Setup Guide for Omi AI
+# Google OAuth Setup Guide for Vizual AI
 
 ## Problem
 Cannot log in with Google account - OAuth is not fully configured.
@@ -8,7 +8,7 @@ Cannot log in with Google account - OAuth is not fully configured.
 ### Step 1: Create Google Cloud Project
 1. Go to [Google Cloud Console](https://console.cloud.google.com/)
 2. Click "Select a Project" → "New Project"
-3. Name it "Omi AI" or similar
+3. Name it "Vizual AI" or similar
 4. Click "Create"
 
 ### Step 2: Enable Google OAuth
@@ -17,7 +17,7 @@ Cannot log in with Google account - OAuth is not fully configured.
 3. Click **Create**
 
 #### Configure OAuth Consent Screen:
-- **App name**: `Omi AI`
+- **App name**: `Vizual AI`
 - **User support email**: Your email
 - **Developer contact email**: Your email
 - Click **Save and Continue**
@@ -37,7 +37,7 @@ Cannot log in with Google account - OAuth is not fully configured.
 1. Go to **APIs & Services** → **Credentials**
 2. Click **+ CREATE CREDENTIALS** → **OAuth 2.0 Client ID**
 3. Choose **Web application**
-4. Name it "Omi AI Web Client"
+4. Name it "Vizual AI Web Client"
 
 #### Configure Authorized URIs:
 
@@ -179,7 +179,7 @@ https://your-app.vercel.app/**
 **Solution**: Check that all URLs in Google Cloud Console match your current environment (localhost for dev, Vercel URL for production).
 
 ### Issue: Google OAuth screen shows "This app isn't verified"
-**Solution**: This is normal for development. Click "Advanced" → "Go to Omi AI (unsafe)" to continue. For production, you can submit for verification.
+**Solution**: This is normal for development. Click "Advanced" → "Go to Vizual AI (unsafe)" to continue. For production, you can submit for verification.
 
 ### Issue: Still can't log in
 **Solution**: 

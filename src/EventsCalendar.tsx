@@ -20,9 +20,9 @@ const SAMPLE_EVENTS: Event[] = [
     title: 'AI Art Challenge: Cyberpunk',
     date: new Date(new Date().getFullYear(), new Date().getMonth(), 15),
     type: 'challenge',
-    description: 'Create the most stunning cyberpunk cityscape using Omi Media Studio. Top 3 winners get 1000 credits.',
+    description: 'Create the most stunning cyberpunk cityscape using Vizual Media Studio. Top 3 winners get 1000 credits.',
     time: '10:00 AM - 11:59 PM PST',
-    location: 'Omi Community Discord'
+    location: 'Vizual Community Discord'
   },
   {
     id: '2',
@@ -35,7 +35,7 @@ const SAMPLE_EVENTS: Event[] = [
   },
   {
     id: '3',
-    title: 'Omi v2.5 Feature Launch',
+    title: 'Vizual v2.5 Feature Launch',
     date: new Date(new Date().getFullYear(), new Date().getMonth(), 28),
     type: 'launch',
     description: 'Unveiling the new video generation capabilities and enhanced voice models. Don\'t miss the keynote.',

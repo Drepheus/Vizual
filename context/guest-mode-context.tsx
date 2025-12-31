@@ -20,7 +20,7 @@ const GuestModeContext = createContext<GuestModeContextValue | undefined>(
   undefined
 );
 
-const STORAGE_KEY = "omi_guest_mode";
+const STORAGE_KEY = "vizual_guest_mode";
 
 export function GuestModeProvider({ children }: { children: ReactNode }) {
   const [isGuestMode, setIsGuestMode] = useState(false);

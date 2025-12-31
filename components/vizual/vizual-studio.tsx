@@ -271,11 +271,11 @@ export function VizualStudio() {
             </div>
           )}
 
-          {/* Powered by Omi AI */}
+          {/* Powered by Vizual AI */}
           <div className="mt-8 flex justify-center">
             <div className="flex items-center gap-3 px-5 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm">
               <span className="text-gray-500 text-sm">powered by</span>
-              <span className={`text-white text-base font-bold ${playfair.className} italic`}>Omi AI</span>
+              <span className={`text-white text-base font-bold ${playfair.className} italic`}>Vizual AI</span>
             </div>
           </div>
         </main>
@@ -1170,7 +1170,7 @@ export function VizualStudio() {
 
           {/* Video Column */}
           <div className="md:col-span-4 flex flex-col gap-4">
-            <h4 className="text-white font-bold mb-2">powered by <span className={`${playfair.className} italic`}>Omi AI</span></h4>
+            <h4 className="text-white font-bold mb-2">powered by <span className={`${playfair.className} italic`}>Vizual AI</span></h4>
             <div className="relative w-full aspect-video rounded-2xl overflow-hidden border border-white/10 group cursor-pointer">
               <video
                 autoPlay

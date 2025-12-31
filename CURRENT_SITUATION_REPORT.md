@@ -1,4 +1,4 @@
-# 🚨 Current Situation Report: Omi AI RAG Issue
+# 🚨 Current Situation Report: Vizual AI RAG Issue
 
 ## 1. Web Application Setup
 *   **Framework:** Next.js 14+ (App Router)
@@ -7,7 +7,7 @@
 *   **Database & Auth:** Supabase (Auth, Database)
 *   **Deployment:** Google Cloud Run (Dockerized)
 *   **Build System:** Google Cloud Build
-*   **Project ID:** `omi-ai-474603`
+*   **Project ID:** `vizual-ai-474603`
 *   **Region:** `us-central1`
 
 ## 2. RAG (Retrieval-Augmented Generation) Setup
@@ -29,12 +29,12 @@ We are using **Google Vertex AI Search & Conversation** with **Gemini Grounding*
 ## 3. The Current Issue
 **Error:** `404 Not Found` when attempting to chat with the bot.
 **Specific Message:**
-> "Publisher Model `projects/omi-ai-474603/locations/us-central1/publishers/google/models/gemini-1.5-flash` was not found or your project does not have access to it."
+> "Publisher Model `projects/vizual-ai-474603/locations/us-central1/publishers/google/models/gemini-1.5-flash` was not found or your project does not have access to it."
 
 ### Troubleshooting Steps Taken:
 1.  **API Enablement:** Confirmed `aiplatform.googleapis.com` and `discoveryengine.googleapis.com` are enabled in the deployment script.
 2.  **Environment Variables:**
-    *   `GOOGLE_CLOUD_PROJECT_ID` is set to `omi-ai-474603`.
+    *   `GOOGLE_CLOUD_PROJECT_ID` is set to `vizual-ai-474603`.
     *   `VERTEX_DATA_STORE_ID` is set correctly.
     *   `GOOGLE_CLOUD_LOCATION` was explicitly forced to `us-central1`.
 3.  **Model Versions Attempted:**

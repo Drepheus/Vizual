@@ -1,4 +1,4 @@
-# Omi AI - Tech Stack & Infrastructure
+# Vizual AI - Tech Stack & Infrastructure
 
 ## 📋 Executive Summary
 Full-stack AI chat application built on Next.js, deployed on Google Cloud Run, using Supabase for data/auth and Google Gemini for AI intelligence.
@@ -81,8 +81,8 @@ Required in Cloud Run:
 
 ## 📦 Deployment Workflow
 
-1. **Build**: `gcloud builds submit --tag gcr.io/PROJECT_ID/omi-ai`
-2. **Deploy**: `gcloud run deploy omi-ai --image gcr.io/PROJECT_ID/omi-ai`
+1. **Build**: `gcloud builds submit --tag gcr.io/PROJECT_ID/vizual-ai`
+2. **Deploy**: `gcloud run deploy vizual-ai --image gcr.io/PROJECT_ID/vizual-ai`
 
 ---
 

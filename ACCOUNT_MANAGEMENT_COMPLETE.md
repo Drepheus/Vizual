@@ -5,7 +5,7 @@
 ### 1. **Settings Modal** (`SettingsModal.tsx`)
 A beautiful, modern popup that shows:
 - ✅ **User Profile** - Email and User ID
-- ✅ **Subscription Status** - Shows "Free Plan" or "Omi Pro" badge
+- ✅ **Subscription Status** - Shows "Free Plan" or "Vizual Pro" badge
 - ✅ **Logout Button** - Sign out functionality
 - ✅ **Smooth Animations** - Slide-up entrance, fade-in overlay
 - ✅ **Modern Design** - Glassmorphism, purple gradients, responsive
@@ -53,7 +53,7 @@ A beautiful, modern popup that shows:
 │  │ 🚪 Log Out          │   │
 │  └─────────────────────┘   │
 ├─────────────────────────────┤
-│ Omi AI • Created by Andre   │
+│ Vizual AI • Created by Andre   │
 └─────────────────────────────┘
 ```
 
@@ -82,7 +82,7 @@ A beautiful, modern popup that shows:
 
 ### Settings Modal:
 - **Glassmorphism** - Translucent background with blur
-- **Purple Theme** - Matches your Omi brand colors
+- **Purple Theme** - Matches your Vizual brand colors
 - **Smooth Animations** - Slide up on open, rotate on close
 - **Responsive** - Works on mobile and desktop
 - **Scrollable** - Long content scrolls smoothly
@@ -99,7 +99,7 @@ A beautiful, modern popup that shows:
 
 ### Desktop:
 ```
-Header: [Omi AI] [Active Model: Gemini Pro ⚙️]    [✨ New Chat] [👤 username]
+Header: [Vizual AI] [Active Model: Gemini Pro ⚙️]    [✨ New Chat] [👤 username]
 ```
 
 ### Mobile (< 768px):

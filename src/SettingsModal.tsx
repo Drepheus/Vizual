@@ -46,7 +46,7 @@ export default function SettingsModal({ isOpen, onClose, user }: SettingsModalPr
       }
       
       // Mock loading API keys from local storage or DB
-      const storedKeys = localStorage.getItem('omi_api_keys');
+      const storedKeys = localStorage.getItem('vizual_api_keys');
       if (storedKeys) {
         setApiKeys(JSON.parse(storedKeys));
       }
@@ -77,7 +77,7 @@ export default function SettingsModal({ isOpen, onClose, user }: SettingsModalPr
   const handleApiKeyChange = (provider: string, value: string) => {
     const newKeys = { ...apiKeys, [provider]: value };
     setApiKeys(newKeys);
-    localStorage.setItem('omi_api_keys', JSON.stringify(newKeys));
+    localStorage.setItem('vizual_api_keys', JSON.stringify(newKeys));
   };
 
   if (!isOpen) return null;

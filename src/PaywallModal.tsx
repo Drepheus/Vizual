@@ -84,8 +84,8 @@ const PaywallModal: React.FC<PaywallModalProps> = ({
                   <div className="icon-inner">🆓</div>
                 </div>
                 <div className="plan-title-group">
-                  <h3 className="plan-name">OMI FREE</h3>
-                  <p className="plan-subtitle">For trying Omi</p>
+                  <h3 className="plan-name">VIZUAL FREE</h3>
+                  <p className="plan-subtitle">For trying Vizual</p>
                 </div>
               </div>
 
@@ -152,7 +152,7 @@ const PaywallModal: React.FC<PaywallModalProps> = ({
                   <div className="icon-inner">⚡</div>
                 </div>
                 <div className="plan-title-group">
-                  <h3 className="plan-name">OMI PRO</h3>
+                  <h3 className="plan-name">VIZUAL PRO</h3>
                   <p className="plan-subtitle">Your main conversion plan</p>
                 </div>
               </div>
@@ -194,7 +194,7 @@ const PaywallModal: React.FC<PaywallModalProps> = ({
                   <div className="feature-icon-box">
                     <span className="icon">☺</span>
                   </div>
-                  <span className="feature-text">2 Custom Omi's</span>
+                  <span className="feature-text">2 Custom Vizual's</span>
                 </div>
                 <div className="feature-item">
                   <div className="feature-icon-box">
@@ -234,7 +234,7 @@ const PaywallModal: React.FC<PaywallModalProps> = ({
                     <div className="icon-inner">✦</div>
                   </div>
                   <div className="plan-title-group">
-                    <h3 className="plan-name ultra-name">OMI ULTRA</h3>
+                    <h3 className="plan-name ultra-name">VIZUAL ULTRA</h3>
                     <p className="plan-subtitle">For power users & creators</p>
                   </div>
                 </div>
@@ -276,7 +276,7 @@ const PaywallModal: React.FC<PaywallModalProps> = ({
                     <div className="feature-icon-box ultra-feature">
                       <span className="icon">★</span>
                     </div>
-                    <span className="feature-text">Unlimited Custom Omi's</span>
+                    <span className="feature-text">Unlimited Custom Vizual's</span>
                   </div>
                   <div className="feature-item">
                     <div className="feature-icon-box ultra-feature">

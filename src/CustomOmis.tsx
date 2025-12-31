@@ -6,11 +6,11 @@ import { useAuth } from '@/context/auth-context';
 import * as ragService from './ragService';
 import { chatWithVertexRAG } from './ragService';
 
-interface CustomOmisProps {
+interface CustomVizualsProps {
   onClose?: () => void;
 }
 
-interface CustomOmi {
+interface CustomVizual {
   id: string;
   name: string;
   description: string;
@@ -33,7 +33,7 @@ interface Document {
 const DOCUMENT_ACCEPT_STRING = '.txt,.md,.markdown,.json,.yaml,.yml,.csv,.js,.jsx,.ts,.tsx,.py,.cs,.html,.htm,.css';
 const DOCUMENT_TYPE_BADGES = ['TXT', 'MD', 'JSON', 'YAML', 'CSV', 'JS/TS', 'PY/CS', 'HTML/CSS'];
 
-const CustomOmis: React.FC<CustomOmisProps> = ({ onClose }) => {
+const CustomVizuals: React.FC<CustomVizualsProps> = ({ onClose }) => {
   const { session } = useAuth();
   const [activeTab, setActiveTab] = useState<'bots' | 'documents' | 'training'>('bots');
   const [selectedBot, setSelectedBot] = useState<string | null>(null);
@@ -56,7 +56,7 @@ const CustomOmis: React.FC<CustomOmisProps> = ({ onClose }) => {
   const [isChatLoading, setIsChatLoading] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
-  const [customOmis, setCustomOmis] = useState<CustomOmi[]>([]);
+  const [customVizuals, setCustomVizuals] = useState<CustomVizual[]>([]);
   const [documents, setDocuments] = useState<Document[]>([]);
 
   // Load bots on mount
@@ -84,8 +84,8 @@ const CustomOmis: React.FC<CustomOmisProps> = ({ onClose }) => {
     if (!session?.user?.id) return;
     setIsLoading(true);
     try {
-      const bots = await ragService.loadCustomOmis(session.user.id);
-      setCustomOmis(bots);
+      const bots = await ragService.loadCustomVizuals(session.user.id);
+      setCustomVizuals(bots);
     } catch (error) {
       console.error('Failed to load bots:', error);
     } finally {
@@ -128,12 +128,12 @@ const CustomOmis: React.FC<CustomOmisProps> = ({ onClose }) => {
     const files = event.target.files;
     if (!files || files.length === 0) return;
 
-    if (!selectedBot && customOmis.length === 0) {
+    if (!selectedBot && customVizuals.length === 0) {
       alert('Please create a bot first before uploading documents');
       return;
     }
 
-    const botId = selectedBot || customOmis[0]?.id;
+    const botId = selectedBot || customVizuals[0]?.id;
     if (!botId) return;
 
     setIsUploading(true);
@@ -173,7 +173,7 @@ const CustomOmis: React.FC<CustomOmisProps> = ({ onClose }) => {
     setIsCreatingBot(true);
     setCreateBotError(null);
     try {
-      const newBot = await ragService.createCustomOmi(session.user.id, newBotName, newBotDescription);
+      const newBot = await ragService.createCustomVizual(session.user.id, newBotName, newBotDescription);
       setNewBotName('');
       setNewBotDescription('');
       setShowCreateModal(false);
@@ -242,7 +242,7 @@ const CustomOmis: React.FC<CustomOmisProps> = ({ onClose }) => {
     }
   };
 
-  const handleTestBot = (bot: CustomOmi) => {
+  const handleTestBot = (bot: CustomVizual) => {
     setSelectedBot(bot.id);
     setChatHistory([]);
     setShowChatModal(true);
@@ -292,12 +292,12 @@ const CustomOmis: React.FC<CustomOmisProps> = ({ onClose }) => {
   };
 
   return (
-    <div className="custom-omis-container" ref={containerRef}>
-      <header className="custom-omis-header">
+    <div className="custom-vizuals-container" ref={containerRef}>
+      <header className="custom-vizuals-header">
         <div className="header-left">
           <div className="logo">
             <span className="logo-icon">🤖</span>
-            <span className="logo-text">Custom Omi Training</span>
+            <span className="logo-text">Custom Vizual Training</span>
           </div>
           <nav className="header-tabs">
             <button
@@ -327,12 +327,12 @@ const CustomOmis: React.FC<CustomOmisProps> = ({ onClose }) => {
         </div>
       </header>
 
-      <div className="custom-omis-main">
+      <div className="custom-vizuals-main">
         {activeTab === 'bots' && (
           <div className="bots-tab">
             <div className="tab-header">
               <div>
-                <h2 className="tab-title">Your Custom Omi Bots</h2>
+                <h2 className="tab-title">Your Custom Vizual Bots</h2>
                 <p className="tab-subtitle">Create and manage specialized AI assistants trained on your data</p>
               </div>
               <button className="create-bot-btn" onClick={() => setShowCreateModal(true)}>
@@ -341,7 +341,7 @@ const CustomOmis: React.FC<CustomOmisProps> = ({ onClose }) => {
               </button>
             </div>
             <div className="bots-grid">
-              {customOmis.length === 0 ? (
+              {customVizuals.length === 0 ? (
                 <div style={{
                   gridColumn: '1 / -1',
                   textAlign: 'center',
@@ -352,10 +352,10 @@ const CustomOmis: React.FC<CustomOmisProps> = ({ onClose }) => {
                 }}>
                   <div style={{ fontSize: '48px', marginBottom: '16px' }}>🤖</div>
                   <h3 style={{ color: 'rgba(255,255,255,0.9)', marginBottom: '12px', fontSize: '20px', fontWeight: '400' }}>
-                    Create Your First Custom Omi Bot
+                    Create Your First Custom Vizual Bot
                   </h3>
                   <p style={{ color: 'rgba(255,255,255,0.6)', marginBottom: '24px', maxWidth: '500px', margin: '0 auto 24px' }}>
-                    Custom Omi bots are AI assistants trained on your own documents using RAG (Retrieval-Augmented Generation).
+                    Custom Vizual bots are AI assistants trained on your own documents using RAG (Retrieval-Augmented Generation).
                     They can answer questions based on your uploaded knowledge base.
                   </p>
                   <button
@@ -368,7 +368,7 @@ const CustomOmis: React.FC<CustomOmisProps> = ({ onClose }) => {
                   </button>
                 </div>
               ) : (
-                customOmis.map((bot) => (
+                customVizuals.map((bot) => (
                   <div key={bot.id} className={'bot-card' + (selectedBot === bot.id ? ' selected' : '')} onClick={() => setSelectedBot(bot.id)}>
                     <div className="bot-card-header">
                       <div className="bot-icon">🤖</div>
@@ -425,20 +425,20 @@ const CustomOmis: React.FC<CustomOmisProps> = ({ onClose }) => {
               <div>
                 <h2 className="tab-title">Knowledge Base Documents</h2>
                 <p className="tab-subtitle">Upload and manage training documents for RAG fine-tuning</p>
-                {selectedBot && customOmis.length > 0 && (
+                {selectedBot && customVizuals.length > 0 && (
                   <div style={{ marginTop: '8px', padding: '8px 12px', background: 'rgba(192,192,192,0.1)', borderRadius: '8px', display: 'inline-block' }}>
                     <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px' }}>Selected Bot: </span>
                     <span style={{ color: 'rgba(255,255,255,0.9)', fontSize: '13px', fontWeight: '500' }}>
-                      {customOmis.find(b => b.id === selectedBot)?.name || 'Unknown'}
+                      {customVizuals.find(b => b.id === selectedBot)?.name || 'Unknown'}
                     </span>
                   </div>
                 )}
-                {!selectedBot && customOmis.length > 0 && (
+                {!selectedBot && customVizuals.length > 0 && (
                   <div style={{ marginTop: '8px', padding: '8px 12px', background: 'rgba(255,193,7,0.1)', border: '1px solid rgba(255,193,7,0.3)', borderRadius: '8px', display: 'inline-block' }}>
                     <span style={{ color: 'rgba(255,193,7,0.9)', fontSize: '12px' }}>⚠️ Select a bot first to upload documents</span>
                   </div>
                 )}
-                {customOmis.length === 0 && (
+                {customVizuals.length === 0 && (
                   <div style={{ marginTop: '8px', padding: '8px 12px', background: 'rgba(248,113,113,0.1)', border: '1px solid rgba(248,113,113,0.3)', borderRadius: '8px', display: 'inline-block' }}>
                     <span style={{ color: 'rgba(248,113,113,0.9)', fontSize: '12px' }}>❌ Create a bot first in the "My Bots" tab</span>
                   </div>
@@ -457,18 +457,18 @@ const CustomOmis: React.FC<CustomOmisProps> = ({ onClose }) => {
                 <button
                   className="upload-btn"
                   onClick={() => {
-                    if (!selectedBot && customOmis.length > 0) {
+                    if (!selectedBot && customVizuals.length > 0) {
                       alert('Please select a bot first by clicking on it in the "My Bots" tab, then come back here to upload documents.');
                       return;
                     }
-                    if (customOmis.length === 0) {
+                    if (customVizuals.length === 0) {
                       alert('Please create a bot first in the "My Bots" tab before uploading documents.');
                       return;
                     }
                     fileInputRef.current?.click();
                   }}
-                  disabled={isUploading || customOmis.length === 0}
-                  style={customOmis.length === 0 ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
+                  disabled={isUploading || customVizuals.length === 0}
+                  style={customVizuals.length === 0 ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
                 >
                   {isUploading ? (
                     <>
@@ -681,7 +681,7 @@ const CustomOmis: React.FC<CustomOmisProps> = ({ onClose }) => {
       {showCreateModal && (
         <div className="modal-overlay" onClick={() => setShowCreateModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h2>Create New Custom Omi</h2>
+            <h2>Create New Custom Vizual</h2>
             <div className="modal-form">
               <div className="form-group">
                 <label>Bot Name</label>
@@ -731,7 +731,7 @@ const CustomOmis: React.FC<CustomOmisProps> = ({ onClose }) => {
         <div className="modal-overlay" onClick={() => setShowChatModal(false)}>
           <div className="modal-content chat-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '800px', height: '80vh', display: 'flex', flexDirection: 'column' }}>
             <div className="modal-header" style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '16px', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h2>Test Bot: {customOmis.find(b => b.id === selectedBot)?.name}</h2>
+              <h2>Test Bot: {customVizuals.find(b => b.id === selectedBot)?.name}</h2>
               <button onClick={() => setShowChatModal(false)} style={{ background: 'none', border: 'none', color: 'white', fontSize: '20px', cursor: 'pointer' }}>✕</button>
             </div>
 
@@ -794,4 +794,4 @@ const CustomOmis: React.FC<CustomOmisProps> = ({ onClose }) => {
   );
 };
 
-export default CustomOmis;
+export default CustomVizuals;

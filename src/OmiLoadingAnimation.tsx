@@ -3,11 +3,11 @@
 import { useEffect, useState } from 'react';
 import MetallicPaint from './MetallicPaint';
 
-export default function OmiLoadingAnimation() {
+export default function VizualLoadingAnimation() {
   const [imageData, setImageData] = useState<ImageData | null>(null);
 
   useEffect(() => {
-    // Create Omi logo programmatically
+    // Create Vizual logo programmatically
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
@@ -20,7 +20,7 @@ export default function OmiLoadingAnimation() {
     ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, size, size);
 
-    // Draw Omi logo - simple circle with "O" 
+    // Draw Vizual logo - simple circle with "O" 
     const centerX = size / 2;
     const centerY = size / 2;
     const radius = size * 0.35;

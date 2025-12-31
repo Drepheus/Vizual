@@ -26,7 +26,7 @@
 - ✓ 10 image generations (lifetime)
 - ✓ 2 video generations (lifetime)
 
-**Omi Pro ($5/month)**
+**Vizual Pro ($5/month)**
 - ✓ Unlimited chat prompts
 - ✓ Unlimited image generation
 - ✓ Unlimited video generation
@@ -121,7 +121,7 @@ SUBSCRIPTION_SETUP_GUIDE.md       # Detailed guide
 
 ### Test Pro Upgrade
 1. Trigger paywall
-2. Click "Upgrade to Omi Pro"
+2. Click "Upgrade to Vizual Pro"
 3. Complete Stripe checkout with test card
 4. Verify unlimited access
 

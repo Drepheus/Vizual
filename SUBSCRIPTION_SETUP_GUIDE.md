@@ -1,6 +1,6 @@
 # Subscription & Rate Limiting Setup Guide
 
-This guide explains how to set up the subscription and rate limiting system for Omi AI.
+This guide explains how to set up the subscription and rate limiting system for Vizual AI.
 
 ## Overview
 
@@ -254,7 +254,7 @@ Wait 4 hours or manually update the `reset_at` timestamp in the database to test
 
 ### Testing Stripe Checkout
 
-1. Click "Upgrade to Omi Pro" in the paywall modal
+1. Click "Upgrade to Vizual Pro" in the paywall modal
 2. Use Stripe test card: `4242 4242 4242 4242`
 3. Use any future expiry date and any CVC
 4. Complete checkout

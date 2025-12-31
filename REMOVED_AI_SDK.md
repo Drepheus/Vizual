@@ -206,7 +206,7 @@ const searchResults = await tavilyClient.search(searchQuery, {
 
 ## Notes
 - System prompts preserved in both chat.ts and deep-search.ts
-- Omi personality and behavior unchanged
+- Vizual personality and behavior unchanged
 - All features remain functional
 - Code is now much simpler and easier to debug
 - No more SDK-related deployment issues

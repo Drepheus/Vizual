@@ -20,14 +20,14 @@ This guide explains how to set up the **Vertex AI Search & Conversation** infras
 5. **Configure Data Store**:
    - Click **Create New Data Store**.
    - Select **Cloud Storage** (if your files are in a bucket) or **Upload** (for manual testing).
-   - *Recommendation*: Create a Google Cloud Storage bucket (e.g., `omi-ai-knowledge-base`) and select it. This allows you to just drop files there to update the index.
+   - *Recommendation*: Create a Google Cloud Storage bucket (e.g., `vizual-ai-knowledge-base`) and select it. This allows you to just drop files there to update the index.
    - Select "Unstructured documents" (PDF, HTML, TXT, etc.).
 6. **Link Data Store**: Select the data store you just created and click **Create**.
 
 ### Step 3: Get IDs
 You will need two IDs for your environment variables:
-1. **Project ID**: Your GCP Project ID (e.g., `omi-ai-123`).
-2. **Data Store ID**: Go to the Data Stores tab, click your data store, and copy the ID (e.g., `omi-knowledge-base_12345`).
+1. **Project ID**: Your GCP Project ID (e.g., `vizual-ai-123`).
+2. **Data Store ID**: Go to the Data Stores tab, click your data store, and copy the ID (e.g., `vizual-knowledge-base_12345`).
 3. **Location**: usually `global` or `us-central1`.
 
 ---

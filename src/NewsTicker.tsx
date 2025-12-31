@@ -51,14 +51,14 @@ export default function NewsTicker() {
     ];
 
     const actions = [
-      'just trained a Custom Omi',
-      'is chatting with Omi Chat',
+      'just trained a Custom Vizual',
+      'is chatting with Vizual Chat',
       'just generated a 4K image in Media Studio',
       'just Upgraded to the Pro Plan!',
       'just created a new AI Workflow',
       'just generated a stunning video with Veo',
       'just completed a deep web search',
-      'just customized their AI assistant',
+      'just custvizualzed their AI assistant',
       'just exported media from the gallery',
       'just discovered a new feature',
       'just integrated a new API',
@@ -70,7 +70,7 @@ export default function NewsTicker() {
       'just built a business workflow',
       'just designed a creative project',
       'just optimized their AI settings',
-      'just shared their Custom Omi',
+      'just shared their Custom Vizual',
       'just completed an AI task',
       'just explored the Command Hub',
       'just unlocked advanced features',

@@ -12,11 +12,11 @@ interface DotItem {
 }
 
 const dots: DotItem[] = [
-    { id: 'chat', label: 'Omi Chat', path: '/chat', color: '#00C8FF' },
+    { id: 'chat', label: 'Vizual Chat', path: '/chat', color: '#00C8FF' },
     { id: 'search', label: 'Web Search', path: '/web-search', color: '#00FF9D' },
     { id: 'media', label: 'Media Studio', path: '/media-studio', color: '#FF00D4' },
     { id: 'workflows', label: 'AI Workflows', path: '/ai-workflows', color: '#FFE600' },
-    { id: 'custom', label: 'Custom Omis', path: '/custom-omis', color: '#9D00FF' },
+    { id: 'custom', label: 'Custom Vizuals', path: '/custom-vizuals', color: '#9D00FF' },
     { id: 'google', label: 'Google AI', path: '/google-ai-studio', color: '#4285F4' },
     { id: 'replicate', label: 'Replicate', path: '/replicate-studio', color: '#C0C0C0' },
 ];

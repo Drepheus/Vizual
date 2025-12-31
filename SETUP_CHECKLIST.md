@@ -132,11 +132,11 @@ When limit is hit, verify the modal shows:
 - ✅ Timer for chat reset (if applicable)
 - ✅ Pro plan features list
 - ✅ $5/month pricing
-- ✅ Golden "Upgrade to Omi Pro" button
+- ✅ Golden "Upgrade to Vizual Pro" button
 
 ### Test 3: Stripe Checkout
 
-1. Click **"Upgrade to Omi Pro"** in the paywall
+1. Click **"Upgrade to Vizual Pro"** in the paywall
 2. Should redirect to Stripe checkout page ✅
 3. Use Stripe test card:
    ```

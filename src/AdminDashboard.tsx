@@ -150,7 +150,7 @@ const AdminDashboard = () => {
             created_at
           `);
         
-        const userStats = await Promise.all((usersData || []).map(async (user) => {
+        const userStats = await Prvizualse.all((usersData || []).map(async (user) => {
           // Get aggregated usage stats
           const { data: chatUsage } = await supabase
             .from('usage_tracking')
@@ -228,7 +228,7 @@ const AdminDashboard = () => {
 
       if (!error && data) {
         // Fetch user emails
-        const logsWithEmails = await Promise.all(data.map(async (log) => {
+        const logsWithEmails = await Prvizualse.all(data.map(async (log) => {
           const { data: userData } = await supabase.auth.admin.getUserById(log.user_id);
           return {
             ...log,
@@ -254,7 +254,7 @@ const AdminDashboard = () => {
       
       console.log('AdminDashboard: Loading admin data...');
       setIsLoading(true);
-      await Promise.all([
+      await Prvizualse.all([
         fetchSystemMetrics(),
         fetchUsers(),
         fetchApiLogs(),
@@ -688,7 +688,7 @@ const AdminDashboard = () => {
                 <div className="analytics-card">
                   <h3>User Growth</h3>
                   <div className="chart-placeholder">
-                    <div className="coming-soon">Chart visualization coming soon</div>
+                    <div className="cvizualng-soon">Chart visualization cvizualng soon</div>
                   </div>
                 </div>
 

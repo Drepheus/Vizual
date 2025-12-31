@@ -47,7 +47,7 @@ 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
 
 ## 🧪 How to Test DeepSearch
 
-1. **Go to your Omi website**
+1. **Go to your Vizual website**
 2. **Click the "DeepSearch" button** (◎ icon)
    - You should see the laser animation background activate
 3. **Type a search query**, for example:
@@ -61,7 +61,7 @@ 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
 
 - ✅ Tavily searches the web in real-time
 - ✅ Finds 5 most relevant sources
-- ✅ Omi synthesizes the information
+- ✅ Vizual synthesizes the information
 - ✅ Provides answer with **source citations**
 - ✅ Includes clickable links to sources
 - ✅ Shows relevance scores
@@ -71,7 +71,7 @@ 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
 ## 🎯 How DeepSearch Works
 
 ```
-User Query → Tavily Web Search → 5 Best Sources → Omi AI Analysis → Comprehensive Answer
+User Query → Tavily Web Search → 5 Best Sources → Vizual AI Analysis → Comprehensive Answer
 ```
 
 1. **User asks a question** in DeepSearch mode
@@ -82,7 +82,7 @@ User Query → Tavily Web Search → 5 Best Sources → Omi AI Analysis → Comp
    - Content snippet
    - Relevance score
    - Quick AI-generated answer
-4. **Omi synthesizes** all sources into one comprehensive response
+4. **Vizual synthesizes** all sources into one comprehensive response
 5. **Cites sources** with clickable links
 
 ---
@@ -93,13 +93,13 @@ User Query → Tavily Web Search → 5 Best Sources → Omi AI Analysis → Comp
 - ✅ **Advanced search depth** - Goes beyond surface results
 - ✅ **Source citations** - Every claim is backed by sources
 - ✅ **Relevance scoring** - See how relevant each source is
-- ✅ **AI synthesis** - Omi combines multiple sources intelligently
+- ✅ **AI synthesis** - Vizual combines multiple sources intelligently
 - ✅ **Clickable URLs** - Direct links to original sources
 - ✅ **Beautiful laser animation** - Visual indicator you're in DeepSearch mode
 
 ---
 
-## 🔧 Customization Options
+## 🔧 Custvizualzation Options
 
 Want to change how DeepSearch works? Edit `api/deep-search.ts`:
 

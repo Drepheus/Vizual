@@ -10,7 +10,7 @@ export default function CommandHub() {
     <div className="command-hub-container">
       {/* Header */}
       <div className="command-hub-header">
-        <h1 className="command-hub-title">Omi Command Hub</h1>
+        <h1 className="command-hub-title">Vizual Command Hub</h1>
         <p className="command-hub-subtitle">Explore AI-powered tools and features</p>
       </div>
 

@@ -52,7 +52,7 @@ Example response format:
 [Tavily's instant answer]
 
 ## Detailed Analysis
-[Omi's synthesis of all sources]
+[Vizual's synthesis of all sources]
 
 ### Sources:
 1. [Article Title](URL) - Relevance: 95%
@@ -67,7 +67,7 @@ Example response format:
 Your local `.env.local` is set up, but you need to add the API key to Vercel for production:
 
 1. Go to **https://vercel.com**
-2. Open your Omi project
+2. Open your Vizual project
 3. Go to **Settings** → **Environment Variables**
 4. Add:
    ```

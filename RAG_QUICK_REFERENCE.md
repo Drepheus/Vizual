@@ -108,7 +108,7 @@ Response: {
 ## 🗄️ Database Tables
 
 ```
-custom_omis (bots)
+custom_vizuals (bots)
   └─ knowledge_documents (files)
        └─ document_embeddings (chunks + vectors)
 ```

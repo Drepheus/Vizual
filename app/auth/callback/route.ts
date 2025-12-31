@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
   // This fixes the issue where users get stuck on the .run.app domain
   /*
   if (origin.includes('run.app')) {
-    origin = 'https://useomiai.com';
+    origin = 'https://usevizualai.com';
   }
   */
 

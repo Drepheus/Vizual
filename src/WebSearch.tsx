@@ -64,7 +64,7 @@ const WebSearch: React.FC<WebSearchProps> = ({ onClose }) => {
     {
       name: 'Developer Mode',
       icon: '◐',
-      description: 'Coming: API & automation access'
+      description: 'Cvizualng: API & automation access'
     }
   ];
 
@@ -137,7 +137,7 @@ const WebSearch: React.FC<WebSearchProps> = ({ onClose }) => {
 
     // Only Search + Summarize mode is implemented
     if (selectedMode !== 'Search + Summarize') {
-      alert(`${selectedMode || 'This'} mode is coming soon! Please select "Search + Summarize" mode.`);
+      alert(`${selectedMode || 'This'} mode is cvizualng soon! Please select "Search + Summarize" mode.`);
       return;
     }
 
@@ -248,13 +248,13 @@ const WebSearch: React.FC<WebSearchProps> = ({ onClose }) => {
         <div className="search-modes">
           {searchModes.map((mode, index) => {
             const isPro = mode.isPro || mode.name === 'Research Chains';
-            const isComingSoon = mode.name === 'Developer Mode';
+            const isCvizualngSoon = mode.name === 'Developer Mode';
             return (
               <button
                 key={index}
-                className={`search-mode-button ${selectedMode === mode.name ? 'active' : ''} ${isPro ? 'pro' : ''} ${isComingSoon ? 'coming-soon' : ''}`}
+                className={`search-mode-button ${selectedMode === mode.name ? 'active' : ''} ${isPro ? 'pro' : ''} ${isCvizualngSoon ? 'cvizualng-soon' : ''}`}
                 onClick={() => {
-                  if (isComingSoon) return;
+                  if (isCvizualngSoon) return;
                   
                   // If clicking AI Web Task, open modal immediately
                   if (mode.name === 'AI Web Task') {
@@ -265,14 +265,14 @@ const WebSearch: React.FC<WebSearchProps> = ({ onClose }) => {
                   
                   setSelectedMode(selectedMode === mode.name ? null : mode.name);
                 }}
-                disabled={isComingSoon}
+                disabled={isCvizualngSoon}
                 title={mode.description}
                 data-tooltip={mode.description}
               >
                 <span className="mode-icon">{mode.icon}</span>
                 <span className="mode-name">{mode.name}</span>
                 {isPro && <span className="pro-badge">PRO</span>}
-                {isComingSoon && <span className="coming-soon-badge">Soon</span>}
+                {isCvizualngSoon && <span className="cvizualng-soon-badge">Soon</span>}
               </button>
             );
           })}

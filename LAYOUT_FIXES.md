@@ -5,7 +5,7 @@ Fixed three critical UX issues: header layout, button positioning, and conversat
 
 ## ✅ Changes Made
 
-### 1. **Centered Omi AI Logo**
+### 1. **Centered Vizual AI Logo**
 **Before**: Logo was in header-left, aligned to the left side
 **After**: Logo is now centered in the header using absolute positioning
 
@@ -102,7 +102,7 @@ This ensures the sidebar list updates but messages aren't auto-loaded.
 ```
 ┌──────────────────────────────────────────────────────────────┐
 │                                      [New Chat]  [👤 Account] │  ← Top right
-│                         Omi AI                                │  ← Centered
+│                         Vizual AI                                │  ← Centered
 │                     Active Model: Gemini Pro ⚙️              │  ← Centered
 ├──────────────────────────────────────────────────────────────┤
 │  [Compare] [DeepSearch] [Create] [Personas] [Pulse] [Image]  │
@@ -131,7 +131,7 @@ This ensures the sidebar list updates but messages aren't auto-loaded.
    - Clean, intentional experience
 
 ### Visual Hierarchy:
-- **Omi AI branding** - Center focus, prominent
+- **Vizual AI branding** - Center focus, prvizualnent
 - **Action buttons** - Top right corner (standard UI pattern)
 - **Model selector** - Centered below logo
 - **Feature buttons** - Below header, above chat
@@ -145,7 +145,7 @@ This ensures the sidebar list updates but messages aren't auto-loaded.
 
 This creates a flexible 3-zone layout:
 - **Left zone**: Empty (reserved for future sidebar toggle)
-- **Center zone**: Omi branding
+- **Center zone**: Vizual branding
 - **Right zone**: Action buttons
 
 ### Conversation Management:
@@ -184,5 +184,5 @@ This creates a flexible 3-zone layout:
 ## Commit
 ```
 commit 6971020
-Fix layout: Center Omi logo, move buttons to top right, start fresh conversation on login
+Fix layout: Center Vizual logo, move buttons to top right, start fresh conversation on login
 ```
