@@ -1,16 +1,11 @@
 {
   "/_not-found/page": "app/_not-found/page.js",
-  "/ai-workflows/page": "app/ai-workflows/page.js",
-  "/api/music/route": "app/api/music/route.js",
-  "/chat/page": "app/chat/page.js",
   "/command-hub/page": "app/command-hub/page.js",
   "/login/page": "app/login/page.js",
-  "/media-studio/page": "app/media-studio/page.js",
   "/page": "app/page.js",
   "/vizual/api/page": "app/vizual/api/page.js",
   "/vizual/community/page": "app/vizual/community/page.js",
   "/vizual/enterprise/page": "app/vizual/enterprise/page.js",
   "/vizual/page": "app/vizual/page.js",
-  "/vizual/studio/page": "app/vizual/studio/page.js",
-  "/web-search/page": "app/web-search/page.js"
+  "/vizual/studio/page": "app/vizual/studio/page.js"
 }
