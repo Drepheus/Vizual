@@ -5,6 +5,8 @@ import { useState, useEffect, useRef } from "react";
 import { ArrowUp, ChevronDown, ChevronUp, X } from "lucide-react";
 import { Inter, Space_Grotesk, Playfair_Display } from "next/font/google";
 import { useAuth } from "@/context/auth-context";
+import { motion, AnimatePresence } from "framer-motion";
+import Aurora from "./Aurora";
 
 // Chrome/Silver gradient text component with shimmer animation
 const ChromeText = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
@@ -213,22 +215,41 @@ export function VizualStudio() {
         {/* Hero Content */}
         <main className="relative z-10 flex flex-col items-center justify-between min-h-screen px-4 pt-24 pb-8 md:justify-center md:pt-20">
           <div className="flex-1 flex flex-col items-center justify-center w-full">
-            <h1 className="text-4xl sm:text-5xl md:text-7xl font-light tracking-tight mb-6 max-w-4xl mx-auto leading-[1.1] text-center w-full break-words px-2 animate-on-scroll animate-fade-in-up animated">
+            <motion.h1
+              initial={{ opacity: 0, y: 30, filter: "blur(10px)" }}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              transition={{ duration: 1, ease: "easeOut" }}
+              className="text-4xl sm:text-5xl md:text-7xl font-light tracking-tight mb-6 max-w-4xl mx-auto leading-[1.1] text-center w-full break-words px-2"
+            >
               Use Your <br />
               <span className={`${spaceGrotesk.className} inline-block font-bold`}>
                 <ChromeText>Imagination</ChromeText>
               </span>
-            </h1>
+            </motion.h1>
 
-            <p className="text-lg md:text-xl text-gray-300 mb-8 md:mb-12 max-w-xs md:max-w-2xl mx-auto font-light text-center leading-relaxed animate-on-scroll animate-fade-in-up animated delay-200">
+            <motion.p
+              initial={{ opacity: 0, y: 20, filter: "blur(5px)" }}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
+              className="text-lg md:text-xl text-gray-300 mb-8 md:mb-12 max-w-xs md:max-w-2xl mx-auto font-light text-center leading-relaxed"
+            >
               Production-ready images and videos with precision, speed, and control
-            </p>
+            </motion.p>
           </div>
 
           {/* Input Area */}
-          <div className="w-full max-w-3xl mx-auto relative group">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.6, ease: "easeOut" }}
+            className="w-full max-w-3xl mx-auto relative group"
+          >
             <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 rounded-[32px] blur opacity-0 group-hover:opacity-100 transition duration-1000"></div>
-            <div className="relative bg-[#0a0a0a]/60 backdrop-blur-xl border border-white/10 rounded-[32px] p-1 flex flex-col transition-all duration-300 focus-within:bg-black/80 focus-within:border-white/20">
+            <motion.div
+              whileHover={{ scale: 1.01 }}
+              transition={{ type: "spring", stiffness: 400, damping: 30 }}
+              className="relative bg-[#0a0a0a]/60 backdrop-blur-xl border border-white/10 rounded-[32px] p-1 flex flex-col transition-all duration-300 focus-within:bg-black/80 focus-within:border-white/20"
+            >
               <div className="flex flex-col min-h-[180px] md:min-h-[140px] p-5">
                 <textarea
                   placeholder="Tell me more about your character..."
@@ -244,64 +265,77 @@ export function VizualStudio() {
                 />
 
                 <div className="mt-auto flex justify-end items-center pr-2 pb-1">
-                  <button className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white text-black hover:bg-gray-200 transition-transform hover:scale-105 active:scale-95 flex items-center justify-center shadow-lg shadow-white/10">
+                  <motion.button
+                    whileHover={{ scale: 1.1, rotate: 90 }}
+                    whileTap={{ scale: 0.9 }}
+                    className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white text-black hover:bg-gray-200 flex items-center justify-center shadow-lg shadow-white/10"
+                  >
                     <ArrowUp className="w-5 h-5 md:w-6 md:h-6" strokeWidth={2.5} />
-                  </button>
+                  </motion.button>
                 </div>
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
 
           {/* Input Modal */}
-          {showInputModal && (
-            <div
-              className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-fade-in"
-              onClick={() => setShowInputModal(false)}
-            >
-              <div
-                className="relative w-full max-w-sm bg-[#1a1a1a] rounded-2xl overflow-hidden shadow-2xl shadow-black/80 animate-scale-in border border-white/10"
-                onClick={(e) => e.stopPropagation()}
+          <AnimatePresence>
+            {showInputModal && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md"
+                onClick={() => setShowInputModal(false)}
               >
-                {/* Close Button */}
-                <button
-                  onClick={() => setShowInputModal(false)}
-                  className="absolute top-3 right-3 z-10 w-6 h-6 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center transition-colors"
+                <motion.div
+                  initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                  animate={{ scale: 1, opacity: 1, y: 0 }}
+                  exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  className="relative w-full max-w-sm bg-[#1a1a1a] rounded-2xl overflow-hidden shadow-2xl shadow-black/80 border border-white/10"
+                  onClick={(e) => e.stopPropagation()}
                 >
-                  <X className="w-3 h-3" />
-                </button>
-
-                {/* Video Section */}
-                <div className="relative aspect-[4/3] bg-black">
-                  <video
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    className="w-full h-full object-cover"
-                  >
-                    <source src="/videos/film.mp4" type="video/mp4" />
-                  </video>
-                </div>
-
-                {/* Content Section */}
-                <div className="p-4">
-                  <p className="text-gray-500 text-[10px] uppercase tracking-[0.15em] mb-0.5 font-medium">INTRODUCING</p>
-                  <h3 className={`text-base font-bold mb-1.5 ${spaceGrotesk.className}`}>Vizual Studio</h3>
-                  <p className="text-gray-400 text-[11px] leading-relaxed mb-4">
-                    Stop guessing. Start creating. Vizual Studio brings world-class AI video and image generation to your fingertips with natural language prompts and character consistency.
-                  </p>
-
-                  {/* CTA Button - Refined */}
+                  {/* Close Button */}
                   <button
-                    onClick={handleTryNow}
-                    className="w-full py-2 rounded-lg bg-transparent border border-white/20 hover:border-white/40 hover:bg-white/5 text-white/80 hover:text-white font-medium text-xs transition-all"
+                    onClick={() => setShowInputModal(false)}
+                    className="absolute top-3 right-3 z-10 w-6 h-6 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center transition-colors"
                   >
-                    {user ? 'Open Studio' : 'Login to Continue'}
+                    <X className="w-3 h-3" />
                   </button>
-                </div>
-              </div>
-            </div>
-          )}
+
+                  {/* Video Section */}
+                  <div className="relative aspect-[4/3] bg-black">
+                    <video
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      className="w-full h-full object-cover"
+                    >
+                      <source src="/videos/film.mp4" type="video/mp4" />
+                    </video>
+                  </div>
+
+                  {/* Content Section */}
+                  <div className="p-4">
+                    <p className="text-gray-500 text-[10px] uppercase tracking-[0.15em] mb-0.5 font-medium">INTRODUCING</p>
+                    <h3 className={`text-base font-bold mb-1.5 ${spaceGrotesk.className}`}>Vizual Studio</h3>
+                    <p className="text-gray-400 text-lg leading-snug mb-4">
+                      Stop guessing. Start creating.
+                    </p>
+
+                    {/* CTA Button - Refined */}
+                    <button
+                      onClick={handleTryNow}
+                      className="w-full py-2 rounded-lg bg-white text-black font-bold hover:bg-gray-200 transition-all"
+                    >
+                      {user ? 'Open Studio' : 'Login to Continue'}
+                    </button>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Powered by Vizual AI */}
           <div className="mt-8 flex justify-center">
@@ -314,8 +348,13 @@ export function VizualStudio() {
       </div>
 
       {/* Features Section */}
-      <section className="relative z-20 w-full min-h-screen bg-black py-24 px-4">
-        <div className="max-w-7xl mx-auto">
+      <section className="relative z-20 w-full min-h-screen bg-black py-24 px-4 overflow-hidden">
+        {/* Aurora Background */}
+        <div className="absolute inset-0 opacity-30 pointer-events-none">
+          <Aurora speed={0.5} />
+        </div>
+
+        <div className="max-w-7xl mx-auto relative z-10">
           <h2 className="text-4xl md:text-6xl font-bold text-center mb-10 tracking-tight">
             Do it all with <br />
             <span className={`${spaceGrotesk.className} inline-block`}>
@@ -325,7 +364,11 @@ export function VizualStudio() {
 
           <div className="flex flex-wrap justify-center gap-6">
             {/* Make Videos Card */}
-            <div className="group relative bg-[#111] rounded-[32px] overflow-hidden border border-white/5 hover:border-white/10 transition-colors w-full max-w-md md:max-w-6xl">
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              className="group relative bg-[#111] rounded-[32px] overflow-hidden border border-white/5 hover:border-white/10 transition-colors w-full max-w-md md:max-w-6xl"
+            >
               <div className="p-8 pb-0 text-center">
                 <h3 className="text-2xl md:text-4xl font-bold mb-3 md:mb-6">Make Videos</h3>
                 <p className="text-gray-400 text-lg md:text-xl leading-relaxed mb-8 max-w-2xl mx-auto">
@@ -337,13 +380,13 @@ export function VizualStudio() {
                 <HoverVideo src="/videos/klingnextgen.mp4" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500" />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#111] to-transparent opacity-20" />
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
-      </section>
+      </section >
 
       {/* No Prompt Engineering Section */}
-      <section className="relative z-30 w-full min-h-screen bg-black py-24 px-4 flex items-center">
+      < section className="relative z-30 w-full min-h-screen bg-black py-24 px-4 flex items-center" >
         <div className="max-w-7xl mx-auto text-center">
           <button
             onClick={handleTryNow}
@@ -384,10 +427,10 @@ export function VizualStudio() {
 
           </div>
         </div>
-      </section>
+      </section >
 
       {/* Film & Design Carousels */}
-      <section className="relative z-40 w-full bg-black py-24 overflow-hidden">
+      < section className="relative z-40 w-full bg-black py-24 overflow-hidden" >
         <style dangerouslySetInnerHTML={{
           __html: `
           @keyframes scroll-left {
@@ -604,19 +647,19 @@ export function VizualStudio() {
             </div>
           </div>
         </div>
-      </section>
+      </section >
 
       {/* Powered By Section */}
-      <section className="relative z-50 w-full min-h-screen bg-black py-32 px-4 flex items-center">
+      < section className="relative z-50 w-full min-h-screen bg-black py-32 px-4 flex items-center" >
         <div className="max-w-5xl mx-auto text-center">
           <p className={`text-3xl md:text-5xl font-medium leading-snug text-neutral-600 ${spaceGrotesk.className} animate-on-scroll animate-blur-in`}>
             Powered by the world's best AI models: <span className="text-white">Veo</span>, <span className="text-white">LumaLabs</span>, <span className="text-white">Kling</span>, <span className="text-white">WAN</span>, <span className="text-white">Seedance</span>, <span className="text-white">Imagen 3</span>, and more coming soon.
           </p>
         </div>
-      </section>
+      </section >
 
       {/* New Freedoms Section */}
-      <section className="relative z-60 w-full min-h-screen bg-black pb-32 px-4 flex items-center justify-center">
+      < section className="relative z-60 w-full min-h-screen bg-black pb-32 px-4 flex items-center justify-center" >
         <div className="relative w-full max-w-md md:max-w-6xl mx-auto aspect-[3/4] md:aspect-[21/9] rounded-[40px] overflow-hidden group">
           <HoverVideo src="/videos/veo1.mp4" className="absolute inset-0 w-full h-full object-cover opacity-70" />
           <div className="absolute inset-0 bg-black/20" />
@@ -630,10 +673,10 @@ export function VizualStudio() {
             </span>
           </div>
         </div>
-      </section>
+      </section >
 
       {/* Video Section Showcase */}
-      <section className="relative z-[70] w-full bg-black py-24 px-4">
+      < section className="relative z-[70] w-full bg-black py-24 px-4" >
         <div className="max-w-7xl mx-auto">
           <h2 className={`text-4xl md:text-6xl font-bold text-center mb-6 tracking-tight ${spaceGrotesk.className} animate-on-scroll animate-fade-in-up`}>
             Seamless <ChromeText>Integration</ChromeText>
@@ -645,10 +688,10 @@ export function VizualStudio() {
             <HoverVideo src="/videos/videsectionloop.mp4" className="w-full h-auto" />
           </div>
         </div>
-      </section>
+      </section >
 
       {/* Portrait Video Feature Section */}
-      <section className="relative z-[80] w-full bg-black py-24 px-4">
+      < section className="relative z-[80] w-full bg-black py-24 px-4" >
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 items-center">
             {/* Text Content */}
@@ -683,10 +726,10 @@ export function VizualStudio() {
             </div>
           </div>
         </div>
-      </section>
+      </section >
 
       {/* Text to Image Section */}
-      <section className="relative z-[85] w-full bg-black py-24 px-4">
+      < section className="relative z-[85] w-full bg-black py-24 px-4" >
         <div className="max-w-7xl mx-auto">
           <h2 className={`text-4xl md:text-6xl font-bold text-center mb-6 tracking-tight ${spaceGrotesk.className} animate-on-scroll animate-fade-in-up`}>
             Text to <ChromeText>Image</ChromeText>
@@ -698,10 +741,10 @@ export function VizualStudio() {
             <HoverVideo src="/videos/text2image.mp4" className="w-full h-auto" />
           </div>
         </div>
-      </section>
+      </section >
 
       {/* Character Consistency Section */}
-      <section className="relative z-[90] w-full bg-black py-24 px-4">
+      < section className="relative z-[90] w-full bg-black py-24 px-4" >
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 items-center">
             {/* Portrait Video */}
@@ -722,27 +765,40 @@ export function VizualStudio() {
               <p className="text-gray-400 text-lg md:text-xl leading-relaxed mb-8 max-w-lg">
                 Keep your characters looking the same across every scene. From the first frame to the last, maintain perfect visual coherence for your stories.
               </p>
-              <ul className="space-y-4 text-gray-300 text-left max-w-lg mx-auto md:mx-0">
-                <li className="flex items-start gap-3">
-                  <div className="w-2 h-2 rounded-full bg-white mt-2 flex-shrink-0" />
-                  <span>Same character, different scenes and poses</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <div className="w-2 h-2 rounded-full bg-white mt-2 flex-shrink-0" />
-                  <span>Preserve facial features and expressions</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <div className="w-2 h-2 rounded-full bg-white mt-2 flex-shrink-0" />
-                  <span>Perfect for storytelling and brand mascots</span>
-                </li>
-              </ul>
+              <motion.ul
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                variants={{
+                  visible: { transition: { staggerChildren: 0.2 } }
+                }}
+                className="space-y-4 text-gray-300 text-left max-w-lg mx-auto md:mx-0"
+              >
+                {[
+                  "Same character, different scenes and poses",
+                  "Preserve facial features and expressions",
+                  "Perfect for storytelling and brand mascots"
+                ].map((item, i) => (
+                  <motion.li
+                    key={i}
+                    variants={{
+                      hidden: { opacity: 0, x: -20 },
+                      visible: { opacity: 1, x: 0 }
+                    }}
+                    className="flex items-start gap-3"
+                  >
+                    <div className="w-2 h-2 rounded-full bg-white mt-2 flex-shrink-0" />
+                    <span>{item}</span>
+                  </motion.li>
+                ))}
+              </motion.ul>
             </div>
           </div>
         </div>
-      </section>
+      </section >
 
       {/* Avatar Demos Section */}
-      <section className="relative z-[95] w-full bg-black py-24 px-4">
+      < section className="relative z-[95] w-full bg-black py-24 px-4" >
         <div className="max-w-7xl mx-auto">
           <h2 className={`text-4xl md:text-6xl font-bold text-center mb-6 tracking-tight ${spaceGrotesk.className} animate-on-scroll animate-fade-in-up`}>
             AI <ChromeText>Avatars</ChromeText>
@@ -783,12 +839,12 @@ export function VizualStudio() {
             </div>
           </div>
         </div>
-      </section>
+      </section >
 
       {/* Features Zigzag Section */}
-      <section className="relative z-[96] w-full bg-black py-24 px-4 overflow-hidden">
+      < section className="relative z-[96] w-full bg-black py-24 px-4 overflow-hidden" >
         {/* Subtle background gradient */}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-purple-900/5 to-transparent pointer-events-none" />
+        < div className="absolute inset-0 bg-gradient-to-b from-transparent via-purple-900/5 to-transparent pointer-events-none" />
 
         <div className="relative max-w-6xl mx-auto space-y-32">
 
@@ -870,12 +926,12 @@ export function VizualStudio() {
             </div>
           </div>
         </div>
-      </section>
+      </section >
 
       {/* Generate Without Learning Curve Section */}
-      <section className="relative z-[97] w-full bg-black py-24 px-4 overflow-hidden">
+      < section className="relative z-[97] w-full bg-black py-24 px-4 overflow-hidden" >
         {/* Animated background orb */}
-        <div className="absolute top-1/2 left-1/4 w-[600px] h-[600px] bg-blue-500/5 rounded-full blur-[150px] pointer-events-none" />
+        < div className="absolute top-1/2 left-1/4 w-[600px] h-[600px] bg-blue-500/5 rounded-full blur-[150px] pointer-events-none" />
 
         <div className="relative max-w-6xl mx-auto">
 
@@ -928,10 +984,10 @@ export function VizualStudio() {
             </div>
           </div>
         </div>
-      </section>
+      </section >
 
       {/* For Creators/Teams/Developers Section */}
-      <section className="relative z-[98] w-full bg-black py-24 px-4">
+      < section className="relative z-[98] w-full bg-black py-24 px-4" >
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
 
           {/* For Creators */}
@@ -979,12 +1035,12 @@ export function VizualStudio() {
             </p>
           </div>
         </div>
-      </section>
+      </section >
 
       {/* Community Section */}
-      <section className="relative z-[99] w-full bg-gradient-to-b from-black via-[#0a0a1a] to-black py-24 px-4 overflow-hidden">
+      < section className="relative z-[99] w-full bg-gradient-to-b from-black via-[#0a0a1a] to-black py-24 px-4 overflow-hidden" >
         {/* Background gradient orbs */}
-        <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[150px] pointer-events-none" />
+        < div className="absolute top-0 left-0 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[150px] pointer-events-none" />
         <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-purple-600/10 rounded-full blur-[120px] pointer-events-none" />
 
         <div className="relative max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-12 md:gap-20">
@@ -1065,10 +1121,10 @@ export function VizualStudio() {
             </div>
           </div>
         </div>
-      </section>
+      </section >
 
       {/* Partners Section */}
-      <section className="relative z-[100] w-full bg-black py-16 px-4 border-t border-white/5">
+      < section className="relative z-[100] w-full bg-black py-16 px-4 border-t border-white/5" >
         <div className="max-w-6xl mx-auto">
           <p className="text-center text-gray-500 text-sm uppercase tracking-widest mb-10 animate-on-scroll animate-fade-in-up">Powered by Industry Leaders</p>
           <div className="flex flex-wrap items-center justify-center gap-12 md:gap-20 animate-on-scroll animate-fade-in-up delay-200">
@@ -1078,12 +1134,12 @@ export function VizualStudio() {
             <img src="/images/percify-logo.png" alt="Percify" className="h-8 md:h-10 opacity-60 hover:opacity-100 transition-opacity grayscale hover:grayscale-0" />
           </div>
         </div>
-      </section>
+      </section >
 
       {/* Final CTA Section */}
-      <section className="relative z-[101] w-full bg-black py-32 px-4 overflow-hidden">
+      < section className="relative z-[101] w-full bg-black py-32 px-4 overflow-hidden" >
         {/* Background gradient effects */}
-        <div className="absolute inset-0 bg-gradient-to-t from-blue-900/10 via-transparent to-transparent pointer-events-none" />
+        < div className="absolute inset-0 bg-gradient-to-t from-blue-900/10 via-transparent to-transparent pointer-events-none" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-blue-500/5 rounded-full blur-[150px] pointer-events-none" />
 
         <div className="relative max-w-4xl mx-auto text-center">
@@ -1113,10 +1169,10 @@ export function VizualStudio() {
             </a>
           </div>
         </div>
-      </section>
+      </section >
 
       {/* Footer */}
-      <footer className="relative z-[100] w-full bg-black border-t border-white/10 pt-20 pb-10 px-6">
+      < footer className="relative z-[100] w-full bg-black border-t border-white/10 pt-20 pb-10 px-6" >
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-12 mb-16">
 
           {/* Brand Column */}
@@ -1180,7 +1236,7 @@ export function VizualStudio() {
             <a href="#" className="hover:text-white transition-colors">Cookie Settings</a>
           </div>
         </div>
-      </footer>
-    </div>
+      </footer >
+    </div >
   );
 }
