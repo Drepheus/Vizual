@@ -1,5 +1,5 @@
-import { LandingPage } from "@/components/landing/landing-page";
+import { VizualStudio } from "@/components/vizual/vizual-studio";
 
 export default function HomePage() {
-  return <LandingPage />;
+  return <VizualStudio />;
 }
