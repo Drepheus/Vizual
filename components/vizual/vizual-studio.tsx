@@ -1010,9 +1010,7 @@ export function VizualStudio() {
           <div className="flex flex-col md:flex-row items-center gap-8 md:gap-16 mb-32">
             <div className="flex-1 animate-on-scroll animate-fade-in-left">
               <h2 className={`text-4xl md:text-5xl font-bold mb-6 leading-tight ${spaceGrotesk.className}`}>
-                <span className="bg-[length:200%_auto] bg-gradient-to-r from-white via-blue-200 to-white bg-clip-text text-transparent animate-shimmer">Generate AI videos</span>
-                <br />
-                <span className="bg-[length:200%_auto] bg-gradient-to-r from-blue-400 via-cyan-300 to-blue-400 bg-clip-text text-transparent animate-shimmer">without a learning curve</span>
+                Generate AI videos <br /> <ChromeText>without a learning curve</ChromeText>
               </h2>
               <p className="text-gray-400 text-lg leading-relaxed mb-8">
                 Type your idea, add the specifics—like length, platform, voiceover accent, and get AI-generated high-quality videos that put your ideas into focus.
@@ -1038,9 +1036,7 @@ export function VizualStudio() {
           <div className="flex flex-col md:flex-row items-center gap-8 md:gap-16">
             <div className="flex-1 order-2 md:order-1 animate-on-scroll animate-fade-in-left">
               <h2 className={`text-4xl md:text-5xl font-bold mb-6 leading-tight ${spaceGrotesk.className}`}>
-                <span className="bg-[length:200%_auto] bg-gradient-to-r from-white via-purple-200 to-white bg-clip-text text-transparent animate-shimmer">Edit videos with</span>
-                <br />
-                <span className="bg-[length:200%_auto] bg-gradient-to-r from-purple-400 via-pink-300 to-purple-400 bg-clip-text text-transparent animate-shimmer">a text prompt</span>
+                Edit videos with <br /> <ChromeText>a text prompt</ChromeText>
               </h2>
               <p className="text-gray-400 text-lg leading-relaxed">
                 Edit your videos with simple commands. Give simple commands like change the accent, delete scenes or add a funny intro and watch your videos come to life.
@@ -1213,11 +1209,19 @@ export function VizualStudio() {
       < section className="relative z-[100] w-full bg-black py-16 px-4 border-t border-white/5" >
         <div className="max-w-6xl mx-auto">
           <p className="text-center text-gray-500 text-sm uppercase tracking-widest mb-10 animate-on-scroll animate-fade-in-up">Powered by Industry Leaders</p>
-          <div className="flex flex-wrap items-center justify-center gap-12 md:gap-20 animate-on-scroll animate-fade-in-up delay-200">
-            <img src="/images/veo3-logo.png" alt="Veo 3" className="h-8 md:h-10 hover:scale-105 transition-transform" />
-            <img src="/images/kling-ai-logo.png" alt="Kling AI" className="h-8 md:h-10 hover:scale-105 transition-transform" />
-            <img src="/images/hailuo-ai-logo.png" alt="Hailuo AI" className="h-8 md:h-10 hover:scale-105 transition-transform" />
-            <img src="/images/percify-logo.png" alt="Percify" className="h-8 md:h-10 hover:scale-105 transition-transform" />
+          <div className="flex flex-wrap items-center justify-center gap-8 md:gap-12 animate-on-scroll animate-fade-in-up delay-200">
+            <div className="bg-white rounded-lg px-4 py-2 hover:scale-105 transition-transform">
+              <img src="/images/veo3-logo.png" alt="Veo 3" className="h-6 md:h-8 object-contain" />
+            </div>
+            <div className="bg-white rounded-lg px-4 py-2 hover:scale-105 transition-transform">
+              <img src="/images/kling-ai-logo.png" alt="Kling AI" className="h-6 md:h-8 object-contain" />
+            </div>
+            <div className="bg-white rounded-lg px-4 py-2 hover:scale-105 transition-transform">
+              <img src="/images/hailuo-ai-logo.png" alt="Hailuo AI" className="h-6 md:h-8 object-contain" />
+            </div>
+            <div className="bg-white rounded-lg px-4 py-2 hover:scale-105 transition-transform">
+              <img src="/images/percify-logo.png" alt="Percify" className="h-6 md:h-8 object-contain" />
+            </div>
           </div>
         </div>
       </section >
