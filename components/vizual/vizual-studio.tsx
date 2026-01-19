@@ -145,6 +145,18 @@ export function VizualStudio() {
     return () => clearTimeout(timeout);
   }, [typingText, isDeleting, promptIndex]);
 
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (showInputModal) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [showInputModal]);
+
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
@@ -278,64 +290,7 @@ export function VizualStudio() {
           </motion.div>
 
           {/* Input Modal */}
-          <AnimatePresence>
-            {showInputModal && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md"
-                onClick={() => setShowInputModal(false)}
-              >
-                <motion.div
-                  initial={{ scale: 0.9, opacity: 0, y: 20 }}
-                  animate={{ scale: 1, opacity: 1, y: 0 }}
-                  exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                  className="relative w-full max-w-sm bg-[#1a1a1a] rounded-2xl overflow-hidden shadow-2xl shadow-black/80 border border-white/10"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  {/* Close Button */}
-                  <button
-                    onClick={() => setShowInputModal(false)}
-                    className="absolute top-3 right-3 z-10 w-6 h-6 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center transition-colors"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-
-                  {/* Video Section */}
-                  <div className="relative aspect-[4/3] bg-black">
-                    <video
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                      className="w-full h-full object-cover"
-                    >
-                      <source src="/videos/film.mp4" type="video/mp4" />
-                    </video>
-                  </div>
-
-                  {/* Content Section */}
-                  <div className="p-4">
-                    <p className="text-gray-500 text-[10px] uppercase tracking-[0.15em] mb-0.5 font-medium">INTRODUCING</p>
-                    <h3 className={`text-base font-bold mb-1.5 ${spaceGrotesk.className}`}>Vizual Studio</h3>
-                    <p className="text-gray-400 text-lg leading-snug mb-4">
-                      Stop guessing. Start creating.
-                    </p>
-
-                    {/* CTA Button - Refined */}
-                    <button
-                      onClick={handleTryNow}
-                      className="w-full py-2 rounded-lg bg-white text-black font-bold hover:bg-gray-200 transition-all"
-                    >
-                      {user ? 'Open Studio' : 'Login to Continue'}
-                    </button>
-                  </div>
-                </motion.div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {/* Modal moved to root for z-index */}
 
           {/* Powered by Vizual AI */}
           <div className="mt-8 flex justify-center">
@@ -1319,6 +1274,66 @@ export function VizualStudio() {
           </div>
         </div>
       </footer >
+
+      {/* Input Modal - Moved to root for proper stacking */}
+      <AnimatePresence>
+        {showInputModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md"
+            onClick={() => setShowInputModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className="relative w-full max-w-sm bg-[#1a1a1a] rounded-2xl overflow-hidden shadow-2xl shadow-black/80 border border-white/10"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Close Button */}
+              <button
+                onClick={() => setShowInputModal(false)}
+                className="absolute top-3 right-3 z-10 w-6 h-6 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center transition-colors"
+              >
+                <X className="w-3 h-3" />
+              </button>
+
+              {/* Video Section */}
+              <div className="relative aspect-[4/3] bg-black">
+                <video
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="w-full h-full object-cover"
+                >
+                  <source src="/videos/film.mp4" type="video/mp4" />
+                </video>
+              </div>
+
+              {/* Content Section */}
+              <div className="p-4">
+                <p className="text-gray-500 text-[10px] uppercase tracking-[0.15em] mb-0.5 font-medium">INTRODUCING</p>
+                <h3 className={`text-base font-bold mb-1.5 ${spaceGrotesk.className}`}>Vizual Studio</h3>
+                <p className="text-gray-400 text-lg leading-snug mb-4">
+                  Stop guessing. Start creating.
+                </p>
+
+                {/* CTA Button - Refined */}
+                <button
+                  onClick={handleTryNow}
+                  className="w-full py-2 rounded-lg bg-white text-black font-bold hover:bg-gray-200 transition-all"
+                >
+                  {user ? 'Open Studio' : 'Login to Continue'}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div >
   );
 }
