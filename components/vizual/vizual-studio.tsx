@@ -378,7 +378,7 @@ export function VizualStudio() {
 
               <div className="relative w-full aspect-[4/3] md:aspect-[21/9] bg-[#1a1a1a] mt-auto">
                 <HoverVideo src="/videos/klingnextgen.mp4" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500" />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#111] to-transparent opacity-20" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#111] to-transparent opacity-20 pointer-events-none" />
               </div>
             </motion.div>
           </div>
@@ -662,9 +662,9 @@ export function VizualStudio() {
       < section className="relative z-60 w-full min-h-screen bg-black pb-32 px-4 flex items-center justify-center" >
         <div className="relative w-full max-w-md md:max-w-6xl mx-auto aspect-[3/4] md:aspect-[21/9] rounded-[40px] overflow-hidden group">
           <HoverVideo src="/videos/veo1.mp4" className="absolute inset-0 w-full h-full object-cover opacity-70" />
-          <div className="absolute inset-0 bg-black/20" />
+          <div className="absolute inset-0 bg-black/20 pointer-events-none" />
 
-          <div className={`absolute inset-0 flex flex-col items-center justify-center text-center z-10 p-4 leading-none select-none ${spaceGrotesk.className}`}>
+          <div className={`absolute inset-0 flex flex-col items-center justify-center text-center z-10 p-4 leading-none select-none ${spaceGrotesk.className} pointer-events-none`}>
             <span className="text-5xl md:text-7xl text-white font-bold tracking-tighter mb-2">New</span>
             <span className="text-6xl md:text-8xl text-white font-bold tracking-tighter mb-2">freedoms</span>
             <span className="text-5xl md:text-7xl text-white font-bold tracking-tighter mb-2">of</span>
