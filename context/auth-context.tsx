@@ -37,12 +37,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       })
       .finally(() => setLoading(false));
 
+    // Safety timeout: if Supabase takes too long, stop loading so UI is interactive
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 2000);
+
+
+
     subscription = supabase.auth.onAuthStateChange((_event, nextSession) => {
       setSession(nextSession);
       setUser(nextSession?.user ?? null);
     });
 
     return () => {
+      clearTimeout(timer);
       subscription?.data.subscription.unsubscribe();
     };
   }, [supabase]);
