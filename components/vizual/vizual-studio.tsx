@@ -341,7 +341,7 @@ export function VizualStudio() {
           <div className="mt-8 flex justify-center">
             <div className="flex items-center gap-3 px-5 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm">
               <span className="text-gray-500 text-sm">powered by</span>
-              <span className={`text-white text-base font-bold ${playfair.className} italic`}>Vizual AI</span>
+              <span className={`text-white text-base font-bold ${playfair.className} italic`}>Omi AI & Google</span>
             </div>
           </div>
         </main>
@@ -372,7 +372,7 @@ export function VizualStudio() {
               <div className="p-8 pb-0 text-center">
                 <h3 className="text-2xl md:text-4xl font-bold mb-3 md:mb-6">Make Videos</h3>
                 <p className="text-gray-400 text-lg md:text-xl leading-relaxed mb-8 max-w-2xl mx-auto">
-                  Direct the perfect shot with start/end frames. Extend any video or say "loop" to make it loop.
+                  Create short vids, long vids, social media viral vids, cinematic vids and more...
                 </p>
               </div>
 
@@ -676,19 +676,19 @@ export function VizualStudio() {
       </section >
 
       {/* Video Section Showcase */}
-      < section className="relative z-[70] w-full bg-black py-24 px-4" >
+      <section className="relative z-[70] w-full bg-white text-black py-24 px-4">
         <div className="max-w-7xl mx-auto">
           <h2 className={`text-4xl md:text-6xl font-bold text-center mb-6 tracking-tight ${spaceGrotesk.className} animate-on-scroll animate-fade-in-up`}>
             Seamless <ChromeText>Integration</ChromeText>
           </h2>
-          <p className="text-gray-400 text-lg md:text-xl text-center mb-12 max-w-2xl mx-auto animate-on-scroll animate-fade-in-up delay-200">
+          <p className="text-gray-600 text-lg md:text-xl text-center mb-12 max-w-2xl mx-auto animate-on-scroll animate-fade-in-up delay-200">
             See how Vizual fits naturally into your creative workflow
           </p>
-          <div className="relative w-full max-w-6xl mx-auto rounded-[32px] overflow-hidden border border-white/10 animate-on-scroll animate-scale-fade delay-300">
+          <div className="relative w-full max-w-6xl mx-auto rounded-[32px] overflow-hidden border border-black/10 shadow-2xl shadow-black/5 animate-on-scroll animate-scale-fade delay-300">
             <HoverVideo src="/videos/videsectionloop.mp4" className="w-full h-auto" />
           </div>
         </div>
-      </section >
+      </section>
 
       {/* Portrait Video Feature Section */}
       < section className="relative z-[80] w-full bg-black py-24 px-4" >
@@ -712,7 +712,10 @@ export function VizualStudio() {
                 >
                   Try It Free
                 </button>
-                <button className="px-8 py-4 rounded-full bg-white/10 text-white font-medium hover:bg-white/20 transition-all border border-white/10">
+                <button
+                  onClick={() => router.push('/vizual/community')}
+                  className="px-8 py-4 rounded-full bg-white/10 text-white font-medium hover:bg-white/20 transition-all border border-white/10"
+                >
                   View Examples
                 </button>
               </div>
@@ -729,19 +732,19 @@ export function VizualStudio() {
       </section >
 
       {/* Text to Image Section */}
-      < section className="relative z-[85] w-full bg-black py-24 px-4" >
+      <section className="relative z-[85] w-full bg-white text-black py-24 px-4">
         <div className="max-w-7xl mx-auto">
           <h2 className={`text-4xl md:text-6xl font-bold text-center mb-6 tracking-tight ${spaceGrotesk.className} animate-on-scroll animate-fade-in-up`}>
             Text to <ChromeText>Image</ChromeText>
           </h2>
-          <p className="text-gray-400 text-lg md:text-xl text-center mb-12 max-w-2xl mx-auto animate-on-scroll animate-fade-in-up delay-200">
+          <p className="text-gray-600 text-lg md:text-xl text-center mb-12 max-w-2xl mx-auto animate-on-scroll animate-fade-in-up delay-200">
             Transform your words into stunning visuals with unparalleled precision and creativity
           </p>
-          <div className="relative w-full max-w-6xl mx-auto rounded-[32px] overflow-hidden border border-white/10 animate-on-scroll animate-scale-fade delay-300">
+          <div className="relative w-full max-w-6xl mx-auto rounded-[32px] overflow-hidden border border-black/10 shadow-2xl shadow-black/5 animate-on-scroll animate-scale-fade delay-300">
             <HoverVideo src="/videos/text2image.mp4" className="w-full h-auto" />
           </div>
         </div>
-      </section >
+      </section>
 
       {/* Character Consistency Section */}
       < section className="relative z-[90] w-full bg-black py-24 px-4" >
