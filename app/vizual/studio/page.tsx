@@ -4,18 +4,18 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
 import { useGuestMode } from "@/context/guest-mode-context";
-import { 
-  LayoutGrid, 
-  Lightbulb, 
-  Pencil, 
-  HelpCircle, 
-  User, 
-  ChevronDown, 
+import {
+  LayoutGrid,
+  Lightbulb,
+  Pencil,
+  HelpCircle,
+  User,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
-  Share2, 
-  Sparkles, 
-  MessageSquareQuote, 
+  Share2,
+  Sparkles,
+  MessageSquareQuote,
   MoreHorizontal,
   Image as ImageIcon,
   Plus,
@@ -41,6 +41,104 @@ const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], weight: ["300", "400", 
 type CreationMode = "IMAGE" | "VIDEO";
 type TabMode = "KEYFRAME" | "REFERENCE" | "MODIFY";
 
+// Models Configuration
+const IMAGE_MODELS = [
+  {
+    id: "flux-schnell",
+    name: "FLUX Schnell",
+    description: "Fastest efficient generation",
+    cost: "$0.003",
+    detail: "333 images / $1"
+  },
+  {
+    id: "p-image",
+    name: "PrunaAI P-Image",
+    description: "High efficiency model",
+    cost: "$0.005",
+    detail: "200 images / $1"
+  },
+  {
+    id: "imagen-4-fast",
+    name: "Imagen 4 Fast",
+    description: "Next-gen fast generation",
+    cost: "$0.02",
+    detail: "50 images / $1"
+  },
+  {
+    id: "imagen-3-fast",
+    name: "Imagen 3 Fast",
+    description: "Google's fast model",
+    cost: "$0.025",
+    detail: "40 images / $1"
+  },
+  {
+    id: "ideogram-v3-turbo",
+    name: "Ideogram v3 Turbo",
+    description: "Excellent typography",
+    cost: "$0.03",
+    detail: "33 images / $1"
+  },
+  {
+    id: "seedream-4",
+    name: "SeaDream 4",
+    description: "ByteDance general model",
+    cost: "$0.03",
+    detail: "33 images / $1"
+  },
+  {
+    id: "seedream-4.5",
+    name: "SeaDream 4.5",
+    description: "Enhanced quality",
+    cost: "$0.04",
+    detail: "25 images / $1"
+  },
+  {
+    id: "flux-1.1-pro-ultra",
+    name: "FLUX 1.1 Pro Ultra",
+    description: "Premium detailed output",
+    cost: "$0.06",
+    detail: "16 images / $1"
+  },
+  {
+    id: "imagen-4-ultra",
+    name: "Imagen 4 Ultra",
+    description: "Google's highest fidelity",
+    cost: "$0.06",
+    detail: "16 images / $1"
+  },
+  {
+    id: "nano-banana-pro",
+    name: "Nano Banana Pro",
+    description: "Target resolution 1K",
+    cost: "$0.15",
+    detail: "66 images / $10"
+  }
+];
+
+const VIDEO_MODELS = [
+  {
+    id: "veo-2",
+    name: "Veo 2",
+    description: "Fluid cinematic motion",
+    cost: "$0.10",
+    detail: "per second"
+  },
+  {
+    id: "kling-1.6",
+    name: "Kling 1.6",
+    description: "High coherence video",
+    cost: "$0.15",
+    detail: "per second"
+  },
+  {
+    id: "luma-ray-2",
+    name: "Luma Ray 2",
+    description: "Dynamic scenes",
+    cost: "$0.12",
+    detail: "per second"
+  }
+];
+
 export default function VizualStudioApp() {
   const router = useRouter();
   const { user, loading } = useAuth();
@@ -50,11 +148,21 @@ export default function VizualStudioApp() {
   const [prompt, setPrompt] = useState("");
   const [isDraft, setIsDraft] = useState(true);
   const [aspectRatio, setAspectRatio] = useState("16:9");
-  const [model, setModel] = useState("VEO3");
+  const [model, setModel] = useState(VIDEO_MODELS[0].name); // Initialize with first video model
   const [showModeDropdown, setShowModeDropdown] = useState(false);
+  const [showModelDropdown, setShowModelDropdown] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showModeModal, setShowModeModal] = useState(false);
   const [sidebarExpanded, setSidebarExpanded] = useState(true);
+
+  // Update selected model when mode changes
+  useEffect(() => {
+    if (creationMode === "IMAGE") {
+      setModel(IMAGE_MODELS[0].name);
+    } else {
+      setModel(VIDEO_MODELS[0].name);
+    }
+  }, [creationMode]);
 
   // Template/inspiration modes
   const templateModes = [
@@ -89,7 +197,7 @@ export default function VizualStudioApp() {
       icon: "clock"
     }
   ];
-  
+
   // Sample generation result
   const [generatedContent, setGeneratedContent] = useState<{
     prompt: string;
@@ -106,7 +214,7 @@ export default function VizualStudioApp() {
 
   const handleGenerate = () => {
     if (!prompt.trim()) return;
-    
+
     // Simulate AI response with highlighted keywords
     const keywords = prompt.match(/\b\w{4,}\b/g)?.slice(0, 5) || [];
     setGeneratedContent({
@@ -128,11 +236,13 @@ export default function VizualStudioApp() {
     return null;
   }
 
+  const currentModels = creationMode === "IMAGE" ? IMAGE_MODELS : VIDEO_MODELS;
+
   return (
     <div className={`min-h-screen bg-[#0a0a0a] text-white flex ${inter.className}`}>
       {/* Mobile Menu Overlay */}
       {sidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/80 z-40 md:hidden"
           onClick={() => setSidebarOpen(false)}
         />
@@ -150,7 +260,7 @@ export default function VizualStudioApp() {
       `}>
         {/* Close button - mobile only, only visible when sidebar is open */}
         {sidebarOpen && (
-          <button 
+          <button
             className="absolute top-4 right-[-40px] md:hidden p-2 bg-black/50 rounded-r-lg"
             onClick={() => setSidebarOpen(false)}
           >
@@ -167,7 +277,7 @@ export default function VizualStudioApp() {
             {sidebarExpanded && <span className={`font-bold text-sm uppercase tracking-wide ${spaceGrotesk.className}`}>VIZUAL.AI</span>}
           </div>
           {/* Collapse/Expand button - visible on desktop */}
-          <button 
+          <button
             className="hidden md:flex p-1.5 hover:bg-white/5 rounded-lg transition-colors"
             onClick={() => setSidebarExpanded(!sidebarExpanded)}
             title={sidebarExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
@@ -178,7 +288,7 @@ export default function VizualStudioApp() {
 
         {/* Create New Button */}
         <div className={`${sidebarExpanded ? 'px-3' : 'px-2'} mb-4`}>
-          <button 
+          <button
             onClick={() => setShowModeModal(true)}
             className={`w-full flex items-center gap-2 ${sidebarExpanded ? 'px-3 justify-start' : 'justify-center'} py-2.5 rounded-lg bg-transparent border border-white/20 hover:border-white/40 hover:bg-white/5 transition-all text-white font-medium text-sm`}
           >
@@ -216,39 +326,84 @@ export default function VizualStudioApp() {
         {/* Top Header */}
         <header className="h-14 border-b border-white/5 flex items-center justify-between px-3 md:px-6">
           {/* Mobile Menu Button */}
-          <button 
+          <button
             className="md:hidden p-2 hover:bg-white/5 rounded-lg transition-colors mr-2"
             onClick={() => setSidebarOpen(true)}
           >
             <Menu size={20} />
           </button>
 
-          <div className="relative flex-1 md:flex-none">
-            <button 
-              onClick={() => setShowModeDropdown(!showModeDropdown)}
-              className="flex items-center gap-1 md:gap-2 text-xs md:text-sm font-medium hover:text-gray-300 transition-colors"
-            >
-              <span className="text-gray-400 hidden sm:inline">CREATE AND MODIFY</span>
-              <span className={`font-bold ${spaceGrotesk.className}`}>{creationMode}</span>
-              <ChevronDown size={16} />
-            </button>
-            
-            {showModeDropdown && (
-              <div className="absolute top-full left-0 mt-2 bg-[#1a1a1a] border border-white/10 rounded-lg overflow-hidden z-50">
-                <button 
-                  onClick={() => { setCreationMode("IMAGE"); setShowModeDropdown(false); }}
-                  className="w-full px-4 py-2 text-left text-sm hover:bg-white/5 transition-colors"
-                >
-                  IMAGE
-                </button>
-                <button 
-                  onClick={() => { setCreationMode("VIDEO"); setShowModeDropdown(false); }}
-                  className="w-full px-4 py-2 text-left text-sm hover:bg-white/5 transition-colors"
-                >
-                  VIDEO
-                </button>
-              </div>
-            )}
+          <div className="relative flex-1 md:flex-none flex items-center gap-4">
+            {/* Create Mode Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setShowModeDropdown(!showModeDropdown)}
+                className="flex items-center gap-1 md:gap-2 text-xs md:text-sm font-medium hover:text-gray-300 transition-colors"
+              >
+                <span className="text-gray-400 hidden sm:inline">CREATE AND MODIFY</span>
+                <span className={`font-bold ${spaceGrotesk.className}`}>{creationMode}</span>
+                <ChevronDown size={16} />
+              </button>
+
+              {showModeDropdown && (
+                <div className="absolute top-full left-0 mt-2 min-w-[140px] bg-[#1a1a1a] border border-white/10 rounded-lg overflow-hidden z-50 shadow-xl">
+                  {/* Backdrop for click away */}
+                  <div className="fixed inset-0 z-[-1]" onClick={() => setShowModeDropdown(false)} />
+                  <button
+                    onClick={() => { setCreationMode("IMAGE"); setShowModeDropdown(false); }}
+                    className="w-full px-4 py-3 text-left text-sm hover:bg-white/5 transition-colors flex items-center gap-2"
+                  >
+                    <ImageIcon size={16} />
+                    IMAGE
+                  </button>
+                  <button
+                    onClick={() => { setCreationMode("VIDEO"); setShowModeDropdown(false); }}
+                    className="w-full px-4 py-3 text-left text-sm hover:bg-white/5 transition-colors flex items-center gap-2"
+                  >
+                    <Video size={16} />
+                    VIDEO
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Model Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setShowModelDropdown(!showModelDropdown)}
+                className="flex items-center gap-1 md:gap-2 text-xs md:text-sm font-medium hover:text-gray-300 transition-colors"
+              >
+                <span className="text-gray-400 hidden sm:inline">MODEL</span>
+                <span className={`font-bold ${spaceGrotesk.className}`}>{model}</span>
+                <ChevronDown size={16} />
+              </button>
+
+              {showModelDropdown && (
+                <div className="absolute top-full left-0 mt-2 min-w-[280px] sm:min-w-[320px] bg-[#1a1a1a] border border-white/10 rounded-lg overflow-hidden z-50 shadow-2xl max-h-[80vh] overflow-y-auto">
+                  {/* Backdrop for click away */}
+                  <div className="fixed inset-0 z-[-1]" onClick={() => setShowModelDropdown(false)} />
+                  <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    Select {creationMode === 'IMAGE' ? 'Image' : 'Video'} Model
+                  </div>
+                  {currentModels.map((m) => (
+                    <button
+                      key={m.id}
+                      onClick={() => { setModel(m.name); setShowModelDropdown(false); }}
+                      className="w-full px-4 py-3 text-left hover:bg-white/5 transition-colors border-l-2 border-transparent hover:border-white/50 flex items-start justify-between gap-4 group"
+                    >
+                      <div>
+                        <div className="text-sm font-medium text-white mb-0.5 group-hover:text-blue-400 transition-colors">{m.name}</div>
+                        <div className="text-xs text-gray-500">{m.description}</div>
+                      </div>
+                      <div className="text-right flex-shrink-0">
+                        <div className="text-xs font-bold text-gray-300">{m.cost}</div>
+                        <div className="text-[10px] text-gray-600">{m.detail}</div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           <button className="flex items-center gap-2 px-3 md:px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors text-sm">
@@ -270,7 +425,7 @@ export default function VizualStudioApp() {
           </div>
           {/* Dark overlay for better text readability */}
           <div className="absolute inset-0 bg-black/30" />
-          
+
           {/* Content */}
           <div className="relative z-10 h-full flex flex-col items-center justify-center px-4 md:px-8 py-6">
             {generatedContent ? (
@@ -278,11 +433,11 @@ export default function VizualStudioApp() {
                 {/* Describe Section */}
                 <div className="mb-8">
                   <h3 className="text-xs font-medium text-gray-500 mb-3 tracking-wider">DESCRIBE</h3>
-                  
+
                   {/* Keywords */}
                   <div className="flex flex-wrap gap-2 mb-4">
                     {generatedContent.keywords.map((keyword, i) => (
-                      <span 
+                      <span
                         key={i}
                         className="px-2 md:px-3 py-1 rounded-full border border-white/30 text-xs md:text-sm bg-white/5"
                       >
@@ -325,7 +480,7 @@ export default function VizualStudioApp() {
                 <p className="text-gray-400 max-w-md mx-auto text-sm md:text-base mb-8">
                   Describe your vision below and let Vizual bring it to life with AI-powered {creationMode.toLowerCase()} generation.
                 </p>
-                
+
                 {/* Mode Button */}
                 <button
                   onClick={() => setShowModeModal(true)}
@@ -348,11 +503,10 @@ export default function VizualStudioApp() {
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`px-3 md:px-4 py-1.5 rounded-full text-[10px] md:text-xs font-medium transition-colors whitespace-nowrap ${
-                    activeTab === tab 
-                      ? "bg-white/15 text-white border border-white/20" 
+                  className={`px-3 md:px-4 py-1.5 rounded-full text-[10px] md:text-xs font-medium transition-colors whitespace-nowrap ${activeTab === tab
+                      ? "bg-white/15 text-white border border-white/20"
                       : "text-gray-500 hover:text-gray-300"
-                  }`}
+                    }`}
                 >
                   {tab}
                 </button>
@@ -394,7 +548,7 @@ export default function VizualStudioApp() {
                   {/* Draft Toggle - Hidden on very small screens */}
                   <div className="hidden xs:flex items-center gap-2">
                     <span className="text-xs text-gray-400">DRAFT</span>
-                    <button 
+                    <button
                       onClick={() => setIsDraft(!isDraft)}
                       className={`w-10 h-5 rounded-full transition-colors relative ${isDraft ? 'bg-white/30' : 'bg-white/10'}`}
                     >
@@ -413,14 +567,13 @@ export default function VizualStudioApp() {
                   </div>
 
                   {/* Send Button */}
-                  <button 
+                  <button
                     onClick={handleGenerate}
                     disabled={!prompt.trim()}
-                    className={`p-2 md:p-2.5 rounded-full transition-colors ${
-                      prompt.trim() 
-                        ? 'bg-white text-black hover:bg-gray-200' 
+                    className={`p-2 md:p-2.5 rounded-full transition-colors ${prompt.trim()
+                        ? 'bg-white text-black hover:bg-gray-200'
                         : 'bg-white/10 text-gray-500 cursor-not-allowed'
-                    }`}
+                      }`}
                   >
                     <Send size={18} />
                   </button>
@@ -441,25 +594,25 @@ export default function VizualStudioApp() {
             <div className="absolute bottom-1/4 right-1/4 w-40 sm:w-80 h-40 sm:h-80 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] sm:w-[600px] h-[300px] sm:h-[600px] bg-gradient-to-r from-emerald-500/10 to-teal-500/10 rounded-full blur-3xl" />
           </div>
-          
+
           {/* Click to close backdrop */}
-          <div 
+          <div
             className="absolute inset-0"
             onClick={() => setShowModeModal(false)}
           />
-          
+
           {/* Modal Content */}
           <div className="relative z-10 w-full max-w-2xl max-h-[90vh] sm:max-h-[85vh] overflow-hidden">
             {/* Glowing border effect */}
             <div className="absolute -inset-[1px] bg-gradient-to-r from-blue-500/50 via-purple-500/50 to-pink-500/50 rounded-[20px] sm:rounded-[32px] blur-sm opacity-60" />
-            
+
             {/* Main container */}
             <div className="relative bg-[#0a0a0a]/95 backdrop-blur-2xl rounded-[20px] sm:rounded-[32px] border border-white/10 overflow-hidden">
               {/* Top glow line */}
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-[1px] bg-gradient-to-r from-transparent via-white/50 to-transparent" />
-              
+
               {/* Close Button */}
-              <button 
+              <button
                 onClick={() => setShowModeModal(false)}
                 className="absolute top-4 right-4 sm:top-6 sm:right-6 p-2 sm:p-2.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 transition-all hover:rotate-90 duration-300 z-20 group"
               >
@@ -494,7 +647,7 @@ export default function VizualStudioApp() {
                   >
                     {/* Hover gradient overlay */}
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 translate-x-[-100%] group-hover:translate-x-[100%]" style={{ transition: 'transform 0.8s ease-out, opacity 0.3s' }} />
-                    
+
                     {/* Minimal Icon */}
                     <div className="relative flex-shrink-0">
                       <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white/[0.03] border border-white/[0.08] group-hover:border-white/20 group-hover:bg-white/[0.06] flex items-center justify-center transition-all duration-300">
@@ -505,7 +658,7 @@ export default function VizualStudioApp() {
                         {mode.icon === 'clock' && <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-hover:text-white transition-colors" />}
                       </div>
                     </div>
-                    
+
                     {/* Text Content */}
                     <div className="flex-1 min-w-0 relative z-10">
                       <h3 className="text-white font-semibold text-sm sm:text-base md:text-lg mb-0.5 sm:mb-1 group-hover:text-white transition-colors">
@@ -539,12 +692,11 @@ export default function VizualStudioApp() {
 // Navigation Item Component
 function NavItem({ icon, label, active = false, expanded = false }: { icon: React.ReactNode; label: string; active?: boolean; expanded?: boolean }) {
   return (
-    <button 
-      className={`w-full flex items-center ${expanded ? 'gap-3 px-3' : 'justify-center'} py-2.5 rounded-lg transition-all duration-200 ${
-        active 
-          ? 'bg-white/10 text-white' 
+    <button
+      className={`w-full flex items-center ${expanded ? 'gap-3 px-3' : 'justify-center'} py-2.5 rounded-lg transition-all duration-200 ${active
+          ? 'bg-white/10 text-white'
           : 'text-gray-400 hover:text-white hover:bg-white/5'
-      }`}
+        }`}
       title={label}
     >
       <span className="flex-shrink-0">{icon}</span>
