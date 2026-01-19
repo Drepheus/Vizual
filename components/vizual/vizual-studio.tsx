@@ -460,6 +460,76 @@ export function VizualStudio() {
           }
         `}} />
 
+        {/* How It Works Section */}
+        <section className="relative z-40 w-full bg-black py-24 px-4 border-t border-white/5">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-16">
+              <h2 className={`text-4xl md:text-6xl font-bold mb-6 tracking-tight ${spaceGrotesk.className}`}>
+                How it <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600">Works</span>
+              </h2>
+              <p className="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto">
+                From idea to reality in three simple steps
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {[
+                { title: "Prompt", desc: "Type a prompt, upload an image, or provide a video reference.", icon: "📝", color: "from-blue-500/20 to-cyan-500/20" },
+                { title: "Select Style", desc: "Choose from our curated library of cinematic and artistic styles.", icon: "🎨", color: "from-purple-500/20 to-pink-500/20" },
+                { title: "Generate", desc: "Watch as our advanced AI brings your vision to life in seconds.", icon: "✨", color: "from-amber-500/20 to-orange-500/20" }
+              ].map((step, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.2 }}
+                  className="relative group p-1 rounded-[32px] bg-gradient-to-b from-white/10 to-transparent hover:from-white/20 transition-all duration-300"
+                >
+                  <div className="bg-[#111] rounded-[30px] p-8 h-full border border-white/5 relative overflow-hidden">
+                    <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${step.color} blur-[50px] rounded-full pointer-events-none`} />
+                    <div className="text-4xl mb-6">{step.icon}</div>
+                    <h3 className={`text-2xl font-bold text-white mb-4 ${spaceGrotesk.className}`}>{step.title}</h3>
+                    <p className="text-gray-400 leading-relaxed">{step.desc}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Why Vizual Section */}
+        <section className="relative z-40 w-full bg-[#050505] py-24 px-4">
+          <div className="max-w-7xl mx-auto">
+            <h2 className={`text-4xl md:text-6xl font-bold text-center mb-16 tracking-tight ${spaceGrotesk.className}`}>
+              Why is Vizual <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-600">Different?</span>
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+              <div className="text-center group">
+                <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20 group-hover:scale-110 transition-transform duration-300">
+                  <svg className="w-8 h-8 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                </div>
+                <h3 className="text-xl font-bold text-white mb-3">Newest Models</h3>
+                <p className="text-gray-400">Instant access to the latest state-of-the-art AI models without waitlists.</p>
+              </div>
+              <div className="text-center group">
+                <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-purple-500/10 flex items-center justify-center border border-purple-500/20 group-hover:scale-110 transition-transform duration-300">
+                  <svg className="w-8 h-8 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg>
+                </div>
+                <h3 className="text-xl font-bold text-white mb-3">Simple Interface</h3>
+                <p className="text-gray-400">Professional tools wrapped in an intuitive design. No learning curve required.</p>
+              </div>
+              <div className="text-center group">
+                <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-green-500/10 flex items-center justify-center border border-green-500/20 group-hover:scale-110 transition-transform duration-300">
+                  <svg className="w-8 h-8 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                </div>
+                <h3 className="text-xl font-bold text-white mb-3">Pay As You Go</h3>
+                <p className="text-gray-400">Freedom from subscriptions. Only pay for what you generate, when you need it.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Section Header with See More */}
         <div className="max-w-7xl mx-auto px-4 mb-12 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
@@ -804,7 +874,7 @@ export function VizualStudio() {
       < section className="relative z-[95] w-full bg-black py-24 px-4" >
         <div className="max-w-7xl mx-auto">
           <h2 className={`text-4xl md:text-6xl font-bold text-center mb-6 tracking-tight ${spaceGrotesk.className} animate-on-scroll animate-fade-in-up`}>
-            AI <ChromeText>Avatars</ChromeText>
+            Conversational <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500">Scene Generation</span>
           </h2>
           <p className="text-gray-400 text-lg md:text-xl text-center mb-12 max-w-2xl mx-auto animate-on-scroll animate-fade-in-up delay-200">
             Create lifelike digital humans that speak, move, and express emotions naturally
@@ -821,7 +891,9 @@ export function VizualStudio() {
                 <source src="/videos/avatarscene.mp4" type="video/mp4" />
               </video>
               <div className="p-4">
-                <h3 className={`text-xl font-bold text-white mb-2 ${spaceGrotesk.className}`}>Scene Generation</h3>
+                <h3 className={`text-xl font-bold mb-2 ${spaceGrotesk.className}`}>
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-rose-500">Scene Generation</span>
+                </h3>
                 <p className="text-gray-400 text-sm">Full avatar in dynamic environments</p>
               </div>
             </div>
@@ -836,7 +908,9 @@ export function VizualStudio() {
                 <source src="/videos/twoavatars.mp4" type="video/mp4" />
               </video>
               <div className="p-4">
-                <h3 className={`text-xl font-bold text-white mb-2 ${spaceGrotesk.className}`}>Multi-Avatar Conversations</h3>
+                <h3 className={`text-xl font-bold mb-2 ${spaceGrotesk.className}`}>
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">Multi-Avatar Conversations</span>
+                </h3>
                 <p className="text-gray-400 text-sm">Multiple avatars interacting together</p>
               </div>
             </div>
