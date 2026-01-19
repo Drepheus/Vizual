@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
-import { ArrowUp, ChevronDown, ChevronUp, X } from "lucide-react";
+import { ArrowUp, ChevronDown, ChevronUp, X, PenTool, Palette, Sparkles, Zap, Layout, CreditCard, ArrowUpRight } from "lucide-react";
 import { Inter, Space_Grotesk, Playfair_Display } from "next/font/google";
 import { useAuth } from "@/context/auth-context";
 import { motion, AnimatePresence } from "framer-motion";
@@ -465,7 +465,7 @@ export function VizualStudio() {
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16">
               <h2 className={`text-4xl md:text-6xl font-bold mb-6 tracking-tight ${spaceGrotesk.className}`}>
-                How it <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600">Works</span>
+                How it <ChromeText>Works</ChromeText>
               </h2>
               <p className="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto">
                 From idea to reality in three simple steps
@@ -474,24 +474,23 @@ export function VizualStudio() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {[
-                { title: "Prompt", desc: "Type a prompt, upload an image, or provide a video reference.", icon: "📝", color: "from-blue-500/20 to-cyan-500/20" },
-                { title: "Select Style", desc: "Choose from our curated library of cinematic and artistic styles.", icon: "🎨", color: "from-purple-500/20 to-pink-500/20" },
-                { title: "Generate", desc: "Watch as our advanced AI brings your vision to life in seconds.", icon: "✨", color: "from-amber-500/20 to-orange-500/20" }
+                { title: "Prompt", desc: "Type a prompt, upload an image, or provide a video reference.", icon: <PenTool className="w-8 h-8 text-white/80" /> },
+                { title: "Select Style", desc: "Choose from our curated library of cinematic and artistic styles.", icon: <Palette className="w-8 h-8 text-white/80" /> },
+                { title: "Generate", desc: "Watch as our advanced AI brings your vision to life in seconds.", icon: <Sparkles className="w-8 h-8 text-white/80" /> }
               ].map((step, i) => (
                 <motion.div
                   key={i}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
+                  initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
+                  whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                   viewport={{ once: true }}
-                  transition={{ delay: i * 0.2 }}
-                  className="relative group p-1 rounded-[32px] bg-gradient-to-b from-white/10 to-transparent hover:from-white/20 transition-all duration-300"
+                  transition={{ delay: i * 0.2, duration: 0.6 }}
+                  className="relative group p-8 rounded-[32px] bg-[#111] border border-white/10 hover:border-white/20 transition-all duration-300 hover:bg-white/[0.02]"
                 >
-                  <div className="bg-[#111] rounded-[30px] p-8 h-full border border-white/5 relative overflow-hidden">
-                    <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${step.color} blur-[50px] rounded-full pointer-events-none`} />
-                    <div className="text-4xl mb-6">{step.icon}</div>
-                    <h3 className={`text-2xl font-bold text-white mb-4 ${spaceGrotesk.className}`}>{step.title}</h3>
-                    <p className="text-gray-400 leading-relaxed">{step.desc}</p>
+                  <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center mb-6 group-hover:bg-white/10 transition-colors border border-white/5 shadow-2xl shadow-black/50">
+                    {step.icon}
                   </div>
+                  <h3 className={`text-2xl font-bold text-white mb-4 ${spaceGrotesk.className}`}>{step.title}</h3>
+                  <p className="text-gray-400 leading-relaxed">{step.desc}</p>
                 </motion.div>
               ))}
             </div>
@@ -502,30 +501,31 @@ export function VizualStudio() {
         <section className="relative z-40 w-full bg-[#050505] py-24 px-4">
           <div className="max-w-7xl mx-auto">
             <h2 className={`text-4xl md:text-6xl font-bold text-center mb-16 tracking-tight ${spaceGrotesk.className}`}>
-              Why is Vizual <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-600">Different?</span>
+              Why is Vizual <ChromeText>Different?</ChromeText>
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-              <div className="text-center group">
-                <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20 group-hover:scale-110 transition-transform duration-300">
-                  <svg className="w-8 h-8 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                </div>
-                <h3 className="text-xl font-bold text-white mb-3">Newest Models</h3>
-                <p className="text-gray-400">Instant access to the latest state-of-the-art AI models without waitlists.</p>
-              </div>
-              <div className="text-center group">
-                <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-purple-500/10 flex items-center justify-center border border-purple-500/20 group-hover:scale-110 transition-transform duration-300">
-                  <svg className="w-8 h-8 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg>
-                </div>
-                <h3 className="text-xl font-bold text-white mb-3">Simple Interface</h3>
-                <p className="text-gray-400">Professional tools wrapped in an intuitive design. No learning curve required.</p>
-              </div>
-              <div className="text-center group">
-                <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-green-500/10 flex items-center justify-center border border-green-500/20 group-hover:scale-110 transition-transform duration-300">
-                  <svg className="w-8 h-8 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                </div>
-                <h3 className="text-xl font-bold text-white mb-3">Pay As You Go</h3>
-                <p className="text-gray-400">Freedom from subscriptions. Only pay for what you generate, when you need it.</p>
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {[
+                { title: "Newest Models", desc: "Instant access to the latest state-of-the-art AI models without waitlists.", icon: <Zap className="w-6 h-6 text-white" /> },
+                { title: "Simple Interface", desc: "Professional tools wrapped in an intuitive design. No learning curve required.", icon: <Layout className="w-6 h-6 text-white" /> },
+                { title: "Pay As You Go", desc: "Freedom from subscriptions. Only pay for what you generate, when you need it.", icon: <CreditCard className="w-6 h-6 text-white" /> }
+              ].map((item, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
+                  whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.2, duration: 0.6 }}
+                  className="relative group p-8 rounded-2xl bg-[#0a0a0a] border border-white/10 hover:border-white/20 transition-all duration-300 hover:bg-white/[0.02]"
+                >
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center border border-white/5 group-hover:bg-white/10 transition-colors">
+                      {item.icon}
+                    </div>
+                    <h3 className="text-xl font-bold text-white">{item.title}</h3>
+                  </div>
+                  <p className="text-gray-400 leading-relaxed">{item.desc}</p>
+                </motion.div>
+              ))}
             </div>
           </div>
         </section>
@@ -874,7 +874,7 @@ export function VizualStudio() {
       < section className="relative z-[95] w-full bg-black py-24 px-4" >
         <div className="max-w-7xl mx-auto">
           <h2 className={`text-4xl md:text-6xl font-bold text-center mb-6 tracking-tight ${spaceGrotesk.className} animate-on-scroll animate-fade-in-up`}>
-            Conversational <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500">Scene Generation</span>
+            Conversational <ChromeText>Scene Generation</ChromeText>
           </h2>
           <p className="text-gray-400 text-lg md:text-xl text-center mb-12 max-w-2xl mx-auto animate-on-scroll animate-fade-in-up delay-200">
             Create lifelike digital humans that speak, move, and express emotions naturally
@@ -892,7 +892,7 @@ export function VizualStudio() {
               </video>
               <div className="p-4">
                 <h3 className={`text-xl font-bold mb-2 ${spaceGrotesk.className}`}>
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-rose-500">Scene Generation</span>
+                  <ChromeText>Scene Generation</ChromeText>
                 </h3>
                 <p className="text-gray-400 text-sm">Full avatar in dynamic environments</p>
               </div>
@@ -909,7 +909,7 @@ export function VizualStudio() {
               </video>
               <div className="p-4">
                 <h3 className={`text-xl font-bold mb-2 ${spaceGrotesk.className}`}>
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">Multi-Avatar Conversations</span>
+                  <ChromeText>Multi-Avatar Conversations</ChromeText>
                 </h3>
                 <p className="text-gray-400 text-sm">Multiple avatars interacting together</p>
               </div>
@@ -1068,49 +1068,61 @@ export function VizualStudio() {
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
 
           {/* For Creators */}
-          <div className="group relative p-8 rounded-2xl bg-gradient-to-b from-white/[0.08] to-transparent border border-white/10 hover:border-white/20 transition-all duration-300 animate-on-scroll animate-fade-in-up">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
+            whileInView={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="group relative p-8 rounded-2xl bg-gradient-to-b from-white/[0.08] to-transparent border border-white/10 hover:border-white/20 transition-all duration-300"
+          >
             <div className="flex items-start justify-between mb-6">
               <h3 className={`text-xl font-bold text-white ${spaceGrotesk.className}`}>For Creators</h3>
               <div className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center group-hover:bg-white/10 transition-colors">
-                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 17L17 7M17 7H7M17 7V17" />
-                </svg>
+                <ArrowUpRight className="w-4 h-4 text-white" />
               </div>
             </div>
             <p className="text-gray-400 leading-relaxed">
               Create production-quality visual assets for your projects with unprecedented quality, speed, and style-consistency.
             </p>
-          </div>
+          </motion.div>
 
           {/* For Teams */}
-          <div className="group relative p-8 rounded-2xl bg-gradient-to-b from-white/[0.08] to-transparent border border-white/10 hover:border-white/20 transition-all duration-300 animate-on-scroll animate-fade-in-up delay-200">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
+            whileInView={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="group relative p-8 rounded-2xl bg-gradient-to-b from-white/[0.08] to-transparent border border-white/10 hover:border-white/20 transition-all duration-300"
+          >
             <div className="flex items-start justify-between mb-6">
               <h3 className={`text-xl font-bold text-white ${spaceGrotesk.className}`}>For Teams</h3>
               <div className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center group-hover:bg-white/10 transition-colors">
-                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 17L17 7M17 7H7M17 7V17" />
-                </svg>
+                <ArrowUpRight className="w-4 h-4 text-white" />
               </div>
             </div>
             <p className="text-gray-400 leading-relaxed">
               Bring your team's best ideas to life at scale, with our intuitive AI-first creative suite designed for collaboration and built for business.
             </p>
-          </div>
+          </motion.div>
 
           {/* For Developers */}
-          <div className="group relative p-8 rounded-2xl bg-gradient-to-b from-white/[0.08] to-transparent border border-white/10 hover:border-white/20 transition-all duration-300 animate-on-scroll animate-fade-in-up delay-400">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
+            whileInView={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="group relative p-8 rounded-2xl bg-gradient-to-b from-white/[0.08] to-transparent border border-white/10 hover:border-white/20 transition-all duration-300"
+          >
             <div className="flex items-start justify-between mb-6">
               <h3 className={`text-xl font-bold text-white ${spaceGrotesk.className}`}>For Developers</h3>
               <div className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center group-hover:bg-white/10 transition-colors">
-                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 17L17 7M17 7H7M17 7V17" />
-                </svg>
+                <ArrowUpRight className="w-4 h-4 text-white" />
               </div>
             </div>
             <p className="text-gray-400 leading-relaxed">
               Experience content creation excellence with Vizual's API. With unmatched scalability, effortlessly tailor outputs to your brand guidelines.
             </p>
-          </div>
+          </motion.div>
         </div>
       </section >
 
