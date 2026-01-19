@@ -928,14 +928,12 @@ export function VizualStudio() {
           {/* Feature 1 - Any Style */}
           <div className="flex flex-col md:flex-row items-center gap-8 md:gap-16 group">
             <div className="flex-1 order-2 md:order-1 animate-on-scroll animate-fade-in-left">
-              <span className="inline-flex items-center gap-2 px-4 py-1.5 text-xs font-semibold bg-gradient-to-r from-blue-500/20 to-cyan-500/20 text-blue-400 rounded-full mb-6 border border-blue-500/30">
-                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+              <span className="inline-flex items-center gap-2 px-4 py-1.5 text-xs font-semibold bg-white/10 text-white rounded-full mb-6 border border-white/10">
+                <Sparkles className="w-3 h-3 text-white" />
                 Any Style
               </span>
               <h3 className={`text-3xl md:text-4xl font-bold mb-5 leading-tight ${spaceGrotesk.className}`}>
-                <span className="bg-gradient-to-r from-white via-white to-gray-400 bg-clip-text text-transparent">From Cartoons to</span>
-                <br />
-                <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">Realistic Scenes</span>
+                From Cartoons to <br /> <ChromeText>Realistic Scenes</ChromeText>
               </h3>
               <p className="text-gray-400 leading-relaxed text-lg">
                 Whether you want to animate a drawing, make your pet dance, or bring a <span className="text-blue-400 font-medium">product shot</span> to life, our AI video generator can create videos in any style, while preserving the original context and details.
@@ -962,14 +960,12 @@ export function VizualStudio() {
               </div>
             </div>
             <div className="flex-1 animate-on-scroll animate-fade-in-right delay-200">
-              <span className="inline-flex items-center gap-2 px-4 py-1.5 text-xs font-semibold bg-gradient-to-r from-emerald-500/20 to-green-500/20 text-emerald-400 rounded-full mb-6 border border-emerald-500/30">
-                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
+              <span className="inline-flex items-center gap-2 px-4 py-1.5 text-xs font-semibold bg-white/10 text-white rounded-full mb-6 border border-white/10">
+                <Zap className="w-3 h-3 text-white" />
                 Greater Realism
               </span>
               <h3 className={`text-3xl md:text-4xl font-bold mb-5 leading-tight ${spaceGrotesk.className}`}>
-                <span className="bg-gradient-to-r from-white via-white to-gray-400 bg-clip-text text-transparent">Add Greater Realism</span>
-                <br />
-                <span className="bg-gradient-to-r from-emerald-400 to-green-400 bg-clip-text text-transparent">with AI Motion</span>
+                Add Greater Realism <br /> <ChromeText>with AI Motion</ChromeText>
               </h3>
               <p className="text-gray-400 leading-relaxed text-lg">
                 Vizual's artificial intelligence image to video feature uses advanced deep learning to create lifelike, immersive videos. Add drama, realism, or storytelling depth to any static image.
@@ -980,14 +976,12 @@ export function VizualStudio() {
           {/* Feature 3 - High-Quality Motion */}
           <div className="flex flex-col md:flex-row items-center gap-8 md:gap-16 group">
             <div className="flex-1 order-2 md:order-1 animate-on-scroll animate-fade-in-left">
-              <span className="inline-flex items-center gap-2 px-4 py-1.5 text-xs font-semibold bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-purple-400 rounded-full mb-6 border border-purple-500/30">
-                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" /></svg>
+              <span className="inline-flex items-center gap-2 px-4 py-1.5 text-xs font-semibold bg-white/10 text-white rounded-full mb-6 border border-white/10">
+                <Sparkles className="w-3 h-3 text-white" />
                 High-Quality Motion
               </span>
               <h3 className={`text-3xl md:text-4xl font-bold mb-5 leading-tight ${spaceGrotesk.className}`}>
-                <span className="bg-gradient-to-r from-white via-white to-gray-400 bg-clip-text text-transparent">Natural Movement</span>
-                <br />
-                <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Real-World Effects</span>
+                Natural Movement <br /> <ChromeText>Real-World Effects</ChromeText>
               </h3>
               <p className="text-gray-400 leading-relaxed text-lg">
                 Zoom, pan, and tilt with precision. Our image to video AI engine simulates realistic physics, lighting, and material interaction, from flowing hair and bouncing fabric to shimmering water.
@@ -1166,34 +1160,37 @@ export function VizualStudio() {
           <div className="flex-1 relative h-[400px] hidden md:block">
             {/* Avatar Grid - scattered floating effect */}
             {[
-              { top: '5%', left: '10%', size: 'w-16 h-16', delay: '0s' },
-              { top: '0%', left: '35%', size: 'w-14 h-14', delay: '0.5s' },
-              { top: '10%', left: '60%', size: 'w-12 h-12', delay: '1s' },
-              { top: '5%', left: '85%', size: 'w-14 h-14', delay: '0.3s' },
-              { top: '25%', left: '0%', size: 'w-12 h-12', delay: '0.7s' },
-              { top: '30%', left: '25%', size: 'w-16 h-16', delay: '0.2s' },
-              { top: '25%', left: '50%', size: 'w-14 h-14', delay: '0.9s' },
-              { top: '35%', left: '75%', size: 'w-12 h-12', delay: '0.4s' },
-              { top: '50%', left: '5%', size: 'w-14 h-14', delay: '0.6s' },
-              { top: '55%', left: '30%', size: 'w-12 h-12', delay: '0.1s' },
-              { top: '50%', left: '55%', size: 'w-16 h-16', delay: '0.8s' },
-              { top: '55%', left: '80%', size: 'w-14 h-14', delay: '0.35s' },
-              { top: '75%', left: '15%', size: 'w-12 h-12', delay: '0.55s' },
-              { top: '70%', left: '40%', size: 'w-14 h-14', delay: '0.25s' },
-              { top: '75%', left: '65%', size: 'w-12 h-12', delay: '0.75s' },
-              { top: '80%', left: '90%', size: 'w-14 h-14', delay: '0.45s' },
+              { top: '5%', left: '10%', size: 'w-16 h-16', delay: '0s', seed: 'Felix' },
+              { top: '0%', left: '35%', size: 'w-14 h-14', delay: '0.5s', seed: 'Aneka' },
+              { top: '10%', left: '60%', size: 'w-12 h-12', delay: '1s', seed: 'Zack' },
+              { top: '5%', left: '85%', size: 'w-14 h-14', delay: '0.3s', seed: 'Molly' },
+              { top: '25%', left: '0%', size: 'w-12 h-12', delay: '0.7s', seed: 'Sarah' },
+              { top: '30%', left: '25%', size: 'w-16 h-16', delay: '0.2s', seed: 'John' },
+              { top: '25%', left: '50%', size: 'w-14 h-14', delay: '0.9s', seed: 'Max' },
+              { top: '35%', left: '75%', size: 'w-12 h-12', delay: '0.4s', seed: 'Luna' },
+              { top: '50%', left: '5%', size: 'w-14 h-14', delay: '0.6s', seed: 'Sam' },
+              { top: '55%', left: '30%', size: 'w-12 h-12', delay: '0.1s', seed: 'Kai' },
+              { top: '50%', left: '55%', size: 'w-16 h-16', delay: '0.8s', seed: 'Omi' },
+              { top: '55%', left: '80%', size: 'w-14 h-14', delay: '0.35s', seed: 'Leo' },
+              { top: '75%', left: '15%', size: 'w-12 h-12', delay: '0.55s', seed: 'Zoe' },
+              { top: '70%', left: '40%', size: 'w-14 h-14', delay: '0.25s', seed: 'Ray' },
+              { top: '75%', left: '65%', size: 'w-12 h-12', delay: '0.75s', seed: 'Mia' },
+              { top: '80%', left: '90%', size: 'w-14 h-14', delay: '0.45s', seed: 'Ben' },
             ].map((pos, i) => (
               <div
                 key={i}
-                className={`absolute ${pos.size} rounded-full bg-gradient-to-br from-gray-700 to-gray-900 border-2 border-white/10 overflow-hidden animate-float`}
+                className={`absolute ${pos.size} rounded-full border border-white/20 overflow-hidden animate-float bg-[#1a1a1a] shadow-lg`}
                 style={{
                   top: pos.top,
                   left: pos.left,
                   animationDelay: pos.delay,
                 }}
               >
-                {/* Placeholder gradient - these would be actual user avatars */}
-                <div className="w-full h-full bg-gradient-to-br from-blue-500/30 via-purple-500/30 to-pink-500/30" />
+                <img
+                  src={`https://api.dicebear.com/9.x/avataaars/svg?seed=${pos.seed}`}
+                  alt="Community member"
+                  className="w-full h-full object-cover"
+                />
               </div>
             ))}
 
@@ -1217,10 +1214,10 @@ export function VizualStudio() {
         <div className="max-w-6xl mx-auto">
           <p className="text-center text-gray-500 text-sm uppercase tracking-widest mb-10 animate-on-scroll animate-fade-in-up">Powered by Industry Leaders</p>
           <div className="flex flex-wrap items-center justify-center gap-12 md:gap-20 animate-on-scroll animate-fade-in-up delay-200">
-            <img src="/images/veo3-logo.png" alt="Veo 3" className="h-8 md:h-10 opacity-60 hover:opacity-100 transition-opacity grayscale hover:grayscale-0" />
-            <img src="/images/kling-ai-logo.png" alt="Kling AI" className="h-8 md:h-10 opacity-60 hover:opacity-100 transition-opacity grayscale hover:grayscale-0" />
-            <img src="/images/hailuo-ai-logo.png" alt="Hailuo AI" className="h-8 md:h-10 opacity-60 hover:opacity-100 transition-opacity grayscale hover:grayscale-0" />
-            <img src="/images/percify-logo.png" alt="Percify" className="h-8 md:h-10 opacity-60 hover:opacity-100 transition-opacity grayscale hover:grayscale-0" />
+            <img src="/images/veo3-logo.png" alt="Veo 3" className="h-8 md:h-10 hover:scale-105 transition-transform" />
+            <img src="/images/kling-ai-logo.png" alt="Kling AI" className="h-8 md:h-10 hover:scale-105 transition-transform" />
+            <img src="/images/hailuo-ai-logo.png" alt="Hailuo AI" className="h-8 md:h-10 hover:scale-105 transition-transform" />
+            <img src="/images/percify-logo.png" alt="Percify" className="h-8 md:h-10 hover:scale-105 transition-transform" />
           </div>
         </div>
       </section >
