@@ -191,7 +191,7 @@ export function VizualStudio() {
         <div className="max-w-7xl mx-auto px-4 md:px-6 flex items-center justify-between">
           <div className="flex items-center gap-8">
             <div
-              onClick={() => router.push('/command-hub')}
+              onClick={() => router.push('/')}
               className="cursor-pointer flex items-center gap-2 group"
             >
               {/* Logo Icon */}

@@ -3,7 +3,7 @@ import Script from "next/script";
 import { AppProviders } from "@/components/providers/app-providers";
 import "./globals.css";
 
-import GlowingDotsNav from "@/src/GlowingDotsNav";
+
 
 export const metadata: Metadata = {
   title: "Vizual AI",
@@ -58,7 +58,6 @@ export default function RootLayout({
 
         <AppProviders>
           {children}
-          <GlowingDotsNav />
         </AppProviders>
       </body>
     </html>
