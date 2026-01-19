@@ -1209,19 +1209,11 @@ export function VizualStudio() {
       < section className="relative z-[100] w-full bg-black py-16 px-4 border-t border-white/5" >
         <div className="max-w-6xl mx-auto">
           <p className="text-center text-gray-500 text-sm uppercase tracking-widest mb-10 animate-on-scroll animate-fade-in-up">Powered by Industry Leaders</p>
-          <div className="flex flex-wrap items-center justify-center gap-8 md:gap-12 animate-on-scroll animate-fade-in-up delay-200">
-            <div className="bg-white rounded-lg px-4 py-2 hover:scale-105 transition-transform">
-              <img src="/images/veo3-logo.png" alt="Veo 3" className="h-6 md:h-8 object-contain" />
-            </div>
-            <div className="bg-white rounded-lg px-4 py-2 hover:scale-105 transition-transform">
-              <img src="/images/kling-ai-logo.png" alt="Kling AI" className="h-6 md:h-8 object-contain" />
-            </div>
-            <div className="bg-white rounded-lg px-4 py-2 hover:scale-105 transition-transform">
-              <img src="/images/hailuo-ai-logo.png" alt="Hailuo AI" className="h-6 md:h-8 object-contain" />
-            </div>
-            <div className="bg-white rounded-lg px-4 py-2 hover:scale-105 transition-transform">
-              <img src="/images/percify-logo.png" alt="Percify" className="h-6 md:h-8 object-contain" />
-            </div>
+          <div className="flex flex-wrap items-center justify-center gap-12 md:gap-20 animate-on-scroll animate-fade-in-up delay-200">
+            <img src="/images/veo3-logo.svg" alt="Veo 3" className="h-8 md:h-10 hover:scale-105 transition-transform" />
+            <img src="/images/kling-ai-logo.svg" alt="Kling AI" className="h-8 md:h-10 hover:scale-105 transition-transform" />
+            <img src="/images/hailuo-ai-logo.svg" alt="Hailuo AI" className="h-8 md:h-10 hover:scale-105 transition-transform" />
+            <img src="/images/percify-logo.png" alt="Percify" className="h-8 md:h-10 hover:scale-105 transition-transform" />
           </div>
         </div>
       </section >
