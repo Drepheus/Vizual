@@ -1361,8 +1361,16 @@ export function VizualStudio() {
 
               <div className="p-8 pt-12">
                 <div className="flex justify-center mb-6">
-                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-500 to-violet-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
-                    <Sparkles className="w-6 h-6 text-white" />
+                  <div className="w-14 h-14 rounded-2xl overflow-hidden shadow-lg shadow-blue-500/20 border border-white/10 relative">
+                    <video
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      className="w-full h-full object-cover"
+                    >
+                      <source src="/videos/grok-video-163f4b90-6e8d-43d2-88d0-6450a84086c0 (5).mp4" type="video/mp4" />
+                    </video>
                   </div>
                 </div>
 
