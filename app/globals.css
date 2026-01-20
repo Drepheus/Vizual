@@ -48,6 +48,8 @@ body {
   width: 100%;
   position: relative;
   scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 * {
@@ -242,11 +244,11 @@ body {
 @keyframes blur-in {
   from {
     opacity: 0;
-    filter: blur(10px);
+    transform: translateZ(0) scale(0.98);
   }
   to {
     opacity: 1;
-    filter: blur(0);
+    transform: translateZ(0) scale(1);
   }
 }
 
@@ -264,34 +266,36 @@ body {
 /* Animation classes - initially hidden */
 .animate-on-scroll {
   opacity: 0;
+  will-change: opacity, transform;
 }
 
 .animate-on-scroll.animated {
   animation-fill-mode: forwards;
+  will-change: auto;
 }
 
 .animate-fade-in-up.animated {
-  animation: fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fade-in-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .animate-fade-in-down.animated {
-  animation: fade-in-down 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fade-in-down 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .animate-fade-in-left.animated {
-  animation: fade-in-left 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fade-in-left 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .animate-fade-in-right.animated {
-  animation: fade-in-right 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fade-in-right 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .animate-blur-in.animated {
-  animation: blur-in 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: blur-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .animate-scale-fade.animated {
-  animation: scale-fade-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: scale-fade-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* Stagger delays */

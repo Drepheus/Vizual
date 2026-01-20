@@ -653,20 +653,7 @@ export default function VizualStudioApp() {
                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                           />
                         </div>
-                        {/* Mock Failed 1 */}
-                        <div className="aspect-video rounded-xl overflow-hidden bg-neutral-900/50 border border-white/5 flex flex-col items-center justify-center text-gray-500 gap-2">
-                          <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
-                            <X size={14} />
-                          </div>
-                          <span className="text-xs">Generation Failed</span>
-                        </div>
-                        {/* Mock Failed 2 */}
-                        <div className="aspect-video rounded-xl overflow-hidden bg-neutral-900/50 border border-white/5 flex flex-col items-center justify-center text-gray-500 gap-2">
-                          <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
-                            <X size={14} />
-                          </div>
-                          <span className="text-xs">Generation Failed</span>
-                        </div>
+
                       </div>
                     </div>
                   </div>

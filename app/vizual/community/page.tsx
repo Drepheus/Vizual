@@ -1,8 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { Heart, MessageCircle, Share2, Sparkles, TrendingUp, Play, Image as ImageIcon, Grid3X3, Filter } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Heart, MessageCircle, Share2, Sparkles, TrendingUp, Play, Image as ImageIcon, Grid3X3, Filter, Maximize2, X } from "lucide-react";
 import { Inter, Space_Grotesk } from "next/font/google";
 
 const inter = Inter({ subsets: ["latin"], weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"] });
@@ -10,7 +10,7 @@ const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], weight: ["300", "400", 
 
 // Chrome/Silver gradient text component
 const ChromeText = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-  <span 
+  <span
     className={`bg-clip-text text-transparent animate-chrome-shimmer ${className}`}
     style={{
       backgroundImage: 'linear-gradient(90deg, #666666 0%, #888888 15%, #ffffff 30%, #e8e8e8 45%, #b8b8b8 60%, #888888 75%, #666666 100%)',
@@ -22,6 +22,116 @@ const ChromeText = ({ children, className = "" }: { children: React.ReactNode; c
     {children}
   </span>
 );
+
+const CreationCard = ({ creation, heightClass, active, onHover, onLeave, onClick }: any) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [hasLoaded, setHasLoaded] = useState(false);
+
+  useEffect(() => {
+    if (active && videoRef.current) {
+      // Load video only when needed
+      if (!hasLoaded) {
+        videoRef.current.load();
+        setHasLoaded(true);
+      }
+      videoRef.current.play().catch(() => { });
+    } else if (videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+    }
+  }, [active, hasLoaded]);
+
+  return (
+    <div
+      className="break-inside-avoid group cursor-pointer"
+      onMouseEnter={onHover}
+      onMouseLeave={onLeave}
+      onClick={onClick}
+      style={{ contain: 'layout style paint' }}
+    >
+      <div className={`relative ${heightClass} rounded-2xl overflow-hidden bg-[#0F0F0F] border border-white/5 group-hover:border-white/20 transition-colors duration-300`}>
+        {/* Video/Image */}
+        <video
+          ref={videoRef}
+          loop
+          muted
+          playsInline
+          preload="none"
+          poster="/images/omi-preview.png"
+          className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-300 will-change-transform"
+        >
+          <source src={creation.src} type="video/mp4" />
+        </video>
+
+        {/* Gradient Overlay */}
+        <div className={`absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent transition-opacity duration-300 ${active ? 'opacity-100' : 'opacity-0'}`} />
+
+        {/* Author Badge - Top */}
+        <div className={`absolute top-4 left-4 flex items-center gap-3 transition-all duration-200 ${active ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"
+          }`}>
+          <div className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-md border border-white/10 flex items-center justify-center text-xs font-bold text-white shadow-lg">
+            {creation.author.charAt(0)}
+          </div>
+          <span className="text-sm font-medium text-white/90 drop-shadow-md">{creation.author}</span>
+        </div>
+
+        {/* Like Badge - Top Right */}
+        <div className={`absolute top-4 right-4 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 transition-all duration-200 ${active ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"
+          }`}>
+          <Heart className="w-3.5 h-3.5 text-white/80" />
+          <span className="text-xs font-medium text-white/90">{creation.likes.toLocaleString()}</span>
+        </div>
+
+        {/* Bottom Content */}
+        <div className={`absolute bottom-0 left-0 right-0 p-5 transition-all duration-200 ${active ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+          }`}>
+          <p className="text-sm text-gray-300 line-clamp-2 mb-4 leading-relaxed font-light">
+            {creation.prompt}
+          </p>
+
+          {/* Remix Button - Premium Monochrome */}
+          <button className="w-full py-3 rounded-xl bg-white text-black font-bold text-xs tracking-wide uppercase hover:bg-gray-200 transition-all shadow-lg flex items-center justify-center gap-2">
+            <Sparkles className="w-3.5 h-3.5" />
+            Remix This
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Expanded Modal Component
+const ExpandedModal = ({ creation, onClose }: { creation: any, onClose: () => void }) => {
+  if (!creation) return null;
+
+  return (
+    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/95 backdrop-blur-md p-4 animate-in fade-in duration-200">
+      <button
+        onClick={onClose}
+        className="absolute top-6 right-6 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors z-50"
+      >
+        <X size={24} />
+      </button>
+
+      <div className="relative w-full max-w-5xl aspect-video rounded-2xl overflow-hidden shadow-2xl bg-[#0F0F0F] border border-white/10">
+        <video
+          autoPlay
+          loop
+          controls
+          playsInline
+          className="w-full h-full object-contain"
+        >
+          <source src={creation.src} type="video/mp4" />
+        </video>
+
+        <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black via-black/80 to-transparent">
+          <h3 className={`text-2xl font-bold mb-2 ${spaceGrotesk.className}`}>{creation.author}</h3>
+          <p className="text-gray-300">{creation.prompt}</p>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 // Sample community creations data
 const communityCreations = [
@@ -62,10 +172,10 @@ export default function CommunityPage() {
   return (
     <div className={`relative w-full min-h-screen bg-black text-white ${inter.className}`}>
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-[100] bg-black/40 backdrop-blur-xl border-b border-white/5 py-3 md:py-4">
+      <nav className="fixed top-0 left-0 right-0 z-[100] bg-black/80 backdrop-blur-xl border-b border-white/5 py-3 md:py-4">
         <div className="max-w-7xl mx-auto px-4 md:px-6 flex items-center justify-between">
           <div className="flex items-center gap-8">
-            <div 
+            <div
               onClick={() => router.push('/vizual')}
               className="cursor-pointer flex items-center gap-2 group"
             >
@@ -76,7 +186,7 @@ export default function CommunityPage() {
                 <ChromeText>VIZUAL</ChromeText>
               </div>
             </div>
-            
+
             <div className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-300">
               <a href="/vizual/studio" className="hover:text-white transition-colors">STUDIO</a>
               <a href="/vizual/api" className="hover:text-white transition-colors">API</a>
@@ -86,7 +196,7 @@ export default function CommunityPage() {
           </div>
 
           <div className="flex items-center gap-4">
-            <button 
+            <button
               onClick={() => router.push('/vizual/studio')}
               className="px-5 py-2 md:px-6 md:py-2 rounded-full bg-white text-black text-xs md:text-sm font-bold hover:bg-gray-200 transition-colors"
             >
@@ -97,55 +207,44 @@ export default function CommunityPage() {
       </nav>
 
       {/* Header */}
-      <div className="pt-28 pb-8 px-4">
-        <div className="max-w-7xl mx-auto">
-          <h1 className={`text-4xl md:text-5xl font-bold mb-4 ${spaceGrotesk.className}`}>
-            <span className="text-purple-400">Community</span> Creations
+      <div className="pt-32 pb-12 px-4">
+        <div className="max-w-7xl mx-auto text-center md:text-left">
+          <h1 className={`text-4xl md:text-7xl font-bold mb-6 tracking-tight ${spaceGrotesk.className}`}>
+            Community <ChromeText>Creations</ChromeText>
           </h1>
-          
+          <p className="text-gray-400 text-lg md:text-xl max-w-2xl font-light">
+            Explore the next generation of AI-generated media created by the Vizual community.
+          </p>
+
           {/* Filter Bar */}
-          <div className="flex flex-wrap items-center gap-3 mt-8">
-            {/* Sort Dropdown */}
-            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/20 text-purple-400 border border-purple-500/30">
-              <TrendingUp className="w-4 h-4" />
-              <span className="text-sm font-medium">Trending</span>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
-            
-            {/* Type Filters */}
-            <div className="flex items-center bg-white/5 rounded-full p-1 border border-white/10">
+          <div className="flex flex-col md:flex-row items-center gap-6 mt-12 border-b border-white/5 pb-8">
+            {/* Sort & Type Filters */}
+            <div className="flex items-center gap-2 p-1 rounded-full bg-white/5 border border-white/10">
               {filters.map((filter) => (
                 <button
                   key={filter.name}
                   onClick={() => setActiveFilter(filter.name)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                    activeFilter === filter.name
-                      ? "bg-white text-black"
-                      : "text-gray-400 hover:text-white"
-                  }`}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${activeFilter === filter.name
+                    ? "bg-white text-black shadow-lg shadow-white/10"
+                    : "text-gray-400 hover:text-white hover:bg-white/5"
+                    }`}
                 >
                   {filter.icon}
                   <span>{filter.name}</span>
                 </button>
               ))}
             </div>
-            
-            {/* Divider */}
-            <div className="hidden md:block w-px h-8 bg-white/10" />
-            
+
             {/* Category Pills */}
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap justify-center md:justify-start items-center gap-2 flex-1">
               {categories.map((category) => (
                 <button
                   key={category}
                   onClick={() => setActiveCategory(category)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all border ${
-                    activeCategory === category
-                      ? "bg-white text-black border-white"
-                      : "bg-transparent text-gray-400 border-white/10 hover:border-white/30 hover:text-white"
-                  }`}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 border ${activeCategory === category
+                    ? "bg-white/10 text-white border-white/20"
+                    : "bg-transparent text-gray-500 border-transparent hover:text-white hover:border-white/10"
+                    }`}
                 >
                   {category}
                 </button>
@@ -156,70 +255,24 @@ export default function CommunityPage() {
       </div>
 
       {/* Masonry Grid */}
-      <div className="px-4 pb-20">
+      <div className="px-4 pb-32">
         <div className="max-w-7xl mx-auto">
-          <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4">
+          <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6">
             {communityCreations.map((creation, index) => {
               // Vary heights for masonry effect
               const heights = ["aspect-[3/4]", "aspect-square", "aspect-[4/5]", "aspect-[3/4]", "aspect-[5/4]"];
               const heightClass = heights[index % heights.length];
-              
+
               return (
-                <div 
+                <CreationCard
                   key={creation.id}
-                  className="break-inside-avoid group cursor-pointer"
-                  onMouseEnter={() => setHoveredCard(creation.id)}
-                  onMouseLeave={() => setHoveredCard(null)}
-                >
-                  <div className={`relative ${heightClass} rounded-2xl overflow-hidden bg-gray-900`}>
-                    {/* Video/Image */}
-                    <video
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                      className="w-full h-full object-cover"
-                    >
-                      <source src={creation.src} type="video/mp4" />
-                    </video>
-                    
-                    {/* Gradient Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    
-                    {/* Author Badge - Top */}
-                    <div className={`absolute top-4 left-4 flex items-center gap-2 transition-all duration-300 ${
-                      hoveredCard === creation.id ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"
-                    }`}>
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-xs font-bold">
-                        {creation.author.charAt(0)}
-                      </div>
-                      <span className="text-sm font-medium">{creation.author}</span>
-                    </div>
-                    
-                    {/* Like Badge - Top Right */}
-                    <div className={`absolute top-4 right-4 flex items-center gap-1 px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-sm transition-all duration-300 ${
-                      hoveredCard === creation.id ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"
-                    }`}>
-                      <Heart className="w-4 h-4" />
-                      <span className="text-sm">{creation.likes.toLocaleString()}</span>
-                    </div>
-                    
-                    {/* Bottom Content */}
-                    <div className={`absolute bottom-0 left-0 right-0 p-4 transition-all duration-300 ${
-                      hoveredCard === creation.id ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-                    }`}>
-                      <p className="text-sm text-gray-200 line-clamp-2 mb-4">
-                        {creation.prompt}
-                      </p>
-                      
-                      {/* Remix Button */}
-                      <button className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 font-medium text-sm flex items-center justify-center gap-2 hover:from-purple-600 hover:to-pink-600 transition-all">
-                        <Sparkles className="w-4 h-4" />
-                        Remix
-                      </button>
-                    </div>
-                  </div>
-                </div>
+                  creation={creation}
+                  heightClass={heightClass}
+                  active={hoveredCard === creation.id}
+                  onHover={() => setHoveredCard(creation.id)}
+                  onLeave={() => setHoveredCard(null)}
+                  onClick={() => setHoveredCard(creation.id)}
+                />
               );
             })}
           </div>
@@ -227,22 +280,22 @@ export default function CommunityPage() {
       </div>
 
       {/* Load More */}
-      <div className="flex justify-center pb-20">
-        <button className="px-8 py-4 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 font-medium transition-all">
-          Load More Creations
+      <div className="flex justify-center pb-32">
+        <button className="px-8 py-4 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 font-medium text-sm tracking-widest uppercase transition-all hover:scale-105 active:scale-95">
+          Load More
         </button>
       </div>
 
       {/* Footer */}
-      <footer className="border-t border-white/10 py-12 px-4">
+      <footer className="border-t border-white/5 py-12 px-4 bg-black">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 opacity-50 hover:opacity-100 transition-opacity">
             <svg width="20" height="20" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-white">
               <path d="M25 20 L85 50 L25 80 V20 Z" fill="currentColor" />
             </svg>
             <span className={`font-bold ${spaceGrotesk.className}`}>VIZUAL</span>
           </div>
-          <p className="text-gray-500 text-sm">© 2025 Vizual. All rights reserved.</p>
+          <p className="text-gray-600 text-xs uppercase tracking-wider">© 2025 Vizual AI. All rights reserved.</p>
         </div>
       </footer>
     </div>

@@ -53,9 +53,9 @@ The subscription system is now **fully integrated** into your SplashPage! Here's
 2. Click **Add endpoint**
 3. Enter your webhook URL:
    ```
-   https://your-vercel-app.vercel.app/api/stripe-webhook
+   https://your-app-url.com/api/stripe-webhook
    ```
-   Replace `your-vercel-app` with your actual Vercel domain
+   Replace `your-app-url.com` with your actual domain
 
 4. Select these events to listen for:
    - ✅ `checkout.session.completed`
@@ -65,11 +65,11 @@ The subscription system is now **fully integrated** into your SplashPage! Here's
 5. Click **Add endpoint**
 6. Copy the **Signing secret** (whsec_...)
 
-### Step 5: Add Environment Variables to Vercel (5 minutes)
+### Step 5: Add Environment Variables to Google Cloud (5 minutes)
 
-1. Go to your **Vercel Dashboard**
+1. Go to your **Google Cloud Console**
 2. Select your project
-3. Go to **Settings** → **Environment Variables**
+3. Go to **Cloud Run** -> **Revisions** -> **Edit & Deploy New Revision** -> **Variables & Secrets**
 4. Add these three variables:
 
    **Variable 1:**
@@ -90,18 +90,11 @@ The subscription system is now **fully integrated** into your SplashPage! Here's
    Value: (Get from Supabase Dashboard → Settings → API → service_role key)
    ```
 
-5. **Important**: Make sure all variables are set for **Production**, **Preview**, and **Development**
-
-6. Click **Save**
+5. Click **Deploy**
 
 ### Step 6: Redeploy (1 minute)
 
-After adding environment variables, you need to redeploy:
-
-1. In Vercel Dashboard, go to **Deployments**
-2. Click the **...** menu on your latest deployment
-3. Click **Redeploy**
-4. Wait for deployment to complete (~30 seconds)
+After adding environment variables, redeploy your service.
 
 ---
 
@@ -163,7 +156,7 @@ After completing checkout:
 
 ### Test 5: Webhook Events
 
-1. Check your Vercel logs for webhook processing
+1. Check your Google Cloud logs for webhook processing
 2. Look for these log messages:
    - "User {userId} upgraded to Pro" ✅
    - "Subscription updated for user..." ✅
@@ -179,14 +172,14 @@ After completing checkout:
 
 ### Checkout Fails
 - Verify `STRIPE_SECRET_KEY` is set correctly
-- Check Vercel logs for API errors
+- Check Google Cloud logs for API errors
 - Ensure user email exists in Supabase
 
 ### Webhook Not Working
 - Verify webhook URL is correct
 - Check `STRIPE_WEBHOOK_SECRET` matches Stripe
 - Look at Stripe Dashboard → Webhooks → Events for errors
-- Check Vercel function logs
+- Check Google Cloud function logs
 
 ### User Still Seeing Limits After Upgrade
 - Check Supabase `users` table
@@ -225,7 +218,7 @@ When ready to accept real payments:
    - In Stripe Dashboard, toggle from Test to Live
    - Get new live API keys (sk_live_...)
    
-2. **Update Vercel Environment Variables**
+2. **Update Google Cloud Environment Variables**
    - Replace `STRIPE_SECRET_KEY` with live key
    - Update webhook secret with live webhook
    
@@ -240,7 +233,7 @@ When ready to accept real payments:
 
 5. **Monitor**
    - Watch Stripe Dashboard for payments
-   - Check Vercel logs for errors
+   - Check Google Cloud logs for errors
    - Monitor user feedback
 
 ---
@@ -250,7 +243,7 @@ When ready to accept real payments:
 If something isn't working:
 
 1. **Check the logs:**
-   - Vercel logs for API errors
+   - Google Cloud logs for API errors
    - Browser console for frontend errors
    - Stripe webhook events for payment issues
 
@@ -274,7 +267,7 @@ If something isn't working:
 You just need to:
 1. ✅ Run SQL in Supabase (5 min)
 2. ✅ Set up Stripe account + webhook (10 min)
-3. ✅ Add environment variables to Vercel (5 min)
+3. ✅ Add environment variables to Google Cloud (5 min)
 4. ✅ Redeploy (1 min)
 5. ✅ Test with Stripe test card (5 min)
 

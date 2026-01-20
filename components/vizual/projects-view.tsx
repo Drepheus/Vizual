@@ -246,8 +246,8 @@ export function ProjectsView() {
                         onClick={() => setViewState('VIDEOS')}
                     />
                     <CategoryCard
-                        subtitle="KEYFRAME WITH"
-                        title="RAY3"
+                        subtitle="CONTINUE"
+                        title="DRAFTS"
                         count={24}
                         likes={4}
                         colors="bg-gradient-to-br from-stone-800 to-stone-950" // Brownish

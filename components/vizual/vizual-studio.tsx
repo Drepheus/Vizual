@@ -6,6 +6,7 @@ import { getBrowserSupabaseClient } from "@/lib/supabase-browser";
 import { ArrowUp, ChevronDown, ChevronUp, X, PenTool, Palette, Sparkles, Zap, Layout, CreditCard, ArrowUpRight, Mail } from "lucide-react";
 import { Inter, Space_Grotesk, Playfair_Display } from "next/font/google";
 import { useAuth } from "@/context/auth-context";
+import { useGuestMode } from "@/context/guest-mode-context";
 import { motion, AnimatePresence } from "framer-motion";
 import Aurora from "./Aurora";
 
@@ -24,20 +25,71 @@ const ChromeText = ({ children, className = "" }: { children: React.ReactNode; c
   </span>
 );
 
-// HoverVideo component - plays video only on hover
-const HoverVideo = ({ src, className = "" }: { src: string; className?: string }) => {
+// HoverVideo component - optimized for performance with lazy loading
+const HoverVideo = ({ src, className = "", autoPlay = false, poster }: { src: string; className?: string; autoPlay?: boolean; poster?: string }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+  const [hasLoaded, setHasLoaded] = useState(false);
+
+  useEffect(() => {
+    if (!videoRef.current) return;
+
+    const video = videoRef.current;
+
+    // Single observer for both visibility and autoplay
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setIsVisible(true);
+            // Start loading video when near viewport
+            if (!hasLoaded) {
+              video.load();
+              setHasLoaded(true);
+            }
+            // Only autoplay if autoPlay prop is true
+            if (autoPlay) {
+              video.play().catch(() => { });
+            }
+          } else {
+            setIsVisible(false);
+            if (autoPlay) {
+              video.pause();
+            }
+          }
+        });
+      },
+      {
+        threshold: 0.1, // Start earlier for smoother experience
+        rootMargin: '100px 0px' // Pre-load videos 100px before entering viewport
+      }
+    );
+
+    observer.observe(video);
+
+    return () => observer.disconnect();
+  }, [autoPlay, hasLoaded]);
 
   const handleMouseEnter = () => {
-    if (videoRef.current) {
+    if (!autoPlay && videoRef.current && isVisible) {
       videoRef.current.play().catch(() => { });
     }
   };
 
   const handleMouseLeave = () => {
-    if (videoRef.current) {
+    if (!autoPlay && videoRef.current) {
       videoRef.current.pause();
       videoRef.current.currentTime = 0;
+    }
+  };
+
+  const handleClick = () => {
+    if (videoRef.current) {
+      if (videoRef.current.paused) {
+        videoRef.current.play().catch(() => { });
+      } else {
+        videoRef.current.pause();
+      }
     }
   };
 
@@ -47,29 +99,41 @@ const HoverVideo = ({ src, className = "" }: { src: string; className?: string }
       loop
       muted
       playsInline
-      className={className}
+      preload="none"
+      poster={poster}
+      className={`${className} will-change-transform`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      onClick={handleClick}
+      style={{ contentVisibility: 'auto' }}
     >
       <source src={src} type="video/mp4" />
     </video>
   );
 };
 
-// Custom hook for scroll-triggered animations
+// Custom hook for scroll-triggered animations - optimized with early detection
 const useScrollAnimation = () => {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('animated');
-          }
+        // Use requestAnimationFrame for smoother class updates
+        requestAnimationFrame(() => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('animated');
+              // Unobserve after animation to reduce overhead
+              observer.unobserve(entry.target);
+            }
+          });
         });
       },
-      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+      {
+        threshold: 0.05, // Trigger earlier
+        rootMargin: '50px 0px 0px 0px' // Start animating before fully in view
+      }
     );
 
     const elements = ref.current?.querySelectorAll('.animate-on-scroll');
@@ -88,6 +152,7 @@ const playfair = Playfair_Display({ subsets: ["latin"], weight: ["400", "500", "
 export function VizualStudio() {
   const router = useRouter();
   const { user, loading } = useAuth();
+  const { setGuestMode } = useGuestMode();
   const [isScrolled, setIsScrolled] = useState(false);
   const [categoriesExpanded, setCategoriesExpanded] = useState(false);
   const [showInputModal, setShowInputModal] = useState(false);
@@ -105,6 +170,7 @@ export function VizualStudio() {
   };
 
   const handleMockLogin = () => {
+    setGuestMode(true);
     router.push('/vizual/studio');
   }
 
@@ -122,16 +188,16 @@ export function VizualStudio() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const prompts = [
-    "Cinematic drone shot of a futuristic city",
-    "A cute robot painting a canvas in a park",
-    "Slow motion water droplets on a rose",
-    "Cyberpunk street food vendor at night",
-    "An astronaut floating through a nebula",
-    "Time-lapse of clouds moving over mountains",
-    "A golden retriever playing in autumn leaves",
-    "Underwater view of a coral reef with fish",
-    "A vintage car driving along a coastal road",
-    "A magical library with flying books"
+    "A T-Rex skateboarding in 1990s Venice Beach, VHS style",
+    "POV: Falling into a black hole made of neon gummy bears",
+    "A cyberpunk samurai slicing a raindrop in half at 1000fps",
+    "A hamster leading a Spartan army into battle, epic cinematic",
+    "An underwater city illuminated by bioluminescent jellyfish",
+    "A futuristic fashion show on the surface of Mars",
+    "A dragon made of storm clouds breathing lightning",
+    "A capybara hosting a late night talk show",
+    "A time-lapse of a city growing from nature in 5 seconds",
+    "A slow motion explosion of colorful paint powder in 8K"
   ];
 
   useEffect(() => {
@@ -204,7 +270,7 @@ export function VizualStudio() {
             </div>
 
             <div className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-300">
-              <a href="/vizual/studio" className="hover:text-white transition-colors">STUDIO</a>
+              <button onClick={handleTryNow} className="hover:text-white transition-colors">STUDIO</button>
               <a href="/vizual/api" className="hover:text-white transition-colors">API</a>
               <a href="/vizual/enterprise" className="hover:text-white transition-colors">ENTERPRISE</a>
               <a href="/vizual/community" className="hover:text-white transition-colors">COMMUNITY</a>
@@ -232,9 +298,11 @@ export function VizualStudio() {
             muted
             playsInline
             preload="auto"
-            className="min-h-full min-w-full object-cover opacity-70"
+            poster="/images/omi-preview.png"
+            className="min-h-full min-w-full object-cover opacity-70 will-change-transform"
+            style={{ contentVisibility: 'auto' }}
           >
-            <source src="/videos/RAYVID.mp4" type="video/mp4" />
+            <source src="/videos/veo2.mp4" type="video/mp4" />
           </video>
           <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/80" />
         </div>
@@ -347,7 +415,11 @@ export function VizualStudio() {
               </div>
 
               <div className="relative w-full aspect-[4/3] md:aspect-[21/9] bg-[#1a1a1a] mt-auto">
-                <HoverVideo src="/videos/klingnextgen.mp4" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500" />
+                <HoverVideo
+                  src="/videos/klingnextgen.mp4"
+                  className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500"
+                  autoPlay={true}
+                />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#111] to-transparent opacity-20 pointer-events-none" />
               </div>
             </motion.div>
@@ -379,7 +451,7 @@ export function VizualStudio() {
               playsInline
               className="absolute inset-0 w-full h-full object-cover"
             >
-              <source src="/videos/veo2.mp4" type="video/mp4" />
+              <source src="/videos/RAYVID.mp4" type="video/mp4" />
             </video>
             <div className="absolute inset-0 bg-black/30" />
 
@@ -404,23 +476,28 @@ export function VizualStudio() {
         <style dangerouslySetInnerHTML={{
           __html: `
           @keyframes scroll-left {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
+            0% { transform: translate3d(0, 0, 0); }
+            100% { transform: translate3d(-50%, 0, 0); }
           }
           @keyframes scroll-right {
-            0% { transform: translateX(-50%); }
-            100% { transform: translateX(0); }
+            0% { transform: translate3d(-50%, 0, 0); }
+            100% { transform: translate3d(0, 0, 0); }
           }
           .animate-scroll-left {
             animation: scroll-left 40s linear infinite;
+            will-change: transform;
+            backface-visibility: hidden;
           }
           .animate-scroll-right {
             animation: scroll-right 45s linear infinite;
+            will-change: transform;
+            backface-visibility: hidden;
           }
           .carousel-item {
             flex: 0 0 auto;
             width: 280px;
             height: 158px; /* 16:9 */
+            contain: layout style paint;
           }
           @media (min-width: 768px) {
             .carousel-item {
@@ -533,22 +610,22 @@ export function VizualStudio() {
             {[...Array(2)].map((_, i) => (
               <div key={i} className="flex gap-4">
                 <div className="carousel-item rounded-xl overflow-hidden relative group bg-gray-900">
-                  <HoverVideo src="/videos/film.mp4" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                  <HoverVideo src="/videos/film.mp4" poster="/images/omi-preview.png" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                 </div>
                 <div className="carousel-item rounded-xl overflow-hidden relative group bg-gray-900">
-                  <HoverVideo src="/videos/film2.mp4" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                  <HoverVideo src="/videos/film2.mp4" poster="/images/omi-preview.png" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                 </div>
                 <div className="carousel-item rounded-xl overflow-hidden relative group bg-gray-900">
-                  <HoverVideo src="/videos/film3.mp4" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                  <HoverVideo src="/videos/film3.mp4" poster="/images/omi-preview.png" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                 </div>
                 <div className="carousel-item rounded-xl overflow-hidden relative group bg-gray-900">
-                  <HoverVideo src="/videos/film5.mp4" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                  <HoverVideo src="/videos/film5.mp4" poster="/images/omi-preview.png" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                 </div>
                 <div className="carousel-item rounded-xl overflow-hidden relative group bg-gray-900">
-                  <HoverVideo src="/videos/film6.mp4" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                  <HoverVideo src="/videos/film6.mp4" poster="/images/omi-preview.png" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                 </div>
                 <div className="carousel-item rounded-xl overflow-hidden relative group bg-gray-900">
-                  <HoverVideo src="/videos/film7.mp4" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                  <HoverVideo src="/videos/film7.mp4" poster="/images/omi-preview.png" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                 </div>
               </div>
             ))}
@@ -572,13 +649,13 @@ export function VizualStudio() {
               {[...Array(2)].map((_, i) => (
                 <div key={i} className="flex gap-4">
                   <div className="carousel-item rounded-xl overflow-hidden relative group bg-gray-900">
-                    <HoverVideo src="/videos/ani.mp4" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                    <HoverVideo src="/videos/ani.mp4" poster="/images/omi-preview.png" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                   </div>
                   <div className="carousel-item rounded-xl overflow-hidden relative group bg-gray-900">
-                    <HoverVideo src="/videos/ani1.mp4" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                    <HoverVideo src="/videos/ani1.mp4" poster="/images/omi-preview.png" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                   </div>
                   <div className="carousel-item rounded-xl overflow-hidden relative group bg-gray-900">
-                    <HoverVideo src="/videos/ani4.mp4" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                    <HoverVideo src="/videos/ani4.mp4" poster="/images/omi-preview.png" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                   </div>
                 </div>
               ))}
@@ -599,10 +676,10 @@ export function VizualStudio() {
               {[...Array(2)].map((_, i) => (
                 <div key={i} className="flex gap-4">
                   <div className="carousel-item rounded-xl overflow-hidden relative group bg-gray-900">
-                    <HoverVideo src="/videos/design.mp4" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                    <HoverVideo src="/videos/design.mp4" poster="/images/omi-preview.png" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                   </div>
                   <div className="carousel-item rounded-xl overflow-hidden relative group bg-gray-900">
-                    <HoverVideo src="/videos/design2.mp4" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                    <HoverVideo src="/videos/design2.mp4" poster="/images/omi-preview.png" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                   </div>
                 </div>
               ))}
@@ -623,7 +700,7 @@ export function VizualStudio() {
               {[...Array(2)].map((_, i) => (
                 <div key={i} className="flex gap-4">
                   <div className="carousel-item rounded-xl overflow-hidden relative group bg-gray-900">
-                    <HoverVideo src="/videos/product.mp4" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                    <HoverVideo src="/videos/product.mp4" poster="/images/omi-preview.png" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                   </div>
                   <div className="carousel-item rounded-xl overflow-hidden relative group bg-gray-900">
                     <HoverVideo src="/videos/product1.mp4" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
@@ -693,7 +770,7 @@ export function VizualStudio() {
       < section className="relative z-50 w-full min-h-screen bg-black py-32 px-4 flex items-center" >
         <div className="max-w-5xl mx-auto text-center">
           <p className={`text-3xl md:text-5xl font-medium leading-snug text-neutral-600 ${spaceGrotesk.className} animate-on-scroll animate-blur-in`}>
-            Powered by the world's best AI models: <span className="text-white">Veo</span>, <span className="text-white">LumaLabs</span>, <span className="text-white">Kling</span>, <span className="text-white">WAN</span>, <span className="text-white">Seedance</span>, <span className="text-white">Imagen 3</span>, and more coming soon.
+            Powered by the world's best AI models: <span className="text-white">Omi AI</span>, <span className="text-white">Veo</span>, <span className="text-white">LumaLabs</span>, <span className="text-white">Kling</span>, <span className="text-white">WAN</span>, <span className="text-white">Seedance</span>, <span className="text-white">Imagen 3</span>, and more coming soon.
           </p>
         </div>
       </section >
@@ -701,7 +778,7 @@ export function VizualStudio() {
       {/* New Freedoms Section */}
       < section className="relative z-60 w-full min-h-screen bg-black pb-32 px-4 flex items-center justify-center" >
         <div className="relative w-full max-w-md md:max-w-6xl mx-auto aspect-[3/4] md:aspect-[21/9] rounded-[40px] overflow-hidden group">
-          <HoverVideo src="/videos/veo1.mp4" className="absolute inset-0 w-full h-full object-cover opacity-70" />
+          <HoverVideo src="/videos/veo1.mp4" className="absolute inset-0 w-full h-full object-cover opacity-70" autoPlay={true} />
           <div className="absolute inset-0 bg-black/20 pointer-events-none" />
 
           <div className={`absolute inset-0 flex flex-col items-center justify-center text-center z-10 p-4 leading-none select-none ${spaceGrotesk.className} pointer-events-none`}>
@@ -725,7 +802,7 @@ export function VizualStudio() {
             See how Vizual fits naturally into your creative workflow
           </p>
           <div className="relative w-full max-w-6xl mx-auto rounded-[32px] overflow-hidden border border-black/10 shadow-2xl shadow-black/5 animate-on-scroll animate-scale-fade delay-300">
-            <HoverVideo src="/videos/videsectionloop.mp4" className="w-full h-auto" />
+            <HoverVideo src="/videos/videsectionloop.mp4" className="w-full h-auto" autoPlay={true} />
           </div>
         </div>
       </section>
@@ -764,7 +841,7 @@ export function VizualStudio() {
             {/* Portrait Video */}
             <div className="order-1 md:order-2 flex justify-center animate-on-scroll animate-fade-in-right delay-300">
               <div className="relative w-full max-w-[300px] md:max-w-[350px] aspect-[9/16] rounded-[32px] overflow-hidden border border-white/10 shadow-2xl shadow-white/5">
-                <HoverVideo src="/videos/verticalvid.mp4" className="w-full h-full object-cover" />
+                <HoverVideo src="/videos/verticalvid.mp4" className="w-full h-full object-cover" autoPlay={true} />
               </div>
             </div>
           </div>
@@ -781,7 +858,7 @@ export function VizualStudio() {
             Transform your words into stunning visuals with unparalleled precision and creativity
           </p>
           <div className="relative w-full max-w-6xl mx-auto rounded-[32px] overflow-hidden border border-black/10 shadow-2xl shadow-black/5 animate-on-scroll animate-scale-fade delay-300">
-            <HoverVideo src="/videos/text2image.mp4" className="w-full h-auto" />
+            <HoverVideo src="/videos/text2image.mp4" className="w-full h-auto" autoPlay={true} />
           </div>
         </div>
       </section>
@@ -793,7 +870,7 @@ export function VizualStudio() {
             {/* Portrait Video */}
             <div className="flex justify-center animate-on-scroll animate-fade-in-left">
               <div className="relative w-full max-w-[300px] md:max-w-[350px] aspect-[9/16] rounded-[32px] overflow-hidden border border-white/10 shadow-2xl shadow-white/5">
-                <HoverVideo src="/videos/samchar.mp4" className="w-full h-full object-cover" />
+                <HoverVideo src="/videos/samchar.mp4" className="w-full h-full object-cover" autoPlay={true} />
               </div>
             </div>
 
@@ -854,6 +931,10 @@ export function VizualStudio() {
             {/* Avatar Scene Video */}
             <div className="relative rounded-[24px] overflow-hidden border border-white/10 bg-[#111] group animate-on-scroll animate-fade-in-up delay-300">
               <video
+                autoPlay
+                loop
+                muted
+                playsInline
                 controls
                 preload="metadata"
                 className="w-full aspect-video object-cover"
@@ -871,6 +952,10 @@ export function VizualStudio() {
             {/* Two Avatars Video */}
             <div className="relative rounded-[24px] overflow-hidden border border-white/10 bg-[#111] group animate-on-scroll animate-fade-in-up delay-500">
               <video
+                autoPlay
+                loop
+                muted
+                playsInline
                 controls
                 preload="metadata"
                 className="w-full aspect-video object-cover"
@@ -912,9 +997,7 @@ export function VizualStudio() {
             <div className="flex-1 order-1 md:order-2 animate-on-scroll animate-fade-in-right delay-200">
               <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-[#111] group-hover:border-blue-500/30 transition-colors duration-500">
                 <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <video autoPlay loop muted playsInline className="w-full aspect-video object-cover">
-                  <source src="/videos/ani.mp4" type="video/mp4" />
-                </video>
+                <HoverVideo src="/videos/ani.mp4" className="w-full aspect-video object-cover" autoPlay={true} />
               </div>
             </div>
           </div>
@@ -924,9 +1007,7 @@ export function VizualStudio() {
             <div className="flex-1 animate-on-scroll animate-fade-in-left">
               <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-[#111] group-hover:border-emerald-500/30 transition-colors duration-500">
                 <div className="absolute inset-0 bg-gradient-to-tr from-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <video autoPlay loop muted playsInline className="w-full aspect-video object-cover">
-                  <source src="/videos/nature.mp4" type="video/mp4" />
-                </video>
+                <HoverVideo src="/videos/nature.mp4" className="w-full aspect-video object-cover" autoPlay={true} />
               </div>
             </div>
             <div className="flex-1 animate-on-scroll animate-fade-in-right delay-200">
@@ -960,9 +1041,7 @@ export function VizualStudio() {
             <div className="flex-1 order-1 md:order-2 animate-on-scroll animate-fade-in-right delay-200">
               <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-[#111] group-hover:border-purple-500/30 transition-colors duration-500">
                 <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <video autoPlay loop muted playsInline className="w-full aspect-video object-cover">
-                  <source src="/videos/film2.mp4" type="video/mp4" />
-                </video>
+                <HoverVideo src="/videos/film2.mp4" className="w-full aspect-video object-cover" autoPlay={true} />
               </div>
             </div>
           </div>
@@ -995,9 +1074,7 @@ export function VizualStudio() {
             </div>
             <div className="flex-1">
               <div className="rounded-2xl overflow-hidden border border-white/10 bg-[#0a0a0a] shadow-2xl shadow-blue-500/5">
-                <video autoPlay loop muted playsInline className="w-full aspect-video object-cover">
-                  <source src="/videos/fantasy.mp4" type="video/mp4" />
-                </video>
+                <HoverVideo src="/videos/fantasy.mp4" className="w-full aspect-video object-cover" autoPlay={true} />
               </div>
             </div>
           </div>
@@ -1014,9 +1091,7 @@ export function VizualStudio() {
             </div>
             <div className="flex-1 order-1 md:order-2">
               <div className="rounded-2xl overflow-hidden border border-white/10 bg-[#111] shadow-2xl shadow-purple-500/5">
-                <video autoPlay loop muted playsInline className="w-full aspect-video object-cover">
-                  <source src="/videos/design.mp4" type="video/mp4" />
-                </video>
+                <HoverVideo src="/videos/design.mp4" className="w-full aspect-video object-cover" autoPlay={true} />
               </div>
             </div>
           </div>
