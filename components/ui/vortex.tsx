@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { createNoise3D } from "simplex-noise";
 import { motion } from "motion/react";
 
@@ -22,7 +22,10 @@ interface VortexProps {
 export const Vortex = (props: VortexProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef(null);
-  const animationFrameId = useRef<number>();
+  const animationFrameId = useRef<number | undefined>(undefined);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Reduce particle count on mobile
   const particleCount = props.particleCount || 700;
   const particlePropCount = 9;
   const particlePropsLength = particleCount * particlePropCount;
@@ -240,7 +243,18 @@ export const Vortex = (props: VortexProps) => {
     }
   };
 
+  // Detect mobile device on mount - only actual mobile devices, not small desktop windows
   useEffect(() => {
+    // Only consider it mobile if it's a touch device with no mouse
+    const isTouchDevice = 'ontouchstart' in window && navigator.maxTouchPoints > 0;
+    const isSmallTouchDevice = isTouchDevice && window.innerWidth < 768;
+    setIsMobile(isSmallTouchDevice);
+  }, []);
+
+  useEffect(() => {
+    // Run animation on desktop always, only skip on actual small mobile devices
+    if (isMobile) return;
+
     setup();
     window.addEventListener("resize", handleResize);
 
@@ -250,7 +264,22 @@ export const Vortex = (props: VortexProps) => {
         cancelAnimationFrame(animationFrameId.current);
       }
     };
-  }, []);
+  }, [isMobile]);
+
+  // On mobile, render a simple static background
+  if (isMobile) {
+    return (
+      <div className={cn("relative h-full w-full", props.containerClassName)}>
+        <div
+          className="absolute inset-0 z-0"
+          style={{ backgroundColor: backgroundColor }}
+        />
+        <div className={cn("relative z-10", props.className)}>
+          {props.children}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={cn("relative h-full w-full", props.containerClassName)}>
@@ -269,3 +298,4 @@ export const Vortex = (props: VortexProps) => {
     </div>
   );
 };
+

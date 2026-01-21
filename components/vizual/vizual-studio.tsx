@@ -26,10 +26,17 @@ const ChromeText = ({ children, className = "" }: { children: React.ReactNode; c
   </span>
 );
 
-// HoverVideo component - shows first frame, plays on hover
+// HoverVideo component - shows first frame, plays on hover/touch (optimized for mobile)
 const HoverVideo = ({ src, className = "", autoPlay = false }: { src: string; className?: string; autoPlay?: boolean }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isVisible, setIsVisible] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const isMobileRef = useRef(false);
+
+  // Detect mobile on mount
+  useEffect(() => {
+    isMobileRef.current = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  }, []);
 
   useEffect(() => {
     if (!videoRef.current) return;
@@ -41,20 +48,19 @@ const HoverVideo = ({ src, className = "", autoPlay = false }: { src: string; cl
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             setIsVisible(true);
-            if (autoPlay) {
+            // On mobile or autoPlay, start playing when visible
+            if (autoPlay || isMobileRef.current) {
               video.play().catch(() => { });
             }
           } else {
             setIsVisible(false);
-            if (autoPlay) {
-              video.pause();
-            }
+            video.pause();
           }
         });
       },
       {
         threshold: 0.1,
-        rootMargin: '100px 0px'
+        rootMargin: '50px 0px'
       }
     );
 
@@ -64,25 +70,24 @@ const HoverVideo = ({ src, className = "", autoPlay = false }: { src: string; cl
   }, [autoPlay]);
 
   const handleMouseEnter = () => {
-    if (!autoPlay && videoRef.current && isVisible) {
+    if (!autoPlay && !isMobileRef.current && videoRef.current && isVisible) {
       videoRef.current.play().catch(() => { });
     }
   };
 
   const handleMouseLeave = () => {
-    if (!autoPlay && videoRef.current) {
+    if (!autoPlay && !isMobileRef.current && videoRef.current) {
       videoRef.current.pause();
       videoRef.current.currentTime = 0;
     }
   };
 
-  const handleClick = () => {
-    if (videoRef.current) {
-      if (videoRef.current.paused) {
-        videoRef.current.play().catch(() => { });
-      } else {
-        videoRef.current.pause();
-      }
+  // Handle loaded data - seek to first frame to show thumbnail
+  const handleLoadedData = () => {
+    setIsLoaded(true);
+    if (videoRef.current && !autoPlay && !isMobileRef.current) {
+      // Seek to 0.1s to show a frame (not black)
+      videoRef.current.currentTime = 0.1;
     }
   };
 
@@ -92,12 +97,15 @@ const HoverVideo = ({ src, className = "", autoPlay = false }: { src: string; cl
       loop
       muted
       playsInline
-      preload="metadata"
-      className={`${className} will-change-transform`}
+      preload="auto"
+      className={`${className} ${isLoaded ? '' : 'bg-neutral-800'}`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      onClick={handleClick}
-      style={{ contentVisibility: 'auto' }}
+      onLoadedData={handleLoadedData}
+      style={{
+        contentVisibility: 'auto',
+        contain: 'layout style paint'
+      }}
     >
       <source src={src} type="video/mp4" />
     </video>
@@ -242,7 +250,15 @@ export function VizualStudio() {
   const scrollRef = useScrollAnimation();
 
   return (
-    <div ref={scrollRef} className={`relative w-full bg-black text-white selection:bg-white/20 ${inter.className}`}>
+    <div
+      ref={scrollRef}
+      className={`relative w-full bg-black text-white selection:bg-white/20 ${inter.className}`}
+      style={{
+        // Mobile scroll optimization
+        overscrollBehavior: 'contain',
+        WebkitOverflowScrolling: 'touch',
+      }}
+    >
 
       {/* Navigation - Always visible */}
       <nav className="fixed top-0 left-0 right-0 z-[100] transition-all duration-300 bg-black/40 backdrop-blur-xl border-b border-white/5 py-3 md:py-4">
@@ -484,11 +500,13 @@ export function VizualStudio() {
             animation: scroll-left 40s linear infinite;
             will-change: transform;
             backface-visibility: hidden;
+            transform: translateZ(0);
           }
           .animate-scroll-right {
             animation: scroll-right 45s linear infinite;
             will-change: transform;
             backface-visibility: hidden;
+            transform: translateZ(0);
           }
           .carousel-item {
             flex: 0 0 auto;
@@ -500,6 +518,20 @@ export function VizualStudio() {
             .carousel-item {
               width: 480px;
               height: 270px;
+            }
+          }
+          /* Pause animations on mobile when scrolling */
+          @media (max-width: 767px) {
+            .animate-scroll-left,
+            .animate-scroll-right {
+              animation-duration: 60s; /* Slower on mobile */
+            }
+          }
+          /* Respect reduced motion preference */
+          @media (prefers-reduced-motion: reduce) {
+            .animate-scroll-left,
+            .animate-scroll-right {
+              animation: none;
             }
           }
         `}} />
@@ -964,29 +996,29 @@ export function VizualStudio() {
         </div>
       </section >
 
-      {/* Features Zigzag Section */}
-      < section className="relative z-[96] w-full bg-black py-24 px-4 overflow-hidden" >
+      {/* Features Zigzag Section - WHITE THEME */}
+      < section className="relative z-[96] w-full bg-white text-black py-24 px-4 overflow-hidden" >
         {/* Subtle background gradient */}
-        < div className="absolute inset-0 bg-gradient-to-b from-transparent via-purple-900/5 to-transparent pointer-events-none" />
+        < div className="absolute inset-0 bg-gradient-to-b from-transparent via-gray-100/50 to-transparent pointer-events-none" />
 
         <div className="relative max-w-6xl mx-auto space-y-32">
 
           {/* Feature 1 - Any Style */}
           <div className="flex flex-col md:flex-row items-center gap-8 md:gap-16 group">
             <div className="flex-1 order-2 md:order-1 animate-on-scroll animate-fade-in-left">
-              <span className="inline-flex items-center gap-2 px-4 py-1.5 text-xs font-semibold bg-white/10 text-white rounded-full mb-6 border border-white/10">
-                <Sparkles className="w-3 h-3 text-white" />
+              <span className="inline-flex items-center gap-2 px-4 py-1.5 text-xs font-semibold bg-black/10 text-black rounded-full mb-6 border border-black/10">
+                <Sparkles className="w-3 h-3 text-black" />
                 Any Style
               </span>
               <h3 className={`text-3xl md:text-4xl font-bold mb-5 leading-tight ${spaceGrotesk.className}`}>
-                From Cartoons to <br /> <ChromeText>Realistic Scenes</ChromeText>
+                From Cartoons to <br /> <span className="bg-clip-text text-transparent bg-gradient-to-r from-gray-600 via-gray-800 to-gray-600">Realistic Scenes</span>
               </h3>
-              <p className="text-gray-400 leading-relaxed text-lg">
-                Whether you want to animate a drawing, make your pet dance, or bring a <span className="text-blue-400 font-medium">product shot</span> to life, our AI video generator can create videos in any style, while preserving the original context and details.
+              <p className="text-gray-600 leading-relaxed text-lg">
+                Whether you want to animate a drawing, make your pet dance, or bring a <span className="text-blue-600 font-medium">product shot</span> to life, our AI video generator can create videos in any style, while preserving the original context and details.
               </p>
             </div>
             <div className="flex-1 order-1 md:order-2 animate-on-scroll animate-fade-in-right delay-200">
-              <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-[#111] group-hover:border-blue-500/30 transition-colors duration-500">
+              <div className="relative rounded-2xl overflow-hidden border border-black/10 bg-gray-100 group-hover:border-blue-500/30 transition-colors duration-500 shadow-xl shadow-black/10">
                 <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <HoverVideo src="/videos/ani.mp4" className="w-full aspect-video object-cover" autoPlay={true} />
               </div>
@@ -996,20 +1028,20 @@ export function VizualStudio() {
           {/* Feature 2 - Greater Realism */}
           <div className="flex flex-col md:flex-row items-center gap-8 md:gap-16 group">
             <div className="flex-1 animate-on-scroll animate-fade-in-left">
-              <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-[#111] group-hover:border-emerald-500/30 transition-colors duration-500">
+              <div className="relative rounded-2xl overflow-hidden border border-black/10 bg-gray-100 group-hover:border-emerald-500/30 transition-colors duration-500 shadow-xl shadow-black/10">
                 <div className="absolute inset-0 bg-gradient-to-tr from-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <HoverVideo src="/videos/nature.mp4" className="w-full aspect-video object-cover" autoPlay={true} />
               </div>
             </div>
             <div className="flex-1 animate-on-scroll animate-fade-in-right delay-200">
-              <span className="inline-flex items-center gap-2 px-4 py-1.5 text-xs font-semibold bg-white/10 text-white rounded-full mb-6 border border-white/10">
-                <Zap className="w-3 h-3 text-white" />
+              <span className="inline-flex items-center gap-2 px-4 py-1.5 text-xs font-semibold bg-black/10 text-black rounded-full mb-6 border border-black/10">
+                <Zap className="w-3 h-3 text-black" />
                 Greater Realism
               </span>
               <h3 className={`text-3xl md:text-4xl font-bold mb-5 leading-tight ${spaceGrotesk.className}`}>
-                Add Greater Realism <br /> <ChromeText>with AI Motion</ChromeText>
+                Add Greater Realism <br /> <span className="bg-clip-text text-transparent bg-gradient-to-r from-gray-600 via-gray-800 to-gray-600">with AI Motion</span>
               </h3>
-              <p className="text-gray-400 leading-relaxed text-lg">
+              <p className="text-gray-600 leading-relaxed text-lg">
                 Vizual's artificial intelligence image to video feature uses advanced deep learning to create lifelike, immersive videos. Add drama, realism, or storytelling depth to any static image.
               </p>
             </div>
@@ -1018,19 +1050,19 @@ export function VizualStudio() {
           {/* Feature 3 - High-Quality Motion */}
           <div className="flex flex-col md:flex-row items-center gap-8 md:gap-16 group">
             <div className="flex-1 order-2 md:order-1 animate-on-scroll animate-fade-in-left">
-              <span className="inline-flex items-center gap-2 px-4 py-1.5 text-xs font-semibold bg-white/10 text-white rounded-full mb-6 border border-white/10">
-                <Sparkles className="w-3 h-3 text-white" />
+              <span className="inline-flex items-center gap-2 px-4 py-1.5 text-xs font-semibold bg-black/10 text-black rounded-full mb-6 border border-black/10">
+                <Sparkles className="w-3 h-3 text-black" />
                 High-Quality Motion
               </span>
               <h3 className={`text-3xl md:text-4xl font-bold mb-5 leading-tight ${spaceGrotesk.className}`}>
-                Natural Movement <br /> <ChromeText>Real-World Effects</ChromeText>
+                Natural Movement <br /> <span className="bg-clip-text text-transparent bg-gradient-to-r from-gray-600 via-gray-800 to-gray-600">Real-World Effects</span>
               </h3>
-              <p className="text-gray-400 leading-relaxed text-lg">
+              <p className="text-gray-600 leading-relaxed text-lg">
                 Zoom, pan, and tilt with precision. Our image to video AI engine simulates realistic physics, lighting, and material interaction, from flowing hair and bouncing fabric to shimmering water.
               </p>
             </div>
             <div className="flex-1 order-1 md:order-2 animate-on-scroll animate-fade-in-right delay-200">
-              <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-[#111] group-hover:border-purple-500/30 transition-colors duration-500">
+              <div className="relative rounded-2xl overflow-hidden border border-black/10 bg-gray-100 group-hover:border-purple-500/30 transition-colors duration-500 shadow-xl shadow-black/10">
                 <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <HoverVideo src="/videos/film2.mp4" className="w-full aspect-video object-cover" autoPlay={true} />
               </div>

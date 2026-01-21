@@ -35,7 +35,7 @@ ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY
 # Build Next.js application
 RUN pnpm run build
 
-# Production image, copy all the files and run next
+# Production image - OPTIMIZED for standalone output
 FROM base AS runner
 WORKDIR /app
 
@@ -51,16 +51,16 @@ ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Enable corepack and install pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
+# Copy public assets
+COPY --from=builder /app/public ./public
 
-# Copy package files and install production dependencies
-COPY --from=builder --chown=nextjs:nodejs /app/package.json /app/pnpm-lock.yaml ./
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
+# Set permissions for prerender cache
+RUN mkdir .next
+RUN chown nextjs:nodejs .next
 
-# Copy built application
-COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
-COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+# Copy standalone output (includes all necessary node_modules)
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 USER nextjs
 
@@ -69,4 +69,6 @@ EXPOSE 8080
 ENV PORT=8080
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["pnpm", "start"]
+# Run standalone server directly (no pnpm needed, much faster startup)
+CMD ["node", "server.js"]
+

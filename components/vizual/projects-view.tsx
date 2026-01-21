@@ -217,7 +217,7 @@ const GenerationModal = ({ card, onClose, onAction }: { card: any, onClose: () =
     );
 };
 
-export function ProjectsView({ onAction }: { onAction?: (action: string, card: any) => void }) {
+export function ProjectsView({ onAction, onClose }: { onAction?: (action: string, card: any) => void, onClose?: () => void }) {
     const [viewState, setViewState] = useState<ViewState>('CATEGORIES');
     const [selectedCard, setSelectedCard] = useState<any>(null);
 
@@ -231,9 +231,19 @@ export function ProjectsView({ onAction }: { onAction?: (action: string, card: a
 
     if (viewState === 'CATEGORIES') {
         return (
-            <div className="p-8 max-w-7xl mx-auto w-full h-full flex flex-col justify-center">
-                <h1 className={`text-4xl font-bold mb-10 text-white ${spaceGrotesk.className}`}>Projects</h1>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="p-4 md:p-8 max-w-7xl mx-auto w-full h-full overflow-y-auto">
+                <div className="flex items-center justify-between mb-6 md:mb-10">
+                    <h1 className={`text-2xl md:text-4xl font-bold text-white ${spaceGrotesk.className}`}>Projects</h1>
+                    {onClose && (
+                        <button
+                            onClick={onClose}
+                            className="p-2 rounded-full hover:bg-white/10 text-gray-400 hover:text-white transition-colors md:hidden"
+                        >
+                            <X size={24} />
+                        </button>
+                    )}
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 pb-8">
                     <CategoryCard
                         subtitle="CREATE AND MODIFY"
                         title="IMAGE"
@@ -265,7 +275,7 @@ export function ProjectsView({ onAction }: { onAction?: (action: string, card: a
                         title="DRAFTS"
                         count={24}
                         likes={4}
-                        colors="bg-gradient-to-br from-stone-800 to-stone-950" // Brownish
+                        colors="bg-gradient-to-br from-stone-800 to-stone-950"
                         images={[
                             "https://images.unsplash.com/photo-1507041957456-9c397ce39c97?q=80&w=3456&auto=format&fit=crop",
                             "https://images.unsplash.com/photo-1486915309851-b0cc1f8a0084?q=80&w=3387&auto=format&fit=crop",

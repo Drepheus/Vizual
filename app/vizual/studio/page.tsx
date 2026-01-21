@@ -44,7 +44,9 @@ import {
   Heart,
   Timer,
   Zap,
-  ArrowRightFromLine
+  ArrowRightFromLine,
+  Maximize2,
+  Download
 } from "lucide-react";
 import { MultiStepLoader } from "@/components/ui/multi-step-loader";
 import { Inter, Space_Grotesk } from "next/font/google";
@@ -369,6 +371,7 @@ export default function VizualStudioApp() {
   const [showPricingModal, setShowPricingModal] = useState(false);
 
   const [isExtending, setIsExtending] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [showColorPaletteModal, setShowColorPaletteModal] = useState(false);
   const [showStyleGuideModal, setShowStyleGuideModal] = useState(false);
@@ -427,6 +430,7 @@ export default function VizualStudioApp() {
     prompt: string;
     description: string;
     keywords: string[];
+    imageUrl: string;
   } | null>(null);
 
   // Redirect to login if not authenticated and not in guest mode
@@ -436,16 +440,34 @@ export default function VizualStudioApp() {
     }
   }, [user, loading, router, isGuestMode]);
 
+  // Generation loading states for MultiStepLoader
+  const generationLoadingStates = [
+    { text: "Analyzing your prompt..." },
+    { text: "Selecting optimal AI model..." },
+    { text: "Generating your content..." },
+    { text: "Enhancing details..." },
+    { text: "Finalizing output..." },
+  ];
+
   const handleGenerate = () => {
     if (!prompt.trim()) return;
 
-    // Simulate AI response with highlighted keywords
-    const keywords = prompt.match(/\b\w{4,}\b/g)?.slice(0, 5) || [];
-    setGeneratedContent({
-      prompt: prompt,
-      description: `I've created four distinct ${creationMode.toLowerCase()}s based on your prompt "${prompt}", each with unique artistic interpretation and cinematic quality.`,
-      keywords: keywords
-    });
+    // Start the loading animation
+    setIsGenerating(true);
+
+    // Simulate AI generation time
+    setTimeout(() => {
+      const keywords = prompt.match(/\b\w{4,}\b/g)?.slice(0, 5) || [];
+      // Mock image URL - in production this would be the actual generated image
+      const generatedImageUrl = "https://images.unsplash.com/photo-1518710843675-2540dd79065c?q=80&w=3387&auto=format&fit=crop";
+      setGeneratedContent({
+        prompt: prompt,
+        description: `I've created a ${creationMode.toLowerCase()} based on your prompt "${prompt}", with unique artistic interpretation and cinematic quality.`,
+        keywords: keywords,
+        imageUrl: generatedImageUrl
+      });
+      setIsGenerating(false);
+    }, 10000); // 10 second generation time (5 steps x 2000ms)
   };
 
   if (loading) {
@@ -528,27 +550,27 @@ export default function VizualStudioApp() {
             label="Projects"
             active={currentView === 'PROJECTS'}
             expanded={sidebarExpanded}
-            onClick={() => setCurrentView('PROJECTS')}
+            onClick={() => { setCurrentView('PROJECTS'); setSidebarOpen(false); }}
           />
           <NavItem
             icon={<Home size={20} />}
             label="Studio"
             active={currentView === 'STUDIO'}
             expanded={sidebarExpanded}
-            onClick={() => setCurrentView('STUDIO')}
+            onClick={() => { setCurrentView('STUDIO'); setSidebarOpen(false); }}
           />
           <NavItem
             icon={<Lightbulb size={20} />}
             label="Inspiration"
             active={inspirationOpen}
             expanded={sidebarExpanded}
-            onClick={() => setInspirationOpen(!inspirationOpen)}
+            onClick={() => { setInspirationOpen(!inspirationOpen); setSidebarOpen(false); }}
           />
           <NavItem
             icon={<Compass size={20} />}
             label="Community"
             expanded={sidebarExpanded}
-            onClick={() => router.push('/vizual/community')}
+            onClick={() => { router.push('/vizual/community'); setSidebarOpen(false); }}
           />
         </nav>
 
@@ -558,7 +580,7 @@ export default function VizualStudioApp() {
             icon={<MessageSquareQuote size={20} />}
             label="Feedback"
             expanded={sidebarExpanded}
-            onClick={() => setShowFeedbackModal(true)}
+            onClick={() => { setShowFeedbackModal(true); setSidebarOpen(false); }}
           />
           <button
             onClick={() => setShowAccountModal(true)}
@@ -580,62 +602,64 @@ export default function VizualStudioApp() {
       {/* Main Content Area */}
       {currentView === 'PROJECTS' ? (
         <main className="flex-1 relative overflow-hidden bg-[#0a0a0a]">
-          <ProjectsView onAction={(action, card) => {
-            setCurrentView('STUDIO');
+          <ProjectsView
+            onClose={() => setCurrentView('STUDIO')}
+            onAction={(action, card) => {
+              setCurrentView('STUDIO');
 
-            // Common setup
-            if (card.prompt) setPrompt(card.prompt);
-            if (card.src) {
-              setAttachments(prev => [
-                ...prev,
-                {
-                  id: crypto.randomUUID(),
-                  url: card.src,
-                  type: card.type === 'video' ? 'video' : 'image'
-                }
-              ]);
-            }
+              // Common setup
+              if (card.prompt) setPrompt(card.prompt);
+              if (card.src) {
+                setAttachments(prev => [
+                  ...prev,
+                  {
+                    id: crypto.randomUUID(),
+                    url: card.src,
+                    type: card.type === 'video' ? 'video' : 'image'
+                  }
+                ]);
+              }
 
-            switch (action) {
-              case 'MODIFY':
-                // For images, "Modify" usually means Remix/Image-to-Image
-                // For video, it maps to Modify tab
-                if (card.type === 'video') {
+              switch (action) {
+                case 'MODIFY':
+                  // For images, "Modify" usually means Remix/Image-to-Image
+                  // For video, it maps to Modify tab
+                  if (card.type === 'video') {
+                    setCreationMode('VIDEO');
+                    setActiveTab('MODIFY');
+                  } else {
+                    setCreationMode('IMAGE');
+                    setActiveTab('REMIX'); // Remix allows image modification
+                  }
+                  break;
+
+                case 'MAKE_VIDEO':
                   setCreationMode('VIDEO');
-                  setActiveTab('MODIFY');
-                } else {
+                  setActiveTab('REFERENCE'); // Image-to-Video uses Reference tab
+                  break;
+
+                case 'REFERENCE':
+                  if (card.type === 'video') {
+                    setCreationMode('VIDEO');
+                    setActiveTab('REFERENCE');
+                  } else {
+                    setCreationMode('IMAGE');
+                    setActiveTab('IMAGE REFERENCE');
+                  }
+                  break;
+
+                case 'MORE_LIKE_THIS':
+                case 'COPY_PROMPT':
+                  // Just set prompt mostly, maybe set mode
+                  setCreationMode(card.type === 'video' ? 'VIDEO' : 'IMAGE');
+                  break;
+
+                case 'REFRAME':
                   setCreationMode('IMAGE');
-                  setActiveTab('REMIX'); // Remix allows image modification
-                }
-                break;
-
-              case 'MAKE_VIDEO':
-                setCreationMode('VIDEO');
-                setActiveTab('REFERENCE'); // Image-to-Video uses Reference tab
-                break;
-
-              case 'REFERENCE':
-                if (card.type === 'video') {
-                  setCreationMode('VIDEO');
-                  setActiveTab('REFERENCE');
-                } else {
-                  setCreationMode('IMAGE');
-                  setActiveTab('IMAGE REFERENCE');
-                }
-                break;
-
-              case 'MORE_LIKE_THIS':
-              case 'COPY_PROMPT':
-                // Just set prompt mostly, maybe set mode
-                setCreationMode(card.type === 'video' ? 'VIDEO' : 'IMAGE');
-                break;
-
-              case 'REFRAME':
-                setCreationMode('IMAGE');
-                setActiveTab('REMIX'); // Reframe usually involves outpainting/remixing
-                break;
-            }
-          }} />
+                  setActiveTab('REMIX'); // Reframe usually involves outpainting/remixing
+                  break;
+              }
+            }} />
         </main>
       ) : (
         <div className="flex-1 flex flex-col w-full min-w-0">
@@ -744,156 +768,154 @@ export default function VizualStudioApp() {
               lightness="65%"
               className="flex flex-col w-full h-full"
             >
-              {/* Scrollable Content Area */}
-              <div className="flex-1 overflow-y-auto flex flex-col items-center justify-center px-4 md:px-8 py-6">
+              {/* Main Content Area */}
+              <div className="flex-1 overflow-y-auto flex flex-col">
                 {generatedContent ? (
-                  <div className="max-w-3xl w-full">
-                    {/* Describe Section */}
-                    <div className="mb-8">
-                      <h3 className="text-xs font-medium text-gray-500 mb-3 tracking-wider">DESCRIBE</h3>
+                  /* Generated Output - FULL SCREEN PROMINENT */
+                  <div className="flex-1 flex flex-col p-4 md:p-6">
+                    {/* Large Output Container - Takes most of the space */}
+                    <div className="flex-1 flex flex-col max-w-5xl w-full mx-auto">
 
-                      {/* Keywords */}
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {generatedContent.keywords.map((keyword, i) => (
-                          <span
-                            key={i}
-                            className="px-2 md:px-3 py-1 rounded-full border border-white/30 text-xs md:text-sm bg-white/5"
-                          >
-                            {keyword}
-                          </span>
-                        ))}
+                      {/* The Main Output - LARGE */}
+                      <div
+                        className="relative rounded-2xl overflow-hidden bg-neutral-900 border border-white/20 cursor-pointer group shadow-2xl"
+                        style={{ minHeight: '50vh' }}
+                        onClick={() => {
+                          const modal = document.createElement('div');
+                          modal.id = 'fullscreen-viewer';
+                          modal.className = 'fixed inset-0 z-[200] bg-black flex items-center justify-center';
+                          modal.innerHTML = `
+                            <button onclick="this.parentElement.remove()" class="absolute top-4 right-4 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors z-10">
+                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                            </button>
+                            <img src="${generatedContent.imageUrl}" class="w-full h-full object-contain" />
+                          `;
+                          document.body.appendChild(modal);
+                        }}
+                      >
+                        <img
+                          src={generatedContent.imageUrl}
+                          alt="Generated"
+                          className="w-full h-full object-cover"
+                        />
+
+                        {/* Expand Button */}
+                        <div className="absolute top-4 right-4 px-4 py-2 bg-black/70 backdrop-blur-sm rounded-full text-white text-sm font-medium flex items-center gap-2 hover:bg-black/90 transition-colors">
+                          <Maximize2 size={16} />
+                          Expand
+                        </div>
                       </div>
 
-                      {/* Description */}
-                      <p className="text-gray-300 leading-relaxed mb-6 text-sm md:text-base">
-                        {generatedContent.description}
-                      </p>
+                      {/* Action Bar - Below the image, always visible */}
+                      <div className="flex items-center justify-between gap-4 mt-4 p-4 bg-white/5 rounded-xl border border-white/10">
+                        {/* Left - Prompt Info */}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-white/50 text-xs mb-1">Your prompt:</p>
+                          <p className="text-white text-sm font-medium truncate">{generatedContent.prompt}</p>
+                        </div>
 
-                      {/* Action Buttons */}
-                      <div className="flex flex-wrap items-center gap-2 md:gap-3 mb-8">
+                        {/* Right - Action Buttons */}
+                        <div className="flex gap-2 shrink-0">
+                          <button
+                            onClick={() => alert('Saved!')}
+                            className="p-2.5 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors"
+                            title="Save to favorites"
+                          >
+                            <Heart size={18} />
+                          </button>
+                          <button
+                            onClick={() => { navigator.clipboard.writeText('https://vizual.ai/share/...'); alert('Link copied!'); }}
+                            className="p-2.5 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors"
+                            title="Share"
+                          >
+                            <Share2 size={18} />
+                          </button>
+                          <button
+                            onClick={() => alert('Download started!')}
+                            className="p-2.5 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors"
+                            title="Download"
+                          >
+                            <Download size={18} />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Quick Actions - Below the action bar */}
+                      <div className="flex flex-wrap gap-2 mt-3 justify-center">
                         <button
-                          onClick={() => {
-                            if (window.confirm("Are you sure you want to generate more images with this prompt?")) {
-                              handleGenerate();
-                            }
-                          }}
-                          className="flex items-center gap-2 px-3 md:px-4 py-2 rounded-full bg-white/10 hover:bg-white/15 transition-colors text-xs md:text-sm border border-white/10"
+                          onClick={() => handleGenerate()}
+                          className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-white text-black hover:bg-gray-200 transition-colors text-sm font-medium"
                         >
                           <RefreshCw size={14} />
-                          <span className="hidden sm:inline">Create More</span>
-                          <span className="sm:hidden">Create</span>
+                          Regenerate
+                        </button>
+                        <button
+                          onClick={() => {
+                            // Use the actual generated image URL
+                            setAttachments(prev => [...prev, { id: crypto.randomUUID(), url: generatedContent.imageUrl, type: 'image' }]);
+                            alert('Added as reference!');
+                          }}
+                          className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-white/10 hover:bg-white/15 transition-colors text-sm border border-white/20"
+                        >
+                          <MessageSquareQuote size={14} />
+                          Use as Reference
                         </button>
                         <button
                           onClick={() => setInspirationOpen(true)}
-                          className="flex items-center gap-2 px-3 md:px-4 py-2 rounded-full bg-white/10 hover:bg-white/15 transition-colors text-xs md:text-sm border border-white/10"
+                          className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-white/10 hover:bg-white/15 transition-colors text-sm border border-white/20"
                         >
                           <Sparkles size={14} />
-                          Inspiration
+                          Get Inspiration
                         </button>
-                        <button
-                          onClick={() => {
-                            // Simulate setting the generated image as a reference
-                            const mockUrl = "https://images.unsplash.com/photo-1518710843675-2540dd79065c?q=80&w=3387&auto=format&fit=crop";
-                            setAttachments(prev => [...prev, { id: crypto.randomUUID(), url: mockUrl, type: 'image' }]);
-                            // Switch to reference tab to show it being used
-                            setActiveTab(creationMode === "IMAGE" ? "IMAGE REFERENCE" : "REFERENCE");
-                            alert("Image added to reference!");
-                          }}
-                          className="flex items-center gap-2 px-3 md:px-4 py-2 rounded-full bg-white/10 hover:bg-white/15 transition-colors text-xs md:text-sm border border-white/10"
-                          title="Use as a reference"
-                        >
-                          <MessageSquareQuote size={14} />
-                          Start From Here
-                        </button>
-
-                        <button className="p-2 rounded-full bg-white/10 hover:bg-white/15 transition-colors border border-white/10">
-                          <MoreHorizontal size={16} />
-                        </button>
-                      </div>
-
-                      {/* Generation Grid (2x2) */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {/* Mock Image 1 */}
-                        <div className="aspect-video rounded-xl overflow-hidden bg-neutral-900 border border-white/10 relative group cursor-pointer">
-                          <img
-                            src="https://images.unsplash.com/photo-1518710843675-2540dd79065c?q=80&w=3387&auto=format&fit=crop"
-                            alt="Generated 1"
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                          />
-                        </div>
-                        {/* Mock Image 2 */}
-                        <div className="aspect-video rounded-xl overflow-hidden bg-neutral-900 border border-white/10 relative group cursor-pointer">
-                          <img
-                            src="https://images.unsplash.com/photo-1600271772470-bd22a42787b3?q=80&w=3072&auto=format&fit=crop"
-                            alt="Generated 2"
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                          />
-                        </div>
-
                       </div>
                     </div>
                   </div>
                 ) : (
-                  <div className="text-center px-4">
-                    <h2 className={`text-2xl md:text-4xl font-bold mb-4 ${spaceGrotesk.className}`}>
-                      What will you create?
-                    </h2>
-                    <p className="text-gray-400 max-w-md mx-auto text-sm md:text-base mb-8">
-                      Describe your vision below and let Vizual bring it to life with AI-powered {creationMode.toLowerCase()} generation.
-                    </p>
-
-                    {/* Mode Button */}
-                    <button
-                      onClick={() => setShowModeModal(true)}
-                      className="px-6 py-3 rounded-full bg-white/10 hover:bg-white/15 border border-white/20 transition-all hover:scale-105 text-sm font-medium flex items-center gap-2 mx-auto"
-                    >
-                      <Sparkles size={18} />
-                      Explore Modes
-                    </button>
+                  /* Empty State */
+                  <div className="flex-1 flex items-center justify-center p-4">
+                    <div className="text-center">
+                      <h2 className={`text-2xl md:text-4xl font-bold mb-4 ${spaceGrotesk.className}`}>
+                        What will you create?
+                      </h2>
+                      <p className="text-gray-400 max-w-md mx-auto text-sm md:text-base mb-8">
+                        Describe your vision below and let Vizual bring it to life with AI-powered {creationMode.toLowerCase()} generation.
+                      </p>
+                      <button
+                        onClick={() => setShowModeModal(true)}
+                        className="px-6 py-3 rounded-full bg-white/10 hover:bg-white/15 border border-white/20 transition-all hover:scale-105 text-sm font-medium inline-flex items-center gap-2"
+                      >
+                        <Sparkles size={18} />
+                        Explore Modes
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
 
-              {/* Bottom Input Area */}
-              <div className="w-full p-4 md:p-6 shrink-0 z-20">
+              {/* Bottom Input Area - STICKY */}
+              <div className="sticky bottom-0 w-full p-4 md:p-6 shrink-0 z-30 bg-black/90 backdrop-blur-lg border-t border-white/5">
                 <div className="max-w-4xl mx-auto">
                   {/* Tabs */}
-                  <div className="flex flex-col items-center justify-center gap-4 mb-3 md:mb-4">
-                    <div className="flex items-center justify-center gap-1 md:gap-2 overflow-x-auto">
-                      {(creationMode === "IMAGE"
-                        ? ["IMAGE REFERENCE", "REMIX"]
-                        : ["STYLE", "REFERENCE", "MODIFY"]).map((tab) => (
-                          <button
-                            key={tab}
-                            onClick={() => {
-                              setActiveTab(tab as TabMode);
-                              if (tab === "STYLE") {
-                                setShowStyleModal(true);
-                              }
-                            }}
-                            className={`px-3 md:px-4 py-1.5 rounded-full text-[10px] md:text-xs font-medium transition-colors whitespace-nowrap ${activeTab === tab
-                              ? "bg-white/15 text-white border border-white/20"
-                              : "text-gray-500 hover:text-gray-300"
-                              }`}
-                          >
-                            {tab}
-                          </button>
-                        ))}
-                    </div>
-
-                    {/* Image Reference Upload Area */}
-                    {creationMode === "IMAGE" && activeTab === "IMAGE REFERENCE" && (
-                      <div className="flex gap-4 w-full justify-center animate-in fade-in slide-in-from-bottom-4 duration-300">
-                        {[1, 2, 3].map((i) => (
-                          <button key={i} className="w-24 h-24 rounded-xl border border-dashed border-white/20 bg-white/5 hover:bg-white/10 transition-colors flex flex-col items-center justify-center gap-2 text-gray-500 hover:text-gray-300 group">
-                            <div className="w-8 h-8 rounded-full bg-white/5 group-hover:bg-white/10 flex items-center justify-center transition-colors">
-                              <Plus size={16} />
-                            </div>
-                            <span className="text-[10px]">Upload Ref</span>
-                          </button>
-                        ))}
-                      </div>
-                    )}
+                  <div className="flex items-center justify-center gap-1 md:gap-2 overflow-x-auto mb-2">
+                    {(creationMode === "IMAGE"
+                      ? ["REFERENCE", "REMIX"]
+                      : ["STYLE", "REFERENCE", "MODIFY"]).map((tab) => (
+                        <button
+                          key={tab}
+                          onClick={() => {
+                            setActiveTab(tab as TabMode);
+                            if (tab === "STYLE") {
+                              setShowStyleModal(true);
+                            }
+                          }}
+                          className={`px-3 md:px-4 py-1.5 rounded-full text-[10px] md:text-xs font-medium transition-colors whitespace-nowrap ${activeTab === tab || (tab === "REFERENCE" && activeTab === "IMAGE REFERENCE")
+                            ? "bg-white/15 text-white border border-white/20"
+                            : "text-gray-500 hover:text-gray-300"
+                            }`}
+                        >
+                          {tab}
+                        </button>
+                      ))}
                   </div>
 
                   {/* Input Container - Floating transparency */}
@@ -1445,8 +1467,9 @@ export default function VizualStudioApp() {
             />
             <div className="relative w-full max-w-lg bg-[#0d0d0d] border border-white/10 rounded-2xl p-8 shadow-2xl">
               <div className="flex items-center gap-3 mb-6">
-                <div className="p-2.5 rounded-xl bg-white/5 border border-white/10">
-                  <Wand2 className="text-purple-400" size={24} />
+                {/* Vizual-styled icon - chrome/white gradient */}
+                <div className="p-3 rounded-xl bg-gradient-to-br from-white to-gray-400 shadow-lg">
+                  <Sparkles className="text-black" size={22} />
                 </div>
                 <div>
                   <h3 className={`text-2xl font-bold text-white ${spaceGrotesk.className}`}>AI Enhancer</h3>
@@ -1455,7 +1478,7 @@ export default function VizualStudioApp() {
               </div>
 
               <textarea
-                className="w-full h-40 bg-black/50 border border-white/10 rounded-xl p-4 text-white placeholder-gray-600 focus:outline-none focus:border-purple-500/50 transition-colors mb-6 resize-none text-sm leading-relaxed"
+                className="w-full h-40 bg-black/50 border border-white/10 rounded-xl p-4 text-white placeholder-gray-600 focus:outline-none focus:border-white/30 transition-colors mb-6 resize-none text-sm leading-relaxed"
                 placeholder="Describe your basic idea here (e.g., A futuristic city)..."
                 value={enhancerPrompt}
                 onChange={(e) => setEnhancerPrompt(e.target.value)}
@@ -1478,7 +1501,7 @@ export default function VizualStudioApp() {
                   }}
                   className="px-6 py-2.5 bg-white text-black rounded-xl text-sm font-bold hover:bg-gray-200 transition-all hover:scale-105 flex items-center gap-2"
                 >
-                  <Wand2 size={16} />
+                  <Sparkles size={16} />
                   Enhance
                 </button>
               </div>
@@ -1553,15 +1576,38 @@ export default function VizualStudioApp() {
                     </button>
 
                     {expandBilling && (
-                      <div className="pl-14 pr-4 pb-4 space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
-                        <div className="p-3 bg-white/5 rounded-xl border border-white/10 space-y-2">
-                          <div className="flex justify-between items-center text-xs">
-                            <span className="text-gray-400">Current Plan</span>
-                            <span className="text-white font-medium">Free</span>
+                      <div className="pl-14 pr-4 pb-4 space-y-3">
+                        <div className="p-4 bg-white/5 rounded-xl border border-white/10 space-y-3">
+                          <div className="flex justify-between items-center">
+                            <span className="text-xs text-gray-400">Current Plan</span>
+                            <span className="text-xs text-white font-bold px-2 py-0.5 bg-white/10 rounded-full">Free Tier</span>
                           </div>
-                          <div className="flex justify-between items-center text-xs">
-                            <span className="text-gray-400">Billing</span>
-                            <span className="text-white font-medium">Monthly</span>
+                          <div className="flex justify-between items-center">
+                            <span className="text-xs text-gray-400">Billing Cycle</span>
+                            <span className="text-xs text-white font-medium">Monthly</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-xs text-gray-400">Next Bill Date</span>
+                            <span className="text-xs text-gray-300">-</span>
+                          </div>
+                          <div className="border-t border-white/10 pt-3 mt-2">
+                            <div className="flex justify-between items-center mb-2">
+                              <span className="text-xs text-gray-400">Credits Used</span>
+                              <span className="text-xs text-white font-medium">12 / 50</span>
+                            </div>
+                            <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+                              <div className="h-full bg-gradient-to-r from-white to-gray-400 w-[24%]" />
+                            </div>
+                          </div>
+                          <div className="border-t border-white/10 pt-3 mt-2">
+                            <span className="text-[10px] text-gray-500 uppercase tracking-wider">Payment Method</span>
+                            <div className="flex items-center gap-2 mt-2">
+                              <div className="w-8 h-5 bg-gradient-to-r from-gray-700 to-gray-600 rounded flex items-center justify-center text-[8px] text-white font-bold">
+                                VISA
+                              </div>
+                              <span className="text-xs text-gray-300">•••• 4242</span>
+                              <button className="ml-auto text-[10px] text-blue-400 hover:text-blue-300">Edit</button>
+                            </div>
                           </div>
                         </div>
                         <button
@@ -1569,9 +1615,13 @@ export default function VizualStudioApp() {
                             setShowAccountModal(false);
                             setShowPricingModal(true);
                           }}
-                          className="w-full py-2 bg-white text-black text-xs font-bold rounded-lg hover:bg-gray-200 transition-colors"
+                          className="w-full py-2.5 bg-gradient-to-r from-white via-gray-200 to-white text-black text-xs font-bold rounded-xl hover:brightness-110 transition-all flex items-center justify-center gap-2 shadow-lg shadow-white/10"
                         >
+                          <Zap size={14} />
                           Upgrade Plan
+                        </button>
+                        <button className="w-full py-2 text-xs text-gray-500 hover:text-gray-300 transition-colors">
+                          View Billing History
                         </button>
                       </div>
                     )}
@@ -1621,143 +1671,278 @@ export default function VizualStudioApp() {
               </div>
             </div>
           </div>
-        )}
+        )
+      }
 
-      {/* Style Selection Modal */}
-      {showStyleModal && (
-        <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            onClick={() => setShowStyleModal(false)}
-          />
-          <div className="relative w-full max-w-3xl bg-[#0d0d0d] border border-white/10 rounded-2xl shadow-2xl p-6 overflow-hidden">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className={`text-xl font-bold text-white ${spaceGrotesk.className}`}>Select Style</h3>
-              <button
-                onClick={() => setShowStyleModal(false)}
-                className="p-1.5 bg-white/5 hover:bg-white/10 rounded-full text-white transition-colors"
-              >
-                <X size={16} />
-              </button>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              {STYLE_PRESETS.map((style) => (
+      {/* Style Selection Modal - Premium Design with Images */}
+      {
+        showStyleModal && (
+          <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
+            <div
+              className="absolute inset-0 bg-black/80 backdrop-blur-md"
+              onClick={() => setShowStyleModal(false)}
+            />
+            <div className="relative w-full max-w-4xl max-h-[85vh] bg-[#0a0a0a] border border-white/10 rounded-3xl shadow-2xl overflow-hidden">
+              {/* Header */}
+              <div className="flex items-center justify-between p-6 border-b border-white/5">
+                <div>
+                  <h3 className={`text-2xl font-bold text-white ${spaceGrotesk.className}`}>Choose a Style</h3>
+                  <p className="text-gray-400 text-sm mt-1">Select a visual style for your creation</p>
+                </div>
                 <button
-                  key={style.name}
-                  onClick={() => {
-                    setPrompt((prev) => prev ? `${prev}, ${style.name} style` : `${style.name} style`);
-                    setShowStyleModal(false);
-                  }}
-                  className="group relative aspect-square rounded-xl overflow-hidden border border-white/10 hover:border-white/30 transition-all"
+                  onClick={() => setShowStyleModal(false)}
+                  className="p-2.5 bg-white/5 hover:bg-white/10 rounded-full text-white transition-colors"
                 >
-                  {/* Placeholder Gradient Backgrounds */}
-                  <div className={`absolute inset-0 bg-gradient-to-br transition-transform duration-500 group-hover:scale-110 
-                    ${style.name === 'Cinematic' ? 'from-amber-900 to-black' :
-                      style.name === 'Anime' ? 'from-pink-500 to-purple-900' :
-                        style.name === '3D Animation' ? 'from-blue-500 to-cyan-900' :
-                          style.name === 'Cartoon' ? 'from-yellow-400 to-orange-600' :
-                            style.name === 'Brainrot' ? 'from-green-500 to-red-500' :
-                              style.name === 'Realistic' ? 'from-gray-300 to-gray-700' :
-                                'from-gray-900 to-black'}`}
-                  />
-                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors" />
-
-                  <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
-                    <span className="text-white font-medium text-sm">{style.name}</span>
-                  </div>
-
-                  {/* Icon Overlay */}
-                  <div className="absolute top-3 right-3 p-2 bg-black/30 backdrop-blur-md rounded-full text-white/70 group-hover:text-white transition-colors">
-                    <Sparkles size={14} />
-                  </div>
+                  <X size={18} />
                 </button>
-              ))}
+              </div>
+
+              {/* Styles Grid */}
+              <div className="p-6 overflow-y-auto max-h-[calc(85vh-100px)]">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {[
+                    { name: 'Cinematic', image: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400&h=400&fit=crop', desc: 'Film-like quality' },
+                    { name: 'Anime', image: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=400&h=400&fit=crop', desc: 'Japanese animation' },
+                    { name: '3D Animation', image: 'https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?w=400&h=400&fit=crop', desc: 'Pixar-like render' },
+                    { name: 'Cartoon', image: 'https://images.unsplash.com/photo-1534809027769-b00d750a6bac?w=400&h=400&fit=crop', desc: 'Playful illustration' },
+                    { name: 'Realistic', image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=400&fit=crop', desc: 'Photorealistic' },
+                    { name: 'Noir', image: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=400&h=400&fit=crop', desc: 'Dark & moody' },
+                    { name: 'Cyberpunk', image: 'https://images.unsplash.com/photo-1515630771457-09367d0ae038?w=400&h=400&fit=crop', desc: 'Neon futurism' },
+                    { name: 'Fantasy', image: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=400&h=400&fit=crop', desc: 'Magical worlds' },
+                  ].map((style) => (
+                    <button
+                      key={style.name}
+                      onClick={() => {
+                        setPrompt((prev) => prev ? `${prev}, ${style.name} style` : `${style.name} style`);
+                        setShowStyleModal(false);
+                      }}
+                      className="group relative aspect-[4/5] rounded-2xl overflow-hidden border border-white/10 hover:border-white/40 transition-all hover:scale-[1.02] hover:shadow-xl"
+                    >
+                      {/* Background Image */}
+                      <img
+                        src={style.image}
+                        alt={style.name}
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      />
+
+                      {/* Overlay gradient */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity" />
+
+                      {/* Content */}
+                      <div className="absolute bottom-0 left-0 right-0 p-4">
+                        <h4 className="text-white font-bold text-base mb-1">{style.name}</h4>
+                        <p className="text-white/60 text-xs">{style.desc}</p>
+                      </div>
+
+                      {/* Selection indicator */}
+                      <div className="absolute top-3 right-3 w-8 h-8 bg-white/0 group-hover:bg-white rounded-full flex items-center justify-center transition-all opacity-0 group-hover:opacity-100">
+                        <Sparkles size={14} className="text-black" />
+                      </div>
+
+                      {/* Hover glow effect */}
+                      <div className="absolute inset-0 ring-2 ring-white/0 group-hover:ring-white/30 rounded-2xl transition-all" />
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      )
+        )
       }
 
       {/* Feedback Modal */}
-      {showFeedbackModal && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            onClick={() => setShowFeedbackModal(false)}
-          />
-          <div className="relative w-full max-w-lg bg-[#0d0d0d] border border-white/10 rounded-2xl shadow-2xl p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className={`text-xl font-bold text-white ${spaceGrotesk.className}`}>Feedback</h3>
-              <button onClick={() => setShowFeedbackModal(false)} className="text-gray-400 hover:text-white"><X size={20} /></button>
-            </div>
-            <p className="text-sm text-gray-400 mb-4">We value your input! Let us know how we can improve.</p>
-            <textarea className="w-full h-32 bg-black/50 border border-white/10 rounded-xl p-3 text-white placeholder-gray-600 mb-4 resize-none focus:outline-none focus:border-white/30" placeholder="Type your feedback here..." />
-            <div className="flex justify-end gap-2">
-              <button onClick={() => setShowFeedbackModal(false)} className="px-4 py-2 text-sm text-gray-400 hover:text-white">Cancel</button>
-              <button onClick={() => {
-                // Simulate submission
-                alert("Feedback submitted! Thank you.");
-                setShowFeedbackModal(false);
-              }} className="px-5 py-2 rounded-lg bg-white text-black font-medium text-sm hover:bg-gray-200">Submit</button>
+      {
+        showFeedbackModal && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+            <div
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              onClick={() => setShowFeedbackModal(false)}
+            />
+            <div className="relative w-full max-w-lg bg-[#0d0d0d] border border-white/10 rounded-2xl shadow-2xl p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className={`text-xl font-bold text-white ${spaceGrotesk.className}`}>Feedback</h3>
+                <button onClick={() => setShowFeedbackModal(false)} className="text-gray-400 hover:text-white"><X size={20} /></button>
+              </div>
+              <p className="text-sm text-gray-400 mb-4">We value your input! Let us know how we can improve.</p>
+              <textarea className="w-full h-32 bg-black/50 border border-white/10 rounded-xl p-3 text-white placeholder-gray-600 mb-4 resize-none focus:outline-none focus:border-white/30" placeholder="Type your feedback here..." />
+              <div className="flex justify-end gap-2">
+                <button onClick={() => setShowFeedbackModal(false)} className="px-4 py-2 text-sm text-gray-400 hover:text-white">Cancel</button>
+                <button onClick={() => {
+                  // Simulate submission
+                  alert("Feedback submitted! Thank you.");
+                  setShowFeedbackModal(false);
+                }} className="px-5 py-2 rounded-lg bg-white text-black font-medium text-sm hover:bg-gray-200">Submit</button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
-      {/* Pricing Modal */}
-      {showPricingModal && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-black/80 backdrop-blur-md"
-            onClick={() => setShowPricingModal(false)}
-          />
-          <div className="relative w-full max-w-4xl bg-[#0d0d0d] border border-white/10 rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row">
-            <button
+      {/* Pricing Modal - Premium Vizual Design */}
+      {
+        showPricingModal && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+            <div
+              className="absolute inset-0 bg-black/90 backdrop-blur-xl"
               onClick={() => setShowPricingModal(false)}
-              className="absolute top-4 right-4 p-2 bg-black/20 hover:bg-white/10 rounded-full text-white z-10"
-            >
-              <X size={20} />
-            </button>
-
-            {/* Pro Plan */}
-            <div className="flex-1 p-8 border-r border-white/10 flex flex-col items-center text-center">
-              <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mb-4 text-white">
-                <Sparkles size={24} />
+            />
+            <div className="relative w-full max-w-5xl">
+              {/* Header */}
+              <div className="text-center mb-8 relative z-10">
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/10 mb-4">
+                  <Sparkles size={14} className="text-white" />
+                  <span className="text-xs font-medium text-white uppercase tracking-wider">Vizual Plans</span>
+                </div>
+                <h2 className={`text-3xl md:text-4xl font-bold text-white mb-2 ${spaceGrotesk.className}`}>
+                  Unlock Your Creative Potential
+                </h2>
+                <p className="text-gray-400 text-sm max-w-lg mx-auto">
+                  Choose the plan that fits your workflow. Cancel anytime.
+                </p>
               </div>
-              <h3 className={`text-2xl font-bold text-white mb-2 ${spaceGrotesk.className}`}>Pro</h3>
-              <div className="text-3xl font-bold text-white mb-6">$29<span className="text-sm text-gray-400 font-normal">/mo</span></div>
-              <ul className="space-y-3 mb-8 text-sm text-gray-300 text-left w-full max-w-xs">
-                <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-white mt-1.5" /> Unlimited Generations</li>
-                <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-white mt-1.5" /> Fast Processing</li>
-                <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-white mt-1.5" /> Commercial Usage</li>
-              </ul>
-              <button className="w-full py-3 rounded-xl bg-white text-black font-bold hover:bg-gray-200 transition-colors mt-auto">
-                Upgrade to Pro
-              </button>
-            </div>
 
-            {/* Ultra Plan */}
-            <div className="flex-1 p-8 flex flex-col items-center text-center relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 to-blue-900/20" />
-              <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center mb-4 text-white relative z-10">
-                <Zap size={24} />
-              </div>
-              <h3 className={`text-2xl font-bold text-white mb-2 relative z-10 ${spaceGrotesk.className}`}>Ultra</h3>
-              <div className="text-3xl font-bold text-white mb-6 relative z-10">$99<span className="text-sm text-gray-400 font-normal">/mo</span></div>
-              <ul className="space-y-3 mb-8 text-sm text-gray-300 text-left w-full max-w-xs relative z-10">
-                <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 mt-1.5" /> Everything in Pro</li>
-                <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 mt-1.5" /> Priority Access</li>
-                <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 mt-1.5" /> Exclusive Models</li>
-              </ul>
-              <button className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-500 to-blue-500 text-white font-bold hover:brightness-110 transition-all mt-auto relative z-10">
-                Get Ultra
+              <button
+                onClick={() => setShowPricingModal(false)}
+                className="absolute top-0 right-0 p-3 bg-white/5 hover:bg-white/10 rounded-full text-white z-20 border border-white/10"
+              >
+                <X size={20} />
               </button>
+
+              {/* Plans Container */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
+
+                {/* Free Plan */}
+                <div className="relative p-6 rounded-3xl bg-[#0d0d0d] border border-white/10 flex flex-col">
+                  <div className="mb-6">
+                    <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-4">
+                      <User size={22} className="text-gray-400" />
+                    </div>
+                    <h3 className={`text-xl font-bold text-white mb-1 ${spaceGrotesk.className}`}>Free</h3>
+                    <p className="text-sm text-gray-500">Perfect for exploring</p>
+                  </div>
+                  <div className="mb-6">
+                    <span className="text-4xl font-bold text-white">$0</span>
+                    <span className="text-gray-500 text-sm">/month</span>
+                  </div>
+                  <ul className="space-y-3 mb-8 flex-1">
+                    {["50 credits per month", "Basic AI models", "720p exports", "Community support"].map((feature, i) => (
+                      <li key={i} className="flex items-start gap-3 text-sm text-gray-400">
+                        <div className="w-1.5 h-1.5 rounded-full bg-gray-600 mt-1.5 flex-shrink-0" />
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+                  <button className="w-full py-3.5 rounded-xl bg-white/5 text-white font-semibold text-sm border border-white/10 hover:bg-white/10 transition-all">
+                    Current Plan
+                  </button>
+                </div>
+
+                {/* Pro Plan - Featured with Video */}
+                <div className="relative rounded-3xl overflow-hidden border-2 border-white/20 flex flex-col transform md:scale-105 shadow-2xl shadow-white/5">
+                  {/* Video Background */}
+                  <div className="absolute inset-0 z-0">
+                    <video
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      className="w-full h-full object-cover opacity-30"
+                    >
+                      <source src="/videos/veo1.mp4" type="video/mp4" />
+                    </video>
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/60 to-black/90" />
+                  </div>
+
+                  {/* Popular Badge */}
+                  <div className="absolute top-4 right-4 z-10">
+                    <span className="px-3 py-1 rounded-full bg-white text-black text-xs font-bold">
+                      MOST POPULAR
+                    </span>
+                  </div>
+
+                  <div className="relative z-10 p-6 flex flex-col h-full">
+                    <div className="mb-6">
+                      <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center mb-4">
+                        <Sparkles size={22} className="text-black" />
+                      </div>
+                      <h3 className={`text-xl font-bold text-white mb-1 ${spaceGrotesk.className}`}>Pro</h3>
+                      <p className="text-sm text-gray-400">For serious creators</p>
+                    </div>
+                    <div className="mb-6">
+                      <span className="text-4xl font-bold text-white">$29</span>
+                      <span className="text-gray-400 text-sm">/month</span>
+                    </div>
+                    <ul className="space-y-3 mb-8 flex-1">
+                      {["1,000 credits per month", "Premium AI models", "4K exports", "Priority processing", "Remove watermarks", "Commercial license"].map((feature, i) => (
+                        <li key={i} className="flex items-start gap-3 text-sm text-white">
+                          <div className="w-1.5 h-1.5 rounded-full bg-white mt-1.5 flex-shrink-0" />
+                          {feature}
+                        </li>
+                      ))}
+                    </ul>
+                    <button className="w-full py-3.5 rounded-xl bg-white text-black font-bold text-sm hover:bg-gray-100 transition-all hover:scale-[1.02] shadow-lg shadow-white/20">
+                      Upgrade to Pro
+                    </button>
+                  </div>
+                </div>
+
+                {/* Ultra Plan - with Video */}
+                <div className="relative rounded-3xl overflow-hidden border border-white/10 flex flex-col">
+                  {/* Video Background */}
+                  <div className="absolute inset-0 z-0">
+                    <video
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      className="w-full h-full object-cover opacity-20"
+                    >
+                      <source src="/videos/film2.mp4" type="video/mp4" />
+                    </video>
+                    <div className="absolute inset-0 bg-gradient-to-b from-[#0d0d0d]/90 via-[#0d0d0d]/70 to-[#0d0d0d]/95" />
+                  </div>
+
+                  <div className="relative z-10 p-6 flex flex-col h-full">
+                    <div className="mb-6">
+                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-r from-gray-700 via-white to-gray-700 p-[1px]">
+                        <div className="w-full h-full rounded-2xl bg-black flex items-center justify-center">
+                          <Zap size={22} className="text-white" />
+                        </div>
+                      </div>
+                      <h3 className={`text-xl font-bold text-white mb-1 mt-4 ${spaceGrotesk.className}`}>Ultra</h3>
+                      <p className="text-sm text-gray-400">Maximum power</p>
+                    </div>
+                    <div className="mb-6">
+                      <span className="text-4xl font-bold text-white">$99</span>
+                      <span className="text-gray-400 text-sm">/month</span>
+                    </div>
+                    <ul className="space-y-3 mb-8 flex-1">
+                      {["Unlimited credits", "All AI models (incl. Sora)", "8K exports", "Fastest processing", "API access", "Dedicated support", "Early feature access"].map((feature, i) => (
+                        <li key={i} className="flex items-start gap-3 text-sm text-gray-300">
+                          <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-gray-500 to-white mt-1.5 flex-shrink-0" />
+                          {feature}
+                        </li>
+                      ))}
+                    </ul>
+                    <button className="w-full py-3.5 rounded-xl bg-gradient-to-r from-gray-800 via-gray-700 to-gray-800 text-white font-bold text-sm hover:brightness-125 transition-all border border-white/10 shadow-lg">
+                      Get Ultra
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="text-center mt-8 relative z-10">
+                <p className="text-xs text-gray-500">
+                  All plans include a 7-day free trial. No credit card required to start.
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
-      {/* MultiStep Loader */}
+      {/* MultiStep Loader for Video Extension */}
       <MultiStepLoader
         loadingStates={extensionLoadingStates}
         loading={isExtending}
@@ -1775,79 +1960,101 @@ export default function VizualStudioApp() {
         )
       }
 
+      {/* MultiStep Loader for Content Generation */}
+      <MultiStepLoader
+        loadingStates={generationLoadingStates}
+        loading={isGenerating}
+        duration={2000}
+      />
+
+      {
+        isGenerating && (
+          <button
+            className="fixed top-4 right-4 text-white z-[120] bg-black/50 p-2 rounded-full hover:bg-black/70"
+            onClick={() => setIsGenerating(false)}
+          >
+            <X className="h-10 w-10" />
+          </button>
+        )
+      }
+
       {/* Color Palette Modal */}
-      {showColorPaletteModal && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowColorPaletteModal(false)} />
-          <div className="relative w-full max-w-2xl bg-[#0d0d0d] border border-white/10 rounded-2xl shadow-2xl p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className={`text-xl font-bold text-white ${spaceGrotesk.className}`}>Color Palettes</h3>
-              <button onClick={() => setShowColorPaletteModal(false)} className="text-gray-400 hover:text-white"><X size={20} /></button>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Palette 1 */}
-              <div className="space-y-2">
-                <div className="h-32 rounded-xl flex overflow-hidden">
-                  <div className="flex-1 bg-[#0a0a0a]"></div>
-                  <div className="flex-1 bg-[#1a1a1a]"></div>
-                  <div className="flex-1 bg-white"></div>
-                  <div className="flex-1 bg-blue-500"></div>
-                </div>
-                <p className="text-sm font-medium text-white">Cyber Dark</p>
+      {
+        showColorPaletteModal && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowColorPaletteModal(false)} />
+            <div className="relative w-full max-w-2xl bg-[#0d0d0d] border border-white/10 rounded-2xl shadow-2xl p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className={`text-xl font-bold text-white ${spaceGrotesk.className}`}>Color Palettes</h3>
+                <button onClick={() => setShowColorPaletteModal(false)} className="text-gray-400 hover:text-white"><X size={20} /></button>
               </div>
-              {/* Palette 2 */}
-              <div className="space-y-2">
-                <div className="h-32 rounded-xl flex overflow-hidden">
-                  <div className="flex-1 bg-purple-900"></div>
-                  <div className="flex-1 bg-purple-600"></div>
-                  <div className="flex-1 bg-pink-500"></div>
-                  <div className="flex-1 bg-orange-400"></div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Palette 1 */}
+                <div className="space-y-2">
+                  <div className="h-32 rounded-xl flex overflow-hidden">
+                    <div className="flex-1 bg-[#0a0a0a]"></div>
+                    <div className="flex-1 bg-[#1a1a1a]"></div>
+                    <div className="flex-1 bg-white"></div>
+                    <div className="flex-1 bg-blue-500"></div>
+                  </div>
+                  <p className="text-sm font-medium text-white">Cyber Dark</p>
                 </div>
-                <p className="text-sm font-medium text-white">Sunset Synth</p>
+                {/* Palette 2 */}
+                <div className="space-y-2">
+                  <div className="h-32 rounded-xl flex overflow-hidden">
+                    <div className="flex-1 bg-purple-900"></div>
+                    <div className="flex-1 bg-purple-600"></div>
+                    <div className="flex-1 bg-pink-500"></div>
+                    <div className="flex-1 bg-orange-400"></div>
+                  </div>
+                  <p className="text-sm font-medium text-white">Sunset Synth</p>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
       {/* Style Guide Modal */}
-      {showStyleGuideModal && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowStyleGuideModal(false)} />
-          <div className="relative w-full max-w-2xl bg-[#0d0d0d] border border-white/10 rounded-2xl shadow-2xl p-6 max-h-[80vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className={`text-xl font-bold text-white ${spaceGrotesk.className}`}>Style Guide</h3>
-              <button onClick={() => setShowStyleGuideModal(false)} className="text-gray-400 hover:text-white"><X size={20} /></button>
-            </div>
-            <div className="space-y-8">
-              {/* Typography */}
-              <section>
-                <h4 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4">Typography</h4>
-                <div className="space-y-4 border border-white/10 p-4 rounded-xl">
-                  <div>
-                    <p className="text-sm text-gray-400 mb-1">Display (Space Grotesk)</p>
-                    <h1 className={`text-4xl font-bold text-white ${spaceGrotesk.className}`}>The quick brown fox</h1>
+      {
+        showStyleGuideModal && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowStyleGuideModal(false)} />
+            <div className="relative w-full max-w-2xl bg-[#0d0d0d] border border-white/10 rounded-2xl shadow-2xl p-6 max-h-[80vh] overflow-y-auto">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className={`text-xl font-bold text-white ${spaceGrotesk.className}`}>Style Guide</h3>
+                <button onClick={() => setShowStyleGuideModal(false)} className="text-gray-400 hover:text-white"><X size={20} /></button>
+              </div>
+              <div className="space-y-8">
+                {/* Typography */}
+                <section>
+                  <h4 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4">Typography</h4>
+                  <div className="space-y-4 border border-white/10 p-4 rounded-xl">
+                    <div>
+                      <p className="text-sm text-gray-400 mb-1">Display (Space Grotesk)</p>
+                      <h1 className={`text-4xl font-bold text-white ${spaceGrotesk.className}`}>The quick brown fox</h1>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-400 mb-1">Body (Inter)</p>
+                      <p className="text-base text-gray-300">The quick brown fox jumps over the lazy dog. A visual creation tool for the modern era.</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm text-gray-400 mb-1">Body (Inter)</p>
-                    <p className="text-base text-gray-300">The quick brown fox jumps over the lazy dog. A visual creation tool for the modern era.</p>
-                  </div>
-                </div>
-              </section>
+                </section>
 
-              {/* Buttons */}
-              <section>
-                <h4 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4">Buttons</h4>
-                <div className="flex flex-wrap gap-4 border border-white/10 p-4 rounded-xl">
-                  <button className="px-4 py-2 bg-white text-black rounded-lg font-medium text-sm">Primary Action</button>
-                  <button className="px-4 py-2 bg-white/10 text-white border border-white/10 rounded-lg font-medium text-sm">Secondary Action</button>
-                  <button className="px-4 py-2 bg-transparent text-gray-400 hover:text-white rounded-lg font-medium text-sm">Ghost Button</button>
-                </div>
-              </section>
+                {/* Buttons */}
+                <section>
+                  <h4 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4">Buttons</h4>
+                  <div className="flex flex-wrap gap-4 border border-white/10 p-4 rounded-xl">
+                    <button className="px-4 py-2 bg-white text-black rounded-lg font-medium text-sm">Primary Action</button>
+                    <button className="px-4 py-2 bg-white/10 text-white border border-white/10 rounded-lg font-medium text-sm">Secondary Action</button>
+                    <button className="px-4 py-2 bg-transparent text-gray-400 hover:text-white rounded-lg font-medium text-sm">Ghost Button</button>
+                  </div>
+                </section>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      }
     </div >
   );
 }
