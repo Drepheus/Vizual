@@ -9,6 +9,7 @@ import { useAuth } from "@/context/auth-context";
 import { useGuestMode } from "@/context/guest-mode-context";
 import { motion, AnimatePresence } from "framer-motion";
 import Aurora from "./Aurora";
+import { HoverBorderGradient } from "@/src/components/ui/hover-border-gradient";
 
 // Chrome/Silver gradient text component with shimmer animation
 const ChromeText = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
@@ -25,29 +26,21 @@ const ChromeText = ({ children, className = "" }: { children: React.ReactNode; c
   </span>
 );
 
-// HoverVideo component - optimized for performance with lazy loading
-const HoverVideo = ({ src, className = "", autoPlay = false, poster }: { src: string; className?: string; autoPlay?: boolean; poster?: string }) => {
+// HoverVideo component - shows first frame, plays on hover
+const HoverVideo = ({ src, className = "", autoPlay = false }: { src: string; className?: string; autoPlay?: boolean }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isVisible, setIsVisible] = useState(false);
-  const [hasLoaded, setHasLoaded] = useState(false);
 
   useEffect(() => {
     if (!videoRef.current) return;
 
     const video = videoRef.current;
 
-    // Single observer for both visibility and autoplay
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             setIsVisible(true);
-            // Start loading video when near viewport
-            if (!hasLoaded) {
-              video.load();
-              setHasLoaded(true);
-            }
-            // Only autoplay if autoPlay prop is true
             if (autoPlay) {
               video.play().catch(() => { });
             }
@@ -60,15 +53,15 @@ const HoverVideo = ({ src, className = "", autoPlay = false, poster }: { src: st
         });
       },
       {
-        threshold: 0.1, // Start earlier for smoother experience
-        rootMargin: '100px 0px' // Pre-load videos 100px before entering viewport
+        threshold: 0.1,
+        rootMargin: '100px 0px'
       }
     );
 
     observer.observe(video);
 
     return () => observer.disconnect();
-  }, [autoPlay, hasLoaded]);
+  }, [autoPlay]);
 
   const handleMouseEnter = () => {
     if (!autoPlay && videoRef.current && isVisible) {
@@ -99,8 +92,7 @@ const HoverVideo = ({ src, className = "", autoPlay = false, poster }: { src: st
       loop
       muted
       playsInline
-      preload="none"
-      poster={poster}
+      preload="metadata"
       className={`${className} will-change-transform`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -278,12 +270,14 @@ export function VizualStudio() {
           </div>
 
           <div className="flex items-center gap-4">
-            <button
+            <HoverBorderGradient
+              containerClassName="rounded-full"
+              as="button"
               onClick={handleTryNow}
-              className="px-5 py-2 md:px-6 md:py-2 rounded-full bg-white text-black text-xs md:text-sm font-bold hover:bg-gray-200 transition-colors"
+              className="bg-white text-black flex items-center px-4 py-1.5 md:px-5 md:py-2 text-xs md:text-sm font-bold"
             >
               TRY NOW
-            </button>
+            </HoverBorderGradient>
           </div>
         </div>
       </nav>
@@ -298,7 +292,6 @@ export function VizualStudio() {
             muted
             playsInline
             preload="auto"
-            poster="/images/omi-preview.png"
             className="min-h-full min-w-full object-cover opacity-70 will-change-transform"
             style={{ contentVisibility: 'auto' }}
           >
@@ -430,12 +423,16 @@ export function VizualStudio() {
       {/* No Prompt Engineering Section */}
       < section className="relative z-30 w-full min-h-screen bg-black py-24 px-4 flex items-center" >
         <div className="max-w-7xl mx-auto text-center">
-          <button
-            onClick={handleTryNow}
-            className="mb-12 px-8 py-4 rounded-full bg-white text-black text-lg font-bold hover:bg-gray-200 transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-white/20"
-          >
-            Start Vizualizing
-          </button>
+          <div className="flex justify-center mb-12">
+            <HoverBorderGradient
+              containerClassName="rounded-full"
+              as="button"
+              onClick={handleTryNow}
+              className="bg-white text-black flex items-center px-6 py-3 text-lg font-bold"
+            >
+              Start Vizualizing
+            </HoverBorderGradient>
+          </div>
 
           <h2 className="text-5xl md:text-7xl font-bold mb-16 tracking-tight leading-tight">
             No prompt <br />
@@ -610,22 +607,22 @@ export function VizualStudio() {
             {[...Array(2)].map((_, i) => (
               <div key={i} className="flex gap-4">
                 <div className="carousel-item rounded-xl overflow-hidden relative group bg-gray-900">
-                  <HoverVideo src="/videos/film.mp4" poster="/images/omi-preview.png" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                  <HoverVideo src="/videos/film.mp4" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                 </div>
                 <div className="carousel-item rounded-xl overflow-hidden relative group bg-gray-900">
-                  <HoverVideo src="/videos/film2.mp4" poster="/images/omi-preview.png" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                  <HoverVideo src="/videos/film2.mp4" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                 </div>
                 <div className="carousel-item rounded-xl overflow-hidden relative group bg-gray-900">
-                  <HoverVideo src="/videos/film3.mp4" poster="/images/omi-preview.png" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                  <HoverVideo src="/videos/film3.mp4" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                 </div>
                 <div className="carousel-item rounded-xl overflow-hidden relative group bg-gray-900">
-                  <HoverVideo src="/videos/film5.mp4" poster="/images/omi-preview.png" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                  <HoverVideo src="/videos/film5.mp4" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                 </div>
                 <div className="carousel-item rounded-xl overflow-hidden relative group bg-gray-900">
-                  <HoverVideo src="/videos/film6.mp4" poster="/images/omi-preview.png" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                  <HoverVideo src="/videos/film6.mp4" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                 </div>
                 <div className="carousel-item rounded-xl overflow-hidden relative group bg-gray-900">
-                  <HoverVideo src="/videos/film7.mp4" poster="/images/omi-preview.png" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                  <HoverVideo src="/videos/film7.mp4" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                 </div>
               </div>
             ))}
@@ -649,13 +646,13 @@ export function VizualStudio() {
               {[...Array(2)].map((_, i) => (
                 <div key={i} className="flex gap-4">
                   <div className="carousel-item rounded-xl overflow-hidden relative group bg-gray-900">
-                    <HoverVideo src="/videos/ani.mp4" poster="/images/omi-preview.png" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                    <HoverVideo src="/videos/ani.mp4" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                   </div>
                   <div className="carousel-item rounded-xl overflow-hidden relative group bg-gray-900">
-                    <HoverVideo src="/videos/ani1.mp4" poster="/images/omi-preview.png" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                    <HoverVideo src="/videos/ani1.mp4" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                   </div>
                   <div className="carousel-item rounded-xl overflow-hidden relative group bg-gray-900">
-                    <HoverVideo src="/videos/ani4.mp4" poster="/images/omi-preview.png" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                    <HoverVideo src="/videos/ani4.mp4" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                   </div>
                 </div>
               ))}
@@ -676,10 +673,10 @@ export function VizualStudio() {
               {[...Array(2)].map((_, i) => (
                 <div key={i} className="flex gap-4">
                   <div className="carousel-item rounded-xl overflow-hidden relative group bg-gray-900">
-                    <HoverVideo src="/videos/design.mp4" poster="/images/omi-preview.png" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                    <HoverVideo src="/videos/design.mp4" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                   </div>
                   <div className="carousel-item rounded-xl overflow-hidden relative group bg-gray-900">
-                    <HoverVideo src="/videos/design2.mp4" poster="/images/omi-preview.png" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                    <HoverVideo src="/videos/design2.mp4" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                   </div>
                 </div>
               ))}
@@ -700,7 +697,7 @@ export function VizualStudio() {
               {[...Array(2)].map((_, i) => (
                 <div key={i} className="flex gap-4">
                   <div className="carousel-item rounded-xl overflow-hidden relative group bg-gray-900">
-                    <HoverVideo src="/videos/product.mp4" poster="/images/omi-preview.png" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                    <HoverVideo src="/videos/product.mp4" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                   </div>
                   <div className="carousel-item rounded-xl overflow-hidden relative group bg-gray-900">
                     <HoverVideo src="/videos/product1.mp4" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
@@ -931,9 +928,6 @@ export function VizualStudio() {
             {/* Avatar Scene Video */}
             <div className="relative rounded-[24px] overflow-hidden border border-white/10 bg-[#111] group animate-on-scroll animate-fade-in-up delay-300">
               <video
-                autoPlay
-                loop
-                muted
                 playsInline
                 controls
                 preload="metadata"
@@ -952,9 +946,6 @@ export function VizualStudio() {
             {/* Two Avatars Video */}
             <div className="relative rounded-[24px] overflow-hidden border border-white/10 bg-[#111] group animate-on-scroll animate-fade-in-up delay-500">
               <video
-                autoPlay
-                loop
-                muted
                 playsInline
                 controls
                 preload="metadata"
@@ -1320,19 +1311,19 @@ export function VizualStudio() {
             <div>
               <h4 className="text-white font-bold mb-6">Platform</h4>
               <ul className="space-y-4 text-gray-400 text-sm">
-                <li><a href="#" className="hover:text-white transition-colors">Studio</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">API</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Pricing</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Enterprise</a></li>
+                <li><a href="/vizual/studio" className="hover:text-white transition-colors">Studio</a></li>
+                <li><a href="/vizual/api" className="hover:text-white transition-colors">API</a></li>
+                <li><a href="/vizual/enterprise" className="hover:text-white transition-colors">Pricing</a></li>
+                <li><a href="/vizual/enterprise" className="hover:text-white transition-colors">Enterprise</a></li>
               </ul>
             </div>
             <div>
               <h4 className="text-white font-bold mb-6">Company</h4>
               <ul className="space-y-4 text-gray-400 text-sm">
-                <li><a href="#" className="hover:text-white transition-colors">About</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Blog</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Careers</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Contact</a></li>
+                <li><a href="/vizual/about" className="hover:text-white transition-colors">About</a></li>
+                <li><a href="/vizual/blog" className="hover:text-white transition-colors">Blog</a></li>
+                <li><a href="/vizual/careers" className="hover:text-white transition-colors">Careers</a></li>
+                <li><a href="/vizual/contact" className="hover:text-white transition-colors">Contact</a></li>
               </ul>
             </div>
           </div>

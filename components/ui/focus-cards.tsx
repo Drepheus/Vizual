@@ -18,12 +18,14 @@ export const Card = React.memo(
     hovered,
     setHovered,
     onClick,
+    onAction,
   }: {
     card: Card;
     index: number;
     hovered: number | null;
     setHovered: React.Dispatch<React.SetStateAction<number | null>>;
     onClick?: (card: Card) => void;
+    onAction?: (action: string, card: Card) => void;
   }) => (
     <div
       onMouseEnter={() => setHovered(index)}
@@ -54,13 +56,25 @@ export const Card = React.memo(
 
         {/* Action Buttons */}
         <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-          <button className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-white" title="Edit">
+          <button
+            onClick={() => onAction && onAction('MODIFY', card)}
+            className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-white"
+            title="Edit"
+          >
             <Pencil size={18} />
           </button>
-          <button className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-white" title={card.type === 'video' ? 'Extend Video' : 'Make Video'}>
+          <button
+            onClick={() => onAction && onAction('MAKE_VIDEO', card)}
+            className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-white"
+            title={card.type === 'video' ? 'Extend Video' : 'Make Video'}
+          >
             {card.type === 'video' ? <Play size={18} /> : <Video size={18} />}
           </button>
-          <button className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-white" title="Make More">
+          <button
+            onClick={() => onAction && onAction('COPY_PROMPT', card)}
+            className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-white"
+            title="Make More"
+          >
             <Copy size={18} />
           </button>
         </div>
@@ -71,7 +85,7 @@ export const Card = React.memo(
 
 Card.displayName = "Card";
 
-export function FocusCards({ cards, onCardClick }: { cards: Card[], onCardClick?: (card: Card) => void }) {
+export function FocusCards({ cards, onCardClick, onAction }: { cards: Card[], onCardClick?: (card: Card) => void, onAction?: (action: string, card: Card) => void }) {
   const [hovered, setHovered] = useState<number | null>(null);
 
   return (
@@ -84,6 +98,7 @@ export function FocusCards({ cards, onCardClick }: { cards: Card[], onCardClick?
           hovered={hovered}
           setHovered={setHovered}
           onClick={onCardClick}
+          onAction={onAction}
         />
       ))}
     </div>

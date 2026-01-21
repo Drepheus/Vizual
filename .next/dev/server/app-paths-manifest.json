@@ -1,7 +1,10 @@
 {
   "/_not-found/page": "app/_not-found/page.js",
   "/page": "app/page.js",
+  "/vizual/about/page": "app/vizual/about/page.js",
   "/vizual/api/page": "app/vizual/api/page.js",
+  "/vizual/blog/page": "app/vizual/blog/page.js",
+  "/vizual/careers/page": "app/vizual/careers/page.js",
   "/vizual/community/page": "app/vizual/community/page.js",
   "/vizual/enterprise/page": "app/vizual/enterprise/page.js",
   "/vizual/page": "app/vizual/page.js",

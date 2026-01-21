@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
 import { useGuestMode } from "@/context/guest-mode-context";
@@ -30,8 +30,23 @@ import {
   Compass,
   Library,
   PanelLeftClose,
-  PanelLeft
+  PanelLeft,
+  Tv,
+  Play,
+  Palette,
+  Wand2,
+  Settings,
+  CreditCard,
+  LogOut,
+  Bell,
+  Shield,
+  Moon,
+  Heart,
+  Timer,
+  Zap,
+  ArrowRightFromLine
 } from "lucide-react";
+import { MultiStepLoader } from "@/components/ui/multi-step-loader";
 import { Inter, Space_Grotesk } from "next/font/google";
 import { Vortex } from "@/components/ui/vortex";
 import { ProjectsView } from "@/components/vizual/projects-view";
@@ -40,7 +55,17 @@ const inter = Inter({ subsets: ["latin"], weight: ["300", "400", "500", "600", "
 const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], weight: ["300", "400", "500", "600", "700"] });
 
 type CreationMode = "IMAGE" | "VIDEO";
-type TabMode = "KEYFRAME" | "REFERENCE" | "MODIFY" | "IMAGE REFERENCE" | "REMIX";
+type TabMode = "STYLE" | "REFERENCE" | "MODIFY" | "IMAGE REFERENCE" | "REMIX";
+
+const STYLE_PRESETS = [
+  { name: "Cinematic", icon: "film" },
+  { name: "Anime", icon: "user" },
+  { name: "3D Animation", icon: "box" },
+  { name: "Cartoon", icon: "smile" },
+  { name: "Brainrot", icon: "zap" },
+  { name: "Realistic", icon: "camera" },
+  { name: "Noir", icon: "moon" },
+];
 
 // Models Configuration
 const IMAGE_MODELS = [
@@ -276,32 +301,83 @@ const VIDEO_MODELS = [
   }
 ];
 
+const extensionLoadingStates = [
+  { text: "Analyzing video frames" },
+  { text: "Upscaling resolution" },
+  { text: "Interpolating frames" },
+  { text: "Enhancing details" },
+  { text: "Finalizing render" },
+];
+
+const MODE_SUBOPTIONS: Record<number, { title: string; promptSuffix?: string }[]> = {
+  1: [ // Make visuals for
+    { title: "Products", promptSuffix: "product photography" },
+    { title: "Avatar", promptSuffix: "character avatar" },
+    { title: "Environment", promptSuffix: "environment design" },
+    { title: "Social Media", promptSuffix: "social media post" },
+  ],
+  2: [ // Make a video of
+    { title: "Music Video", promptSuffix: "music video" },
+    { title: "Short Film", promptSuffix: "short film" },
+    { title: "Advertisement", promptSuffix: "advertisement" },
+    { title: "Vlog", promptSuffix: "vlog style" },
+  ],
+  3: [ // Use this @style
+    ...STYLE_PRESETS.map(s => ({ title: s.name, promptSuffix: `${s.name} style` }))
+  ]
+};
+
 export default function VizualStudioApp() {
   const router = useRouter();
   const { user, loading } = useAuth();
   const { isGuestMode } = useGuestMode();
   const [creationMode, setCreationMode] = useState<CreationMode>("VIDEO");
-  const [activeTab, setActiveTab] = useState<TabMode>("KEYFRAME");
+  const [activeTab, setActiveTab] = useState<TabMode>("STYLE");
 
   // Reset active tab when creation mode changes
   useEffect(() => {
     if (creationMode === 'IMAGE') {
       setActiveTab('IMAGE REFERENCE');
     } else {
-      setActiveTab('KEYFRAME');
+      setActiveTab('STYLE');
     }
   }, [creationMode]);
   const [currentView, setCurrentView] = useState<'STUDIO' | 'PROJECTS'>('STUDIO');
   const [prompt, setPrompt] = useState("");
-  const [isDraft, setIsDraft] = useState(true);
+  const [showStyleModal, setShowStyleModal] = useState(false);
+  const [enhancerPrompt, setEnhancerPrompt] = useState("");
+  const [showEnhancerModal, setShowEnhancerModal] = useState(false);
+  const [showTimerSlider, setShowTimerSlider] = useState(false);
+  const [duration, setDuration] = useState(0);
+  const [isAudio, setIsAudio] = useState(false); // Renamed from isDraft
   const [aspectRatio, setAspectRatio] = useState("16:9");
   const [model, setModel] = useState(VIDEO_MODELS[0].name); // Initialize with first video model
   const [showModeDropdown, setShowModeDropdown] = useState(false);
   const [showModelDropdown, setShowModelDropdown] = useState(false);
   const [uploadPopup, setUploadPopup] = useState<'image' | 'video' | null>(null);
+
+  // Attachments State
+  const [attachments, setAttachments] = useState<{ id: string; url: string; file?: File; type: 'image' | 'video' }[]>([]);
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showModeModal, setShowModeModal] = useState(false);
   const [sidebarExpanded, setSidebarExpanded] = useState(true);
+  const [inspirationOpen, setInspirationOpen] = useState(false);
+  const [showFlowTV, setShowFlowTV] = useState(false);
+  const [showAccountModal, setShowAccountModal] = useState(false);
+  const [expandBilling, setExpandBilling] = useState(false);
+  const [showPricingModal, setShowPricingModal] = useState(false);
+
+  const [isExtending, setIsExtending] = useState(false);
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [showColorPaletteModal, setShowColorPaletteModal] = useState(false);
+  const [showStyleGuideModal, setShowStyleGuideModal] = useState(false);
+
+  // Mode Selection States
+  const [modeStep, setModeStep] = useState<0 | 1>(0);
+  const [selectedModeId, setSelectedModeId] = useState<number | null>(null);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Update selected model when mode changes
   useEffect(() => {
@@ -456,18 +532,38 @@ export default function VizualStudioApp() {
           />
           <NavItem
             icon={<Home size={20} />}
-            label="Dashboard"
+            label="Studio"
             active={currentView === 'STUDIO'}
             expanded={sidebarExpanded}
             onClick={() => setCurrentView('STUDIO')}
           />
-          <NavItem icon={<Compass size={20} />} label="Explore" expanded={sidebarExpanded} />
-          <NavItem icon={<Library size={20} />} label="My Library" expanded={sidebarExpanded} />
+          <NavItem
+            icon={<Lightbulb size={20} />}
+            label="Inspiration"
+            active={inspirationOpen}
+            expanded={sidebarExpanded}
+            onClick={() => setInspirationOpen(!inspirationOpen)}
+          />
+          <NavItem
+            icon={<Compass size={20} />}
+            label="Community"
+            expanded={sidebarExpanded}
+            onClick={() => router.push('/vizual/community')}
+          />
         </nav>
 
-        {/* Bottom Section - User Profile */}
-        <div className={`${sidebarExpanded ? 'px-3' : 'px-2'} pt-4 border-t border-white/5 mt-4 flex-shrink-0`}>
-          <button className={`w-full flex items-center gap-3 ${sidebarExpanded ? 'px-2' : 'justify-center'} py-2 rounded-lg hover:bg-white/5 transition-colors`}>
+        {/* Bottom Section - Feedback & Profile */}
+        <div className={`${sidebarExpanded ? 'px-3' : 'px-2'} pt-4 border-t border-white/5 mt-4 flex-shrink-0 space-y-2`}>
+          <NavItem
+            icon={<MessageSquareQuote size={20} />}
+            label="Feedback"
+            expanded={sidebarExpanded}
+            onClick={() => setShowFeedbackModal(true)}
+          />
+          <button
+            onClick={() => setShowAccountModal(true)}
+            className={`w-full flex items-center gap-3 ${sidebarExpanded ? 'px-2' : 'justify-center'} py-2 rounded-lg hover:bg-white/5 transition-colors`}
+          >
             <div className="w-8 h-8 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
               A
             </div>
@@ -484,7 +580,62 @@ export default function VizualStudioApp() {
       {/* Main Content Area */}
       {currentView === 'PROJECTS' ? (
         <main className="flex-1 relative overflow-hidden bg-[#0a0a0a]">
-          <ProjectsView />
+          <ProjectsView onAction={(action, card) => {
+            setCurrentView('STUDIO');
+
+            // Common setup
+            if (card.prompt) setPrompt(card.prompt);
+            if (card.src) {
+              setAttachments(prev => [
+                ...prev,
+                {
+                  id: crypto.randomUUID(),
+                  url: card.src,
+                  type: card.type === 'video' ? 'video' : 'image'
+                }
+              ]);
+            }
+
+            switch (action) {
+              case 'MODIFY':
+                // For images, "Modify" usually means Remix/Image-to-Image
+                // For video, it maps to Modify tab
+                if (card.type === 'video') {
+                  setCreationMode('VIDEO');
+                  setActiveTab('MODIFY');
+                } else {
+                  setCreationMode('IMAGE');
+                  setActiveTab('REMIX'); // Remix allows image modification
+                }
+                break;
+
+              case 'MAKE_VIDEO':
+                setCreationMode('VIDEO');
+                setActiveTab('REFERENCE'); // Image-to-Video uses Reference tab
+                break;
+
+              case 'REFERENCE':
+                if (card.type === 'video') {
+                  setCreationMode('VIDEO');
+                  setActiveTab('REFERENCE');
+                } else {
+                  setCreationMode('IMAGE');
+                  setActiveTab('IMAGE REFERENCE');
+                }
+                break;
+
+              case 'MORE_LIKE_THIS':
+              case 'COPY_PROMPT':
+                // Just set prompt mostly, maybe set mode
+                setCreationMode(card.type === 'video' ? 'VIDEO' : 'IMAGE');
+                break;
+
+              case 'REFRAME':
+                setCreationMode('IMAGE');
+                setActiveTab('REMIX'); // Reframe usually involves outpainting/remixing
+                break;
+            }
+          }} />
         </main>
       ) : (
         <div className="flex-1 flex flex-col w-full min-w-0">
@@ -571,7 +722,10 @@ export default function VizualStudioApp() {
               </div>
             </div>
 
-            <button className="flex items-center gap-2 px-3 md:px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors text-sm">
+            <button
+              onClick={() => setShowAccountModal(true)}
+              className="flex items-center gap-2 px-3 md:px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors text-sm"
+            >
               <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-[10px] font-bold border border-white/20 text-white">
                 A
               </div>
@@ -617,19 +771,41 @@ export default function VizualStudioApp() {
 
                       {/* Action Buttons */}
                       <div className="flex flex-wrap items-center gap-2 md:gap-3 mb-8">
-                        <button className="flex items-center gap-2 px-3 md:px-4 py-2 rounded-full bg-white/10 hover:bg-white/15 transition-colors text-xs md:text-sm border border-white/10">
+                        <button
+                          onClick={() => {
+                            if (window.confirm("Are you sure you want to generate more images with this prompt?")) {
+                              handleGenerate();
+                            }
+                          }}
+                          className="flex items-center gap-2 px-3 md:px-4 py-2 rounded-full bg-white/10 hover:bg-white/15 transition-colors text-xs md:text-sm border border-white/10"
+                        >
                           <RefreshCw size={14} />
                           <span className="hidden sm:inline">Create More</span>
                           <span className="sm:hidden">Create</span>
                         </button>
-                        <button className="flex items-center gap-2 px-3 md:px-4 py-2 rounded-full bg-white/10 hover:bg-white/15 transition-colors text-xs md:text-sm border border-white/10">
+                        <button
+                          onClick={() => setInspirationOpen(true)}
+                          className="flex items-center gap-2 px-3 md:px-4 py-2 rounded-full bg-white/10 hover:bg-white/15 transition-colors text-xs md:text-sm border border-white/10"
+                        >
                           <Sparkles size={14} />
                           Inspiration
                         </button>
-                        <button className="flex items-center gap-2 px-3 md:px-4 py-2 rounded-full bg-white/10 hover:bg-white/15 transition-colors text-xs md:text-sm border border-white/10" title="Use as a reference">
+                        <button
+                          onClick={() => {
+                            // Simulate setting the generated image as a reference
+                            const mockUrl = "https://images.unsplash.com/photo-1518710843675-2540dd79065c?q=80&w=3387&auto=format&fit=crop";
+                            setAttachments(prev => [...prev, { id: crypto.randomUUID(), url: mockUrl, type: 'image' }]);
+                            // Switch to reference tab to show it being used
+                            setActiveTab(creationMode === "IMAGE" ? "IMAGE REFERENCE" : "REFERENCE");
+                            alert("Image added to reference!");
+                          }}
+                          className="flex items-center gap-2 px-3 md:px-4 py-2 rounded-full bg-white/10 hover:bg-white/15 transition-colors text-xs md:text-sm border border-white/10"
+                          title="Use as a reference"
+                        >
                           <MessageSquareQuote size={14} />
                           Start From Here
                         </button>
+
                         <button className="p-2 rounded-full bg-white/10 hover:bg-white/15 transition-colors border border-white/10">
                           <MoreHorizontal size={16} />
                         </button>
@@ -686,10 +862,15 @@ export default function VizualStudioApp() {
                     <div className="flex items-center justify-center gap-1 md:gap-2 overflow-x-auto">
                       {(creationMode === "IMAGE"
                         ? ["IMAGE REFERENCE", "REMIX"]
-                        : ["KEYFRAME", "REFERENCE", "MODIFY"]).map((tab) => (
+                        : ["STYLE", "REFERENCE", "MODIFY"]).map((tab) => (
                           <button
                             key={tab}
-                            onClick={() => setActiveTab(tab as TabMode)}
+                            onClick={() => {
+                              setActiveTab(tab as TabMode);
+                              if (tab === "STYLE") {
+                                setShowStyleModal(true);
+                              }
+                            }}
                             className={`px-3 md:px-4 py-1.5 rounded-full text-[10px] md:text-xs font-medium transition-colors whitespace-nowrap ${activeTab === tab
                               ? "bg-white/15 text-white border border-white/20"
                               : "text-gray-500 hover:text-gray-300"
@@ -742,6 +923,42 @@ export default function VizualStudioApp() {
                       </div>
                     )}
 
+                    {/* Attachments Preview List */}
+                    {attachments.length > 0 && (
+                      <div className="absolute -top-24 left-4 z-[100] flex gap-4 overflow-x-auto max-w-[90%] pb-2 px-1">
+                        {attachments.map((att) => (
+                          <div key={att.id} className="relative group shrink-0">
+                            {/* Main Preview */}
+                            <div className="w-20 h-20 rounded-xl overflow-hidden border-2 border-white/20 shadow-2xl relative bg-black">
+                              {att.type === 'video' ? (
+                                <video src={att.url} className="w-full h-full object-cover" autoPlay loop muted />
+                              ) : (
+                                <img src={att.url} alt="Preview" className="w-full h-full object-cover" />
+                              )}
+                              {/* Pulse overlay effect */}
+                              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/20 to-transparent animate-pulse" />
+                            </div>
+
+                            {/* Close Button */}
+                            <button
+                              onClick={() => {
+                                setAttachments(prev => prev.filter(item => item.id !== att.id));
+                                if (attachments.length === 1 && fileInputRef.current) {
+                                  fileInputRef.current.value = '';
+                                }
+                              }}
+                              className="absolute -top-2 -right-2 bg-red-500 rounded-full p-1 text-white shadow-lg opacity-0 group-hover:opacity-100 transition-opacity transform scale-75 hover:scale-100"
+                            >
+                              <X size={12} />
+                            </button>
+
+                            {/* Connection Line */}
+                            <div className="absolute top-full left-1/2 w-0.5 h-4 bg-gradient-to-b from-white/20 to-transparent" />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
                     {/* Text Input */}
                     <textarea
                       value={prompt}
@@ -755,37 +972,105 @@ export default function VizualStudioApp() {
                     <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-0">
                       {/* Left Icons */}
                       <div className="flex items-center gap-1 justify-center sm:justify-start">
+                        {/* Image Upload */}
+                        <input
+                          type="file"
+                          ref={fileInputRef}
+                          className="hidden"
+                          multiple
+                          accept="image/*,video/*"
+                          onChange={(e) => {
+                            if (e.target.files && e.target.files.length > 0) {
+                              const newAttachments: { id: string; url: string; file?: File; type: 'image' | 'video' }[] = [];
+
+                              Array.from(e.target.files).forEach(file => {
+                                const url = URL.createObjectURL(file);
+                                const type = file.type.startsWith('video') ? 'video' : 'image';
+                                newAttachments.push({ id: crypto.randomUUID(), url, file, type });
+                              });
+
+                              setAttachments(prev => [...prev, ...newAttachments]);
+                            }
+                            // Reset input value
+                            e.target.value = '';
+                          }}
+                        />
                         <button
-                          onClick={() => setUploadPopup(uploadPopup === 'image' ? null : 'image')}
-                          className={`p-2 rounded-lg transition-colors ${uploadPopup === 'image' ? 'bg-white/10 text-white' : 'hover:bg-white/5 text-gray-400 hover:text-white'}`}
+                          onClick={() => fileInputRef.current?.click()}
+                          className="p-2 rounded-lg hover:bg-white/5 transition-colors text-gray-400 hover:text-white"
+                          title="Upload Image"
                         >
                           <ImageIcon size={18} />
                         </button>
-                        <button className="p-2 rounded-lg hover:bg-white/5 transition-colors text-gray-400 hover:text-white">
-                          <Plus size={18} />
-                        </button>
-                        <div className="w-px h-5 bg-white/10 mx-2" />
+
+                        {/* AI Enhancer */}
                         <button
-                          onClick={() => setUploadPopup(uploadPopup === 'video' ? null : 'video')}
-                          className={`p-2 rounded-lg transition-colors ${uploadPopup === 'video' ? 'bg-white/10 text-white' : 'hover:bg-white/5 text-gray-400 hover:text-white'}`}
+                          onClick={() => setShowEnhancerModal(true)}
+                          className="p-2 rounded-lg hover:bg-white/5 transition-colors text-gray-400 hover:text-white"
+                          title="AI Enhancer"
                         >
-                          <Video size={18} />
+                          <Wand2 size={18} />
                         </button>
-                        <button className="p-2 rounded-lg hover:bg-white/5 transition-colors text-gray-400 hover:text-white">
-                          <Infinity size={18} />
+
+                        <div className="w-px h-5 bg-white/10 mx-2" />
+
+                        {/* Video Timer */}
+                        <div className="relative">
+                          <button
+                            onClick={() => setShowTimerSlider(!showTimerSlider)}
+                            className={`p-2 rounded-lg transition-colors ${showTimerSlider ? 'bg-white/10 text-white' : 'hover:bg-white/5 text-gray-400 hover:text-white'}`}
+                            title="Set Duration"
+                          >
+                            <Timer size={18} />
+                          </button>
+
+                          {/* Timer Slider Popup */}
+                          {showTimerSlider && (
+                            <div className="absolute bottom-full left-0 mb-2 p-4 bg-[#1a1a1a] border border-white/10 rounded-xl shadow-2xl w-64 z-[200]">
+                              <div className="flex justify-between items-center mb-3">
+                                <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Duration</span>
+                                <span className="text-xs text-white font-mono">{Math.floor(duration / 60)}:{(duration % 60).toString().padStart(2, '0')}</span>
+                              </div>
+                              <input
+                                type="range" min="0" max="300" value={duration}
+                                onChange={(e) => setDuration(parseInt(e.target.value))}
+                                className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-white"
+                              />
+                              <div className="flex justify-between mt-1 text-[10px] text-gray-500">
+                                <span>0s</span>
+                                <span>5m</span>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Video Extender */}
+                        <button
+                          onClick={() => {
+                            if (attachments.length === 0 && !generatedContent) {
+                              // If no file uploaded AND no generated content to extend
+                              alert("Please upload a file or generate content first.");
+                              return;
+                            }
+                            setIsExtending(true);
+                          }}
+                          className="p-2 rounded-lg hover:bg-white/5 transition-colors text-gray-400 hover:text-white"
+                          title="Extend Clip"
+                        >
+                          <ArrowRightFromLine size={18} />
                         </button>
                       </div>
 
                       {/* Right Controls */}
                       <div className="flex items-center gap-2 md:gap-4 justify-between sm:justify-end">
-                        {/* Draft Toggle - Hidden on very small screens */}
+                        {/* Audio Toggle - Hidden on very small screens */}
                         <div className="hidden xs:flex items-center gap-2">
-                          <span className="text-xs text-gray-400">DRAFT</span>
+                          <span className="text-xs text-gray-400">Audio</span>
                           <button
-                            onClick={() => setIsDraft(!isDraft)}
-                            className={`w-10 h-5 rounded-full transition-colors relative ${isDraft ? 'bg-white/30' : 'bg-white/10'}`}
+                            onClick={() => setIsAudio(!isAudio)}
+                            className={`w-10 h-5 rounded-full transition-colors relative ${isAudio ? 'bg-white/30' : 'bg-white/10'}`}
                           >
-                            <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${isDraft ? 'left-5' : 'left-0.5'}`} />
+                            <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${isAudio ? 'left-5' : 'left-0.5'}`} />
                           </button>
                         </div>
 
@@ -818,7 +1103,8 @@ export default function VizualStudioApp() {
             </Vortex>
           </main>
         </div>
-      )}
+      )
+      }
 
 
       {/* Mode Selection Modal */}
@@ -851,11 +1137,27 @@ export default function VizualStudioApp() {
 
                 {/* Close Button */}
                 <button
-                  onClick={() => setShowModeModal(false)}
-                  className="absolute top-4 right-4 sm:top-6 sm:right-6 p-2 sm:p-2.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 transition-all hover:rotate-90 duration-300 z-20 group"
+                  onClick={() => {
+                    if (modeStep === 1) {
+                      setModeStep(0);
+                    } else {
+                      setShowModeModal(false);
+                    }
+                  }}
+                  className="absolute top-4 right-4 sm:top-6 sm:right-6 p-2 sm:p-2.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 transition-all z-20 group"
                 >
                   <X size={16} className="sm:w-[18px] sm:h-[18px] text-gray-400 group-hover:text-white transition-colors" />
                 </button>
+
+                {/* Back Button (Step 1 only) */}
+                {modeStep === 1 && (
+                  <button
+                    onClick={() => setModeStep(0)}
+                    className="absolute top-4 left-4 sm:top-6 sm:left-6 p-2 sm:p-2.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 transition-all z-20 group"
+                  >
+                    <ChevronLeft size={16} className="sm:w-[18px] sm:h-[18px] text-gray-400 group-hover:text-white transition-colors" />
+                  </button>
+                )}
 
                 {/* Header */}
                 <div className="text-center pt-8 sm:pt-10 pb-4 sm:pb-6 px-4 sm:px-8">
@@ -864,57 +1166,108 @@ export default function VizualStudioApp() {
                     <span className="text-[10px] sm:text-xs font-medium text-gray-300 tracking-wider uppercase">Creative Studio</span>
                   </div>
                   <h2 className={`text-2xl sm:text-3xl md:text-4xl font-bold mb-2 sm:mb-3 bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent ${spaceGrotesk.className}`}>
-                    Choose Your Mode
+                    {modeStep === 0 ? "Choose Your Mode" : "Refine Selection"}
                   </h2>
                   <p className="text-gray-500 text-xs sm:text-sm md:text-base max-w-md mx-auto px-2">
-                    Select a creative template to jumpstart your vision
+                    {modeStep === 0 ? "Select a creative template to jumpstart your vision" : "Select a specific style or category"}
                   </p>
                 </div>
 
                 {/* Template Cards */}
                 <div className="px-3 sm:px-6 pb-6 sm:pb-8 space-y-2 sm:space-y-3 max-h-[55vh] sm:max-h-[50vh] overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
-                  {templateModes.map((mode, index) => (
-                    <button
-                      key={mode.id}
-                      onClick={() => {
-                        setPrompt(mode.description);
-                        setShowModeModal(false);
-                      }}
-                      className="w-full flex items-center gap-3 sm:gap-5 p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-gradient-to-r from-white/[0.03] to-white/[0.01] hover:from-white/[0.08] hover:to-white/[0.04] border border-white/[0.06] hover:border-white/20 transition-all duration-300 group text-left relative overflow-hidden active:scale-[0.98]"
-                      style={{ animationDelay: `${index * 0.1}s` }}
-                    >
-                      {/* Hover gradient overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 translate-x-[-100%] group-hover:translate-x-[100%]" style={{ transition: 'transform 0.8s ease-out, opacity 0.3s' }} />
+                  {modeStep === 0 ? (
+                    templateModes.map((mode, index) => (
+                      <button
+                        key={mode.id}
+                        onClick={() => {
+                          // Check if this mode has sub-options
+                          if (MODE_SUBOPTIONS[mode.id]) {
+                            setSelectedModeId(mode.id);
+                            setModeStep(1);
+                          } else {
+                            // Direct select if no sub-options
+                            setPrompt(mode.title);
+                            if (mode.title.toLowerCase().includes("video")) setCreationMode("VIDEO");
+                            else setCreationMode("IMAGE");
+                            setShowModeModal(false);
+                          }
+                        }}
+                        className="w-full flex items-center gap-3 sm:gap-5 p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-gradient-to-r from-white/[0.03] to-white/[0.01] hover:from-white/[0.08] hover:to-white/[0.04] border border-white/[0.06] hover:border-white/20 transition-all duration-300 group text-left relative overflow-hidden active:scale-[0.98]"
+                        style={{ animationDelay: `${index * 0.1}s` }}
+                      >
+                        {/* Hover gradient overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 translate-x-[-100%] group-hover:translate-x-[100%]" style={{ transition: 'transform 0.8s ease-out, opacity 0.3s' }} />
 
-                      {/* Minimal Icon */}
-                      <div className="relative flex-shrink-0">
-                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white/[0.03] border border-white/[0.08] group-hover:border-white/20 group-hover:bg-white/[0.06] flex items-center justify-center transition-all duration-300">
-                          {mode.icon === 'image' && <ImageIcon className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-hover:text-white transition-colors" />}
-                          {mode.icon === 'video' && <Video className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-hover:text-white transition-colors" />}
-                          {mode.icon === 'style' && <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-hover:text-white transition-colors" />}
-                          {mode.icon === 'film' && <Video className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-hover:text-white transition-colors" />}
-                          {mode.icon === 'clock' && <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-hover:text-white transition-colors" />}
+                        {/* Minimal Icon */}
+                        <div className="relative flex-shrink-0">
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white/[0.03] border border-white/[0.08] group-hover:border-white/20 group-hover:bg-white/[0.06] flex items-center justify-center transition-all duration-300">
+                            {mode.icon === 'image' && <ImageIcon className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-hover:text-white transition-colors" />}
+                            {mode.icon === 'video' && <Video className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-hover:text-white transition-colors" />}
+                            {mode.icon === 'style' && <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-hover:text-white transition-colors" />}
+                            {mode.icon === 'film' && <Video className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-hover:text-white transition-colors" />}
+                            {mode.icon === 'clock' && <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-hover:text-white transition-colors" />}
+                          </div>
                         </div>
-                      </div>
 
-                      {/* Text Content */}
-                      <div className="flex-1 min-w-0 relative z-10">
-                        <h3 className="text-white font-semibold text-sm sm:text-base md:text-lg mb-0.5 sm:mb-1 group-hover:text-white transition-colors">
-                          {mode.title}
-                        </h3>
-                        <p className="text-gray-500 group-hover:text-gray-300 text-xs sm:text-sm md:text-base leading-relaxed transition-colors duration-300 line-clamp-2">
-                          {mode.description}
-                        </p>
-                      </div>
+                        {/* Text Content */}
+                        <div className="flex-1 min-w-0 relative z-10">
+                          <h3 className="text-white font-semibold text-sm sm:text-base md:text-lg mb-0.5 sm:mb-1 group-hover:text-white transition-colors">
+                            {mode.title}
+                          </h3>
+                          <p className="text-gray-500 group-hover:text-gray-300 text-xs sm:text-sm md:text-base leading-relaxed transition-colors duration-300 line-clamp-2">
+                            {mode.description}
+                          </p>
+                        </div>
 
-                      {/* Arrow indicator - hidden on mobile */}
-                      <div className="hidden sm:flex flex-shrink-0 w-8 h-8 rounded-full bg-white/5 items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
-                        <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </div>
-                    </button>
-                  ))}
+                        {/* Arrow indicator - hidden on mobile */}
+                        <div className="hidden sm:flex flex-shrink-0 w-8 h-8 rounded-full bg-white/5 items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
+                          <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </div>
+                      </button>
+                    ))
+                  ) : (
+                    // STEP 2: Sub-options
+                    MODE_SUBOPTIONS[selectedModeId!]?.map((option, index) => (
+                      <button
+                        key={index}
+                        onClick={() => {
+                          const basePrompt = templateModes.find(m => m.id === selectedModeId)?.title || "";
+                          const finalPrompt = selectedModeId === 3 // Use this style
+                            ? option.promptSuffix || ""
+                            : selectedModeId === 1 // Make visuals for
+                              ? `${basePrompt} ${option.title.toLowerCase()} - ${option.promptSuffix}`
+                              : `${basePrompt} ${option.title.toLowerCase()} - ${option.promptSuffix}`;
+
+                          setPrompt(finalPrompt);
+
+                          // Set logic based on mode ID
+                          if (selectedModeId === 1 || selectedModeId === 3) setCreationMode("IMAGE");
+                          if (selectedModeId === 2) setCreationMode("VIDEO");
+
+                          setShowModeModal(false);
+                          setModeStep(0);
+                        }}
+                        className="w-full flex items-center gap-3 sm:gap-5 p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-gradient-to-r from-white/[0.03] to-white/[0.01] hover:from-white/[0.08] hover:to-white/[0.04] border border-white/[0.06] hover:border-white/20 transition-all duration-300 group text-left active:scale-[0.98]"
+                        style={{ animationDelay: `${index * 0.1}s` }}
+                      >
+                        <div className="relative flex-shrink-0">
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white/[0.03] border border-white/[0.08] group-hover:border-white/20 group-hover:bg-white/[0.06] flex items-center justify-center transition-all duration-300">
+                            <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-hover:text-white transition-colors" />
+                          </div>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-white font-semibold text-sm sm:text-base md:text-lg mb-0.5 group-hover:text-white transition-colors">
+                            {option.title}
+                          </h3>
+                          <p className="text-gray-500 text-xs sm:text-sm line-clamp-1 group-hover:text-gray-400">
+                            Select to apply {option.promptSuffix}
+                          </p>
+                        </div>
+                      </button>
+                    ))
+                  )}
                 </div>
 
                 {/* Bottom gradient fade */}
@@ -924,9 +1277,582 @@ export default function VizualStudioApp() {
           </div>
         )
       }
+
+      {/* Inspiration Right Sidebar */}
+      <aside className={`
+        fixed right-0 top-0 h-full z-50
+        w-80 md:w-96
+        bg-[#0d0d0d] border-l border-white/10
+        flex flex-col
+        transition-transform duration-300 ease-in-out
+        ${inspirationOpen ? 'translate-x-0' : 'translate-x-full'}
+      `}>
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
+          <h2 className={`text-lg font-bold uppercase tracking-wider ${spaceGrotesk.className}`}>Inspiration</h2>
+          <button
+            onClick={() => setInspirationOpen(false)}
+            className="p-1.5 hover:bg-white/10 rounded-lg transition-colors"
+          >
+            <X size={18} className="text-gray-400" />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto py-4">
+          {/* Prompt Ideas Section */}
+          <div className="px-5 mb-6">
+            <h3 className={`text-sm font-semibold text-white mb-3 ${spaceGrotesk.className}`}>Cosmic Heroic Action</h3>
+            <div className="overflow-x-auto pb-2 -mx-5 px-5 scrollbar-none" onWheel={(e) => { if (e.deltaY !== 0) e.currentTarget.scrollLeft += e.deltaY; }}>
+              <div className="flex gap-3 w-max">
+                {[
+                  { prompt: "A dynamic hero mid-air, nebulae and galaxies swirling around, comet streaks enhancing motion." },
+                  { prompt: "Hero illuminated by starburst, reflective metallic costume glowing amidst mystical outer space elements." },
+                  { prompt: "Warrior standing on asteroid, cosmic storm raging behind, ethereal energy radiating from hands." },
+                ].map((item, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setPrompt(item.prompt)}
+                    className="flex items-start gap-3 p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 transition-all min-w-[200px] max-w-[200px] text-left group"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-white/10 flex-shrink-0" />
+                    <p className="text-xs text-gray-400 group-hover:text-gray-300 line-clamp-3">{item.prompt}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* More Prompt Categories */}
+          <div className="px-5 mb-6">
+            <h3 className={`text-sm font-semibold text-white mb-3 ${spaceGrotesk.className}`}>Futuristic Celestial Design</h3>
+            <div className="overflow-x-auto pb-2 -mx-5 px-5 scrollbar-none" onWheel={(e) => { if (e.deltaY !== 0) e.currentTarget.scrollLeft += e.deltaY; }}>
+              <div className="flex gap-3 w-max">
+                {[
+                  { prompt: "Sleek crystalline board glowing with energy, blending futuristic design and cosmic mysticism." },
+                  { prompt: "Neon-lit spacecraft hovering above alien landscape, bioluminescent flora illuminating the scene." },
+                  { prompt: "Cybernetic angel with holographic wings ascending through a digital nebula." },
+                ].map((item, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setPrompt(item.prompt)}
+                    className="flex items-start gap-3 p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 transition-all min-w-[200px] max-w-[200px] text-left group"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-white/10 flex-shrink-0" />
+                    <p className="text-xs text-gray-400 group-hover:text-gray-300 line-clamp-3">{item.prompt}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div className="border-t border-white/10 my-4" />
+
+          {/* Visual Inspiration Section */}
+          <div className="px-5">
+            <h3 className={`text-sm font-semibold text-white mb-3 ${spaceGrotesk.className}`}>Visual Inspiration</h3>
+            <div className="overflow-x-auto pb-2 -mx-5 px-5 scrollbar-none" onWheel={(e) => { if (e.deltaY !== 0) e.currentTarget.scrollLeft += e.deltaY; }}>
+              <div className="flex gap-3 w-max">
+                {/* Flow TV Card */}
+                <button
+                  onClick={() => setShowFlowTV(true)}
+                  className="flex flex-col items-center p-4 rounded-xl bg-gradient-to-br from-purple-500/20 to-blue-500/20 hover:from-purple-500/30 hover:to-blue-500/30 border border-white/10 hover:border-white/20 transition-all min-w-[140px] group"
+                >
+                  <div className="w-16 h-16 rounded-2xl bg-black/50 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                    <Tv size={28} className="text-purple-400" />
+                  </div>
+                  <span className="text-xs font-medium text-white">Flow TV</span>
+                  <span className="text-[10px] text-gray-500">Google Labs</span>
+                </button>
+
+                {/* More visual cards */}
+                <button
+                  onClick={() => setShowColorPaletteModal(true)}
+                  className="flex flex-col items-center p-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 transition-all min-w-[140px] group cursor-pointer"
+                >
+                  <div className="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                    <Palette size={28} className="text-pink-400" />
+                  </div>
+                  <span className="text-xs font-medium text-white">Color Palettes</span>
+                  <span className="text-[10px] text-gray-500">Explore Colors</span>
+                </button>
+
+                <button
+                  onClick={() => setShowStyleGuideModal(true)}
+                  className="flex flex-col items-center p-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 transition-all min-w-[140px] group cursor-pointer"
+                >
+                  <div className="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                    <Wand2 size={28} className="text-cyan-400" />
+                  </div>
+                  <span className="text-xs font-medium text-white">Style Guide</span>
+                  <span className="text-[10px] text-gray-500">View Guide</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      {/* Inspiration Overlay (mobile) */}
+      {
+        inspirationOpen && (
+          <div
+            className="fixed inset-0 bg-black/60 z-40 md:hidden"
+            onClick={() => setInspirationOpen(false)}
+          />
+        )
+      }
+
+      {/* Flow TV Modal */}
+      {
+        showFlowTV && (
+          <div className="fixed inset-0 z-[100] bg-black flex flex-col">
+            {/* Header */}
+            <div className="flex items-center justify-between px-4 py-3 bg-black border-b border-white/10">
+              <div className="flex items-center gap-3">
+                <Tv size={20} className="text-purple-400" />
+                <span className={`font-semibold ${spaceGrotesk.className}`}>Flow TV</span>
+                <span className="text-xs text-gray-500">by Google Labs</span>
+              </div>
+              <button
+                onClick={() => setShowFlowTV(false)}
+                className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+              >
+                <X size={20} className="text-gray-400" />
+              </button>
+            </div>
+            {/* Iframe */}
+            <div className="flex-1 w-full">
+              <iframe
+                src="https://labs.google/flow/tv/channel/downside-up/tViwFuHm1Lu18C5GghLC"
+                className="w-full h-full border-0"
+                allow="autoplay; fullscreen"
+                title="Flow TV"
+              />
+            </div>
+          </div>
+        )
+      }
+
+      {/* AI Enhancer Modal */}
+      {
+        showEnhancerModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+            <div
+              className="absolute inset-0"
+              onClick={() => setShowEnhancerModal(false)}
+            />
+            <div className="relative w-full max-w-lg bg-[#0d0d0d] border border-white/10 rounded-2xl p-8 shadow-2xl">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2.5 rounded-xl bg-white/5 border border-white/10">
+                  <Wand2 className="text-purple-400" size={24} />
+                </div>
+                <div>
+                  <h3 className={`text-2xl font-bold text-white ${spaceGrotesk.className}`}>AI Enhancer</h3>
+                  <p className="text-gray-400 text-xs mt-1">Transform your ideas into cinematic prompts</p>
+                </div>
+              </div>
+
+              <textarea
+                className="w-full h-40 bg-black/50 border border-white/10 rounded-xl p-4 text-white placeholder-gray-600 focus:outline-none focus:border-purple-500/50 transition-colors mb-6 resize-none text-sm leading-relaxed"
+                placeholder="Describe your basic idea here (e.g., A futuristic city)..."
+                value={enhancerPrompt}
+                onChange={(e) => setEnhancerPrompt(e.target.value)}
+              />
+
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={() => setShowEnhancerModal(false)}
+                  className="px-5 py-2.5 text-gray-400 hover:text-white transition-colors text-sm font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    if (!enhancerPrompt.trim()) return;
+                    const enhanced = `${enhancerPrompt} - Cinematic lighting, highly detailed, 8k resolution, photorealistic, masterpiece, trending on artstation, unreal engine 5 render.`;
+                    setPrompt(enhanced);
+                    setShowEnhancerModal(false);
+                    setEnhancerPrompt("");
+                  }}
+                  className="px-6 py-2.5 bg-white text-black rounded-xl text-sm font-bold hover:bg-gray-200 transition-all hover:scale-105 flex items-center gap-2"
+                >
+                  <Wand2 size={16} />
+                  Enhance
+                </button>
+              </div>
+            </div>
+          </div>
+        )
+      }
+
+      {/* Account Settings Modal */}
+      {
+        showAccountModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              onClick={() => setShowAccountModal(false)}
+            />
+            <div className="relative w-full max-w-md bg-[#0d0d0d] border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
+              {/* Header */}
+              <div className="relative h-24 bg-gradient-to-r from-neutral-800 to-neutral-900">
+                <button
+                  onClick={() => setShowAccountModal(false)}
+                  className="absolute top-4 right-4 p-1.5 bg-black/20 hover:bg-black/40 rounded-full text-white transition-colors backdrop-blur-md"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              {/* Profile Info */}
+              <div className="px-6 pb-6 mt-[-40px]">
+                <div className="relative w-20 h-20 rounded-full bg-black p-1 mb-4">
+                  <div className="w-full h-full rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-2xl font-bold text-white shadow-lg">
+                    A
+                  </div>
+                  <div className="absolute bottom-0 right-0 w-6 h-6 bg-green-500 border-2 border-black rounded-full" />
+                </div>
+
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h3 className={`text-xl font-bold text-white ${spaceGrotesk.className}`}>Guest User</h3>
+                    <p className="text-sm text-gray-400">guest@vizual.ai</p>
+                  </div>
+                  <div className="px-3 py-1 rounded-full bg-white/10 border border-white/10 text-xs font-medium text-white">
+                    Free Plan
+                  </div>
+                </div>
+
+                {/* Usage Stats - Updated to visual style per request */}
+                <div className="p-4 rounded-xl bg-white/5 border border-white/10 mb-6">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-medium text-gray-400">Monthly Credits</span>
+                    <span className="text-xs font-bold text-white">12 / 50</span>
+                  </div>
+                  <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+                    <div className="h-full bg-white w-[24%]" />
+                  </div>
+                </div>
+
+                {/* Menu Items */}
+                <div className="space-y-1">
+                  <div className="overflow-hidden transition-all duration-300">
+                    <button
+                      onClick={() => setExpandBilling(!expandBilling)}
+                      className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-white/5 transition-colors group"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-lg bg-white/5 text-gray-400 group-hover:text-white group-hover:bg-white/10 transition-colors">
+                          <CreditCard size={18} />
+                        </div>
+                        <span className="text-sm font-medium text-gray-300 group-hover:text-white">Billing & Plans</span>
+                      </div>
+                      <ChevronRight size={16} className={`text-gray-500 group-hover:text-white transition-transform ${expandBilling ? 'rotate-90' : ''}`} />
+                    </button>
+
+                    {expandBilling && (
+                      <div className="pl-14 pr-4 pb-4 space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
+                        <div className="p-3 bg-white/5 rounded-xl border border-white/10 space-y-2">
+                          <div className="flex justify-between items-center text-xs">
+                            <span className="text-gray-400">Current Plan</span>
+                            <span className="text-white font-medium">Free</span>
+                          </div>
+                          <div className="flex justify-between items-center text-xs">
+                            <span className="text-gray-400">Billing</span>
+                            <span className="text-white font-medium">Monthly</span>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => {
+                            setShowAccountModal(false);
+                            setShowPricingModal(true);
+                          }}
+                          className="w-full py-2 bg-white text-black text-xs font-bold rounded-lg hover:bg-gray-200 transition-colors"
+                        >
+                          Upgrade Plan
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  <button className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-white/5 transition-colors group">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-lg bg-white/5 text-gray-400 group-hover:text-white group-hover:bg-white/10 transition-colors">
+                        <Bell size={18} />
+                      </div>
+                      <span className="text-sm font-medium text-gray-300 group-hover:text-white">Notifications</span>
+                    </div>
+                    <div className="w-2 h-2 rounded-full bg-red-500" />
+                  </button>
+
+                  <button className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-white/5 transition-colors group">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-lg bg-white/5 text-gray-400 group-hover:text-white group-hover:bg-white/10 transition-colors">
+                        <Shield size={18} />
+                      </div>
+                      <span className="text-sm font-medium text-gray-300 group-hover:text-white">Security</span>
+                    </div>
+                    <ChevronRight size={16} className="text-gray-500 group-hover:text-white" />
+                  </button>
+
+                  <button className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-white/5 transition-colors group">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-lg bg-white/5 text-gray-400 group-hover:text-white group-hover:bg-white/10 transition-colors">
+                        <Moon size={18} />
+                      </div>
+                      <span className="text-sm font-medium text-gray-300 group-hover:text-white">Appearance</span>
+                    </div>
+                    <span className="text-xs text-gray-500">Dark</span>
+                  </button>
+                </div>
+
+                {/* Footer */}
+                <div className="mt-6 pt-6 border-t border-white/5 flex items-center justify-between">
+                  <button className="text-xs text-gray-500 hover:text-white transition-colors">
+                    Privacy Policy
+                  </button>
+                  <button className="flex items-center gap-2 text-red-400 hover:text-red-300 transition-colors text-sm font-medium">
+                    <LogOut size={16} />
+                    Sign Out
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+      {/* Style Selection Modal */}
+      {showStyleModal && (
+        <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => setShowStyleModal(false)}
+          />
+          <div className="relative w-full max-w-3xl bg-[#0d0d0d] border border-white/10 rounded-2xl shadow-2xl p-6 overflow-hidden">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className={`text-xl font-bold text-white ${spaceGrotesk.className}`}>Select Style</h3>
+              <button
+                onClick={() => setShowStyleModal(false)}
+                className="p-1.5 bg-white/5 hover:bg-white/10 rounded-full text-white transition-colors"
+              >
+                <X size={16} />
+              </button>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {STYLE_PRESETS.map((style) => (
+                <button
+                  key={style.name}
+                  onClick={() => {
+                    setPrompt((prev) => prev ? `${prev}, ${style.name} style` : `${style.name} style`);
+                    setShowStyleModal(false);
+                  }}
+                  className="group relative aspect-square rounded-xl overflow-hidden border border-white/10 hover:border-white/30 transition-all"
+                >
+                  {/* Placeholder Gradient Backgrounds */}
+                  <div className={`absolute inset-0 bg-gradient-to-br transition-transform duration-500 group-hover:scale-110 
+                    ${style.name === 'Cinematic' ? 'from-amber-900 to-black' :
+                      style.name === 'Anime' ? 'from-pink-500 to-purple-900' :
+                        style.name === '3D Animation' ? 'from-blue-500 to-cyan-900' :
+                          style.name === 'Cartoon' ? 'from-yellow-400 to-orange-600' :
+                            style.name === 'Brainrot' ? 'from-green-500 to-red-500' :
+                              style.name === 'Realistic' ? 'from-gray-300 to-gray-700' :
+                                'from-gray-900 to-black'}`}
+                  />
+                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors" />
+
+                  <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
+                    <span className="text-white font-medium text-sm">{style.name}</span>
+                  </div>
+
+                  {/* Icon Overlay */}
+                  <div className="absolute top-3 right-3 p-2 bg-black/30 backdrop-blur-md rounded-full text-white/70 group-hover:text-white transition-colors">
+                    <Sparkles size={14} />
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )
+      }
+
+      {/* Feedback Modal */}
+      {showFeedbackModal && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => setShowFeedbackModal(false)}
+          />
+          <div className="relative w-full max-w-lg bg-[#0d0d0d] border border-white/10 rounded-2xl shadow-2xl p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className={`text-xl font-bold text-white ${spaceGrotesk.className}`}>Feedback</h3>
+              <button onClick={() => setShowFeedbackModal(false)} className="text-gray-400 hover:text-white"><X size={20} /></button>
+            </div>
+            <p className="text-sm text-gray-400 mb-4">We value your input! Let us know how we can improve.</p>
+            <textarea className="w-full h-32 bg-black/50 border border-white/10 rounded-xl p-3 text-white placeholder-gray-600 mb-4 resize-none focus:outline-none focus:border-white/30" placeholder="Type your feedback here..." />
+            <div className="flex justify-end gap-2">
+              <button onClick={() => setShowFeedbackModal(false)} className="px-4 py-2 text-sm text-gray-400 hover:text-white">Cancel</button>
+              <button onClick={() => {
+                // Simulate submission
+                alert("Feedback submitted! Thank you.");
+                setShowFeedbackModal(false);
+              }} className="px-5 py-2 rounded-lg bg-white text-black font-medium text-sm hover:bg-gray-200">Submit</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Pricing Modal */}
+      {showPricingModal && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/80 backdrop-blur-md"
+            onClick={() => setShowPricingModal(false)}
+          />
+          <div className="relative w-full max-w-4xl bg-[#0d0d0d] border border-white/10 rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row">
+            <button
+              onClick={() => setShowPricingModal(false)}
+              className="absolute top-4 right-4 p-2 bg-black/20 hover:bg-white/10 rounded-full text-white z-10"
+            >
+              <X size={20} />
+            </button>
+
+            {/* Pro Plan */}
+            <div className="flex-1 p-8 border-r border-white/10 flex flex-col items-center text-center">
+              <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mb-4 text-white">
+                <Sparkles size={24} />
+              </div>
+              <h3 className={`text-2xl font-bold text-white mb-2 ${spaceGrotesk.className}`}>Pro</h3>
+              <div className="text-3xl font-bold text-white mb-6">$29<span className="text-sm text-gray-400 font-normal">/mo</span></div>
+              <ul className="space-y-3 mb-8 text-sm text-gray-300 text-left w-full max-w-xs">
+                <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-white mt-1.5" /> Unlimited Generations</li>
+                <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-white mt-1.5" /> Fast Processing</li>
+                <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-white mt-1.5" /> Commercial Usage</li>
+              </ul>
+              <button className="w-full py-3 rounded-xl bg-white text-black font-bold hover:bg-gray-200 transition-colors mt-auto">
+                Upgrade to Pro
+              </button>
+            </div>
+
+            {/* Ultra Plan */}
+            <div className="flex-1 p-8 flex flex-col items-center text-center relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 to-blue-900/20" />
+              <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center mb-4 text-white relative z-10">
+                <Zap size={24} />
+              </div>
+              <h3 className={`text-2xl font-bold text-white mb-2 relative z-10 ${spaceGrotesk.className}`}>Ultra</h3>
+              <div className="text-3xl font-bold text-white mb-6 relative z-10">$99<span className="text-sm text-gray-400 font-normal">/mo</span></div>
+              <ul className="space-y-3 mb-8 text-sm text-gray-300 text-left w-full max-w-xs relative z-10">
+                <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 mt-1.5" /> Everything in Pro</li>
+                <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 mt-1.5" /> Priority Access</li>
+                <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 mt-1.5" /> Exclusive Models</li>
+              </ul>
+              <button className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-500 to-blue-500 text-white font-bold hover:brightness-110 transition-all mt-auto relative z-10">
+                Get Ultra
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MultiStep Loader */}
+      <MultiStepLoader
+        loadingStates={extensionLoadingStates}
+        loading={isExtending}
+        duration={2000}
+      />
+
+      {
+        isExtending && (
+          <button
+            className="fixed top-4 right-4 text-white z-[120] bg-black/50 p-2 rounded-full hover:bg-black/70"
+            onClick={() => setIsExtending(false)}
+          >
+            <X className="h-10 w-10" />
+          </button>
+        )
+      }
+
+      {/* Color Palette Modal */}
+      {showColorPaletteModal && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowColorPaletteModal(false)} />
+          <div className="relative w-full max-w-2xl bg-[#0d0d0d] border border-white/10 rounded-2xl shadow-2xl p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className={`text-xl font-bold text-white ${spaceGrotesk.className}`}>Color Palettes</h3>
+              <button onClick={() => setShowColorPaletteModal(false)} className="text-gray-400 hover:text-white"><X size={20} /></button>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Palette 1 */}
+              <div className="space-y-2">
+                <div className="h-32 rounded-xl flex overflow-hidden">
+                  <div className="flex-1 bg-[#0a0a0a]"></div>
+                  <div className="flex-1 bg-[#1a1a1a]"></div>
+                  <div className="flex-1 bg-white"></div>
+                  <div className="flex-1 bg-blue-500"></div>
+                </div>
+                <p className="text-sm font-medium text-white">Cyber Dark</p>
+              </div>
+              {/* Palette 2 */}
+              <div className="space-y-2">
+                <div className="h-32 rounded-xl flex overflow-hidden">
+                  <div className="flex-1 bg-purple-900"></div>
+                  <div className="flex-1 bg-purple-600"></div>
+                  <div className="flex-1 bg-pink-500"></div>
+                  <div className="flex-1 bg-orange-400"></div>
+                </div>
+                <p className="text-sm font-medium text-white">Sunset Synth</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Style Guide Modal */}
+      {showStyleGuideModal && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowStyleGuideModal(false)} />
+          <div className="relative w-full max-w-2xl bg-[#0d0d0d] border border-white/10 rounded-2xl shadow-2xl p-6 max-h-[80vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className={`text-xl font-bold text-white ${spaceGrotesk.className}`}>Style Guide</h3>
+              <button onClick={() => setShowStyleGuideModal(false)} className="text-gray-400 hover:text-white"><X size={20} /></button>
+            </div>
+            <div className="space-y-8">
+              {/* Typography */}
+              <section>
+                <h4 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4">Typography</h4>
+                <div className="space-y-4 border border-white/10 p-4 rounded-xl">
+                  <div>
+                    <p className="text-sm text-gray-400 mb-1">Display (Space Grotesk)</p>
+                    <h1 className={`text-4xl font-bold text-white ${spaceGrotesk.className}`}>The quick brown fox</h1>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-400 mb-1">Body (Inter)</p>
+                    <p className="text-base text-gray-300">The quick brown fox jumps over the lazy dog. A visual creation tool for the modern era.</p>
+                  </div>
+                </div>
+              </section>
+
+              {/* Buttons */}
+              <section>
+                <h4 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4">Buttons</h4>
+                <div className="flex flex-wrap gap-4 border border-white/10 p-4 rounded-xl">
+                  <button className="px-4 py-2 bg-white text-black rounded-lg font-medium text-sm">Primary Action</button>
+                  <button className="px-4 py-2 bg-white/10 text-white border border-white/10 rounded-lg font-medium text-sm">Secondary Action</button>
+                  <button className="px-4 py-2 bg-transparent text-gray-400 hover:text-white rounded-lg font-medium text-sm">Ghost Button</button>
+                </div>
+              </section>
+            </div>
+          </div>
+        </div>
+      )}
     </div >
   );
 }
+
+
 
 // Navigation Item Component
 function NavItem({ icon, label, active = false, expanded = false, onClick }: { icon: React.ReactNode; label: string; active?: boolean; expanded?: boolean; onClick?: () => void }) {

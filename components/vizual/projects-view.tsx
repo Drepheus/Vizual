@@ -127,7 +127,7 @@ const CategoryCard = ({
 };
 
 // Generation Modal Component
-const GenerationModal = ({ card, onClose }: { card: any, onClose: () => void }) => {
+const GenerationModal = ({ card, onClose, onAction }: { card: any, onClose: () => void, onAction?: (action: string, card: any) => void }) => {
     if (!card) return null;
 
     return (
@@ -176,23 +176,38 @@ const GenerationModal = ({ card, onClose }: { card: any, onClose: () => void }) 
 
                 {/* Bottom Actions */}
                 <div className="mt-8 flex flex-wrap gap-3">
-                    <button className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-sm font-medium text-white/90">
+                    <button
+                        onClick={() => onAction && onAction('MODIFY', card)}
+                        className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-sm font-medium text-white/90"
+                    >
                         <Sparkles size={16} />
                         Modify...
                     </button>
-                    <button className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-sm font-medium text-white/90">
+                    <button
+                        onClick={() => onAction && onAction('MAKE_VIDEO', card)}
+                        className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-sm font-medium text-white/90"
+                    >
                         <Video size={16} />
                         Make Video...
                     </button>
-                    <button className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-sm font-medium text-white/90">
+                    <button
+                        onClick={() => onAction && onAction('REFERENCE', card)}
+                        className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-sm font-medium text-white/90"
+                    >
                         <Layers size={16} />
                         Reference...
                     </button>
-                    <button className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-sm font-medium text-white/90">
+                    <button
+                        onClick={() => onAction && onAction('MORE_LIKE_THIS', card)}
+                        className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-sm font-medium text-white/90"
+                    >
                         <RefreshCw size={16} />
                         More Like This
                     </button>
-                    <button className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-sm font-medium text-white/90">
+                    <button
+                        onClick={() => onAction && onAction('REFRAME', card)}
+                        className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-sm font-medium text-white/90"
+                    >
                         <Maximize2 size={16} />
                         Reframe
                     </button>
@@ -202,7 +217,7 @@ const GenerationModal = ({ card, onClose }: { card: any, onClose: () => void }) 
     );
 };
 
-export function ProjectsView() {
+export function ProjectsView({ onAction }: { onAction?: (action: string, card: any) => void }) {
     const [viewState, setViewState] = useState<ViewState>('CATEGORIES');
     const [selectedCard, setSelectedCard] = useState<any>(null);
 
@@ -280,12 +295,12 @@ export function ProjectsView() {
             </div>
 
             <div className="flex-1 overflow-y-auto p-8">
-                <FocusCards cards={MOCK_CARDS} onCardClick={handleCardClick} />
+                <FocusCards cards={MOCK_CARDS} onCardClick={handleCardClick} onAction={onAction} />
             </div>
 
             {/* Modal */}
             {selectedCard && (
-                <GenerationModal card={selectedCard} onClose={() => setSelectedCard(null)} />
+                <GenerationModal card={selectedCard} onClose={() => setSelectedCard(null)} onAction={onAction} />
             )}
         </div>
     );
