@@ -1,6 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 1, "column": 0}, "map": {"version":3,"sources":["turbopack:///[project]/Omi-AI-1/src/Orb.css"],"sourcesContent":[".orb-container {\r\n  position: fixed;\r\n  top: 0;\r\n  left: 0;\r\n  width: 100%;\r\n  height: 100%;\r\n  z-index: -1;\r\n  pointer-events: auto;\r\n}\r\n\r\n.orb-container canvas {\r\n  width: 100%;\r\n  height: 100%;\r\n  display: block;\r\n}"],"names":[],"mappings":"AAAA;;;;;;;;;;AAUA"}}]
-}

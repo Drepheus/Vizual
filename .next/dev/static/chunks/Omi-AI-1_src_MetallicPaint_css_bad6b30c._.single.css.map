@@ -1,6 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 1, "column": 0}, "map": {"version":3,"sources":["turbopack:///[project]/Omi-AI-1/src/MetallicPaint.css"],"sourcesContent":[".paint-container {\r\n  display: block;\r\n  height: 100%;\r\n  width: 100%;\r\n  -o-object-fit: contain;\r\n     object-fit: contain;\r\n}\r\n"],"names":[],"mappings":"AAAA"}}]
-}

@@ -376,6 +376,23 @@ export default function VizualStudioApp() {
   const [showColorPaletteModal, setShowColorPaletteModal] = useState(false);
   const [showStyleGuideModal, setShowStyleGuideModal] = useState(false);
 
+  // Selected Mode/Style Tags (Instagram-style @mentions)
+  const [selectedTags, setSelectedTags] = useState<{ id: string; label: string; type: 'mode' | 'style' }[]>([]);
+
+  // Helper to add a tag
+  const addTag = (label: string, type: 'mode' | 'style') => {
+    const tagId = `${type}-${label.toLowerCase().replace(/\s+/g, '-')}`;
+    // Don't add duplicate tags
+    if (!selectedTags.find(t => t.id === tagId)) {
+      setSelectedTags(prev => [...prev, { id: tagId, label, type }]);
+    }
+  };
+
+  // Helper to remove a tag
+  const removeTag = (tagId: string) => {
+    setSelectedTags(prev => prev.filter(t => t.id !== tagId));
+  };
+
   // Mode Selection States
   const [modeStep, setModeStep] = useState<0 | 1>(0);
   const [selectedModeId, setSelectedModeId] = useState<number | null>(null);
@@ -440,6 +457,29 @@ export default function VizualStudioApp() {
     }
   }, [user, loading, router, isGuestMode]);
 
+  // Lock body scroll for mobile app-like behavior
+  useEffect(() => {
+    // Prevent body scrolling - makes it behave like a native app
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+    document.body.style.height = '100%';
+    document.documentElement.style.overflow = 'hidden';
+
+    // Prevent pull-to-refresh and overscroll on mobile
+    document.body.style.overscrollBehavior = 'none';
+
+    return () => {
+      // Cleanup on unmount
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.height = '';
+      document.documentElement.style.overflow = '';
+      document.body.style.overscrollBehavior = '';
+    };
+  }, []);
+
   // Generation loading states for MultiStepLoader
   const generationLoadingStates = [
     { text: "Analyzing your prompt..." },
@@ -485,7 +525,16 @@ export default function VizualStudioApp() {
   const currentModels = creationMode === "IMAGE" ? IMAGE_MODELS : VIDEO_MODELS;
 
   return (
-    <div className={`h-screen bg-[#0a0a0a] text-white flex overflow-hidden ${inter.className}`}>
+    <div
+      className={`h-screen bg-[#0a0a0a] text-white flex overflow-hidden ${inter.className}`}
+      style={{
+        // Mobile app-like fixed viewport
+        position: 'fixed',
+        inset: 0,
+        touchAction: 'none',
+        overscrollBehavior: 'none',
+      }}
+    >
       {/* Mobile Menu Overlay */}
       {sidebarOpen && (
         <div
@@ -520,7 +569,7 @@ export default function VizualStudioApp() {
             <svg width="24" height="24" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-white flex-shrink-0">
               <path d="M25 20 L85 50 L25 80 V20 Z" fill="currentColor" />
             </svg>
-            {sidebarExpanded && <span className={`font-bold text-sm uppercase tracking-wide ${spaceGrotesk.className}`}>VIZUAL.AI</span>}
+            {sidebarExpanded && <span className={`font-bold text-sm uppercase tracking-wide ${spaceGrotesk.className}`}>VIZUAL</span>}
           </div>
           {/* Collapse/Expand button - visible on desktop */}
           <button
@@ -662,7 +711,7 @@ export default function VizualStudioApp() {
             }} />
         </main>
       ) : (
-        <div className="flex-1 flex flex-col w-full min-w-0">
+        <div className="flex-1 flex flex-col w-full min-w-0 overflow-hidden">
           {/* Top Header */}
           <header className="h-14 bg-[#0a0a0a] border-b border-white/5 flex items-center justify-between px-3 md:px-6 flex-shrink-0 relative z-30">
             {/* Mobile Menu Button */}
@@ -758,7 +807,7 @@ export default function VizualStudioApp() {
           </header>
 
           {/* Main Canvas Area */}
-          <main className="flex-1 relative flex flex-col bg-black">
+          <main className="flex-1 relative flex flex-col bg-black overflow-hidden">
             <Vortex
               backgroundColor="black"
               rangeY={800}
@@ -769,7 +818,7 @@ export default function VizualStudioApp() {
               className="flex flex-col w-full h-full"
             >
               {/* Main Content Area */}
-              <div className="flex-1 overflow-y-auto flex flex-col">
+              <div className="flex-1 overflow-y-auto flex flex-col" style={{ touchAction: 'pan-y', overscrollBehavior: 'contain' }}>
                 {generatedContent ? (
                   /* Generated Output - FULL SCREEN PROMINENT */
                   <div className="flex-1 flex flex-col p-4 md:p-6">
@@ -780,63 +829,79 @@ export default function VizualStudioApp() {
                       <div
                         className="relative rounded-2xl overflow-hidden bg-neutral-900 border border-white/20 cursor-pointer group shadow-2xl"
                         style={{ minHeight: '50vh' }}
-                        onClick={() => {
-                          const modal = document.createElement('div');
-                          modal.id = 'fullscreen-viewer';
-                          modal.className = 'fixed inset-0 z-[200] bg-black flex items-center justify-center';
-                          modal.innerHTML = `
-                            <button onclick="this.parentElement.remove()" class="absolute top-4 right-4 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors z-10">
-                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-                            </button>
-                            <img src="${generatedContent.imageUrl}" class="w-full h-full object-contain" />
-                          `;
-                          document.body.appendChild(modal);
-                        }}
                       >
                         <img
                           src={generatedContent.imageUrl}
                           alt="Generated"
                           className="w-full h-full object-cover"
+                          onClick={() => {
+                            const modal = document.createElement('div');
+                            modal.id = 'fullscreen-viewer';
+                            modal.className = 'fixed inset-0 z-[200] bg-black flex items-center justify-center';
+                            modal.innerHTML = `
+                              <button onclick="this.parentElement.remove()" class="absolute top-4 right-4 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors z-10">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                              </button>
+                              <img src="${generatedContent.imageUrl}" class="w-full h-full object-contain" />
+                            `;
+                            document.body.appendChild(modal);
+                          }}
                         />
 
-                        {/* Expand Button */}
-                        <div className="absolute top-4 right-4 px-4 py-2 bg-black/70 backdrop-blur-sm rounded-full text-white text-sm font-medium flex items-center gap-2 hover:bg-black/90 transition-colors">
+                        {/* Expand Button - Top Right */}
+                        <div className="absolute top-4 right-4 px-4 py-2 bg-black/70 backdrop-blur-sm rounded-full text-white text-sm font-medium flex items-center gap-2 hover:bg-black/90 transition-colors pointer-events-none">
                           <Maximize2 size={16} />
                           Expand
                         </div>
-                      </div>
 
-                      {/* Action Bar - Below the image, always visible */}
-                      <div className="flex items-center justify-between gap-4 mt-4 p-4 bg-white/5 rounded-xl border border-white/10">
-                        {/* Left - Prompt Info */}
-                        <div className="flex-1 min-w-0">
-                          <p className="text-white/50 text-xs mb-1">Your prompt:</p>
-                          <p className="text-white text-sm font-medium truncate">{generatedContent.prompt}</p>
-                        </div>
+                        {/* ALWAYS VISIBLE - Bottom Action Bar ON THE IMAGE */}
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-4 pt-10">
+                          <div className="flex items-center justify-between">
+                            {/* Left - Heart */}
+                            <button
+                              onClick={(e) => { e.stopPropagation(); alert('Saved to favorites!'); }}
+                              className="p-2.5 rounded-full hover:bg-white/20 transition-colors text-white/70 hover:text-white"
+                              title="Save"
+                            >
+                              <Heart size={22} />
+                            </button>
 
-                        {/* Right - Action Buttons */}
-                        <div className="flex gap-2 shrink-0">
-                          <button
-                            onClick={() => alert('Saved!')}
-                            className="p-2.5 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors"
-                            title="Save to favorites"
-                          >
-                            <Heart size={18} />
-                          </button>
-                          <button
-                            onClick={() => { navigator.clipboard.writeText('https://vizual.ai/share/...'); alert('Link copied!'); }}
-                            className="p-2.5 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors"
-                            title="Share"
-                          >
-                            <Share2 size={18} />
-                          </button>
-                          <button
-                            onClick={() => alert('Download started!')}
-                            className="p-2.5 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors"
-                            title="Download"
-                          >
-                            <Download size={18} />
-                          </button>
+                            {/* Center - Main Actions */}
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={(e) => { e.stopPropagation(); handleGenerate(); }}
+                                className="p-2.5 rounded-full hover:bg-white/20 transition-colors text-white/70 hover:text-white"
+                                title="Regenerate"
+                              >
+                                <RefreshCw size={20} />
+                              </button>
+                              <button
+                                onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText('https://vizual.ai/share/...'); alert('Link copied!'); }}
+                                className="p-2.5 rounded-full hover:bg-white/20 transition-colors text-white/70 hover:text-white"
+                                title="Share"
+                              >
+                                <Share2 size={20} />
+                              </button>
+                            </div>
+
+                            {/* Right - Download & More */}
+                            <div className="flex items-center gap-1">
+                              <button
+                                onClick={(e) => { e.stopPropagation(); alert('Download started!'); }}
+                                className="p-2.5 rounded-full hover:bg-white/20 transition-colors text-white/70 hover:text-white"
+                                title="Download"
+                              >
+                                <Download size={22} />
+                              </button>
+                              <button
+                                onClick={(e) => { e.stopPropagation(); }}
+                                className="p-2.5 rounded-full hover:bg-white/20 transition-colors text-white/70 hover:text-white"
+                                title="More Options"
+                              >
+                                <MoreHorizontal size={22} />
+                              </button>
+                            </div>
+                          </div>
                         </div>
                       </div>
 
@@ -898,7 +963,7 @@ export default function VizualStudioApp() {
                   {/* Tabs */}
                   <div className="flex items-center justify-center gap-1 md:gap-2 overflow-x-auto mb-2">
                     {(creationMode === "IMAGE"
-                      ? ["REFERENCE", "REMIX"]
+                      ? ["STYLE", "REFERENCE", "REMIX"]
                       : ["STYLE", "REFERENCE", "MODIFY"]).map((tab) => (
                         <button
                           key={tab}
@@ -945,23 +1010,20 @@ export default function VizualStudioApp() {
                       </div>
                     )}
 
-                    {/* Attachments Preview List */}
+                    {/* Attachments Preview - Compact inline strip */}
                     {attachments.length > 0 && (
-                      <div className="absolute -top-24 left-4 z-[100] flex gap-4 overflow-x-auto max-w-[90%] pb-2 px-1">
+                      <div className="flex items-center gap-2 mb-3 overflow-x-auto pb-2">
                         {attachments.map((att) => (
                           <div key={att.id} className="relative group shrink-0">
-                            {/* Main Preview */}
-                            <div className="w-20 h-20 rounded-xl overflow-hidden border-2 border-white/20 shadow-2xl relative bg-black">
+                            {/* Compact thumbnail */}
+                            <div className="w-10 h-10 rounded-lg overflow-hidden border border-white/20 bg-black shadow-lg">
                               {att.type === 'video' ? (
                                 <video src={att.url} className="w-full h-full object-cover" autoPlay loop muted />
                               ) : (
-                                <img src={att.url} alt="Preview" className="w-full h-full object-cover" />
+                                <img src={att.url} alt="Ref" className="w-full h-full object-cover" />
                               )}
-                              {/* Pulse overlay effect */}
-                              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/20 to-transparent animate-pulse" />
                             </div>
-
-                            {/* Close Button */}
+                            {/* Close button - always visible on mobile */}
                             <button
                               onClick={() => {
                                 setAttachments(prev => prev.filter(item => item.id !== att.id));
@@ -969,13 +1031,41 @@ export default function VizualStudioApp() {
                                   fileInputRef.current.value = '';
                                 }
                               }}
-                              className="absolute -top-2 -right-2 bg-red-500 rounded-full p-1 text-white shadow-lg opacity-0 group-hover:opacity-100 transition-opacity transform scale-75 hover:scale-100"
+                              className="absolute -top-1.5 -right-1.5 bg-black/80 border border-white/20 rounded-full p-0.5 text-white shadow-lg"
                             >
-                              <X size={12} />
+                              <X size={10} />
                             </button>
+                          </div>
+                        ))}
+                        {/* Add more button */}
+                        <button
+                          onClick={() => setUploadPopup('image')}
+                          className="w-10 h-10 rounded-lg border border-dashed border-white/20 bg-white/5 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition-colors shrink-0"
+                        >
+                          <Plus size={16} />
+                        </button>
+                      </div>
+                    )}
 
-                            {/* Connection Line */}
-                            <div className="absolute top-full left-1/2 w-0.5 h-4 bg-gradient-to-b from-white/20 to-transparent" />
+                    {/* Selected Mode/Style Tags - Instagram-style @mentions */}
+                    {selectedTags.length > 0 && (
+                      <div className="flex flex-wrap items-center gap-2 mb-3">
+                        {selectedTags.map((tag) => (
+                          <div
+                            key={tag.id}
+                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${tag.type === 'style'
+                              ? 'bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-400/30 text-purple-300'
+                              : 'bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border border-blue-400/30 text-blue-300'
+                              }`}
+                          >
+                            <span className="text-white/70">@</span>
+                            <span>{tag.label}</span>
+                            <button
+                              onClick={() => removeTag(tag.id)}
+                              className="ml-1 p-0.5 rounded-full hover:bg-white/10 transition-colors"
+                            >
+                              <X size={12} className="opacity-70 hover:opacity-100" />
+                            </button>
                           </div>
                         ))}
                       </div>
@@ -985,7 +1075,7 @@ export default function VizualStudioApp() {
                     <textarea
                       value={prompt}
                       onChange={(e) => setPrompt(e.target.value)}
-                      placeholder="What do you want to see..."
+                      placeholder={selectedTags.length > 0 ? "Add your prompt..." : "What do you want to see..."}
                       className="w-full bg-transparent text-white placeholder-gray-500 text-base md:text-lg resize-none focus:outline-none mb-3 md:mb-4 min-h-[50px] md:min-h-[60px]"
                       rows={2}
                     />
@@ -1070,8 +1160,8 @@ export default function VizualStudioApp() {
                         <button
                           onClick={() => {
                             if (attachments.length === 0 && !generatedContent) {
-                              // If no file uploaded AND no generated content to extend
-                              alert("Please upload a file or generate content first.");
+                              // If no file uploaded AND no generated content to extend, show upload popup
+                              setUploadPopup(true);
                               return;
                             }
                             setIsExtending(true);
@@ -1255,14 +1345,9 @@ export default function VizualStudioApp() {
                       <button
                         key={index}
                         onClick={() => {
-                          const basePrompt = templateModes.find(m => m.id === selectedModeId)?.title || "";
-                          const finalPrompt = selectedModeId === 3 // Use this style
-                            ? option.promptSuffix || ""
-                            : selectedModeId === 1 // Make visuals for
-                              ? `${basePrompt} ${option.title.toLowerCase()} - ${option.promptSuffix}`
-                              : `${basePrompt} ${option.title.toLowerCase()} - ${option.promptSuffix}`;
-
-                          setPrompt(finalPrompt);
+                          // Add tag instead of setting prompt (Instagram-style @mention)
+                          const tagType = selectedModeId === 3 ? 'style' : 'mode';
+                          addTag(option.title, tagType);
 
                           // Set logic based on mode ID
                           if (selectedModeId === 1 || selectedModeId === 3) setCreationMode("IMAGE");
@@ -1295,6 +1380,104 @@ export default function VizualStudioApp() {
                 {/* Bottom gradient fade */}
                 <div className="absolute bottom-0 left-0 right-0 h-12 sm:h-16 bg-gradient-to-t from-[#0a0a0a] to-transparent pointer-events-none" />
               </div>
+            </div>
+          </div>
+        )
+      }
+
+      {/* Style Selection Modal */}
+      {
+        showStyleModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4">
+            {/* Backdrop */}
+            <div
+              className="absolute inset-0 bg-black/80 backdrop-blur-md"
+              onClick={() => setShowStyleModal(false)}
+            />
+
+            {/* Modal Content */}
+            <div className="relative z-10 w-full max-w-lg bg-[#0a0a0a]/95 backdrop-blur-2xl rounded-[20px] sm:rounded-[28px] border border-white/10 overflow-hidden shadow-2xl">
+              {/* Glow line */}
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-[1px] bg-gradient-to-r from-transparent via-purple-400/50 to-transparent" />
+
+              {/* Close Button */}
+              <button
+                onClick={() => setShowStyleModal(false)}
+                className="absolute top-4 right-4 z-10 p-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-all"
+              >
+                <X size={16} className="text-gray-400" />
+              </button>
+
+              {/* Header */}
+              <div className="text-center pt-8 pb-4 px-6">
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-500/10 border border-purple-400/20 mb-4">
+                  <Palette size={14} className="text-purple-400" />
+                  <span className="text-xs font-medium text-purple-300 tracking-wider">STYLE PRESETS</span>
+                </div>
+                <h2 className={`text-2xl sm:text-3xl font-bold mb-2 text-white ${spaceGrotesk.className}`}>
+                  Choose a Style
+                </h2>
+                <p className="text-gray-500 text-sm">
+                  Select a visual style to apply to your creation
+                </p>
+              </div>
+
+              {/* Style Grid */}
+              <div className="px-4 sm:px-6 pb-6 grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[50vh] overflow-y-auto">
+                {STYLE_PRESETS.map((style, index) => (
+                  <button
+                    key={style.name}
+                    onClick={() => {
+                      addTag(style.name, 'style');
+                      setShowStyleModal(false);
+                    }}
+                    className="group relative p-4 rounded-xl bg-gradient-to-b from-white/[0.05] to-transparent border border-white/10 hover:border-purple-400/30 hover:bg-purple-500/5 transition-all duration-300 text-left"
+                    style={{ animationDelay: `${index * 50}ms` }}
+                  >
+                    {/* Icon */}
+                    <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 group-hover:border-purple-400/30 group-hover:bg-purple-500/10 flex items-center justify-center mb-3 transition-all duration-300">
+                      {style.icon === 'film' && <Video size={20} className="text-gray-400 group-hover:text-purple-300" />}
+                      {style.icon === 'user' && <User size={20} className="text-gray-400 group-hover:text-purple-300" />}
+                      {style.icon === 'box' && <LayoutGrid size={20} className="text-gray-400 group-hover:text-purple-300" />}
+                      {style.icon === 'smile' && <Sparkles size={20} className="text-gray-400 group-hover:text-purple-300" />}
+                      {style.icon === 'zap' && <Zap size={20} className="text-gray-400 group-hover:text-purple-300" />}
+                      {style.icon === 'camera' && <ImageIcon size={20} className="text-gray-400 group-hover:text-purple-300" />}
+                      {style.icon === 'moon' && <Moon size={20} className="text-gray-400 group-hover:text-purple-300" />}
+                    </div>
+
+                    {/* Name */}
+                    <span className="text-sm font-medium text-white group-hover:text-purple-200 transition-colors">
+                      {style.name}
+                    </span>
+
+                    {/* Selection indicator */}
+                    {selectedTags.find(t => t.label === style.name && t.type === 'style') && (
+                      <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center">
+                        <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
+
+              {/* Selected count */}
+              {selectedTags.filter(t => t.type === 'style').length > 0 && (
+                <div className="px-6 pb-4">
+                  <div className="px-4 py-2 rounded-xl bg-purple-500/10 border border-purple-400/20 flex items-center justify-between">
+                    <span className="text-sm text-purple-300">
+                      {selectedTags.filter(t => t.type === 'style').length} style{selectedTags.filter(t => t.type === 'style').length > 1 ? 's' : ''} selected
+                    </span>
+                    <button
+                      onClick={() => setSelectedTags(prev => prev.filter(t => t.type !== 'style'))}
+                      className="text-xs text-purple-400 hover:text-purple-300 transition-colors"
+                    >
+                      Clear all
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )
@@ -1713,7 +1896,8 @@ export default function VizualStudioApp() {
                     <button
                       key={style.name}
                       onClick={() => {
-                        setPrompt((prev) => prev ? `${prev}, ${style.name} style` : `${style.name} style`);
+                        // Add tag instead of setting prompt (Instagram-style @mention)
+                        addTag(style.name, 'style');
                         setShowStyleModal(false);
                       }}
                       className="group relative aspect-[4/5] rounded-2xl overflow-hidden border border-white/10 hover:border-white/40 transition-all hover:scale-[1.02] hover:shadow-xl"

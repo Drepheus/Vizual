@@ -1,6 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 1, "column": 0}, "map": {"version":3,"sources":["turbopack:///[project]/Omi-AI-1/src/CircularGallery.css"],"sourcesContent":[".circular-gallery {\r\n  width: 100%;\r\n  height: 100%;\r\n  overflow: hidden;\r\n  cursor: grab;\r\n}\r\n\r\n.circular-gallery:active {\r\n  cursor: grabbing;\r\n}\r\n"],"names":[],"mappings":"AAAA;;;;;;;AAOA"}}]
-}
