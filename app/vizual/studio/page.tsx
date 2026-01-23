@@ -303,6 +303,18 @@ const VIDEO_MODELS = [
   }
 ];
 
+// Style backgrounds mapping - used to show style image as background when selected
+const STYLE_BACKGROUNDS: Record<string, string> = {
+  'Cinematic': 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1920&h=1080&fit=crop&q=80',
+  'Anime': 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=1920&h=1080&fit=crop&q=80',
+  '3D Animation': 'https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?w=1920&h=1080&fit=crop&q=80',
+  'Cartoon': 'https://images.unsplash.com/photo-1534809027769-b00d750a6bac?w=1920&h=1080&fit=crop&q=80',
+  'Realistic': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&h=1080&fit=crop&q=80',
+  'Noir': 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=1920&h=1080&fit=crop&q=80',
+  'Cyberpunk': 'https://images.unsplash.com/photo-1515630771457-09367d0ae038?w=1920&h=1080&fit=crop&q=80',
+  'Fantasy': 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1920&h=1080&fit=crop&q=80',
+};
+
 const extensionLoadingStates = [
   { text: "Analyzing video frames" },
   { text: "Upscaling resolution" },
@@ -392,6 +404,65 @@ export default function VizualStudioApp() {
   const removeTag = (tagId: string) => {
     setSelectedTags(prev => prev.filter(t => t.id !== tagId));
   };
+
+  // Get the selected style's background image (if any style tag is selected)
+  const selectedStyleTag = selectedTags.find(t => t.type === 'style');
+
+  // State for cycling background images
+  const [styleImages, setStyleImages] = useState<string[]>([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
+
+  // Fetch images for the selected style from the local folder
+  useEffect(() => {
+    if (!selectedStyleTag) {
+      setStyleImages([]);
+      setCurrentImageIndex(0);
+      return;
+    }
+
+    // Fetch images from the API
+    fetch(`/api/style-images?style=${encodeURIComponent(selectedStyleTag.label)}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.images && data.images.length > 0) {
+          setStyleImages(data.images);
+          setCurrentImageIndex(0);
+          setIsImageLoaded(false);
+        } else {
+          // Fall back to the Unsplash image if no local images
+          const fallbackImage = STYLE_BACKGROUNDS[selectedStyleTag.label];
+          if (fallbackImage) {
+            setStyleImages([fallbackImage]);
+            setCurrentImageIndex(0);
+            setIsImageLoaded(false);
+          }
+        }
+      })
+      .catch(err => {
+        console.error('Error fetching style images:', err);
+        // Fall back to Unsplash
+        const fallbackImage = STYLE_BACKGROUNDS[selectedStyleTag.label];
+        if (fallbackImage) {
+          setStyleImages([fallbackImage]);
+        }
+      });
+  }, [selectedStyleTag?.label]);
+
+  // Cycle through images every 6 seconds
+  useEffect(() => {
+    if (styleImages.length <= 1) return;
+
+    const interval = setInterval(() => {
+      setIsImageLoaded(false);
+      setCurrentImageIndex(prev => (prev + 1) % styleImages.length);
+    }, 6000);
+
+    return () => clearInterval(interval);
+  }, [styleImages.length]);
+
+  // Get current background image
+  const currentStyleBackground = styleImages.length > 0 ? styleImages[currentImageIndex] : null;
 
   // Mode Selection States
   const [modeStep, setModeStep] = useState<0 | 1>(0);
@@ -808,15 +879,49 @@ export default function VizualStudioApp() {
 
           {/* Main Canvas Area */}
           <main className="flex-1 relative flex flex-col bg-black overflow-hidden">
-            <Vortex
-              backgroundColor="black"
-              rangeY={800}
-              particleCount={500}
-              baseHue={0}
-              saturation="0%"
-              lightness="65%"
-              className="flex flex-col w-full h-full"
-            >
+            {/* Style Background Image - Shows when a style is selected */}
+            {/* Style Background Images - cycling with cross-fade */}
+            {styleImages.length > 0 && (
+              <div className="absolute inset-0 z-0">
+                {styleImages.map((img, index) => (
+                  <div
+                    key={img}
+                    className="absolute inset-0 transition-opacity duration-1000 ease-in-out"
+                    style={{
+                      opacity: index === currentImageIndex ? 1 : 0,
+                      zIndex: index === currentImageIndex ? 1 : 0
+                    }}
+                  >
+                    <img
+                      src={img}
+                      alt={selectedStyleTag?.label || 'Style'}
+                      className="w-full h-full object-cover transition-transform duration-[20s] ease-linear"
+                      style={{ transform: index === currentImageIndex ? 'scale(1.1)' : 'scale(1)' }}
+                    />
+                    {/* Overlay for better text readability */}
+                    <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px]" />
+                    {/* Gradient overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/80" />
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Vortex Animation - Shows when no style is selected */}
+            <div className={`absolute inset-0 z-0 transition-opacity duration-500 ${currentStyleBackground ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+              <Vortex
+                backgroundColor="black"
+                rangeY={800}
+                particleCount={500}
+                baseHue={0}
+                saturation="0%"
+                lightness="65%"
+                className="flex flex-col w-full h-full"
+              />
+            </div>
+
+            {/* Content Layer - Always on top */}
+            <div className="relative z-10 flex flex-col w-full h-full">
               {/* Main Content Area */}
               <div className="flex-1 overflow-y-auto flex flex-col" style={{ touchAction: 'pan-y', overscrollBehavior: 'contain' }}>
                 {generatedContent ? (
@@ -1212,7 +1317,7 @@ export default function VizualStudioApp() {
                   </div>
                 </div>
               </div>
-            </Vortex>
+            </div>
           </main>
         </div>
       )

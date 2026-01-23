@@ -300,14 +300,14 @@ export function VizualStudio() {
 
       {/* Hero Section */}
       <div className="relative z-10 h-screen w-full">
-        {/* Background Video */}
+        {/* Background Video - Optimized for instant playback */}
         <div className="absolute inset-0 z-0 bg-black flex items-center justify-center">
           <video
             autoPlay
             loop
             muted
             playsInline
-            preload="auto"
+            preload="metadata"
             className="min-h-full min-w-full object-cover opacity-70 will-change-transform"
             style={{ contentVisibility: 'auto' }}
           >
@@ -320,9 +320,9 @@ export function VizualStudio() {
         <main className="relative z-10 flex flex-col items-center justify-between min-h-screen px-4 pt-24 pb-8 md:justify-center md:pt-20">
           <div className="flex-1 flex flex-col items-center justify-center w-full">
             <motion.h1
-              initial={{ opacity: 0, y: 30, filter: "blur(10px)" }}
-              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              transition={{ duration: 1, ease: "easeOut" }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
               className="text-4xl sm:text-5xl md:text-7xl font-light tracking-tight mb-6 max-w-4xl mx-auto leading-[1.1] text-center w-full break-words px-2"
             >
               Use Your <br />
@@ -332,9 +332,9 @@ export function VizualStudio() {
             </motion.h1>
 
             <motion.p
-              initial={{ opacity: 0, y: 20, filter: "blur(5px)" }}
-              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.15, ease: "easeOut" }}
               className="text-lg md:text-xl text-gray-300 mb-8 md:mb-12 max-w-xs md:max-w-2xl mx-auto font-light text-center leading-relaxed"
             >
               Production-ready images and videos with precision, speed, and control
@@ -343,9 +343,9 @@ export function VizualStudio() {
 
           {/* Input Area */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            initial={{ opacity: 0, scale: 0.98, y: 15 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.6, ease: "easeOut" }}
+            transition={{ duration: 0.5, delay: 0.25, ease: "easeOut" }}
             className="w-full max-w-3xl mx-auto relative group"
           >
             <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 rounded-[32px] blur opacity-0 group-hover:opacity-100 transition duration-1000"></div>
