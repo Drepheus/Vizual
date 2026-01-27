@@ -10,7 +10,7 @@ export function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get('redirect') || '/command-hub';
-  const supabase = useMemo(() => getBrowserSupabaseClient(), []);
+
   const { session, loading } = useAuth();
   const { setGuestMode } = useGuestMode();
 
@@ -21,27 +21,9 @@ export function LoginPage() {
   }, [router, session, redirectTo]);
 
   const signInWithGoogle = async () => {
-    // Store redirect URL for after OAuth callback
-    if (typeof window !== 'undefined') {
-      sessionStorage.setItem('authRedirect', redirectTo);
-    }
-    
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-        queryParams: {
-          access_type: "offline",
-          prompt: "consent",
-        },
-        skipBrowserRedirect: false,
-      },
-    });
-
-    if (error) {
-      console.error("Error signing in with Google", error);
-      alert(`Error signing in with Google: ${error.message}`);
-    }
+    // Mock login behavior
+    setGuestMode(true);
+    router.push(redirectTo);
   };
 
   const handleGuestMode = () => {

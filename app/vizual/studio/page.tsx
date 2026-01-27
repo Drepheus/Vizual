@@ -51,6 +51,7 @@ import {
 import { MultiStepLoader } from "@/components/ui/multi-step-loader";
 import { Inter, Space_Grotesk } from "next/font/google";
 import { Vortex } from "@/components/ui/vortex";
+import Aurora from "@/components/vizual/Aurora";
 import { ProjectsView } from "@/components/vizual/projects-view";
 
 const inter = Inter({ subsets: ["latin"], weight: ["300", "400", "500", "600", "700"] });
@@ -369,6 +370,7 @@ export default function VizualStudioApp() {
   const [showModeDropdown, setShowModeDropdown] = useState(false);
   const [showModelDropdown, setShowModelDropdown] = useState(false);
   const [uploadPopup, setUploadPopup] = useState<'image' | 'video' | null>(null);
+  const [isInputFocused, setIsInputFocused] = useState(false);
 
   // Attachments State
   const [attachments, setAttachments] = useState<{ id: string; url: string; file?: File; type: 'image' | 'video' }[]>([]);
@@ -920,47 +922,52 @@ export default function VizualStudioApp() {
               />
             </div>
 
+
+
             {/* Content Layer - Always on top */}
             <div className="relative z-10 flex flex-col w-full h-full">
               {/* Main Content Area */}
-              <div className="flex-1 overflow-y-auto flex flex-col" style={{ touchAction: 'pan-y', overscrollBehavior: 'contain' }}>
+              {/* Main Content Area */}
+              <div className="flex-1 overflow-hidden flex flex-col relative" style={{ touchAction: 'pan-y', overscrollBehavior: 'contain' }}>
                 {generatedContent ? (
                   /* Generated Output - FULL SCREEN PROMINENT */
-                  <div className="flex-1 flex flex-col p-4 md:p-6">
+                  <div className="flex-1 flex flex-col p-4 md:p-6 min-h-0">
                     {/* Large Output Container - Takes most of the space */}
-                    <div className="flex-1 flex flex-col max-w-5xl w-full mx-auto">
+                    <div className="flex-1 flex flex-col w-full max-w-3xl mx-auto min-h-0">
 
-                      {/* The Main Output - LARGE */}
+                      {/* The Main Output - LARGE - Flex 1 to take available space */}
                       <div
-                        className="relative rounded-2xl overflow-hidden bg-neutral-900 border border-white/20 cursor-pointer group shadow-2xl"
-                        style={{ minHeight: '50vh' }}
+                        className="relative flex-1 min-h-0 w-full rounded-2xl overflow-hidden bg-neutral-900 border border-white/20 cursor-pointer group shadow-2xl flex flex-col"
                       >
-                        <img
-                          src={generatedContent.imageUrl}
-                          alt="Generated"
-                          className="w-full h-full object-cover"
-                          onClick={() => {
-                            const modal = document.createElement('div');
-                            modal.id = 'fullscreen-viewer';
-                            modal.className = 'fixed inset-0 z-[200] bg-black flex items-center justify-center';
-                            modal.innerHTML = `
+                        {/* Image Container - Flex 1 */}
+                        <div className="flex-1 relative min-h-0 w-full bg-neutral-900/50">
+                          <img
+                            src={generatedContent.imageUrl}
+                            alt="Generated"
+                            className="absolute inset-0 w-full h-full object-contain"
+                            onClick={() => {
+                              const modal = document.createElement('div');
+                              modal.id = 'fullscreen-viewer';
+                              modal.className = 'fixed inset-0 z-[200] bg-black flex items-center justify-center';
+                              modal.innerHTML = `
                               <button onclick="this.parentElement.remove()" class="absolute top-4 right-4 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors z-10">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
                               </button>
                               <img src="${generatedContent.imageUrl}" class="w-full h-full object-contain" />
                             `;
-                            document.body.appendChild(modal);
-                          }}
-                        />
+                              document.body.appendChild(modal);
+                            }}
+                          />
+                        </div>
 
                         {/* Expand Button - Top Right */}
-                        <div className="absolute top-4 right-4 px-4 py-2 bg-black/70 backdrop-blur-sm rounded-full text-white text-sm font-medium flex items-center gap-2 hover:bg-black/90 transition-colors pointer-events-none">
+                        <div className="absolute top-4 right-4 px-4 py-2 bg-black/70 backdrop-blur-sm rounded-full text-white text-sm font-medium flex items-center gap-2 hover:bg-black/90 transition-colors pointer-events-none z-10">
                           <Maximize2 size={16} />
                           Expand
                         </div>
 
-                        {/* ALWAYS VISIBLE - Bottom Action Bar ON THE IMAGE */}
-                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-4 pt-10">
+                        {/* ALWAYS VISIBLE - Bottom Action Bar ON THE IMAGE - Fixed at bottom of image container */}
+                        <div className="absolute bottom-0 left-0 right-0 z-10 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-4 pt-10">
                           <div className="flex items-center justify-between">
                             {/* Left - Heart */}
                             <button
@@ -1010,8 +1017,8 @@ export default function VizualStudioApp() {
                         </div>
                       </div>
 
-                      {/* Quick Actions - Below the action bar */}
-                      <div className="flex flex-wrap gap-2 mt-3 justify-center">
+                      {/* Quick Actions - Below the action bar - Fixed height, won't push image off screen if container is flex-col */}
+                      <div className="flex-none flex flex-wrap gap-2 mt-3 justify-center">
                         <button
                           onClick={() => handleGenerate()}
                           className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-white text-black hover:bg-gray-200 transition-colors text-sm font-medium"
@@ -1089,229 +1096,240 @@ export default function VizualStudioApp() {
                   </div>
 
                   {/* Input Container - Floating transparency */}
-                  <div className="bg-[#111]/80 backdrop-blur-md rounded-2xl border border-white/10 p-3 md:p-4 shadow-2xl relative">
+                  <div className="relative rounded-2xl p-[1px] group">
+                    {/* Aurora Animation Border/Glow */}
+                    <div className={`absolute inset-0 rounded-2xl overflow-hidden transition-opacity duration-500 pointer-events-none ${isInputFocused ? 'opacity-100' : 'opacity-0'}`}>
+                      <div className="absolute inset-[-50%] transform-gpu">
+                        <Aurora speed={0.8} colorStops={['#3b82f6', '#8b5cf6', '#ec4899']} />
+                      </div>
+                    </div>
 
-                    {/* Media Upload Popup */}
-                    {uploadPopup && (
-                      <div className="absolute bottom-full left-0 mb-2 ml-0 md:ml-2 z-50 animate-in fade-in slide-in-from-bottom-2 duration-200">
-                        <div className="w-32 h-40 bg-[#1a1a1a]/90 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl flex flex-col items-center justify-center gap-3 relative overflow-hidden group">
-                          {/* Close Button */}
+                    <div className="bg-[#111]/80 backdrop-blur-md rounded-2xl border border-white/10 p-3 md:p-4 shadow-2xl relative z-10 transition-colors duration-300">
+
+                      {/* Media Upload Popup */}
+                      {uploadPopup && (
+                        <div className="absolute bottom-full left-0 mb-2 ml-0 md:ml-2 z-50 animate-in fade-in slide-in-from-bottom-2 duration-200">
+                          <div className="w-32 h-40 bg-[#1a1a1a]/90 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl flex flex-col items-center justify-center gap-3 relative overflow-hidden group">
+                            {/* Close Button */}
+                            <button
+                              onClick={() => setUploadPopup(null)}
+                              className="absolute top-2 right-2 p-1 rounded-full bg-black/20 hover:bg-white/20 text-gray-400 hover:text-white transition-colors"
+                            >
+                              <X size={12} />
+                            </button>
+
+                            {/* Upload Area */}
+                            <div className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 group-hover:scale-110 group-hover:bg-white/10 group-hover:text-white transition-all duration-300">
+                              <Plus size={24} />
+                            </div>
+                            <span className="text-[10px] font-medium text-gray-400 tracking-wider uppercase">{uploadPopup}</span>
+
+                            {/* Gradient Glow */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-white/5 to-transparent pointer-events-none" />
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Attachments Preview - Compact inline strip */}
+                      {attachments.length > 0 && (
+                        <div className="flex items-center gap-2 mb-3 overflow-x-auto pb-2">
+                          {attachments.map((att) => (
+                            <div key={att.id} className="relative group shrink-0">
+                              {/* Compact thumbnail */}
+                              <div className="w-10 h-10 rounded-lg overflow-hidden border border-white/20 bg-black shadow-lg">
+                                {att.type === 'video' ? (
+                                  <video src={att.url} className="w-full h-full object-cover" autoPlay loop muted />
+                                ) : (
+                                  <img src={att.url} alt="Ref" className="w-full h-full object-cover" />
+                                )}
+                              </div>
+                              {/* Close button - always visible on mobile */}
+                              <button
+                                onClick={() => {
+                                  setAttachments(prev => prev.filter(item => item.id !== att.id));
+                                  if (attachments.length === 1 && fileInputRef.current) {
+                                    fileInputRef.current.value = '';
+                                  }
+                                }}
+                                className="absolute -top-1.5 -right-1.5 bg-black/80 border border-white/20 rounded-full p-0.5 text-white shadow-lg"
+                              >
+                                <X size={10} />
+                              </button>
+                            </div>
+                          ))}
+                          {/* Add more button */}
                           <button
-                            onClick={() => setUploadPopup(null)}
-                            className="absolute top-2 right-2 p-1 rounded-full bg-black/20 hover:bg-white/20 text-gray-400 hover:text-white transition-colors"
+                            onClick={() => setUploadPopup('image')}
+                            className="w-10 h-10 rounded-lg border border-dashed border-white/20 bg-white/5 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition-colors shrink-0"
                           >
-                            <X size={12} />
+                            <Plus size={16} />
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Selected Mode/Style Tags - Instagram-style @mentions */}
+                      {selectedTags.length > 0 && (
+                        <div className="flex flex-wrap items-center gap-2 mb-3">
+                          {selectedTags.map((tag) => (
+                            <div
+                              key={tag.id}
+                              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${tag.type === 'style'
+                                ? 'bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-400/30 text-purple-300'
+                                : 'bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border border-blue-400/30 text-blue-300'
+                                }`}
+                            >
+                              <span className="text-white/70">@</span>
+                              <span>{tag.label}</span>
+                              <button
+                                onClick={() => removeTag(tag.id)}
+                                className="ml-1 p-0.5 rounded-full hover:bg-white/10 transition-colors"
+                              >
+                                <X size={12} className="opacity-70 hover:opacity-100" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Text Input */}
+                      <textarea
+                        value={prompt}
+                        onChange={(e) => setPrompt(e.target.value)}
+                        onFocus={() => setIsInputFocused(true)}
+                        onBlur={() => setIsInputFocused(false)}
+                        placeholder={selectedTags.length > 0 ? "Add your prompt..." : "What do you want to see..."}
+                        className="w-full bg-transparent text-white placeholder-gray-500 text-base md:text-lg resize-none focus:outline-none mb-3 md:mb-4 min-h-[50px] md:min-h-[60px]"
+                        rows={2}
+                      />
+
+                      {/* Bottom Controls */}
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-0">
+                        {/* Left Icons */}
+                        <div className="flex items-center gap-1 justify-center sm:justify-start">
+                          {/* Image Upload */}
+                          <input
+                            type="file"
+                            ref={fileInputRef}
+                            className="hidden"
+                            multiple
+                            accept="image/*,video/*"
+                            onChange={(e) => {
+                              if (e.target.files && e.target.files.length > 0) {
+                                const newAttachments: { id: string; url: string; file?: File; type: 'image' | 'video' }[] = [];
+
+                                Array.from(e.target.files).forEach(file => {
+                                  const url = URL.createObjectURL(file);
+                                  const type = file.type.startsWith('video') ? 'video' : 'image';
+                                  newAttachments.push({ id: crypto.randomUUID(), url, file, type });
+                                });
+
+                                setAttachments(prev => [...prev, ...newAttachments]);
+                              }
+                              // Reset input value
+                              e.target.value = '';
+                            }}
+                          />
+                          <button
+                            onClick={() => fileInputRef.current?.click()}
+                            className="p-2 rounded-lg hover:bg-white/5 transition-colors text-gray-400 hover:text-white"
+                            title="Upload Image"
+                          >
+                            <ImageIcon size={18} />
                           </button>
 
-                          {/* Upload Area */}
-                          <div className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 group-hover:scale-110 group-hover:bg-white/10 group-hover:text-white transition-all duration-300">
-                            <Plus size={24} />
-                          </div>
-                          <span className="text-[10px] font-medium text-gray-400 tracking-wider uppercase">{uploadPopup}</span>
+                          {/* AI Enhancer */}
+                          <button
+                            onClick={() => setShowEnhancerModal(true)}
+                            className="p-2 rounded-lg hover:bg-white/5 transition-colors text-gray-400 hover:text-white"
+                            title="AI Enhancer"
+                          >
+                            <Wand2 size={18} />
+                          </button>
 
-                          {/* Gradient Glow */}
-                          <div className="absolute inset-0 bg-gradient-to-t from-white/5 to-transparent pointer-events-none" />
-                        </div>
-                      </div>
-                    )}
+                          <div className="w-px h-5 bg-white/10 mx-2" />
 
-                    {/* Attachments Preview - Compact inline strip */}
-                    {attachments.length > 0 && (
-                      <div className="flex items-center gap-2 mb-3 overflow-x-auto pb-2">
-                        {attachments.map((att) => (
-                          <div key={att.id} className="relative group shrink-0">
-                            {/* Compact thumbnail */}
-                            <div className="w-10 h-10 rounded-lg overflow-hidden border border-white/20 bg-black shadow-lg">
-                              {att.type === 'video' ? (
-                                <video src={att.url} className="w-full h-full object-cover" autoPlay loop muted />
-                              ) : (
-                                <img src={att.url} alt="Ref" className="w-full h-full object-cover" />
-                              )}
-                            </div>
-                            {/* Close button - always visible on mobile */}
+                          {/* Video Timer */}
+                          <div className="relative">
                             <button
-                              onClick={() => {
-                                setAttachments(prev => prev.filter(item => item.id !== att.id));
-                                if (attachments.length === 1 && fileInputRef.current) {
-                                  fileInputRef.current.value = '';
-                                }
-                              }}
-                              className="absolute -top-1.5 -right-1.5 bg-black/80 border border-white/20 rounded-full p-0.5 text-white shadow-lg"
+                              onClick={() => setShowTimerSlider(!showTimerSlider)}
+                              className={`p-2 rounded-lg transition-colors ${showTimerSlider ? 'bg-white/10 text-white' : 'hover:bg-white/5 text-gray-400 hover:text-white'}`}
+                              title="Set Duration"
                             >
-                              <X size={10} />
+                              <Timer size={18} />
+                            </button>
+
+                            {/* Timer Slider Popup */}
+                            {showTimerSlider && (
+                              <div className="absolute bottom-full left-0 mb-2 p-4 bg-[#1a1a1a] border border-white/10 rounded-xl shadow-2xl w-64 z-[200]">
+                                <div className="flex justify-between items-center mb-3">
+                                  <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Duration</span>
+                                  <span className="text-xs text-white font-mono">{Math.floor(duration / 60)}:{(duration % 60).toString().padStart(2, '0')}</span>
+                                </div>
+                                <input
+                                  type="range" min="0" max="300" value={duration}
+                                  onChange={(e) => setDuration(parseInt(e.target.value))}
+                                  className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-white"
+                                />
+                                <div className="flex justify-between mt-1 text-[10px] text-gray-500">
+                                  <span>0s</span>
+                                  <span>5m</span>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Video Extender */}
+                          <button
+                            onClick={() => {
+                              if (attachments.length === 0 && !generatedContent) {
+                                // If no file uploaded AND no generated content to extend, show upload popup
+                                setUploadPopup('video');
+                                return;
+                              }
+                              setIsExtending(true);
+                            }}
+                            className="p-2 rounded-lg hover:bg-white/5 transition-colors text-gray-400 hover:text-white"
+                            title="Extend Clip"
+                          >
+                            <ArrowRightFromLine size={18} />
+                          </button>
+                        </div>
+
+                        {/* Right Controls */}
+                        <div className="flex items-center gap-2 md:gap-4 justify-between sm:justify-end">
+                          {/* Audio Toggle - Hidden on very small screens */}
+                          <div className="hidden xs:flex items-center gap-2">
+                            <span className="text-xs text-gray-400">Audio</span>
+                            <button
+                              onClick={() => setIsAudio(!isAudio)}
+                              className={`w-10 h-5 rounded-full transition-colors relative ${isAudio ? 'bg-white/30' : 'bg-white/10'}`}
+                            >
+                              <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${isAudio ? 'left-5' : 'left-0.5'}`} />
                             </button>
                           </div>
-                        ))}
-                        {/* Add more button */}
-                        <button
-                          onClick={() => setUploadPopup('image')}
-                          className="w-10 h-10 rounded-lg border border-dashed border-white/20 bg-white/5 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition-colors shrink-0"
-                        >
-                          <Plus size={16} />
-                        </button>
-                      </div>
-                    )}
 
-                    {/* Selected Mode/Style Tags - Instagram-style @mentions */}
-                    {selectedTags.length > 0 && (
-                      <div className="flex flex-wrap items-center gap-2 mb-3">
-                        {selectedTags.map((tag) => (
-                          <div
-                            key={tag.id}
-                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${tag.type === 'style'
-                              ? 'bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-400/30 text-purple-300'
-                              : 'bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border border-blue-400/30 text-blue-300'
+                          {/* Model/Aspect Ratio */}
+                          <div className="flex items-center gap-1 md:gap-2 text-[10px] md:text-xs text-gray-400">
+                            <span className="hidden sm:inline">{creationMode}</span>
+                            <span className="hidden sm:inline">·</span>
+                            <span className="text-white font-medium">{model}</span>
+                            <span>·</span>
+                            <span>{aspectRatio}</span>
+                            <ChevronDown size={14} />
+                          </div>
+
+                          {/* Send Button */}
+                          <button
+                            onClick={handleGenerate}
+                            disabled={!prompt.trim()}
+                            className={`p-2 md:p-2.5 rounded-full transition-colors ${prompt.trim()
+                              ? 'bg-white text-black hover:bg-gray-200'
+                              : 'bg-white/10 text-gray-500 cursor-not-allowed'
                               }`}
                           >
-                            <span className="text-white/70">@</span>
-                            <span>{tag.label}</span>
-                            <button
-                              onClick={() => removeTag(tag.id)}
-                              className="ml-1 p-0.5 rounded-full hover:bg-white/10 transition-colors"
-                            >
-                              <X size={12} className="opacity-70 hover:opacity-100" />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
-                    {/* Text Input */}
-                    <textarea
-                      value={prompt}
-                      onChange={(e) => setPrompt(e.target.value)}
-                      placeholder={selectedTags.length > 0 ? "Add your prompt..." : "What do you want to see..."}
-                      className="w-full bg-transparent text-white placeholder-gray-500 text-base md:text-lg resize-none focus:outline-none mb-3 md:mb-4 min-h-[50px] md:min-h-[60px]"
-                      rows={2}
-                    />
-
-                    {/* Bottom Controls */}
-                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-0">
-                      {/* Left Icons */}
-                      <div className="flex items-center gap-1 justify-center sm:justify-start">
-                        {/* Image Upload */}
-                        <input
-                          type="file"
-                          ref={fileInputRef}
-                          className="hidden"
-                          multiple
-                          accept="image/*,video/*"
-                          onChange={(e) => {
-                            if (e.target.files && e.target.files.length > 0) {
-                              const newAttachments: { id: string; url: string; file?: File; type: 'image' | 'video' }[] = [];
-
-                              Array.from(e.target.files).forEach(file => {
-                                const url = URL.createObjectURL(file);
-                                const type = file.type.startsWith('video') ? 'video' : 'image';
-                                newAttachments.push({ id: crypto.randomUUID(), url, file, type });
-                              });
-
-                              setAttachments(prev => [...prev, ...newAttachments]);
-                            }
-                            // Reset input value
-                            e.target.value = '';
-                          }}
-                        />
-                        <button
-                          onClick={() => fileInputRef.current?.click()}
-                          className="p-2 rounded-lg hover:bg-white/5 transition-colors text-gray-400 hover:text-white"
-                          title="Upload Image"
-                        >
-                          <ImageIcon size={18} />
-                        </button>
-
-                        {/* AI Enhancer */}
-                        <button
-                          onClick={() => setShowEnhancerModal(true)}
-                          className="p-2 rounded-lg hover:bg-white/5 transition-colors text-gray-400 hover:text-white"
-                          title="AI Enhancer"
-                        >
-                          <Wand2 size={18} />
-                        </button>
-
-                        <div className="w-px h-5 bg-white/10 mx-2" />
-
-                        {/* Video Timer */}
-                        <div className="relative">
-                          <button
-                            onClick={() => setShowTimerSlider(!showTimerSlider)}
-                            className={`p-2 rounded-lg transition-colors ${showTimerSlider ? 'bg-white/10 text-white' : 'hover:bg-white/5 text-gray-400 hover:text-white'}`}
-                            title="Set Duration"
-                          >
-                            <Timer size={18} />
-                          </button>
-
-                          {/* Timer Slider Popup */}
-                          {showTimerSlider && (
-                            <div className="absolute bottom-full left-0 mb-2 p-4 bg-[#1a1a1a] border border-white/10 rounded-xl shadow-2xl w-64 z-[200]">
-                              <div className="flex justify-between items-center mb-3">
-                                <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Duration</span>
-                                <span className="text-xs text-white font-mono">{Math.floor(duration / 60)}:{(duration % 60).toString().padStart(2, '0')}</span>
-                              </div>
-                              <input
-                                type="range" min="0" max="300" value={duration}
-                                onChange={(e) => setDuration(parseInt(e.target.value))}
-                                className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-white"
-                              />
-                              <div className="flex justify-between mt-1 text-[10px] text-gray-500">
-                                <span>0s</span>
-                                <span>5m</span>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Video Extender */}
-                        <button
-                          onClick={() => {
-                            if (attachments.length === 0 && !generatedContent) {
-                              // If no file uploaded AND no generated content to extend, show upload popup
-                              setUploadPopup(true);
-                              return;
-                            }
-                            setIsExtending(true);
-                          }}
-                          className="p-2 rounded-lg hover:bg-white/5 transition-colors text-gray-400 hover:text-white"
-                          title="Extend Clip"
-                        >
-                          <ArrowRightFromLine size={18} />
-                        </button>
-                      </div>
-
-                      {/* Right Controls */}
-                      <div className="flex items-center gap-2 md:gap-4 justify-between sm:justify-end">
-                        {/* Audio Toggle - Hidden on very small screens */}
-                        <div className="hidden xs:flex items-center gap-2">
-                          <span className="text-xs text-gray-400">Audio</span>
-                          <button
-                            onClick={() => setIsAudio(!isAudio)}
-                            className={`w-10 h-5 rounded-full transition-colors relative ${isAudio ? 'bg-white/30' : 'bg-white/10'}`}
-                          >
-                            <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${isAudio ? 'left-5' : 'left-0.5'}`} />
+                            <Send size={18} />
                           </button>
                         </div>
-
-                        {/* Model/Aspect Ratio */}
-                        <div className="flex items-center gap-1 md:gap-2 text-[10px] md:text-xs text-gray-400">
-                          <span className="hidden sm:inline">{creationMode}</span>
-                          <span className="hidden sm:inline">·</span>
-                          <span className="text-white font-medium">{model}</span>
-                          <span>·</span>
-                          <span>{aspectRatio}</span>
-                          <ChevronDown size={14} />
-                        </div>
-
-                        {/* Send Button */}
-                        <button
-                          onClick={handleGenerate}
-                          disabled={!prompt.trim()}
-                          className={`p-2 md:p-2.5 rounded-full transition-colors ${prompt.trim()
-                            ? 'bg-white text-black hover:bg-gray-200'
-                            : 'bg-white/10 text-gray-500 cursor-not-allowed'
-                            }`}
-                        >
-                          <Send size={18} />
-                        </button>
                       </div>
                     </div>
                   </div>

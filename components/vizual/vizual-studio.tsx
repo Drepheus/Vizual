@@ -174,12 +174,9 @@ export function VizualStudio() {
     router.push('/vizual/studio');
   }
 
-  const supabase = getBrowserSupabaseClient();
+
   const handleGoogleLogin = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: window.location.origin + '/vizual/studio' }
-    });
+    handleMockLogin();
   };
 
   // Typing animation state
