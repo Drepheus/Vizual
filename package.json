@@ -51,6 +51,7 @@
     "tailwindcss-animate": "^1.0.7",
     "three": "^0.180.0",
     "typescript": "^5.9.2",
+    "wavespeed": "^0.2.2",
     "zod": "^3.23.8"
   },
   "devDependencies": {

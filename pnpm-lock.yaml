@@ -122,6 +122,9 @@ importers:
       typescript:
         specifier: ^5.9.2
         version: 5.9.3
+      wavespeed:
+        specifier: ^0.2.2
+        version: 0.2.2
       zod:
         specifier: ^3.23.8
         version: 3.25.76
@@ -3065,6 +3068,9 @@ packages:
     peerDependenciesMeta:
       typescript:
         optional: true
+
+  wavespeed@0.2.2:
+    resolution: {integrity: sha512-x3e9dJZBHRiwQDs8jW6rDGg9al2h41aukm4BRovCpV3bwQT8UeRsgjbdoOpSKohsmujv+bLYDJiJ2rZoTkBFOw==}
 
   web-streams-polyfill@3.3.3:
     resolution: {integrity: sha512-d2JWLCivmZYTSIoge9MsgFCZrt571BikcWGYkjC1khllbTeDlGqZ2D8vD8E/lJa8WGWbb7Plm8/XJYV7IJHZZw==}
@@ -6524,6 +6530,8 @@ snapshots:
       '@vue/shared': 3.5.27
     optionalDependencies:
       typescript: 5.9.3
+
+  wavespeed@0.2.2: {}
 
   web-streams-polyfill@3.3.3: {}
 

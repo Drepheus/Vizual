@@ -78,14 +78,16 @@ const IMAGE_MODELS = [
     name: "FLUX Schnell",
     description: "Black Forest Labs",
     cost: "$0.003",
-    detail: "333 images / $1"
+    detail: "333 images / $1",
+    isFree: true
   },
   {
     id: "flux-1.1-pro-ultra",
     name: "FLUX 1.1 Pro Ultra",
     description: "Black Forest Labs",
     cost: "$0.06",
-    detail: "16 images / $1"
+    detail: "16 images / $1",
+    isFree: false
   },
 
   // PrunaAI
@@ -94,7 +96,8 @@ const IMAGE_MODELS = [
     name: "PrunaAI P-Image",
     description: "High efficiency",
     cost: "$0.005",
-    detail: "200 images / $1"
+    detail: "200 images / $1",
+    isFree: true
   },
 
   // Google
@@ -103,21 +106,24 @@ const IMAGE_MODELS = [
     name: "Imagen 4 Fast",
     description: "Google DeepMind",
     cost: "$0.02",
-    detail: "50 images / $1"
+    detail: "50 images / $1",
+    isFree: true
   },
   {
     id: "imagen-3-fast",
     name: "Imagen 3 Fast",
     description: "Google DeepMind",
     cost: "$0.025",
-    detail: "40 images / $1"
+    detail: "40 images / $1",
+    isFree: true
   },
   {
     id: "imagen-4-ultra",
     name: "Imagen 4 Ultra",
     description: "Google DeepMind",
     cost: "$0.06",
-    detail: "16 images / $1"
+    detail: "16 images / $1",
+    isFree: false
   },
 
   // Ideogram
@@ -126,7 +132,8 @@ const IMAGE_MODELS = [
     name: "Ideogram v3 Turbo",
     description: "Ideogram",
     cost: "$0.03",
-    detail: "33 images / $1"
+    detail: "33 images / $1",
+    isFree: true
   },
 
   // ByteDance
@@ -135,14 +142,16 @@ const IMAGE_MODELS = [
     name: "SeaDream 4",
     description: "ByteDance",
     cost: "$0.03",
-    detail: "33 images / $1"
+    detail: "33 images / $1",
+    isFree: true
   },
   {
     id: "seedream-4.5",
     name: "SeaDream 4.5",
     description: "ByteDance",
     cost: "$0.04",
-    detail: "25 images / $1"
+    detail: "25 images / $1",
+    isFree: false
   },
 
   // Nano
@@ -151,7 +160,8 @@ const IMAGE_MODELS = [
     name: "Nano Banana Pro",
     description: "Nano",
     cost: "$0.15",
-    detail: "66 images / $10"
+    detail: "66 images / $10",
+    isFree: false
   }
 ];
 
@@ -162,21 +172,24 @@ const VIDEO_MODELS = [
     name: "Seedance 1 Pro Fast",
     description: "ByteDance (480p-1080p)",
     cost: "From $0.015/s",
-    detail: "approx 66s / $1"
+    detail: "approx 66s / $1",
+    isFree: true
   },
   {
     id: "seedance-1-lite",
     name: "Seedance 1 Lite",
     description: "ByteDance (480p-1080p)",
     cost: "From $0.018/s",
-    detail: "approx 55s / $1"
+    detail: "approx 55s / $1",
+    isFree: true
   },
   {
     id: "seedance-1-pro",
     name: "Seedance 1 Pro",
     description: "ByteDance (480p-1080p)",
     cost: "From $0.03/s",
-    detail: "approx 33s / $1"
+    detail: "approx 33s / $1",
+    isFree: false
   },
 
   // Wan (Wavespeed/Wan-Video)
@@ -185,35 +198,40 @@ const VIDEO_MODELS = [
     name: "Wan 2.5 I2V",
     description: "Wan Video (480p-1080p)",
     cost: "From $0.05/s",
-    detail: "20s / $1"
+    detail: "20s / $1",
+    isFree: false
   },
   {
     id: "wan-2.5-t2v",
     name: "Wan 2.5 T2V",
     description: "Wan Video (480p-1080p)",
     cost: "From $0.05/s",
-    detail: "20s / $1"
+    detail: "20s / $1",
+    isFree: false
   },
   {
     id: "wan-2.5-t2v-fast",
     name: "Wan 2.5 T2V Fast",
     description: "Wan Video (720p-1080p)",
     cost: "From $0.068/s",
-    detail: "approx 14s / $1"
+    detail: "approx 14s / $1",
+    isFree: false
   },
   {
     id: "wan-2.1-t2v-720p",
     name: "Wan 2.1 T2V",
     description: "WavespeedAI (720p)",
     cost: "$0.24/s",
-    detail: "41s / $10"
+    detail: "41s / $10",
+    isFree: false
   },
   {
     id: "wan-2.1-i2v-720p",
     name: "Wan 2.1 I2V",
     description: "WavespeedAI (720p)",
     cost: "$0.25/s",
-    detail: "40s / $10"
+    detail: "40s / $10",
+    isFree: false
   },
 
   // Pixverse
@@ -222,7 +240,8 @@ const VIDEO_MODELS = [
     name: "Pixverse v4.5",
     description: "Pixverse (360p-1080p)",
     cost: "From $0.06/s",
-    detail: "Variable by resolution"
+    detail: "Variable by resolution",
+    isFree: false
   },
 
   // Kling
@@ -231,7 +250,8 @@ const VIDEO_MODELS = [
     name: "Kling v2.5 Turbo Pro",
     description: "Kuaishou",
     cost: "$0.07/s",
-    detail: "approx 14s / $1"
+    detail: "approx 14s / $1",
+    isFree: false
   },
 
   // Minimax
@@ -240,14 +260,16 @@ const VIDEO_MODELS = [
     name: "Hailuo 2.3 Fast",
     description: "Minimax (6s-10s)",
     cost: "From $0.19/vid",
-    detail: "approx 52 vids / $10"
+    detail: "approx 52 vids / $10",
+    isFree: false
   },
   {
     id: "hailuo-2.3",
     name: "Hailuo 2.3",
     description: "Minimax (6s-10s)",
     cost: "From $0.28/vid",
-    detail: "approx 35 vids / $10"
+    detail: "approx 35 vids / $10",
+    isFree: false
   },
 
   // OpenAI
@@ -256,14 +278,16 @@ const VIDEO_MODELS = [
     name: "Sora 2",
     description: "OpenAI",
     cost: "$0.10/s",
-    detail: "Standard quality"
+    detail: "Standard quality",
+    isFree: false
   },
   {
     id: "sora-2-own-key",
     name: "Sora 2 (Own Key)",
     description: "OpenAI Direct",
     cost: "Direct Bill",
-    detail: "Pay OpenAI directly"
+    detail: "Pay OpenAI directly",
+    isFree: false
   },
 
   // Google
@@ -272,35 +296,40 @@ const VIDEO_MODELS = [
     name: "Veo 3 Fast",
     description: "Google DeepMind",
     cost: "From $0.10/s",
-    detail: "10s / $1 (No Audio)"
+    detail: "10s / $1 (No Audio)",
+    isFree: false
   },
   {
     id: "veo-3.1-fast",
     name: "Veo 3.1 Fast",
     description: "Google DeepMind",
     cost: "From $0.10/s",
-    detail: "10s / $1 (No Audio)"
+    detail: "10s / $1 (No Audio)",
+    isFree: false
   },
   {
     id: "veo-3",
     name: "Veo 3",
     description: "Google DeepMind",
     cost: "From $0.20/s",
-    detail: "50s / $10 (No Audio)"
+    detail: "50s / $10 (No Audio)",
+    isFree: false
   },
   {
     id: "veo-3.1",
     name: "Veo 3.1",
     description: "Google DeepMind",
     cost: "From $0.20/s",
-    detail: "50s / $10 (No Audio)"
+    detail: "50s / $10 (No Audio)",
+    isFree: false
   },
   {
     id: "veo-2",
     name: "Veo 2",
     description: "Google DeepMind",
     cost: "$0.50/s",
-    detail: "20s / $10"
+    detail: "20s / $10",
+    isFree: false
   }
 ];
 
@@ -520,7 +549,9 @@ export default function VizualStudioApp() {
     prompt: string;
     description: string;
     keywords: string[];
-    imageUrl: string;
+    imageUrl?: string;
+    videoUrl?: string;
+    type: 'image' | 'video';
   } | null>(null);
 
   // Redirect to login if not authenticated and not in guest mode
@@ -562,25 +593,80 @@ export default function VizualStudioApp() {
     { text: "Finalizing output..." },
   ];
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     if (!prompt.trim()) return;
 
     // Start the loading animation
     setIsGenerating(true);
 
-    // Simulate AI generation time
-    setTimeout(() => {
+    try {
+      // Find the current model object to get its ID
+      const currentModelList = creationMode === 'IMAGE' ? IMAGE_MODELS : VIDEO_MODELS;
+      const currentModel = currentModelList.find(m => m.name === model);
+      const modelId = currentModel?.id || (creationMode === 'IMAGE' ? 'flux-schnell' : 'seedance-1-pro-fast');
+
+      // Extract keywords from prompt for display
       const keywords = prompt.match(/\b\w{4,}\b/g)?.slice(0, 5) || [];
-      // Mock image URL - in production this would be the actual generated image
-      const generatedImageUrl = "https://images.unsplash.com/photo-1518710843675-2540dd79065c?q=80&w=3387&auto=format&fit=crop";
-      setGeneratedContent({
-        prompt: prompt,
-        description: `I've created a ${creationMode.toLowerCase()} based on your prompt "${prompt}", with unique artistic interpretation and cinematic quality.`,
-        keywords: keywords,
-        imageUrl: generatedImageUrl
-      });
+
+      if (creationMode === 'IMAGE') {
+        // Call image generation API
+        const response = await fetch('/api/generate-image', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            prompt: prompt,
+            model: modelId,
+            aspectRatio: '16:9',
+          }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to generate image');
+        }
+
+        setGeneratedContent({
+          prompt: prompt,
+          description: `I've created an image based on your prompt "${prompt}", using the ${model} model with unique artistic interpretation.`,
+          keywords: keywords,
+          imageUrl: data.imageUrl,
+          type: 'image',
+        });
+      } else {
+        // Call video generation API
+        const response = await fetch('/api/generate-video', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            prompt: prompt,
+            model: modelId,
+            aspectRatio: '16:9',
+            duration: 5, // 5 second video
+          }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to generate video');
+        }
+
+        setGeneratedContent({
+          prompt: prompt,
+          description: `I've created a video based on your prompt "${prompt}", using the ${model} model with cinematic quality.`,
+          keywords: keywords,
+          videoUrl: data.videoUrl,
+          type: 'video',
+        });
+      }
+    } catch (error: any) {
+      console.error('Generation error:', error);
+      // Show error to user - you could add a toast notification here
+      alert(`Generation failed: ${error.message}`);
+    } finally {
       setIsGenerating(false);
-    }, 10000); // 10 second generation time (5 steps x 2000ms)
+    }
   };
 
   if (loading) {
@@ -844,21 +930,58 @@ export default function VizualStudioApp() {
                   <div className="absolute top-full left-0 mt-2 min-w-[280px] sm:min-w-[320px] bg-[#1a1a1a] border border-white/10 rounded-lg overflow-hidden z-50 shadow-2xl max-h-[80vh] overflow-y-auto">
                     {/* Backdrop for click away */}
                     <div className="fixed inset-0 z-[-1]" onClick={() => setShowModelDropdown(false)} />
-                    <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-white/5">
                       Select {creationMode === 'IMAGE' ? 'Image' : 'Video'} Model
                     </div>
-                    {currentModels.map((m) => (
+                    {/* Free Models Section */}
+                    <div className="px-3 py-1.5 text-[10px] font-bold text-emerald-400 uppercase tracking-wider bg-emerald-500/5">
+                      ✓ Free Tier
+                    </div>
+                    {currentModels.filter(m => m.isFree).map((m) => (
                       <button
                         key={m.id}
                         onClick={() => { setModel(m.name); setShowModelDropdown(false); }}
-                        className="w-full px-4 py-3 text-left hover:bg-white/5 transition-colors border-l-2 border-transparent hover:border-white/50 flex items-start justify-between gap-4 group"
+                        className={`w-full px-4 py-3 text-left hover:bg-white/5 transition-colors border-l-2 ${model === m.name ? 'border-emerald-400 bg-emerald-500/10' : 'border-transparent'} hover:border-emerald-400/50 flex items-start justify-between gap-4 group`}
                       >
-                        <div>
-                          <div className="text-sm font-medium text-white mb-0.5 group-hover:text-blue-400 transition-colors">{m.name}</div>
-                          <div className="text-xs text-gray-500">{m.description}</div>
+                        <div className="flex items-start gap-2">
+                          <div>
+                            <div className="text-sm font-medium text-white mb-0.5 group-hover:text-emerald-400 transition-colors flex items-center gap-2">
+                              {m.name}
+                              {model === m.name && <span className="text-[10px] px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 rounded">SELECTED</span>}
+                            </div>
+                            <div className="text-xs text-gray-500">{m.description}</div>
+                          </div>
                         </div>
                         <div className="text-right flex-shrink-0">
-                          <div className="text-xs font-bold text-gray-300">{m.cost}</div>
+                          <div className="text-xs font-bold text-emerald-400">{m.cost}</div>
+                          <div className="text-[10px] text-gray-600">{m.detail}</div>
+                        </div>
+                      </button>
+                    ))}
+                    {/* Premium Models Section */}
+                    <div className="px-3 py-1.5 text-[10px] font-bold text-amber-400 uppercase tracking-wider bg-amber-500/5 border-t border-white/5 mt-1">
+                      ⭐ Premium Models
+                    </div>
+                    {currentModels.filter(m => !m.isFree).map((m) => (
+                      <button
+                        key={m.id}
+                        onClick={() => {
+                          setShowModelDropdown(false);
+                          setShowPricingModal(true);
+                        }}
+                        className="w-full px-4 py-3 text-left hover:bg-amber-500/5 transition-colors border-l-2 border-transparent hover:border-amber-400/50 flex items-start justify-between gap-4 group"
+                      >
+                        <div className="flex items-start gap-2">
+                          <div>
+                            <div className="text-sm font-medium text-white/70 mb-0.5 group-hover:text-amber-400 transition-colors flex items-center gap-2">
+                              {m.name}
+                              <span className="text-[10px] px-1.5 py-0.5 bg-amber-500/20 text-amber-400 rounded font-bold">PRO</span>
+                            </div>
+                            <div className="text-xs text-gray-500">{m.description}</div>
+                          </div>
+                        </div>
+                        <div className="text-right flex-shrink-0">
+                          <div className="text-xs font-bold text-gray-400">{m.cost}</div>
                           <div className="text-[10px] text-gray-600">{m.detail}</div>
                         </div>
                       </button>
@@ -939,25 +1062,49 @@ export default function VizualStudioApp() {
                       <div
                         className="relative flex-1 min-h-0 w-full rounded-2xl overflow-hidden bg-neutral-900 border border-white/20 cursor-pointer group shadow-2xl flex flex-col"
                       >
-                        {/* Image Container - Flex 1 */}
+                        {/* Media Container - Flex 1 */}
                         <div className="flex-1 relative min-h-0 w-full bg-neutral-900/50">
-                          <img
-                            src={generatedContent.imageUrl}
-                            alt="Generated"
-                            className="absolute inset-0 w-full h-full object-contain"
-                            onClick={() => {
-                              const modal = document.createElement('div');
-                              modal.id = 'fullscreen-viewer';
-                              modal.className = 'fixed inset-0 z-[200] bg-black flex items-center justify-center';
-                              modal.innerHTML = `
-                              <button onclick="this.parentElement.remove()" class="absolute top-4 right-4 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors z-10">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-                              </button>
-                              <img src="${generatedContent.imageUrl}" class="w-full h-full object-contain" />
-                            `;
-                              document.body.appendChild(modal);
-                            }}
-                          />
+                          {generatedContent.type === 'video' && generatedContent.videoUrl ? (
+                            <video
+                              src={generatedContent.videoUrl}
+                              controls
+                              autoPlay
+                              loop
+                              muted
+                              className="absolute inset-0 w-full h-full object-contain"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const modal = document.createElement('div');
+                                modal.id = 'fullscreen-viewer';
+                                modal.className = 'fixed inset-0 z-[200] bg-black flex items-center justify-center';
+                                modal.innerHTML = `
+                                <button onclick="this.parentElement.remove()" class="absolute top-4 right-4 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors z-10">
+                                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                                </button>
+                                <video src="${generatedContent.videoUrl}" controls autoplay loop class="w-full h-full object-contain" />
+                              `;
+                                document.body.appendChild(modal);
+                              }}
+                            />
+                          ) : (
+                            <img
+                              src={generatedContent.imageUrl}
+                              alt="Generated"
+                              className="absolute inset-0 w-full h-full object-contain"
+                              onClick={() => {
+                                const modal = document.createElement('div');
+                                modal.id = 'fullscreen-viewer';
+                                modal.className = 'fixed inset-0 z-[200] bg-black flex items-center justify-center';
+                                modal.innerHTML = `
+                                <button onclick="this.parentElement.remove()" class="absolute top-4 right-4 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors z-10">
+                                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                                </button>
+                                <img src="${generatedContent.imageUrl}" class="w-full h-full object-contain" />
+                              `;
+                                document.body.appendChild(modal);
+                              }}
+                            />
+                          )}
                         </div>
 
                         {/* Expand Button - Top Right */}
