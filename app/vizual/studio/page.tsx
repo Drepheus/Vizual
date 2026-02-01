@@ -53,6 +53,7 @@ import { Inter, Space_Grotesk } from "next/font/google";
 import { Vortex } from "@/components/ui/vortex";
 import Aurora from "@/components/vizual/Aurora";
 import { ProjectsView } from "@/components/vizual/projects-view";
+import { useToast } from "@/components/ui/toast";
 
 const inter = Inter({ subsets: ["latin"], weight: ["300", "400", "500", "600", "700"] });
 const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], weight: ["300", "400", "500", "600", "700"] });
@@ -375,6 +376,7 @@ export default function VizualStudioApp() {
   const router = useRouter();
   const { user, loading } = useAuth();
   const { isGuestMode } = useGuestMode();
+  const { showToast } = useToast();
   const [creationMode, setCreationMode] = useState<CreationMode>("VIDEO");
   const [activeTab, setActiveTab] = useState<TabMode>("STYLE");
 
@@ -662,8 +664,7 @@ export default function VizualStudioApp() {
       }
     } catch (error: any) {
       console.error('Generation error:', error);
-      // Show error to user - you could add a toast notification here
-      alert(`Generation failed: ${error.message}`);
+      showToast(`Generation failed: ${error.message}`, 'error', 5000);
     } finally {
       setIsGenerating(false);
     }
@@ -1118,7 +1119,7 @@ export default function VizualStudioApp() {
                           <div className="flex items-center justify-between">
                             {/* Left - Heart */}
                             <button
-                              onClick={(e) => { e.stopPropagation(); alert('Saved to favorites!'); }}
+                              onClick={(e) => { e.stopPropagation(); showToast('Saved to favorites!', 'favorite'); }}
                               className="p-2.5 rounded-full hover:bg-white/20 transition-colors text-white/70 hover:text-white"
                               title="Save"
                             >
@@ -1135,7 +1136,7 @@ export default function VizualStudioApp() {
                                 <RefreshCw size={20} />
                               </button>
                               <button
-                                onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText('https://vizual.ai/share/...'); alert('Link copied!'); }}
+                                onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText('https://vizual.ai/share/...'); showToast('Link copied to clipboard!', 'copied'); }}
                                 className="p-2.5 rounded-full hover:bg-white/20 transition-colors text-white/70 hover:text-white"
                                 title="Share"
                               >
@@ -1146,7 +1147,7 @@ export default function VizualStudioApp() {
                             {/* Right - Download & More */}
                             <div className="flex items-center gap-1">
                               <button
-                                onClick={(e) => { e.stopPropagation(); alert('Download started!'); }}
+                                onClick={(e) => { e.stopPropagation(); showToast('Download started!', 'download'); }}
                                 className="p-2.5 rounded-full hover:bg-white/20 transition-colors text-white/70 hover:text-white"
                                 title="Download"
                               >
@@ -1176,8 +1177,10 @@ export default function VizualStudioApp() {
                         <button
                           onClick={() => {
                             // Use the actual generated image URL
-                            setAttachments(prev => [...prev, { id: crypto.randomUUID(), url: generatedContent.imageUrl, type: 'image' }]);
-                            alert('Added as reference!');
+                            if (generatedContent.imageUrl) {
+                              setAttachments(prev => [...prev, { id: crypto.randomUUID(), url: generatedContent.imageUrl!, type: 'image' }]);
+                            }
+                            showToast('Added as reference!', 'success');
                           }}
                           className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-white/10 hover:bg-white/15 transition-colors text-sm border border-white/20"
                         >
@@ -2222,8 +2225,7 @@ export default function VizualStudioApp() {
               <div className="flex justify-end gap-2">
                 <button onClick={() => setShowFeedbackModal(false)} className="px-4 py-2 text-sm text-gray-400 hover:text-white">Cancel</button>
                 <button onClick={() => {
-                  // Simulate submission
-                  alert("Feedback submitted! Thank you.");
+                  showToast('Feedback submitted! Thank you.', 'success');
                   setShowFeedbackModal(false);
                 }} className="px-5 py-2 rounded-lg bg-white text-black font-medium text-sm hover:bg-gray-200">Submit</button>
               </div>

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Mail, MapPin, Phone, MessageCircle, Send, Clock, Globe } from "lucide-react";
 import { Inter, Space_Grotesk, Playfair_Display } from "next/font/google";
 import { useState } from "react";
+import { useToast } from "@/components/ui/toast";
 
 const inter = Inter({ subsets: ["latin"], weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"] });
 const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], weight: ["300", "400", "500", "600", "700"] });
@@ -24,6 +25,7 @@ const ChromeText = ({ children, className = "" }: { children: React.ReactNode; c
 
 export default function ContactPage() {
     const router = useRouter();
+    const { showToast } = useToast();
     const [formState, setFormState] = useState({
         name: "",
         email: "",
@@ -79,7 +81,7 @@ export default function ContactPage() {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         // Handle form submission
-        alert("Thank you for your message! We'll get back to you soon.");
+        showToast("Thank you for your message! We'll get back to you soon.", 'success');
     };
 
     return (
