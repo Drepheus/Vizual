@@ -8,11 +8,11 @@ export default function AuthRedirectPage() {
 
   useEffect(() => {
     // Check for stored redirect URL from login page
-    const storedRedirect = sessionStorage.getItem('authRedirect');
-    sessionStorage.removeItem('authRedirect');
-    
-    // Redirect to stored URL or default to command-hub
-    const redirectTo = storedRedirect || '/command-hub';
+    const storedRedirect = sessionStorage.getItem('authRedirectUrl');
+    sessionStorage.removeItem('authRedirectUrl');
+
+    // Redirect to stored URL or default to studio
+    const redirectTo = storedRedirect || '/vizual/studio';
     router.replace(redirectTo);
   }, [router]);
 
