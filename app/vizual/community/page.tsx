@@ -52,16 +52,25 @@ const CreationCard = ({ creation, heightClass, active, onHover, onLeave, onClick
     >
       <div className={`relative ${heightClass} rounded-2xl overflow-hidden bg-[#0F0F0F] border border-white/5 group-hover:border-white/20 transition-colors duration-300`}>
         {/* Video/Image */}
-        <video
-          ref={videoRef}
-          loop
-          muted
-          playsInline
-          preload="metadata"
-          className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-300 will-change-transform"
-        >
-          <source src={creation.src} type="video/mp4" />
-        </video>
+        {/* Video/Image */}
+        {creation.type === 'image' || (creation.src && creation.src.match(/\.(jpg|jpeg|png|webp)$/i)) ? (
+          <img
+            src={creation.src}
+            alt={creation.prompt}
+            className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-300 will-change-transform"
+          />
+        ) : (
+          <video
+            ref={videoRef}
+            loop
+            muted
+            playsInline
+            preload="none"
+            className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-300 will-change-transform"
+          >
+            <source src={creation.src} type="video/mp4" />
+          </video>
+        )}
 
         {/* Gradient Overlay */}
         <div className={`absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent transition-opacity duration-300 ${active ? 'opacity-100' : 'opacity-0'}`} />
@@ -69,8 +78,12 @@ const CreationCard = ({ creation, heightClass, active, onHover, onLeave, onClick
         {/* Author Badge - Top */}
         <div className={`absolute top-4 left-4 flex items-center gap-3 transition-all duration-200 ${active ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"
           }`}>
-          <div className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-md border border-white/10 flex items-center justify-center text-xs font-bold text-white shadow-lg">
-            {creation.author.charAt(0)}
+          <div className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-md border border-white/10 flex items-center justify-center text-xs font-bold text-white shadow-lg overflow-hidden">
+            {creation.authorAvatar ? (
+              <img src={creation.authorAvatar} alt={creation.author} className="w-full h-full object-cover" />
+            ) : (
+              creation.author.charAt(0)
+            )}
           </div>
           <span className="text-sm font-medium text-white/90 drop-shadow-md">{creation.author}</span>
         </div>
@@ -118,15 +131,23 @@ const ExpandedModal = ({ creation, onClose }: { creation: any, onClose: () => vo
       </button>
 
       <div className="relative w-full max-w-5xl aspect-video rounded-2xl overflow-hidden shadow-2xl bg-[#0F0F0F] border border-white/10">
-        <video
-          autoPlay
-          loop
-          controls
-          playsInline
-          className="w-full h-full object-contain"
-        >
-          <source src={creation.src} type="video/mp4" />
-        </video>
+        {creation.type === 'image' || (creation.src && creation.src.match(/\.(jpg|jpeg|png|webp)$/i)) ? (
+          <img
+            src={creation.src}
+            alt={creation.prompt}
+            className="w-full h-full object-contain"
+          />
+        ) : (
+          <video
+            autoPlay
+            loop
+            controls
+            playsInline
+            className="w-full h-full object-contain"
+          >
+            <source src={creation.src} type="video/mp4" />
+          </video>
+        )}
 
         <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black via-black/80 to-transparent">
           <h3 className={`text-2xl font-bold mb-2 ${spaceGrotesk.className}`}>{creation.author}</h3>
@@ -250,7 +271,35 @@ export default function CommunityPage() {
   const router = useRouter();
   const [activeCategory, setActiveCategory] = useState("All");
   const [activeFilter, setActiveFilter] = useState("Trending");
-  const [hoveredCard, setHoveredCard] = useState<number | null>(null);
+  const [hoveredCard, setHoveredCard] = useState<string | number | null>(null);
+
+  // Real Data State
+  const [realCreations, setRealCreations] = useState<any[]>([]);
+  const [page, setPage] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+
+  const fetchCreations = async (pageNum: number) => {
+    if (loading) return;
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/community/feed?page=${pageNum}&limit=12`);
+      if (res.ok) {
+        const newItems = await res.json();
+        if (newItems.length < 12) setHasMore(false);
+        // reset only on explicit refresh, else append
+        setRealCreations(prev => pageNum === 0 ? newItems : [...prev, ...newItems]);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCreations(0);
+  }, []);
 
   return (
     <div className={`relative w-full min-h-screen bg-black text-white ${inter.className}`}>
@@ -341,7 +390,7 @@ export default function CommunityPage() {
       <div className="px-4 pb-32">
         <div className="max-w-7xl mx-auto">
           <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6">
-            {communityCreations.map((creation, index) => {
+            {[...realCreations, ...communityCreations].map((creation, index) => {
               // Vary heights for masonry effect
               const heights = ["aspect-[3/4]", "aspect-square", "aspect-[4/5]", "aspect-[3/4]", "aspect-[5/4]"];
               const heightClass = heights[index % heights.length];
@@ -364,8 +413,15 @@ export default function CommunityPage() {
 
       {/* Load More */}
       <div className="flex justify-center pb-32">
-        <button className="px-8 py-4 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 font-medium text-sm tracking-widest uppercase transition-all hover:scale-105 active:scale-95">
-          Load More
+        <button
+          onClick={() => {
+            const nextPage = page + 1;
+            setPage(nextPage);
+            fetchCreations(nextPage);
+          }}
+          disabled={loading || !hasMore}
+          className="px-8 py-4 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 font-medium text-sm tracking-widest uppercase transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
+          {loading ? 'Loading...' : hasMore ? 'Load More' : 'No More Items'}
         </button>
       </div>
 
