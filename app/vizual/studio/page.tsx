@@ -377,7 +377,7 @@ export default function VizualStudioApp() {
   const { user, loading } = useAuth();
   const { isGuestMode } = useGuestMode();
   const { showToast } = useToast();
-  const [creationMode, setCreationMode] = useState<CreationMode>("VIDEO");
+  const [creationMode, setCreationMode] = useState<CreationMode>("IMAGE");
   const [activeTab, setActiveTab] = useState<TabMode>("STYLE");
 
   // Reset active tab when creation mode changes

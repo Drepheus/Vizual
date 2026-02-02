@@ -35,7 +35,7 @@ if ($LASTEXITCODE -ne 0) {
 
 # Deploy with optimizations for ZERO cold starts
 Write-Host "[4/4] Deploying to Cloud Run with cold start elimination..." -ForegroundColor Yellow
-$envVars = "NEXT_PUBLIC_SUPABASE_URL=$SUPABASE_URL,NEXT_PUBLIC_SUPABASE_ANON_KEY=$SUPABASE_KEY,GOOGLE_GENERATIVE_AI_API_KEY=AIzaSyAPUrVUTLGnhPOY6KFypgSqqFB3hRKLEug,TAVILY_API_KEY=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"
+$envVars = "NEXT_PUBLIC_SUPABASE_URL=$SUPABASE_URL,NEXT_PUBLIC_SUPABASE_ANON_KEY=$SUPABASE_KEY,GOOGLE_GENERATIVE_AI_API_KEY=AIzaSyAPUrVUTLGnhPOY6KFypgSqqFB3hRKLEug,TAVILY_API_KEY=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,WAVESPEED_API_KEY=df9e4793f513cc159f9ba7f1007b38c6f1204a22aa2fb7e9d8c444d300e54c85"
 
 & $gcloud run deploy omi-ai `
     --image gcr.io/$ProjectId/omi-ai `
