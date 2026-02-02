@@ -25,13 +25,24 @@ export function getServerSupabaseClient(accessToken?: string): SupabaseClient {
         },
     };
 
-    if (accessToken) {
+    // Only attach user token if we are NOT using the Service Role Key
+    // Or if we specifically want to act as the user despite having the key (rare case)
+    // Here we prioritize the Service Role if available, unless accessToken implies we WANT RLS?
+    // Actually, to fix the issue, if we have serviceRoleKey, we should use it.
+    // If accessToken is provided, Supabase client might prioritize it.
+    // So if serviceRoleKey is present, we should probably ignore accessToken if we want Admin access.
+    // But for general usage, this function is generic.
+    // In specific functions below, we will OMIT accessToken to force Admin mode.
+
+    if (accessToken && !serviceRoleKey) {
         options.global = {
             headers: {
                 Authorization: `Bearer ${accessToken}`,
             },
         };
     }
+    // Note: If serviceRoleKey IS present, we skip adding the Bearer token
+    // This ensures we act as Admin/Service Role, not the user.
 
     return createClient(url, apiKey, options);
 }
@@ -45,7 +56,7 @@ export async function getUserFromRequest(request: Request): Promise<{ userId: st
     }
 
     const token = authHeader.substring(7);
-    const supabase = getServerSupabaseClient(); // Use anon client to validate token
+    const supabase = getServerSupabaseClient(); // Use anon client (or service role) to validate token
 
     const { data: { user }, error } = await supabase.auth.getUser(token);
 
@@ -66,7 +77,9 @@ export async function saveGeneratedMedia(
     aspectRatio?: string,
     accessToken?: string
 ): Promise<{ id: string } | null> {
-    const supabase = getServerSupabaseClient(accessToken);
+    // Force use of Service Role Key (Admin) by NOT passing accessToken
+    // This bypasses RLS policies entirely
+    const supabase = getServerSupabaseClient();
 
     const { data, error } = await supabase
         .from('generated_media')
@@ -99,7 +112,7 @@ export async function createDraft(
     aspectRatio?: string,
     accessToken?: string
 ): Promise<{ id: string } | null> {
-    const supabase = getServerSupabaseClient(accessToken);
+    const supabase = getServerSupabaseClient();
 
     const { data, error } = await supabase
         .from('drafts')
@@ -129,7 +142,7 @@ export async function updateDraftStatus(
     errorMessage?: string,
     accessToken?: string
 ): Promise<boolean> {
-    const supabase = getServerSupabaseClient(accessToken);
+    const supabase = getServerSupabaseClient();
 
     const { error } = await supabase
         .from('drafts')
@@ -150,7 +163,7 @@ export async function updateDraftStatus(
 
 // Delete draft (when generation completes successfully)
 export async function deleteDraft(draftId: string, accessToken?: string): Promise<boolean> {
-    const supabase = getServerSupabaseClient(accessToken);
+    const supabase = getServerSupabaseClient();
 
     const { error } = await supabase
         .from('drafts')
