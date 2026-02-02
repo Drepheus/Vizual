@@ -46,7 +46,8 @@ import {
   Zap,
   ArrowRightFromLine,
   Maximize2,
-  Download
+  Download,
+  Radio
 } from "lucide-react";
 import { MultiStepLoader } from "@/components/ui/multi-step-loader";
 import { Inter, Space_Grotesk } from "next/font/google";
@@ -403,6 +404,29 @@ export default function VizualStudioApp() {
   const [uploadPopup, setUploadPopup] = useState<'image' | 'video' | null>(null);
   const [isInputFocused, setIsInputFocused] = useState(false);
 
+  // Handle remix from community page (URL params)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const remixPrompt = params.get('remix');
+      const remixMode = params.get('mode');
+      
+      if (remixPrompt) {
+        setPrompt(decodeURIComponent(remixPrompt));
+        showToast('Prompt loaded from community! Edit and generate.', 'success', 3000);
+        
+        // Clear the URL params after reading
+        window.history.replaceState({}, '', '/vizual/studio');
+      }
+      
+      if (remixMode === 'VIDEO') {
+        setCreationMode('VIDEO');
+      } else if (remixMode === 'IMAGE') {
+        setCreationMode('IMAGE');
+      }
+    }
+  }, []);
+
   // Attachments State
   const [attachments, setAttachments] = useState<{ id: string; url: string; file?: File; type: 'image' | 'video' }[]>([]);
 
@@ -424,13 +448,17 @@ export default function VizualStudioApp() {
   // Selected Mode/Style Tags (Instagram-style @mentions)
   const [selectedTags, setSelectedTags] = useState<{ id: string; label: string; type: 'mode' | 'style' }[]>([]);
 
-  // Helper to add a tag
+  // Helper to add a tag - LIMIT: 1 style + 1 mode max
   const addTag = (label: string, type: 'mode' | 'style') => {
     const tagId = `${type}-${label.toLowerCase().replace(/\s+/g, '-')}`;
-    // Don't add duplicate tags
-    if (!selectedTags.find(t => t.id === tagId)) {
-      setSelectedTags(prev => [...prev, { id: tagId, label, type }]);
-    }
+    
+    // Replace any existing tag of the same type (only 1 style, 1 mode allowed)
+    setSelectedTags(prev => {
+      // Remove existing tag of the same type
+      const filtered = prev.filter(t => t.type !== type);
+      // Add the new tag
+      return [...filtered, { id: tagId, label, type }];
+    });
   };
 
   // Helper to remove a tag
@@ -783,13 +811,14 @@ export default function VizualStudioApp() {
 
   return (
     <div
-      className={`h-screen bg-[#0a0a0a] text-white flex overflow-hidden ${inter.className}`}
+      className={`h-[100dvh] bg-[#0a0a0a] text-white flex overflow-hidden ${inter.className}`}
       style={{
         // Mobile app-like fixed viewport
         position: 'fixed',
         inset: 0,
-        touchAction: 'none',
-        overscrollBehavior: 'none',
+        touchAction: 'pan-y',
+        overscrollBehavior: 'contain',
+        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
       }}
     >
       {/* Mobile Menu Overlay */}
@@ -864,6 +893,12 @@ export default function VizualStudioApp() {
             active={currentView === 'STUDIO'}
             expanded={sidebarExpanded}
             onClick={() => { setCurrentView('STUDIO'); setSidebarOpen(false); }}
+          />
+          <NavItem
+            icon={<Radio size={20} />}
+            label="Live"
+            expanded={sidebarExpanded}
+            onClick={() => { router.push('/vizual/live'); setSidebarOpen(false); }}
           />
           <NavItem
             icon={<Lightbulb size={20} />}
@@ -1327,7 +1362,10 @@ export default function VizualStudioApp() {
               </div>
 
               {/* Bottom Input Area - STICKY */}
-              <div className="sticky bottom-0 w-full p-4 md:p-6 shrink-0 z-30 bg-black/90 backdrop-blur-lg border-t border-white/5">
+              <div 
+                className="sticky bottom-0 w-full p-4 md:p-6 shrink-0 z-30 bg-black/90 backdrop-blur-lg border-t border-white/5"
+                style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom, 16px))' }}
+              >
                 <div className="max-w-4xl mx-auto">
                   {/* Tabs */}
                   <div className="flex items-center justify-center gap-1 md:gap-2 overflow-x-auto mb-2">

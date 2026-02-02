@@ -1,9 +1,3 @@
 {
-  "/api/community/feed/route": "app/api/community/feed/route.js",
-  "/api/generate-image/route": "app/api/generate-image/route.js",
-  "/api/style-images/route": "app/api/style-images/route.js",
-  "/page": "app/page.js",
-  "/vizual/community/page": "app/vizual/community/page.js",
-  "/vizual/page": "app/vizual/page.js",
   "/vizual/studio/page": "app/vizual/studio/page.js"
 }

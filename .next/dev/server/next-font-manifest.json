@@ -1,19 +1,5 @@
 {
   "app": {
-    "[project]/Vizual/app/page": [
-      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
-      "static/media/0c89a48fa5027cee-s.p.4564287c.woff2",
-      "static/media/2a65768255d6b625-s.p.d19752fb.woff2"
-    ],
-    "[project]/Vizual/app/vizual/community/page": [
-      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
-      "static/media/0c89a48fa5027cee-s.p.4564287c.woff2"
-    ],
-    "[project]/Vizual/app/vizual/page": [
-      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
-      "static/media/0c89a48fa5027cee-s.p.4564287c.woff2",
-      "static/media/2a65768255d6b625-s.p.d19752fb.woff2"
-    ],
     "[project]/Vizual/app/vizual/studio/page": [
       "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
       "static/media/0c89a48fa5027cee-s.p.4564287c.woff2"

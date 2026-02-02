@@ -24,7 +24,7 @@ const ChromeText = ({ children, className = "" }: { children: React.ReactNode; c
   </span>
 );
 
-const CreationCard = ({ creation, heightClass, active, onHover, onLeave, onClick }: any) => {
+const CreationCard = ({ creation, heightClass, active, onHover, onLeave, onClick, onRemix }: any) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [hasLoaded, setHasLoaded] = useState(false);
 
@@ -41,6 +41,11 @@ const CreationCard = ({ creation, heightClass, active, onHover, onLeave, onClick
       videoRef.current.currentTime = 0;
     }
   }, [active, hasLoaded]);
+
+  const handleRemixClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click
+    onRemix?.(creation);
+  };
 
   return (
     <div
@@ -106,6 +111,7 @@ const CreationCard = ({ creation, heightClass, active, onHover, onLeave, onClick
           <HoverBorderGradient
             containerClassName="rounded-xl w-full"
             as="button"
+            onClick={handleRemixClick}
             className="w-full bg-white text-black flex items-center justify-center gap-2 py-2.5 font-bold text-xs tracking-wide uppercase"
           >
             <Sparkles className="w-3.5 h-3.5" />
@@ -279,6 +285,13 @@ export default function CommunityPage() {
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
 
+  // Handle remix - navigate to studio with prompt pre-filled
+  const handleRemix = (creation: any) => {
+    const prompt = encodeURIComponent(creation.prompt || '');
+    const type = creation.type === 'video' ? 'VIDEO' : 'IMAGE';
+    router.push(`/vizual/studio?remix=${prompt}&mode=${type}`);
+  };
+
   const fetchCreations = async (pageNum: number) => {
     if (loading) return;
     setLoading(true);
@@ -404,6 +417,7 @@ export default function CommunityPage() {
                   onHover={() => setHoveredCard(creation.id)}
                   onLeave={() => setHoveredCard(null)}
                   onClick={() => setHoveredCard(creation.id)}
+                  onRemix={handleRemix}
                 />
               );
             })}
