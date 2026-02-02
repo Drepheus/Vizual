@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Client } from 'wavespeed';
 import { trackUsage, logApiCall } from '@/lib/usage-tracking';
+import { getUserFromRequest, saveGeneratedMedia, createDraft, updateDraftStatus, deleteDraft } from '@/lib/supabase-server';
 
 // Model ID mapping - maps our internal IDs to Wavespeed model paths
 const MODEL_MAP: Record<string, string> = {
@@ -29,6 +30,8 @@ function getWavespeedClient() {
 
 export async function POST(req: NextRequest) {
     const startTime = Date.now();
+    let draftId: string | null = null;
+    let accessToken: string | undefined;
 
     try {
         const { prompt, aspectRatio = '16:9', model = 'flux-schnell' } = await req.json();
@@ -46,6 +49,17 @@ export async function POST(req: NextRequest) {
                 { error: 'Server configuration error: API token missing' },
                 { status: 500 }
             );
+        }
+
+        // Get user from auth token (optional - works for both authenticated and guest users)
+        const authUser = await getUserFromRequest(req);
+        const userId = authUser?.userId;
+        accessToken = authUser?.accessToken;
+
+        // Create a draft to track this generation (if user is authenticated)
+        if (userId) {
+            const draft = await createDraft(userId, 'image', prompt, model, aspectRatio, accessToken);
+            draftId = draft?.id || null;
         }
 
         // Get the Wavespeed model path
@@ -79,7 +93,23 @@ export async function POST(req: NextRequest) {
             imageUrl = output;
         } else {
             console.error('Unexpected output format from Wavespeed:', JSON.stringify(output));
+
+            // Update draft to failed status
+            if (draftId) {
+                await updateDraftStatus(draftId, 'failed', 'Failed to parse generation output', accessToken);
+            }
+
             return NextResponse.json({ error: 'Failed to parse generation output' }, { status: 500 });
+        }
+
+        // Save to database if user is authenticated
+        if (userId && imageUrl) {
+            await saveGeneratedMedia(userId, 'image', imageUrl, prompt, model, aspectRatio, accessToken);
+
+            // Delete the draft since generation succeeded
+            if (draftId) {
+                await deleteDraft(draftId, accessToken);
+            }
         }
 
         // Track usage in background (don't await to avoid blocking response)
@@ -95,6 +125,11 @@ export async function POST(req: NextRequest) {
 
     } catch (error: any) {
         console.error('Image generation error:', error);
+
+        // Update draft to failed status
+        if (draftId) {
+            await updateDraftStatus(draftId, 'failed', error.message || 'Unknown error', accessToken);
+        }
 
         // Log error
         logApiCall({

@@ -374,7 +374,7 @@ const MODE_SUBOPTIONS: Record<number, { title: string; promptSuffix?: string }[]
 
 export default function VizualStudioApp() {
   const router = useRouter();
-  const { user, loading } = useAuth();
+  const { user, session, loading } = useAuth();
   const { isGuestMode } = useGuestMode();
   const { showToast } = useToast();
   const [creationMode, setCreationMode] = useState<CreationMode>("IMAGE");
@@ -610,11 +610,19 @@ export default function VizualStudioApp() {
       // Extract keywords from prompt for display
       const keywords = prompt.match(/\b\w{4,}\b/g)?.slice(0, 5) || [];
 
+      // Build headers with auth token if available
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+
       if (creationMode === 'IMAGE') {
         // Call image generation API
         const response = await fetch('/api/generate-image', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers,
           body: JSON.stringify({
             prompt: prompt,
             model: modelId,
@@ -639,7 +647,7 @@ export default function VizualStudioApp() {
         // Call video generation API
         const response = await fetch('/api/generate-video', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers,
           body: JSON.stringify({
             prompt: prompt,
             model: modelId,
@@ -795,12 +803,22 @@ export default function VizualStudioApp() {
             onClick={() => setShowAccountModal(true)}
             className={`w-full flex items-center gap-3 ${sidebarExpanded ? 'px-2' : 'justify-center'} py-2 rounded-lg hover:bg-white/5 transition-colors`}
           >
-            <div className="w-8 h-8 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
-              A
-            </div>
+            {user?.user_metadata?.avatar_url || user?.user_metadata?.picture ? (
+              <img
+                src={user.user_metadata.avatar_url || user.user_metadata.picture}
+                alt="Profile"
+                className="w-8 h-8 rounded-full object-cover border border-white/20 flex-shrink-0"
+              />
+            ) : (
+              <div className="w-8 h-8 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                {(user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email || 'G')[0].toUpperCase()}
+              </div>
+            )}
             {sidebarExpanded && (
               <div className="flex-1 text-left min-w-0">
-                <div className="text-sm font-medium text-white truncate">Guest User</div>
+                <div className="text-sm font-medium text-white truncate">
+                  {user?.user_metadata?.full_name || user?.user_metadata?.name || 'Artist'}
+                </div>
               </div>
             )}
             {sidebarExpanded && <ChevronDown size={16} className="text-gray-400 flex-shrink-0" />}
@@ -1988,16 +2006,28 @@ export default function VizualStudioApp() {
               {/* Profile Info */}
               <div className="px-6 pb-6 mt-[-40px]">
                 <div className="relative w-20 h-20 rounded-full bg-black p-1 mb-4">
-                  <div className="w-full h-full rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-2xl font-bold text-white shadow-lg">
-                    A
-                  </div>
+                  {user?.user_metadata?.avatar_url || user?.user_metadata?.picture ? (
+                    <img
+                      src={user.user_metadata.avatar_url || user.user_metadata.picture}
+                      alt="Profile"
+                      className="w-full h-full rounded-full object-cover shadow-lg"
+                    />
+                  ) : (
+                    <div className="w-full h-full rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-2xl font-bold text-white shadow-lg">
+                      {(user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email || 'G')[0].toUpperCase()}
+                    </div>
+                  )}
                   <div className="absolute bottom-0 right-0 w-6 h-6 bg-green-500 border-2 border-black rounded-full" />
                 </div>
 
                 <div className="flex items-center justify-between mb-6">
                   <div>
-                    <h3 className={`text-xl font-bold text-white ${spaceGrotesk.className}`}>Guest User</h3>
-                    <p className="text-sm text-gray-400">guest@vizual.ai</p>
+                    <h3 className={`text-xl font-bold text-white ${spaceGrotesk.className}`}>
+                      {user?.user_metadata?.full_name || user?.user_metadata?.name || 'Artist'}
+                    </h3>
+                    <p className="text-sm text-gray-400">
+                      {user?.email || 'artist@vizual.ai'}
+                    </p>
                   </div>
                   <div className="px-3 py-1 rounded-full bg-white/10 border border-white/10 text-xs font-medium text-white">
                     Free Plan
