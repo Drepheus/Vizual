@@ -5,19 +5,21 @@ import { getUserFromRequest, saveGeneratedMedia, createDraft, updateDraftStatus,
 
 // Model ID mapping - maps our internal IDs to Wavespeed model paths
 const MODEL_MAP: Record<string, string> = {
-    // Free tier models - Mapping to reliable defaults
-    'flux-schnell': 'black-forest-labs/flux-schnell',
-    'p-image': 'black-forest-labs/flux-dev',
-    'imagen-4-fast': 'black-forest-labs/flux-schnell', // Fallback
-    'imagen-3-fast': 'black-forest-labs/flux-schnell', // Fallback
-    'ideogram-v3-turbo': 'ideogram-ai/ideogram-v2',    // Closest real version
-    'seedream-4': 'black-forest-labs/flux-schnell',    // Fallback
+    // Working Free Tier Models (Restored)
+    'flux-schnell': 'wavespeed-ai/flux-schnell',
+    'p-image': 'wavespeed-ai/flux-dev',
 
-    // Premium models
-    'flux-1.1-pro-ultra': 'black-forest-labs/flux-1.1-pro',
-    'imagen-4-ultra': 'black-forest-labs/flux-1.1-pro', // Fallback
-    'seedream-4.5': 'black-forest-labs/flux-1.1-pro',   // Fallback
-    'nano-banana-pro': 'black-forest-labs/flux-1.1-pro', // Fallback
+    // Broken/Unimplemented Models -> Map to reliable fallback (Flux Schnell)
+    'imagen-4-fast': 'wavespeed-ai/flux-schnell',
+    'imagen-3-fast': 'wavespeed-ai/flux-schnell',
+    'ideogram-v3-turbo': 'wavespeed-ai/flux-schnell',
+    'seedream-4': 'wavespeed-ai/flux-schnell',
+
+    // Premium models -> Map to reliable fallback (Flux Dev/Pro if available, or Schnell)
+    'flux-1.1-pro-ultra': 'wavespeed-ai/flux-dev',
+    'imagen-4-ultra': 'wavespeed-ai/flux-dev',
+    'seedream-4.5': 'wavespeed-ai/flux-dev',
+    'nano-banana-pro': 'wavespeed-ai/flux-dev',
 };
 
 // Initialize Wavespeed client

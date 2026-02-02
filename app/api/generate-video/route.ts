@@ -5,31 +5,31 @@ import { getUserFromRequest, saveGeneratedMedia, createDraft, updateDraftStatus,
 
 // Video Model ID mapping - maps our internal IDs to Wavespeed model paths
 const VIDEO_MODEL_MAP: Record<string, string> = {
-    // Mapping placeholders to known working video models
-    'seedance-1-pro-fast': 'minimax/video-01',   // Reliable fallback
-    'seedance-1-lite': 'minimax/video-01',
-    'seedance-1-pro': 'minimax/video-01',
+    // Working Free Tier Models (Restored)
+    'seedance-1-pro-fast': 'bytedance/seedance-v1-pro-fast/text-to-video',
+    'seedance-1-lite': 'bytedance/seedance-v1-lite/text-to-video',
+    'seedance-1-pro': 'bytedance/bytedance-seedance-v1-pro-t2v-1080p',
 
-    // Alibaba / Wan
-    'wan-2.5-i2v': 'ali-vilab/modelscope-damo-text-to-video-synthesis', // Fallback
-    'wan-2.5-t2v': 'ali-vilab/text-to-video-synthesis',
-    'wan-2.5-t2v-fast': 'ali-vilab/text-to-video-synthesis',
-    'wan-2.1-t2v-720p': 'ali-vilab/text-to-video-synthesis',
-    'wan-2.1-i2v-720p': 'ali-vilab/text-to-video-synthesis',
+    // Broken/Unimplemented -> Map to reliable fallback (Seedance)
+    'wan-2.5-i2v': 'bytedance/seedance-v1-pro-fast/text-to-video',
+    'wan-2.5-t2v': 'bytedance/seedance-v1-pro-fast/text-to-video',
+    'wan-2.5-t2v-fast': 'bytedance/seedance-v1-pro-fast/text-to-video',
+    'wan-2.1-t2v-720p': 'bytedance/seedance-v1-pro-fast/text-to-video',
+    'wan-2.1-i2v-720p': 'bytedance/seedance-v1-pro-fast/text-to-video',
 
     // Others
-    'pixverse-v4.5': 'minimax/video-01', // Fallback
-    'kling-v2.5-turbo-pro': 'kwaivgi/kling-v1.6-pro', // Verify if available, else minimax
-    'hailuo-2.3-fast': 'minimax/video-01',
-    'hailuo-2.3': 'minimax/video-01',
+    'pixverse-v4.5': 'bytedance/seedance-v1-pro-fast/text-to-video',
+    'kling-v2.5-turbo-pro': 'bytedance/seedance-v1-pro-fast/text-to-video',
+    'hailuo-2.3-fast': 'bytedance/seedance-v1-pro-fast/text-to-video',
+    'hailuo-2.3': 'bytedance/seedance-v1-pro-fast/text-to-video',
 
     // OpenAI / Google placeholders -> Fallback
-    'sora-2': 'minimax/video-01',
-    'veo-3-fast': 'minimax/video-01',
-    'veo-3.1-fast': 'minimax/video-01',
-    'veo-3': 'minimax/video-01',
-    'veo-3.1': 'minimax/video-01',
-    'veo-2': 'minimax/video-01',
+    'sora-2': 'bytedance/seedance-v1-pro-fast/text-to-video',
+    'veo-3-fast': 'bytedance/seedance-v1-pro-fast/text-to-video',
+    'veo-3.1-fast': 'bytedance/seedance-v1-pro-fast/text-to-video',
+    'veo-3': 'bytedance/seedance-v1-pro-fast/text-to-video',
+    'veo-3.1': 'bytedance/seedance-v1-pro-fast/text-to-video',
+    'veo-2': 'bytedance/seedance-v1-pro-fast/text-to-video',
 };
 
 // Image-to-Video model mapping (for when user provides a reference image)
