@@ -15,9 +15,11 @@ export async function saveGeneratedMedia(
   type: 'image' | 'video',
   url: string,
   prompt: string
-): Prvizualse<boolean> {
+): Promise<boolean> {
   try {
-    const { error } = await supabase
+    console.log('💾 Saving media to database:', { userId, type, url: url.substring(0, 50) + '...', prompt: prompt.substring(0, 30) + '...' });
+    
+    const { data, error } = await supabase
       .from('generated_media')
       .insert([
         {
@@ -25,18 +27,22 @@ export async function saveGeneratedMedia(
           type,
           url,
           prompt,
+          is_public: true, // Make visible on community page
           created_at: new Date().toISOString(),
         },
-      ]);
+      ])
+      .select('id')
+      .single();
 
     if (error) {
-      console.error('Error saving media:', error);
+      console.error('❌ Error saving media:', error);
       return false;
     }
 
+    console.log('✅ Media saved successfully:', data?.id);
     return true;
   } catch (error) {
-    console.error('Error saving media:', error);
+    console.error('❌ Error saving media:', error);
     return false;
   }
 }
@@ -44,7 +50,7 @@ export async function saveGeneratedMedia(
 // Get all generated media for a user
 export async function getUserGeneratedMedia(
   userId: string
-): Prvizualse<GeneratedMedia[]> {
+): Promise<GeneratedMedia[]> {
   try {
     const { data, error } = await supabase
       .from('generated_media')
@@ -65,7 +71,7 @@ export async function getUserGeneratedMedia(
 }
 
 // Delete a generated media item
-export async function deleteGeneratedMedia(mediaId: string): Prvizualse<boolean> {
+export async function deleteGeneratedMedia(mediaId: string): Promise<boolean> {
   try {
     const { error } = await supabase
       .from('generated_media')

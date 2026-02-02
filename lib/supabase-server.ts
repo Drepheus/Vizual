@@ -90,7 +90,8 @@ export async function saveGeneratedMedia(
             prompt,
             model,
             aspect_ratio: aspectRatio || '16:9',
-            title: prompt.slice(0, 50) + (prompt.length > 50 ? '...' : '')
+            title: prompt.slice(0, 50) + (prompt.length > 50 ? '...' : ''),
+            is_public: true // Make content visible on community page
         })
         .select('id')
         .single();

@@ -595,6 +595,79 @@ export default function VizualStudioApp() {
     { text: "Finalizing output..." },
   ];
 
+  // Build enhanced prompt with selected styles and modes
+  const buildEnhancedPrompt = (basePrompt: string): string => {
+    let enhancedPrompt = basePrompt.trim();
+    
+    // Collect style and mode enhancements
+    const styleEnhancements: string[] = [];
+    const modeEnhancements: string[] = [];
+    
+    selectedTags.forEach(tag => {
+      if (tag.type === 'style') {
+        // Add style-specific enhancements
+        const styleEnhancement = getStyleEnhancement(tag.label);
+        styleEnhancements.push(styleEnhancement);
+      } else if (tag.type === 'mode') {
+        // Add mode-specific enhancements
+        const modeEnhancement = getModeEnhancement(tag.label);
+        modeEnhancements.push(modeEnhancement);
+      }
+    });
+    
+    // Build the final prompt
+    if (styleEnhancements.length > 0 || modeEnhancements.length > 0) {
+      const allEnhancements = [...styleEnhancements, ...modeEnhancements].join(', ');
+      enhancedPrompt = `${enhancedPrompt}, ${allEnhancements}`;
+    }
+    
+    return enhancedPrompt;
+  };
+
+  // Get style-specific prompt enhancement
+  const getStyleEnhancement = (styleName: string): string => {
+    const styleMap: Record<string, string> = {
+      'Cinematic': 'cinematic style, film grain, dramatic lighting, movie quality, anamorphic lens, professional cinematography',
+      'Anime': 'anime style, Japanese animation, vibrant colors, cel-shaded, Studio Ghibli inspired, manga aesthetic',
+      '3D Animation': '3D animation style, Pixar quality, rendered in Blender, smooth surfaces, stylized 3D, CGI quality',
+      'Cartoon': 'cartoon style, bold outlines, vibrant flat colors, playful design, animated look, Disney-style',
+      'Brainrot': 'meme style, surreal, absurdist humor, chaotic energy, internet culture aesthetic, viral content',
+      'Realistic': 'photorealistic, hyperrealistic, 8K resolution, DSLR quality, natural lighting, lifelike details',
+      'Noir': 'film noir style, high contrast black and white, dramatic shadows, moody atmosphere, 1940s detective aesthetic',
+      // Additional styles
+      'Cyberpunk': 'cyberpunk style, neon lights, futuristic cityscape, dystopian, blade runner aesthetic, holographic',
+      'Oil Painting': 'oil painting style, impressionist brushstrokes, textured canvas, classical art, museum quality',
+      'Abstract': 'abstract art style, geometric shapes, bold colors, non-representational, modern art aesthetic',
+      '3D Render': '3D rendered, octane render, unreal engine 5, ray tracing, volumetric lighting, studio quality',
+      'Sketch': 'pencil sketch style, hand-drawn, cross-hatching, graphite texture, artistic illustration',
+      'Watercolor': 'watercolor painting style, soft washes, bleeding colors, paper texture, delicate brushwork',
+      'Pop Art': 'pop art style, Andy Warhol inspired, bold colors, halftone dots, comic book aesthetic',
+      'Vintage': 'vintage style, retro aesthetic, faded colors, film photography look, nostalgic',
+      'Fantasy': 'fantasy art style, magical, ethereal, enchanted, Lord of the Rings inspired, mystical',
+      'Minimalist': 'minimalist style, clean lines, simple composition, negative space, modern aesthetic',
+    };
+    
+    return styleMap[styleName] || `${styleName} style`;
+  };
+
+  // Get mode-specific prompt enhancement
+  const getModeEnhancement = (modeName: string): string => {
+    const modeMap: Record<string, string> = {
+      // Product modes
+      'Products': 'professional product photography, studio lighting, commercial quality, advertising shot',
+      'Avatar': 'character portrait, avatar design, expressive face, personality-driven, profile picture quality',
+      'Environment': 'environment concept art, world building, atmospheric perspective, detailed scenery',
+      'Social Media': 'social media optimized, eye-catching, scroll-stopping, viral potential, engagement-focused',
+      // Video modes
+      'Music Video': 'music video style, rhythmic editing, visual storytelling, concert quality, MTV aesthetic',
+      'Short Film': 'short film quality, narrative driven, cinematic composition, professional filmmaking',
+      'Advertisement': 'commercial advertisement, persuasive visuals, brand-focused, high production value',
+      'Vlog': 'vlog style, casual and authentic, personal perspective, YouTube quality, relatable',
+    };
+    
+    return modeMap[modeName] || modeName;
+  };
+
   const handleGenerate = async () => {
     if (!prompt.trim()) return;
 
@@ -606,6 +679,12 @@ export default function VizualStudioApp() {
       const currentModelList = creationMode === 'IMAGE' ? IMAGE_MODELS : VIDEO_MODELS;
       const currentModel = currentModelList.find(m => m.name === model);
       const modelId = currentModel?.id || (creationMode === 'IMAGE' ? 'flux-schnell' : 'seedance-1-pro-fast');
+
+      // Build enhanced prompt with styles and modes
+      const enhancedPrompt = buildEnhancedPrompt(prompt);
+      console.log('📝 Original prompt:', prompt);
+      console.log('✨ Enhanced prompt:', enhancedPrompt);
+      console.log('🏷️ Selected tags:', selectedTags);
 
       // Extract keywords from prompt for display
       const keywords = prompt.match(/\b\w{4,}\b/g)?.slice(0, 5) || [];
@@ -619,12 +698,12 @@ export default function VizualStudioApp() {
       }
 
       if (creationMode === 'IMAGE') {
-        // Call image generation API
+        // Call image generation API with enhanced prompt
         const response = await fetch('/api/generate-image', {
           method: 'POST',
           headers,
           body: JSON.stringify({
-            prompt: prompt,
+            prompt: enhancedPrompt,
             model: modelId,
             aspectRatio: '16:9',
           }),
@@ -636,20 +715,25 @@ export default function VizualStudioApp() {
           throw new Error(data.error || 'Failed to generate image');
         }
 
+        // Build style description for user feedback
+        const styleNames = selectedTags.filter(t => t.type === 'style').map(t => t.label).join(', ');
+        const modeNames = selectedTags.filter(t => t.type === 'mode').map(t => t.label).join(', ');
+        const appliedStyles = [styleNames, modeNames].filter(Boolean).join(' + ');
+
         setGeneratedContent({
           prompt: prompt,
-          description: `I've created an image based on your prompt "${prompt}", using the ${model} model with unique artistic interpretation.`,
+          description: `I've created an image based on your prompt "${prompt}"${appliedStyles ? ` with ${appliedStyles} style` : ''}, using the ${model} model.`,
           keywords: keywords,
           imageUrl: data.imageUrl,
           type: 'image',
         });
       } else {
-        // Call video generation API
+        // Call video generation API with enhanced prompt
         const response = await fetch('/api/generate-video', {
           method: 'POST',
           headers,
           body: JSON.stringify({
-            prompt: prompt,
+            prompt: enhancedPrompt,
             model: modelId,
             aspectRatio: '16:9',
             duration: 5, // 5 second video
@@ -662,9 +746,14 @@ export default function VizualStudioApp() {
           throw new Error(data.error || 'Failed to generate video');
         }
 
+        // Build style description for user feedback
+        const styleNames = selectedTags.filter(t => t.type === 'style').map(t => t.label).join(', ');
+        const modeNames = selectedTags.filter(t => t.type === 'mode').map(t => t.label).join(', ');
+        const appliedStyles = [styleNames, modeNames].filter(Boolean).join(' + ');
+
         setGeneratedContent({
           prompt: prompt,
-          description: `I've created a video based on your prompt "${prompt}", using the ${model} model with cinematic quality.`,
+          description: `I've created a video based on your prompt "${prompt}"${appliedStyles ? ` with ${appliedStyles} style` : ''}, using the ${model} model.`,
           keywords: keywords,
           videoUrl: data.videoUrl,
           type: 'video',
