@@ -17,6 +17,14 @@ export function LoginPage() {
   const { session, loading } = useAuth();
   const { setGuestMode } = useGuestMode();
 
+  // Check for error in URL
+  useEffect(() => {
+    const errorMsg = searchParams.get('error');
+    if (errorMsg) {
+      setError(errorMsg);
+    }
+  }, [searchParams]);
+
   // Store redirect URL in sessionStorage for OAuth callback
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -110,7 +118,7 @@ export function LoginPage() {
 
 
 
-  if (loading) {
+  if (loading || session) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">

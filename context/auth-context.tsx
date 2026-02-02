@@ -40,7 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Safety timeout: if Supabase takes too long, stop loading so UI is interactive
     const timer = setTimeout(() => {
       setLoading(false);
-    }, 2000);
+    }, 8000);
 
 
 

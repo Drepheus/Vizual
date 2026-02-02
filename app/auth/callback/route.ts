@@ -19,7 +19,10 @@ export async function GET(request: NextRequest) {
   }
 
   if (code) {
-    const cookieStore = cookies()
+    const cookieStorePromise = cookies()
+    // @ts-ignore
+    const cookieStore = typeof cookieStorePromise.then === 'function' ? await cookieStorePromise : cookieStorePromise
+
     const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
 
     try {
