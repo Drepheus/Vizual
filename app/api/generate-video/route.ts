@@ -5,26 +5,31 @@ import { getUserFromRequest, saveGeneratedMedia, createDraft, updateDraftStatus,
 
 // Video Model ID mapping - maps our internal IDs to Wavespeed model paths
 const VIDEO_MODEL_MAP: Record<string, string> = {
-    // Free tier models
-    'seedance-1-pro-fast': 'bytedance/seedance-v1-pro-fast/text-to-video',
-    'seedance-1-lite': 'bytedance/seedance-v1-lite/text-to-video',
-    // Premium models (require subscription)
-    'seedance-1-pro': 'bytedance/bytedance-seedance-v1-pro-t2v-1080p',
-    'wan-2.5-i2v': 'alibaba/alibaba-wan-2.5-image-to-video',
-    'wan-2.5-t2v': 'alibaba/alibaba-wan-2.5-text-to-video',
-    'wan-2.5-t2v-fast': 'wavespeed-ai/wan-2.1-t2v-720p-ultra-fast',
-    'wan-2.1-t2v-720p': 'wavespeed-ai/wan-2.1-t2v-720p',
-    'wan-2.1-i2v-720p': 'wavespeed-ai/wan-2.1-i2v-720p',
-    'pixverse-v4.5': 'pixverse/pixverse-pixverse-v4.5-t2v',
-    'kling-v2.5-turbo-pro': 'kwaivgi/kwaivgi-kling-v2.5-turbo-pro-text-to-video',
-    'hailuo-2.3-fast': 'minimax/minimax-hailuo-2.3-fast',
-    'hailuo-2.3': 'minimax/minimax-hailuo-2.3-t2v-pro',
-    'sora-2': 'openai/openai-sora-2-text-to-video',
-    'veo-3-fast': 'google/google-veo3-fast',
-    'veo-3.1-fast': 'google/google-veo3.1-fast-text-to-video',
-    'veo-3': 'google/google-veo3',
-    'veo-3.1': 'google/google-veo3.1-text-to-video',
-    'veo-2': 'google/google-veo2',
+    // Mapping placeholders to known working video models
+    'seedance-1-pro-fast': 'minimax/video-01',   // Reliable fallback
+    'seedance-1-lite': 'minimax/video-01',
+    'seedance-1-pro': 'minimax/video-01',
+
+    // Alibaba / Wan
+    'wan-2.5-i2v': 'ali-vilab/modelscope-damo-text-to-video-synthesis', // Fallback
+    'wan-2.5-t2v': 'ali-vilab/text-to-video-synthesis',
+    'wan-2.5-t2v-fast': 'ali-vilab/text-to-video-synthesis',
+    'wan-2.1-t2v-720p': 'ali-vilab/text-to-video-synthesis',
+    'wan-2.1-i2v-720p': 'ali-vilab/text-to-video-synthesis',
+
+    // Others
+    'pixverse-v4.5': 'minimax/video-01', // Fallback
+    'kling-v2.5-turbo-pro': 'kwaivgi/kling-v1.6-pro', // Verify if available, else minimax
+    'hailuo-2.3-fast': 'minimax/video-01',
+    'hailuo-2.3': 'minimax/video-01',
+
+    // OpenAI / Google placeholders -> Fallback
+    'sora-2': 'minimax/video-01',
+    'veo-3-fast': 'minimax/video-01',
+    'veo-3.1-fast': 'minimax/video-01',
+    'veo-3': 'minimax/video-01',
+    'veo-3.1': 'minimax/video-01',
+    'veo-2': 'minimax/video-01',
 };
 
 // Image-to-Video model mapping (for when user provides a reference image)

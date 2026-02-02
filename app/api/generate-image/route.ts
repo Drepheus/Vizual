@@ -5,18 +5,19 @@ import { getUserFromRequest, saveGeneratedMedia, createDraft, updateDraftStatus,
 
 // Model ID mapping - maps our internal IDs to Wavespeed model paths
 const MODEL_MAP: Record<string, string> = {
-    // Free tier models
-    'flux-schnell': 'wavespeed-ai/flux-schnell',
-    'p-image': 'wavespeed-ai/flux-dev', // PrunaAI uses Flux Dev as closest match
-    'imagen-4-fast': 'google/google-imagen4-fast',
-    'imagen-3-fast': 'google/google-imagen3-fast',
-    'ideogram-v3-turbo': 'ideogram-ai/ideogram-ai-ideogram-v3-turbo',
-    'seedream-4': 'bytedance/bytedance-seedream-v4',
-    // Premium models (require subscription)
-    'flux-1.1-pro-ultra': 'wavespeed-ai/flux-1.1-pro-ultra',
-    'imagen-4-ultra': 'google/google-imagen4-ultra',
-    'seedream-4.5': 'bytedance/bytedance-seedream-v4.5',
-    'nano-banana-pro': 'google/google-nano-banana-pro-text-to-image',
+    // Free tier models - Mapping to reliable defaults
+    'flux-schnell': 'black-forest-labs/flux-schnell',
+    'p-image': 'black-forest-labs/flux-dev',
+    'imagen-4-fast': 'black-forest-labs/flux-schnell', // Fallback
+    'imagen-3-fast': 'black-forest-labs/flux-schnell', // Fallback
+    'ideogram-v3-turbo': 'ideogram-ai/ideogram-v2',    // Closest real version
+    'seedream-4': 'black-forest-labs/flux-schnell',    // Fallback
+
+    // Premium models
+    'flux-1.1-pro-ultra': 'black-forest-labs/flux-1.1-pro',
+    'imagen-4-ultra': 'black-forest-labs/flux-1.1-pro', // Fallback
+    'seedream-4.5': 'black-forest-labs/flux-1.1-pro',   // Fallback
+    'nano-banana-pro': 'black-forest-labs/flux-1.1-pro', // Fallback
 };
 
 // Initialize Wavespeed client

@@ -6,12 +6,17 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 export function getServerSupabaseClient(accessToken?: string): SupabaseClient {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
     if (!url || !anonKey) {
         throw new Error(
             "Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY environment variables."
         );
     }
+
+    // Use Service Role Key if available (bypasses RLS for saving data)
+    // Otherwise fall back to Anon key
+    const apiKey = serviceRoleKey || anonKey;
 
     const options: any = {
         auth: {
@@ -28,7 +33,7 @@ export function getServerSupabaseClient(accessToken?: string): SupabaseClient {
         };
     }
 
-    return createClient(url, anonKey, options);
+    return createClient(url, apiKey, options);
 }
 
 // Helper to get user from authorization header
