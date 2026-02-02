@@ -1921,7 +1921,7 @@ export default function VizualStudioApp() {
             {/* Iframe */}
             <div className="flex-1 w-full">
               <iframe
-                src="https://labs.google/flow/tv/channel/downside-up/tViwFuHm1Lu18C5GghLC"
+                src="https://labs.google/flow/tv/channel/boomtown/PQ4XlyvmsiNpKumBhOal?random=true"
                 className="w-full h-full border-0"
                 allow="autoplay; fullscreen"
                 title="Flow TV"
