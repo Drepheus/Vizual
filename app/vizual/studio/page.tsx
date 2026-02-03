@@ -1030,7 +1030,7 @@ export default function VizualStudioApp() {
                 {showModelDropdown && (
                   <>
                     <div className="fixed inset-0 z-40" onClick={() => setShowModelDropdown(false)} />
-                    <div className="absolute top-full right-0 mt-3 min-w-[320px] bg-[#0a0a0a]/90 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden z-50 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+                    <div className="absolute top-full right-0 mt-3 min-w-[280px] sm:min-w-[320px] bg-[#0a0a0a]/95 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden z-50 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
 
                       {/* Header */}
                       <div className="px-5 py-4 border-b border-white/5 bg-white/[0.02]">
@@ -1055,8 +1055,8 @@ export default function VizualStudioApp() {
                                 key={m.id}
                                 onClick={() => { setModel(m.name); setShowModelDropdown(false); }}
                                 className={`w-full p-3 rounded-xl text-left transition-all duration-200 border group relative overflow-hidden ${model === m.name
-                                    ? 'bg-emerald-500/10 border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.1)]'
-                                    : 'bg-white/[0.02] border-white/5 hover:bg-white/[0.05] hover:border-white/10'
+                                  ? 'bg-emerald-500/10 border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.1)]'
+                                  : 'bg-white/[0.02] border-white/5 hover:bg-white/[0.05] hover:border-white/10'
                                   }`}
                               >
                                 {model === m.name && (

@@ -387,10 +387,10 @@ export default function LivePage() {
           onCreateNew={() => router.push('/vizual/studio')}
         />
 
-        {/* Main Content - Fixed layout, no scrolling */}
-        <main className="flex-1 flex flex-col h-full overflow-hidden" style={{ background: 'linear-gradient(180deg, #0f0505 0%, #0a0a0a 100%)' }}>
+        {/* Main Content - Fixed layout on desktop, scrollable on mobile */}
+        <main className="flex-1 flex flex-col h-full overflow-y-auto lg:overflow-hidden" style={{ background: 'linear-gradient(180deg, #0f0505 0%, #0a0a0a 100%)' }}>
           {/* Header */}
-          <header className="flex items-center justify-between px-4 md:px-6 py-3 border-b border-white/5 bg-black/50 backdrop-blur-md flex-shrink-0">
+          <header className="flex items-center justify-between px-4 md:px-6 py-3 border-b border-white/5 bg-black/50 backdrop-blur-md flex-shrink-0 sticky top-0 z-20">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setSidebarOpen(true)}
@@ -411,13 +411,13 @@ export default function LivePage() {
             </div>
           </header>
 
-          {/* Main Grid - Fixed height, fills remaining space */}
-          <div className="flex-1 flex flex-col lg:flex-row gap-4 p-4 min-h-0">
+          {/* Main Grid - Scrollable on mobile, fixed on desktop */}
+          <div className="flex-1 flex flex-col lg:flex-row gap-4 p-4 lg:min-h-0">
 
             {/* Left: Video Panels */}
-            <div className="flex-1 flex flex-col lg:flex-row gap-4 min-h-0">
+            <div className="flex-1 flex flex-col lg:flex-row gap-4 lg:min-h-0">
               {/* Input Video */}
-              <div className="flex-1 flex flex-col min-h-0">
+              <div className="flex-1 flex flex-col min-h-[200px] lg:min-h-0">
                 <div className="flex items-center justify-between mb-2 flex-shrink-0">
                   <div className="flex items-center gap-2">
                     <h3 className="text-xs font-medium text-gray-400 uppercase tracking-wider">Input</h3>
@@ -549,7 +549,7 @@ export default function LivePage() {
             </div>
 
             {/* Right: Controls Panel */}
-            <div className="w-full lg:w-80 flex flex-col gap-3 flex-shrink-0 lg:overflow-y-auto">
+            <div className="w-full lg:w-80 flex flex-col gap-3 flex-shrink-0 pb-6 lg:pb-0 lg:overflow-y-auto">
               {/* Style Prompt */}
               <div className="rounded-xl border border-white/5 p-4 flex-shrink-0 bg-white/[0.02]">
                 <div className="flex items-center gap-2 mb-3">
