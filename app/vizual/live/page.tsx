@@ -395,7 +395,7 @@ export default function LivePage() {
         <div className={`flex items-center ${sidebarExpanded ? 'justify-between px-4' : 'justify-center'} mb-4 flex-shrink-0`}>
           <div 
             className="flex items-center gap-2 cursor-pointer" 
-            onClick={() => router.push('/vizual')}
+            onClick={() => router.push('/vizual/studio')}
           >
             <svg width="20" height="20" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-white">
               <path d="M25 20 L85 50 L25 80 V20 Z" fill="currentColor" />
@@ -490,11 +490,11 @@ export default function LivePage() {
               <Menu size={20} />
             </button>
             <div className="flex items-center gap-2">
-              <Radio size={22} className="text-purple-400" />
+              <Radio size={22} className="text-red-500" />
               <h1 className={`text-lg font-bold ${spaceGrotesk.className}`}>
                 REALTIME SWAP
               </h1>
-              <span className="px-2 py-0.5 text-[10px] font-bold bg-gradient-to-r from-purple-500 to-pink-500 rounded-full uppercase tracking-wider">
+              <span className="px-2 py-0.5 text-[10px] font-bold bg-gradient-to-r from-red-600 to-red-500 rounded-full uppercase tracking-wider">
                 Beta
               </span>
             </div>
@@ -509,11 +509,20 @@ export default function LivePage() {
             {/* Input Video */}
             <div className="flex-1 flex flex-col min-h-0">
               <div className="flex items-center justify-between mb-2 flex-shrink-0">
-                <h3 className="text-xs font-medium text-gray-400 uppercase tracking-wider">Input</h3>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-xs font-medium text-gray-400 uppercase tracking-wider">Input</h3>
+                  {/* Blinking red light when camera is connected */}
+                  {(connectionState === 'connected' || connectionState === 'streaming') && isUsingCamera && (
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse shadow-[0_0_8px_2px_rgba(239,68,68,0.6)]" />
+                      <span className="text-[10px] text-red-400 font-medium uppercase tracking-wider">REC</span>
+                    </div>
+                  )}
+                </div>
                 <div className="flex items-center gap-1">
                   <button
                     onClick={switchToCamera}
-                    className={`p-1.5 rounded-lg transition-colors ${isUsingCamera && connectionState !== 'idle' ? 'bg-white/10 text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+                    className={`p-1.5 rounded-lg transition-colors ${isUsingCamera && connectionState !== 'idle' ? 'bg-red-500/20 text-red-400' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
                     title="Use Camera"
                   >
                     <Camera size={16} />
@@ -535,17 +544,21 @@ export default function LivePage() {
                 </div>
               </div>
               
-              <div className="flex-1 relative bg-[#111] rounded-xl overflow-hidden border border-white/10">
+              <div className={`flex-1 relative bg-[#111] rounded-xl overflow-hidden border transition-all duration-300 ${
+                (connectionState === 'connected' || connectionState === 'streaming') && isUsingCamera 
+                  ? 'border-red-500/50 shadow-[0_0_20px_rgba(239,68,68,0.15)]' 
+                  : 'border-white/10'
+              }`}>
                 {connectionState === 'idle' ? (
                   <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-4">
-                    <div className="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
-                      <Camera size={28} className="text-gray-400" />
+                    <div className="w-16 h-16 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center">
+                      <Camera size={28} className="text-red-400" />
                     </div>
                     <p className="text-gray-400 text-sm text-center">Camera access required</p>
                     <div className="flex gap-2">
                       <button
                         onClick={requestCameraAccess}
-                        className="px-4 py-2 bg-white text-black rounded-full font-medium text-xs hover:bg-gray-200 transition-colors flex items-center gap-2"
+                        className="px-4 py-2 bg-red-500 text-white rounded-full font-medium text-xs hover:bg-red-600 transition-colors flex items-center gap-2"
                       >
                         <Camera size={14} />
                         Enable Camera
@@ -561,7 +574,7 @@ export default function LivePage() {
                   </div>
                 ) : connectionState === 'requesting' ? (
                   <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-                    <div className="w-10 h-10 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                    <div className="w-10 h-10 border-2 border-red-500/30 border-t-red-500 rounded-full animate-spin" />
                     <p className="text-gray-400 text-sm">Requesting camera...</p>
                   </div>
                 ) : (
@@ -608,8 +621,8 @@ export default function LivePage() {
               <div className="flex-1 relative bg-[#111] rounded-xl overflow-hidden border border-white/10">
                 {!isStreaming ? (
                   <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-4">
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30 flex items-center justify-center">
-                      <Sparkles size={28} className="text-purple-400" />
+                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-red-500/20 to-red-600/20 border border-red-500/30 flex items-center justify-center">
+                      <Sparkles size={28} className="text-red-400" />
                     </div>
                     <p className="text-gray-400 text-sm text-center">Swapped output appears here</p>
                   </div>
@@ -630,10 +643,10 @@ export default function LivePage() {
             {/* Style Prompt */}
             <div className="bg-[#111]/90 rounded-xl border border-white/10 p-3 flex-shrink-0">
               <div className="flex items-center gap-2 mb-2">
-                <Palette size={16} className="text-purple-400" />
+                <Palette size={16} className="text-red-400" />
                 <span className="text-xs font-medium text-gray-300">Style Prompt</span>
                 {isStreaming && (
-                  <span className="ml-auto text-[10px] text-purple-400">Realtime</span>
+                  <span className="ml-auto text-[10px] text-red-400">Realtime</span>
                 )}
               </div>
               <textarea
@@ -710,7 +723,7 @@ export default function LivePage() {
                 <button
                   onClick={startStreaming}
                   disabled={connectionState === 'idle' || connectionState === 'requesting'}
-                  className="w-full py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-bold text-sm uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-lg shadow-purple-500/20"
+                  className="w-full py-3 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-bold text-sm uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-lg shadow-red-500/20"
                 >
                   <Play size={18} />
                   Start Realtime Swap

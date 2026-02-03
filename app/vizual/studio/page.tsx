@@ -851,7 +851,7 @@ export default function VizualStudioApp() {
 
         {/* Logo & Toggle Row */}
         <div className={`flex items-center ${sidebarExpanded ? 'justify-between px-4' : 'justify-center'} mb-4 flex-shrink-0`}>
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => router.push('/vizual')}>
+          <div className="flex items-center gap-2 cursor-pointer" onClick={() => router.push('/vizual/studio')}>
             <svg width="24" height="24" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-white flex-shrink-0">
               <path d="M25 20 L85 50 L25 80 V20 Z" fill="currentColor" />
             </svg>
