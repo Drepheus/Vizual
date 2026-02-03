@@ -80,6 +80,37 @@ export default function LivePage() {
   const [isUsingCamera, setIsUsingCamera] = useState(true);
   const [referenceImage, setReferenceImage] = useState<string | null>(null);
 
+  // Effect to attach stream to video element when both are available
+  // This fixes the issue where the video element isn't rendered yet when the stream is set
+  useEffect(() => {
+    if (localStream && localVideoRef.current && isUsingCamera) {
+      const videoElement = localVideoRef.current;
+      
+      // Only set if not already set
+      if (videoElement.srcObject !== localStream) {
+        videoElement.srcObject = localStream;
+        videoElement.muted = true;
+        
+        // Ensure video plays
+        const playVideo = async () => {
+          try {
+            await videoElement.play();
+            console.log('Camera video playing successfully');
+          } catch (error) {
+            console.error('Error playing camera video:', error);
+          }
+        };
+        
+        // Play when metadata is loaded or immediately if already loaded
+        if (videoElement.readyState >= 2) {
+          playVideo();
+        } else {
+          videoElement.onloadedmetadata = () => playVideo();
+        }
+      }
+    }
+  }, [localStream, connectionState, isUsingCamera]);
+
   // WebSocket and WebRTC refs
   const wsRef = useRef<WebSocket | null>(null);
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
@@ -97,20 +128,13 @@ export default function LivePage() {
         }
       });
 
+      console.log('Camera stream obtained:', stream.getVideoTracks());
+      
+      // Set stream state - useEffect will handle attaching to video element
       setLocalStream(stream);
-
-      // Set stream to video element and ensure it plays
-      if (localVideoRef.current) {
-        localVideoRef.current.srcObject = stream;
-        localVideoRef.current.muted = true;
-        // Force play after setting srcObject
-        localVideoRef.current.onloadedmetadata = () => {
-          localVideoRef.current?.play().catch(console.error);
-        };
-      }
-
-      setConnectionState('connected');
       setIsUsingCamera(true);
+      setConnectionState('connected');
+      
       showToast('Camera connected successfully!', 'success');
     } catch (error: any) {
       console.error('Camera access error:', error);

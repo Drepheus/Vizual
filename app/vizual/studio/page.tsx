@@ -18,6 +18,7 @@ import {
   MessageSquareQuote,
   MoreHorizontal,
   Image as ImageIcon,
+  Image,
   Plus,
   Video,
   Infinity,
@@ -47,7 +48,15 @@ import {
   ArrowRightFromLine,
   Maximize2,
   Download,
-  Radio
+  Radio,
+  Coins,
+  Rocket,
+  Crown,
+  Film,
+  Clock,
+  Star,
+  Brain,
+  Plug
 } from "lucide-react";
 import { MultiStepLoader } from "@/components/ui/multi-step-loader";
 import { Inter, Space_Grotesk } from "next/font/google";
@@ -56,6 +65,44 @@ import Aurora from "@/components/vizual/Aurora";
 import { ProjectsView } from "@/components/vizual/projects-view";
 import { Sidebar } from "@/components/vizual/sidebar";
 import { useToast } from "@/components/ui/toast";
+import { getBrowserSupabaseClient } from "@/lib/supabase-browser";
+
+const supabase = getBrowserSupabaseClient();
+
+// Credit cost configuration per model
+const MODEL_CREDIT_COSTS: Record<string, number | { perSecond: number }> = {
+  // Image models
+  'flux-schnell': 1,
+  'flux-1.1-pro-ultra': 5,
+  'p-image': 0.5,
+  'imagen-4-fast': 2,
+  'imagen-3-fast': 2.5,
+  'imagen-4-ultra': 6,
+  'ideogram-v3-turbo': 3,
+  'seedream-4': 3,
+  'seedream-4.5': 4,
+  'nano-banana-pro': 15,
+  // Video models (per second costs)
+  'seedance-1-pro-fast': { perSecond: 1.5 },
+  'seedance-1-lite': { perSecond: 1.8 },
+  'seedance-1-pro': { perSecond: 3 },
+  'wan-2.5-i2v': { perSecond: 5 },
+  'wan-2.5-t2v': { perSecond: 5 },
+  'wan-2.5-t2v-fast': { perSecond: 6.8 },
+  'wan-2.1-t2v-720p': { perSecond: 24 },
+  'wan-2.1-i2v-720p': { perSecond: 25 },
+  'pixverse-v4.5': { perSecond: 6 },
+  'kling-v2.5-turbo-pro': { perSecond: 7 },
+  'hailuo-2.3-fast': 19, // Fixed cost per video
+  'hailuo-2.3': 28, // Fixed cost per video
+  'sora-2': { perSecond: 10 },
+  'sora-2-own-key': 0, // Uses own API key
+  'veo-3-fast': { perSecond: 10 },
+  'veo-3.1-fast': { perSecond: 10 },
+  'veo-3': { perSecond: 20 },
+  'veo-3.1': { perSecond: 20 },
+  'veo-2': { perSecond: 50 },
+};
 
 const inter = Inter({ subsets: ["latin"], weight: ["300", "400", "500", "600", "700"] });
 const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], weight: ["300", "400", "500", "600", "700"] });
@@ -446,6 +493,62 @@ export default function VizualStudioApp() {
   const [showColorPaletteModal, setShowColorPaletteModal] = useState(false);
   const [showStyleGuideModal, setShowStyleGuideModal] = useState(false);
 
+  // Credits System State
+  const [userCredits, setUserCredits] = useState<number>(50);
+  const [creditsUsed, setCreditsUsed] = useState<number>(0);
+  const [isLoadingCredits, setIsLoadingCredits] = useState(true);
+  const creditsRemaining = userCredits - creditsUsed;
+
+  // Calculate credit cost for current generation
+  const calculateCreditCost = (): number => {
+    const currentModelList = creationMode === 'IMAGE' ? IMAGE_MODELS : VIDEO_MODELS;
+    const currentModel = currentModelList.find(m => m.name === model);
+    const modelId = currentModel?.id || '';
+    const costConfig = MODEL_CREDIT_COSTS[modelId];
+    
+    if (!costConfig) return 1; // Default cost
+    
+    if (typeof costConfig === 'number') {
+      return costConfig;
+    } else {
+      // Per-second cost for videos
+      const videoDuration = duration > 0 ? duration : 5; // Default 5 seconds
+      return Math.ceil(costConfig.perSecond * videoDuration);
+    }
+  };
+
+  const estimatedCost = calculateCreditCost();
+
+  // Deduct credits after successful generation
+  const deductCredits = async (amount: number) => {
+    if (!user) {
+      // Guest mode - just update local state
+      setCreditsUsed(prev => prev + amount);
+      return;
+    }
+
+    try {
+      // Call the Supabase function to deduct credits
+      const { data, error } = await supabase.rpc('deduct_credits', {
+        p_user_id: user.id,
+        p_amount: amount,
+      });
+
+      if (error) {
+        console.error('Error deducting credits:', error);
+        // Still update local state for UI feedback
+        setCreditsUsed(prev => prev + amount);
+      } else if (data && data.length > 0 && data[0].success) {
+        // Update local state with new balance
+        setCreditsUsed(prev => prev + amount);
+        showToast(`-${amount} credits used`, 'success', 2000);
+      }
+    } catch (err) {
+      console.error('Error deducting credits:', err);
+      setCreditsUsed(prev => prev + amount);
+    }
+  };
+
   // Selected Mode/Style Tags (Instagram-style @mentions)
   const [selectedTags, setSelectedTags] = useState<{ id: string; label: string; type: 'mode' | 'style' }[]>([]);
 
@@ -591,6 +694,44 @@ export default function VizualStudioApp() {
       router.push('/login?redirect=/vizual/studio');
     }
   }, [user, loading, router, isGuestMode]);
+
+  // Fetch user credits from database
+  useEffect(() => {
+    const fetchCredits = async () => {
+      if (!user) {
+        // Guest mode gets 50 free credits
+        setUserCredits(50);
+        setCreditsUsed(0);
+        setIsLoadingCredits(false);
+        return;
+      }
+
+      try {
+        setIsLoadingCredits(true);
+        const { data, error } = await supabase
+          .from('users')
+          .select('credits, credits_used, subscription_tier')
+          .eq('id', user.id)
+          .single();
+
+        if (error) {
+          console.error('Error fetching credits:', error);
+          // Default to free tier credits
+          setUserCredits(50);
+          setCreditsUsed(0);
+        } else if (data) {
+          setUserCredits(data.credits || 50);
+          setCreditsUsed(data.credits_used || 0);
+        }
+      } catch (err) {
+        console.error('Error fetching credits:', err);
+      } finally {
+        setIsLoadingCredits(false);
+      }
+    };
+
+    fetchCredits();
+  }, [user]);
 
   // Lock body scroll for mobile app-like behavior
   useEffect(() => {
@@ -799,6 +940,9 @@ export default function VizualStudioApp() {
           imageUrl: data.imageUrl,
           type: 'image',
         });
+
+        // Deduct credits after successful generation
+        await deductCredits(estimatedCost);
       } else {
         // Call video generation API with enhanced prompt
         const response = await fetch('/api/generate-video', {
@@ -836,6 +980,9 @@ export default function VizualStudioApp() {
           videoUrl: data.videoUrl,
           type: 'video',
         });
+
+        // Deduct credits after successful generation
+        await deductCredits(estimatedCost);
       }
     } catch (error: any) {
       console.error('Generation error:', error);
@@ -1087,7 +1234,7 @@ export default function VizualStudioApp() {
 
                         {/* Premium Tier Group */}
                         <div className="px-2 pb-2">
-                          <div className="flex items-center gap-2 px-2 py-2 mt-2 text-[10px] font-bold text-yellow-500 uppercase tracking-widest opacity-80">
+                          <div className="flex items-center gap-2 px-2 py-2 mt-2 text-[10px] font-bold text-yellow-400 uppercase tracking-widest opacity-90">
                             <Zap size={10} />
                             Premium Models
                           </div>
@@ -1100,22 +1247,27 @@ export default function VizualStudioApp() {
                                   setShowModelDropdown(false);
                                   setShowPricingModal(true);
                                 }}
-                                className="w-full p-3 rounded-xl text-left transition-all duration-200 border bg-gradient-to-r from-yellow-500/[0.02] to-transparent border-yellow-500/10 hover:border-yellow-500/30 hover:bg-yellow-500/[0.05] group relative overflow-hidden"
+                                className="w-full p-3 rounded-xl text-left transition-all duration-200 border bg-gradient-to-r from-yellow-500/[0.05] to-transparent border-yellow-500/20 hover:border-yellow-400/40 hover:bg-yellow-500/[0.08] group relative overflow-hidden"
                               >
                                 <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/0 via-yellow-500/[0.05] to-yellow-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
 
-                                <div className="flex justify-between items-start gap-3 relative z-10">
-                                  <div>
-                                    <div className="text-sm font-bold text-white/50 group-hover:text-yellow-400 transition-colors flex items-center gap-2">
-                                      {m.name}
-                                      <span className="px-1.5 py-0.5 rounded-md bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 text-[10px] leading-none">PRO</span>
+                                <div className="flex justify-between items-start gap-3 relative z-10 w-full">
+                                  <div className="flex-1 min-w-0 pr-2">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <span className="text-sm font-bold text-white/90 group-hover:text-yellow-300 transition-colors truncate">
+                                        {m.name}
+                                      </span>
+                                      <span className="flex-shrink-0 px-1.5 py-[2px] rounded bg-yellow-400/10 text-yellow-400 border border-yellow-400/20 text-[9px] font-extrabold leading-none tracking-wider shadow-[0_0_8px_rgba(250,204,21,0.15)]">
+                                        PRO
+                                      </span>
                                     </div>
-                                    <div className="text-[11px] text-gray-600 mt-0.5 group-hover:text-gray-500 transition-colors">
+                                    <div className="text-[10px] sm:text-[11px] text-gray-500 group-hover:text-gray-400 transition-colors truncate">
                                       {m.description}
                                     </div>
                                   </div>
-                                  <div className="flex flex-col items-end flex-shrink-0">
-                                    <div className="text-[10px] font-bold text-yellow-500/80 group-hover:text-yellow-400 bg-yellow-900/10 group-hover:bg-yellow-500/10 px-2 py-1 rounded-md transition-colors">
+
+                                  <div className="flex flex-col items-end justify-start flex-shrink-0">
+                                    <div className="text-[10px] font-bold text-yellow-300 bg-yellow-400/10 px-2 py-1 rounded-md border border-yellow-400/20 shadow-sm whitespace-nowrap">
                                       {m.cost}
                                     </div>
                                   </div>
@@ -1137,15 +1289,46 @@ export default function VizualStudioApp() {
               </div>
             </div>
 
-            <button
-              onClick={() => setShowAccountModal(true)}
-              className="flex items-center gap-2 px-3 md:px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors text-sm"
-            >
-              <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-[10px] font-bold border border-white/20 text-white">
-                A
+            {/* Credits Display - Glowing Vizual Theme */}
+            <div className="flex items-center gap-3">
+              <div 
+                className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 bg-black/40 backdrop-blur-sm"
+                style={{
+                  boxShadow: creditsRemaining > 0 
+                    ? '0 0 15px rgba(139, 92, 246, 0.3), 0 0 30px rgba(236, 72, 153, 0.2), inset 0 1px 0 rgba(255,255,255,0.1)' 
+                    : '0 0 15px rgba(239, 68, 68, 0.4)',
+                }}
+              >
+                <Coins size={14} className="text-purple-400" />
+                <span className="text-[10px] uppercase tracking-wider text-gray-400 font-medium hidden sm:inline">Credits</span>
+                <span 
+                  className={`text-sm font-bold ${spaceGrotesk.className}`}
+                  style={{
+                    background: creditsRemaining > 0 
+                      ? 'linear-gradient(135deg, #a855f7, #ec4899, #8b5cf6)' 
+                      : 'linear-gradient(135deg, #ef4444, #f97316)',
+                    backgroundClip: 'text',
+                    WebkitBackgroundClip: 'text',
+                    color: 'transparent',
+                    textShadow: creditsRemaining > 0 
+                      ? '0 0 20px rgba(168, 85, 247, 0.5)' 
+                      : '0 0 20px rgba(239, 68, 68, 0.5)',
+                  }}
+                >
+                  {isLoadingCredits ? '...' : creditsRemaining.toLocaleString()}
+                </span>
               </div>
-              <span className="hidden sm:inline">Account</span>
-            </button>
+
+              <button
+                onClick={() => setShowAccountModal(true)}
+                className="flex items-center gap-2 px-3 md:px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors text-sm"
+              >
+                <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-[10px] font-bold border border-white/20 text-white">
+                  A
+                </div>
+                <span className="hidden sm:inline">Account</span>
+              </button>
+            </div>
           </header>
 
           {/* Main Canvas Area */}
@@ -1655,14 +1838,44 @@ export default function VizualStudioApp() {
                             <ChevronDown size={14} />
                           </div>
 
+                          {/* Credit Cost Preview - Border only indicator */}
+                          <div 
+                            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border-2 transition-all ${
+                              estimatedCost <= creditsRemaining 
+                                ? 'border-purple-500' 
+                                : 'border-red-500'
+                            }`}
+                            style={{
+                              background: 'transparent',
+                              boxShadow: estimatedCost <= creditsRemaining 
+                                ? '0 0 12px rgba(168, 85, 247, 0.4)' 
+                                : '0 0 12px rgba(239, 68, 68, 0.5)',
+                            }}
+                            title={estimatedCost <= creditsRemaining 
+                              ? `This will cost ${estimatedCost} credits` 
+                              : `Not enough credits! Need ${estimatedCost}, have ${creditsRemaining}`
+                            }
+                          >
+                            <Zap size={12} className={estimatedCost <= creditsRemaining ? 'text-purple-400' : 'text-red-400'} />
+                            <span 
+                              className={`text-[10px] font-bold ${spaceGrotesk.className} ${
+                                estimatedCost <= creditsRemaining ? 'text-purple-400' : 'text-red-400'
+                              }`}
+                            >
+                              {estimatedCost} {estimatedCost === 1 ? 'credit' : 'credits'}
+                            </span>
+                          </div>
+
                           {/* Send Button */}
                           <button
                             onClick={handleGenerate}
-                            disabled={!prompt.trim()}
-                            className={`p-2 md:p-2.5 rounded-full transition-colors ${prompt.trim()
-                              ? 'bg-white text-black hover:bg-gray-200'
-                              : 'bg-white/10 text-gray-500 cursor-not-allowed'
-                              }`}
+                            disabled={!prompt.trim() || estimatedCost > creditsRemaining}
+                            className={`p-2 md:p-2.5 rounded-full transition-colors ${
+                              prompt.trim() && estimatedCost <= creditsRemaining
+                                ? 'bg-white text-black hover:bg-gray-200'
+                                : 'bg-white/10 text-gray-500 cursor-not-allowed'
+                            }`}
+                            title={estimatedCost > creditsRemaining ? 'Not enough credits' : 'Generate'}
                           >
                             <Send size={18} />
                           </button>
@@ -2449,23 +2662,19 @@ export default function VizualStudioApp() {
       {/* Pricing Modal - Premium Vizual Design */}
       {
         showPricingModal && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 overflow-y-auto">
             <div
               className="absolute inset-0 bg-black/90 backdrop-blur-xl"
               onClick={() => setShowPricingModal(false)}
             />
-            <div className="relative w-full max-w-5xl">
+            <div className="relative w-full max-w-5xl my-8">
               {/* Header */}
-              <div className="text-center mb-8 relative z-10">
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/10 mb-4">
-                  <Sparkles size={14} className="text-white" />
-                  <span className="text-xs font-medium text-white uppercase tracking-wider">Vizual Plans</span>
-                </div>
-                <h2 className={`text-3xl md:text-4xl font-bold text-white mb-2 ${spaceGrotesk.className}`}>
-                  Unlock Your Creative Potential
+              <div className="text-center mb-6 sm:mb-8 relative z-10">
+                <h2 className={`text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-2 ${spaceGrotesk.className}`}>
+                  Choose Your Plan
                 </h2>
-                <p className="text-gray-400 text-sm max-w-lg mx-auto">
-                  Choose the plan that fits your workflow. Cancel anytime.
+                <p className="text-gray-500 text-sm max-w-lg mx-auto">
+                  Unlock the full power of Vizual
                 </p>
               </div>
 
@@ -2476,139 +2685,231 @@ export default function VizualStudioApp() {
                 <X size={20} />
               </button>
 
-              {/* Plans Container */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
+              {/* Plans Container - Scrollable on mobile */}
+              <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory lg:grid lg:grid-cols-4 lg:overflow-visible lg:pb-0 relative z-10" style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(255,255,255,0.15) transparent' }}>
 
                 {/* Free Plan */}
-                <div className="relative p-6 rounded-3xl bg-[#0d0d0d] border border-white/10 flex flex-col">
-                  <div className="mb-6">
-                    <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-4">
-                      <User size={22} className="text-gray-400" />
+                <div className="relative flex-shrink-0 w-[280px] lg:w-auto snap-center p-5 rounded-2xl bg-[#111111] border border-white/5 hover:border-white/10 flex flex-col transition-all duration-300 hover:scale-[1.02] group">
+                  <div className="mb-4">
+                    <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                      <Sparkles size={18} className="text-gray-400" />
                     </div>
-                    <h3 className={`text-xl font-bold text-white mb-1 ${spaceGrotesk.className}`}>Free</h3>
-                    <p className="text-sm text-gray-500">Perfect for exploring</p>
+                    <h3 className={`text-sm font-bold text-white uppercase tracking-wider ${spaceGrotesk.className}`}>VIZUAL FREE</h3>
+                    <p className="text-[10px] text-gray-500">Try Vizual</p>
                   </div>
-                  <div className="mb-6">
-                    <span className="text-4xl font-bold text-white">$0</span>
-                    <span className="text-gray-500 text-sm">/month</span>
+                  <div className="mb-4 pb-4 border-b border-white/5">
+                    <span className="text-3xl font-bold text-white">Free</span>
+                    <span className="text-xs text-gray-500 ml-1">forever</span>
                   </div>
-                  <ul className="space-y-3 mb-8 flex-1">
-                    {["50 credits per month", "Basic AI models", "720p exports", "Community support"].map((feature, i) => (
-                      <li key={i} className="flex items-start gap-3 text-sm text-gray-400">
-                        <div className="w-1.5 h-1.5 rounded-full bg-gray-600 mt-1.5 flex-shrink-0" />
-                        {feature}
+                  <ul className="space-y-2.5 mb-5 flex-1">
+                    {[
+                      { Icon: Image, text: "3 image generations / day" },
+                      { Icon: Radio, text: "10 seconds Live feature / day" },
+                      { Icon: Film, text: "1 video generation / month" },
+                      { Icon: Settings, text: "Basic models only" },
+                      { Icon: Clock, text: "Standard queue" },
+                    ].map((feature, i) => (
+                      <li key={i} className="flex items-center gap-2.5 group/feature">
+                        <div className="w-6 h-6 rounded-md bg-white/5 flex items-center justify-center flex-shrink-0 group-hover/feature:bg-white/10 transition-all">
+                          <feature.Icon size={12} className="text-gray-500 group-hover/feature:text-gray-300" />
+                        </div>
+                        <span className="text-xs text-gray-400 group-hover/feature:text-white transition-colors">{feature.text}</span>
                       </li>
                     ))}
                   </ul>
-                  <button className="w-full py-3.5 rounded-xl bg-white/5 text-white font-semibold text-sm border border-white/10 hover:bg-white/10 transition-all">
+                  <button className="w-full py-3 rounded-xl bg-white/5 text-gray-600 font-semibold text-sm border border-white/5 cursor-default">
                     Current Plan
                   </button>
                 </div>
 
-                {/* Pro Plan - Featured with Video */}
-                <div className="relative rounded-3xl overflow-hidden border-2 border-white/20 flex flex-col transform md:scale-105 shadow-2xl shadow-white/5">
-                  {/* Video Background */}
-                  <div className="absolute inset-0 z-0">
-                    <video
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                      className="w-full h-full object-cover opacity-30"
-                    >
-                      <source src="/videos/veo1.mp4" type="video/mp4" />
-                    </video>
-                    <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/60 to-black/90" />
-                  </div>
-
-                  {/* Popular Badge */}
-                  <div className="absolute top-4 right-4 z-10">
-                    <span className="px-3 py-1 rounded-full bg-white text-black text-xs font-bold">
-                      MOST POPULAR
-                    </span>
-                  </div>
-
-                  <div className="relative z-10 p-6 flex flex-col h-full">
-                    <div className="mb-6">
-                      <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center mb-4">
-                        <Sparkles size={22} className="text-black" />
-                      </div>
-                      <h3 className={`text-xl font-bold text-white mb-1 ${spaceGrotesk.className}`}>Pro</h3>
-                      <p className="text-sm text-gray-400">For serious creators</p>
+                {/* Basic Plan */}
+                <div className="relative flex-shrink-0 w-[280px] lg:w-auto snap-center p-5 rounded-2xl bg-[#111111] border border-white/5 hover:border-white/10 flex flex-col transition-all duration-300 hover:scale-[1.02] group">
+                  <div className="mb-4">
+                    <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                      <Rocket size={18} className="text-gray-400" />
                     </div>
-                    <div className="mb-6">
-                      <span className="text-4xl font-bold text-white">$29</span>
-                      <span className="text-gray-400 text-sm">/month</span>
-                    </div>
-                    <ul className="space-y-3 mb-8 flex-1">
-                      {["1,000 credits per month", "Premium AI models", "4K exports", "Priority processing", "Remove watermarks", "Commercial license"].map((feature, i) => (
-                        <li key={i} className="flex items-start gap-3 text-sm text-white">
-                          <div className="w-1.5 h-1.5 rounded-full bg-white mt-1.5 flex-shrink-0" />
-                          {feature}
-                        </li>
-                      ))}
-                    </ul>
-                    <button className="w-full py-3.5 rounded-xl bg-white text-black font-bold text-sm hover:bg-gray-100 transition-all hover:scale-[1.02] shadow-lg shadow-white/20">
-                      Upgrade to Pro
-                    </button>
+                    <h3 className={`text-sm font-bold text-white uppercase tracking-wider ${spaceGrotesk.className}`}>VIZUAL BASIC</h3>
+                    <p className="text-[10px] text-gray-500">For casual creators</p>
+                  </div>
+                  <div className="mb-4 pb-4 border-b border-white/5">
+                    <span className="text-3xl font-bold text-white">$10</span>
+                    <span className="text-xs text-gray-500 ml-1">/ month</span>
+                  </div>
+                  <ul className="space-y-2.5 mb-5 flex-1">
+                    {[
+                      { Icon: Coins, text: "1,000 credits / month", highlight: true },
+                      { Icon: Image, text: "~50-200 images / month" },
+                      { Icon: Radio, text: "~5 mins Live feature / month" },
+                      { Icon: Film, text: "~3-5 short videos / month" },
+                      { Icon: Settings, text: "Access to more models" },
+                      { Icon: Zap, text: "Faster queue" },
+                    ].map((feature, i) => (
+                      <li key={i} className="flex items-center gap-2.5 group/feature">
+                        <div className="w-6 h-6 rounded-md bg-white/5 flex items-center justify-center flex-shrink-0 group-hover/feature:bg-white/10 transition-all">
+                          <feature.Icon size={12} className="text-gray-500 group-hover/feature:text-gray-300" />
+                        </div>
+                        <span className={`text-xs ${feature.highlight ? 'text-white font-semibold' : 'text-gray-400'} group-hover/feature:text-white transition-colors`}>
+                          {feature.highlight && <span className="inline-block mr-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-white/10 text-white">{feature.text.split(' ')[0]}</span>}
+                          {feature.highlight ? feature.text.split(' ').slice(1).join(' ') : feature.text}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                  <button 
+                    onClick={() => {
+                      const email = user?.email;
+                      const url = email 
+                        ? `https://buy.stripe.com/eVq3cvcypdVZ5UF4Y8dfG0f?prefilled_email=${encodeURIComponent(email)}`
+                        : 'https://buy.stripe.com/eVq3cvcypdVZ5UF4Y8dfG0f';
+                      window.location.href = url;
+                    }}
+                    className="w-full py-3 rounded-xl bg-white text-black font-semibold text-sm hover:bg-gray-100 hover:-translate-y-0.5 transition-all relative overflow-hidden group/btn">
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-700" />
+                    <span className="relative">Choose Basic</span>
+                  </button>
+                  <div className="flex items-center justify-center gap-1.5 mt-3 text-[9px] text-gray-600 uppercase tracking-wider">
+                    <span>◆</span><span>Secured by Stripe</span>
                   </div>
                 </div>
 
-                {/* Ultra Plan - with Video */}
-                <div className="relative rounded-3xl overflow-hidden border border-white/10 flex flex-col">
-                  {/* Video Background */}
-                  <div className="absolute inset-0 z-0">
-                    <video
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                      className="w-full h-full object-cover opacity-20"
-                    >
-                      <source src="/videos/film2.mp4" type="video/mp4" />
-                    </video>
-                    <div className="absolute inset-0 bg-gradient-to-b from-[#0d0d0d]/90 via-[#0d0d0d]/70 to-[#0d0d0d]/95" />
+                {/* Pro Plan - Featured */}
+                <div className="relative flex-shrink-0 w-[280px] lg:w-auto snap-center p-5 rounded-2xl bg-[#111111] border border-white/5 hover:border-white/10 ring-1 ring-white/20 flex flex-col transition-all duration-300 hover:scale-[1.02] group">
+                  {/* Popular Badge - Animated Shimmer Gradient */}
+                  <div 
+                    className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-lg overflow-hidden"
+                    style={{
+                      background: 'linear-gradient(90deg, #fff, #888, #fff, #888, #fff)',
+                      backgroundSize: '200% 100%',
+                      animation: 'shimmer 2s linear infinite',
+                      color: '#000',
+                    }}
+                  >
+                    Most Popular
                   </div>
-
-                  <div className="relative z-10 p-6 flex flex-col h-full">
-                    <div className="mb-6">
-                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-r from-gray-700 via-white to-gray-700 p-[1px]">
-                        <div className="w-full h-full rounded-2xl bg-black flex items-center justify-center">
-                          <Zap size={22} className="text-white" />
+                  <div className="mb-4 mt-2">
+                    <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                      <Zap size={18} className="text-gray-400" />
+                    </div>
+                    <h3 className={`text-sm font-bold text-white uppercase tracking-wider ${spaceGrotesk.className}`}>VIZUAL PRO</h3>
+                    <p className="text-[10px] text-gray-500">For serious creators</p>
+                  </div>
+                  <div className="mb-4 pb-4 border-b border-white/5">
+                    <span className="text-3xl font-bold text-white">$20</span>
+                    <span className="text-xs text-gray-500 ml-1">/ month</span>
+                  </div>
+                  <ul className="space-y-2.5 mb-5 flex-1">
+                    {[
+                      { Icon: Coins, text: "2,000 credits / month", highlight: true },
+                      { Icon: Image, text: "~100-400 images / month" },
+                      { Icon: Radio, text: "~10 mins Live feature / month" },
+                      { Icon: Film, text: "~8-12 videos / month" },
+                      { Icon: Sparkles, text: "All premium models" },
+                      { Icon: Zap, text: "Priority queue" },
+                      { Icon: Brain, text: "Long-term memory" },
+                    ].map((feature, i) => (
+                      <li key={i} className="flex items-center gap-2.5 group/feature">
+                        <div className="w-6 h-6 rounded-md bg-white/5 flex items-center justify-center flex-shrink-0 group-hover/feature:bg-white/10 transition-all">
+                          <feature.Icon size={12} className="text-gray-500 group-hover/feature:text-gray-300" />
                         </div>
-                      </div>
-                      <h3 className={`text-xl font-bold text-white mb-1 mt-4 ${spaceGrotesk.className}`}>Ultra</h3>
-                      <p className="text-sm text-gray-400">Maximum power</p>
+                        <span className={`text-xs ${feature.highlight ? 'text-white font-semibold' : 'text-gray-400'} group-hover/feature:text-white transition-colors`}>
+                          {feature.highlight && <span className="inline-block mr-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-white/10 text-white">{feature.text.split(' ')[0]}</span>}
+                          {feature.highlight ? feature.text.split(' ').slice(1).join(' ') : feature.text}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                  <button 
+                    onClick={() => {
+                      const email = user?.email;
+                      const url = email 
+                        ? `https://buy.stripe.com/fZu14ndCtdVZfvf4Y8dfG0g?prefilled_email=${encodeURIComponent(email)}`
+                        : 'https://buy.stripe.com/fZu14ndCtdVZfvf4Y8dfG0g';
+                      window.location.href = url;
+                    }}
+                    className="w-full py-3 rounded-xl bg-white text-black font-semibold text-sm hover:bg-gray-100 hover:-translate-y-0.5 transition-all relative overflow-hidden group/btn">
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-700" />
+                    <span className="relative">Choose Pro</span>
+                  </button>
+                  <div className="flex items-center justify-center gap-1.5 mt-3 text-[9px] text-gray-600 uppercase tracking-wider">
+                    <span>◆</span><span>Secured by Stripe</span>
+                  </div>
+                </div>
+
+                {/* Ultra Plan - COLORED */}
+                <div className="relative flex-shrink-0 w-[280px] lg:w-auto snap-center p-5 rounded-2xl bg-gradient-to-br from-amber-950/40 via-amber-900/20 to-orange-950/40 border border-amber-500/30 shadow-[0_0_40px_rgba(251,191,36,0.1)] flex flex-col transition-all duration-300 hover:scale-[1.02] group">
+                  {/* Premium Badge */}
+                  <div className="absolute top-3 right-3 px-2 py-1 bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/40 rounded-md text-[9px] font-bold text-amber-400 uppercase tracking-wider">
+                    Premium
+                  </div>
+                  <div className="mb-4">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 border border-amber-500/30 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                      <Crown size={18} className="text-amber-400" />
                     </div>
-                    <div className="mb-6">
-                      <span className="text-4xl font-bold text-white">$99</span>
-                      <span className="text-gray-400 text-sm">/month</span>
-                    </div>
-                    <ul className="space-y-3 mb-8 flex-1">
-                      {["Unlimited credits", "All AI models (incl. Sora)", "8K exports", "Fastest processing", "API access", "Dedicated support", "Early feature access"].map((feature, i) => (
-                        <li key={i} className="flex items-start gap-3 text-sm text-gray-300">
-                          <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-gray-500 to-white mt-1.5 flex-shrink-0" />
-                          {feature}
-                        </li>
-                      ))}
-                    </ul>
-                    <button className="w-full py-3.5 rounded-xl bg-gradient-to-r from-gray-800 via-gray-700 to-gray-800 text-white font-bold text-sm hover:brightness-125 transition-all border border-white/10 shadow-lg">
-                      Get Ultra
-                    </button>
+                    <h3 className={`text-sm font-bold text-amber-400 uppercase tracking-wider ${spaceGrotesk.className}`}>VIZUAL ULTRA</h3>
+                    <p className="text-[10px] text-gray-500">For power users</p>
+                  </div>
+                  <div className="mb-4 pb-4 border-b border-white/5">
+                    <span className="text-3xl font-bold bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text text-transparent">$50</span>
+                    <span className="text-xs text-gray-500 ml-1">/ month</span>
+                  </div>
+                  <ul className="space-y-2.5 mb-5 flex-1">
+                    {[
+                      { Icon: Coins, text: "5,000 credits / month", highlight: true },
+                      { Icon: Image, text: "Unlimited images (soft cap)" },
+                      { Icon: Radio, text: "~30 mins Live feature / month" },
+                      { Icon: Film, text: "~25-40 videos / month" },
+                      { Icon: Star, text: "All models + early access" },
+                      { Icon: Zap, text: "Instant priority queue" },
+                      { Icon: Brain, text: "Infinite memory" },
+                      { Icon: Plug, text: "API access" },
+                    ].map((feature, i) => (
+                      <li key={i} className="flex items-center gap-2.5 group/feature">
+                        <div className="w-6 h-6 rounded-md bg-amber-500/10 flex items-center justify-center flex-shrink-0 group-hover/feature:bg-amber-500/20 transition-all">
+                          <feature.Icon size={12} className="text-amber-400/80" />
+                        </div>
+                        <span className={`text-xs ${feature.highlight ? 'text-white font-semibold' : 'text-gray-400'} group-hover/feature:text-white transition-colors`}>
+                          {feature.highlight && <span className="inline-block mr-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-400">{feature.text.split(' ')[0]}</span>}
+                          {feature.highlight ? feature.text.split(' ').slice(1).join(' ') : feature.text}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                  <button 
+                    onClick={() => {
+                      const email = user?.email;
+                      const url = email 
+                        ? `https://buy.stripe.com/eVa6oOglDdvL2GY7st?prefilled_email=${encodeURIComponent(email)}`
+                        : 'https://buy.stripe.com/eVa6oOglDdvL2GY7st';
+                      window.location.href = url;
+                    }}
+                    className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-black font-bold text-sm hover:shadow-[0_0_30px_rgba(251,191,36,0.3)] hover:-translate-y-0.5 transition-all relative overflow-hidden group/btn">
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-700" />
+                    <span className="relative">Choose Ultra</span>
+                  </button>
+                  <div className="flex items-center justify-center gap-1.5 mt-3 text-[9px] text-gray-600 uppercase tracking-wider">
+                    <span>◆</span><span>Secured by Stripe</span>
                   </div>
                 </div>
               </div>
 
               {/* Footer */}
-              <div className="text-center mt-8 relative z-10">
-                <p className="text-xs text-gray-500">
-                  All plans include a 7-day free trial. No credit card required to start.
+              <div className="text-center mt-6 relative z-10">
+                <p className="text-[10px] text-gray-600">
+                  All plans auto-renew monthly. Cancel anytime. Credits don&apos;t roll over.
                 </p>
               </div>
             </div>
           </div>
         )
       }
+
+      {/* Shimmer animation for Most Popular badge */}
+      <style jsx>{`
+        @keyframes shimmer {
+          0% { background-position: 200% center; }
+          100% { background-position: -200% center; }
+        }
+      `}</style>
 
       {/* MultiStep Loader for Video Extension */}
       <MultiStepLoader
