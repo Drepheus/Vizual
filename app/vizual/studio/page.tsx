@@ -54,6 +54,7 @@ import { Inter, Space_Grotesk } from "next/font/google";
 import { Vortex } from "@/components/ui/vortex";
 import Aurora from "@/components/vizual/Aurora";
 import { ProjectsView } from "@/components/vizual/projects-view";
+import { Sidebar } from "@/components/vizual/sidebar";
 import { useToast } from "@/components/ui/toast";
 
 const inter = Inter({ subsets: ["latin"], weight: ["300", "400", "500", "600", "700"] });
@@ -63,13 +64,13 @@ type CreationMode = "IMAGE" | "VIDEO";
 type TabMode = "STYLE" | "REFERENCE" | "MODIFY" | "IMAGE REFERENCE" | "REMIX";
 
 const STYLE_PRESETS = [
-  { name: "Cinematic", icon: "film" },
-  { name: "Anime", icon: "user" },
-  { name: "3D Animation", icon: "box" },
-  { name: "Cartoon", icon: "smile" },
-  { name: "Brainrot", icon: "zap" },
-  { name: "Realistic", icon: "camera" },
-  { name: "Noir", icon: "moon" },
+  { name: "Cinematic", icon: "film", thumbnail: "https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=400&auto=format&fit=crop" },
+  { name: "Anime", icon: "user", thumbnail: "https://images.unsplash.com/photo-1578632292335-df3abbb0d586?q=80&w=400&auto=format&fit=crop" },
+  { name: "3D Animation", icon: "box", thumbnail: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=400&auto=format&fit=crop" },
+  { name: "Cartoon", icon: "smile", thumbnail: "https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=400&auto=format&fit=crop" },
+  { name: "Brainrot", icon: "zap", thumbnail: "https://images.unsplash.com/photo-1614728263952-84ea206f9c45?q=80&w=400&auto=format&fit=crop" },
+  { name: "Realistic", icon: "camera", thumbnail: "https://images.unsplash.com/photo-1471341971476-3bc3a12901c5?q=80&w=400&auto=format&fit=crop" },
+  { name: "Noir", icon: "moon", thumbnail: "https://images.unsplash.com/photo-1444703686981-a3abbc4d4fe3?q=80&w=400&auto=format&fit=crop" },
 ];
 
 // Models Configuration
@@ -410,15 +411,15 @@ export default function VizualStudioApp() {
       const params = new URLSearchParams(window.location.search);
       const remixPrompt = params.get('remix');
       const remixMode = params.get('mode');
-      
+
       if (remixPrompt) {
         setPrompt(decodeURIComponent(remixPrompt));
         showToast('Prompt loaded from community! Edit and generate.', 'success', 3000);
-        
+
         // Clear the URL params after reading
         window.history.replaceState({}, '', '/vizual/studio');
       }
-      
+
       if (remixMode === 'VIDEO') {
         setCreationMode('VIDEO');
       } else if (remixMode === 'IMAGE') {
@@ -451,7 +452,7 @@ export default function VizualStudioApp() {
   // Helper to add a tag - LIMIT: 1 style + 1 mode max
   const addTag = (label: string, type: 'mode' | 'style') => {
     const tagId = `${type}-${label.toLowerCase().replace(/\s+/g, '-')}`;
-    
+
     // Replace any existing tag of the same type (only 1 style, 1 mode allowed)
     setSelectedTags(prev => {
       // Remove existing tag of the same type
@@ -626,11 +627,11 @@ export default function VizualStudioApp() {
   // Build enhanced prompt with selected styles and modes
   const buildEnhancedPrompt = (basePrompt: string): string => {
     let enhancedPrompt = basePrompt.trim();
-    
+
     // Collect style and mode enhancements
     const styleEnhancements: string[] = [];
     const modeEnhancements: string[] = [];
-    
+
     selectedTags.forEach(tag => {
       if (tag.type === 'style') {
         // Add style-specific enhancements
@@ -642,13 +643,13 @@ export default function VizualStudioApp() {
         modeEnhancements.push(modeEnhancement);
       }
     });
-    
+
     // Build the final prompt
     if (styleEnhancements.length > 0 || modeEnhancements.length > 0) {
       const allEnhancements = [...styleEnhancements, ...modeEnhancements].join(', ');
       enhancedPrompt = `${enhancedPrompt}, ${allEnhancements}`;
     }
-    
+
     return enhancedPrompt;
   };
 
@@ -674,7 +675,7 @@ export default function VizualStudioApp() {
       'Fantasy': 'fantasy art style, magical, ethereal, enchanted, Lord of the Rings inspired, mystical',
       'Minimalist': 'minimalist style, clean lines, simple composition, negative space, modern aesthetic',
     };
-    
+
     return styleMap[styleName] || `${styleName} style`;
   };
 
@@ -692,7 +693,7 @@ export default function VizualStudioApp() {
       'Advertisement': 'commercial advertisement, persuasive visuals, brand-focused, high production value',
       'Vlog': 'vlog style, casual and authentic, personal perspective, YouTube quality, relatable',
     };
-    
+
     return modeMap[modeName] || modeName;
   };
 
@@ -829,126 +830,29 @@ export default function VizualStudioApp() {
         />
       )}
 
-      {/* Left Sidebar - Expandable/Collapsible */}
-      <aside className={`
-        fixed md:relative z-50 flex-shrink-0
-        ${sidebarExpanded ? 'w-56' : 'w-16'} 
-        bg-black border-r border-white/5 
-        flex flex-col py-4
-        h-full
-        transition-all duration-300 ease-in-out
-        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
-      `}>
-        {/* Close button - mobile only, only visible when sidebar is open */}
-        {sidebarOpen && (
-          <button
-            className="absolute top-4 right-[-40px] md:hidden p-2 bg-black/50 rounded-r-lg"
-            onClick={() => setSidebarOpen(false)}
-          >
-            <X size={20} />
-          </button>
-        )}
-
-        {/* Logo & Toggle Row */}
-        <div className={`flex items-center ${sidebarExpanded ? 'justify-between px-4' : 'justify-center'} mb-4 flex-shrink-0`}>
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => router.push('/vizual/studio')}>
-            <svg width="24" height="24" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-white flex-shrink-0">
-              <path d="M25 20 L85 50 L25 80 V20 Z" fill="currentColor" />
-            </svg>
-            {sidebarExpanded && <span className={`font-bold text-sm uppercase tracking-wide ${spaceGrotesk.className}`}>VIZUAL</span>}
-          </div>
-          {/* Collapse/Expand button - visible on desktop */}
-          <button
-            className="hidden md:flex p-1.5 hover:bg-white/5 rounded-lg transition-colors"
-            onClick={() => setSidebarExpanded(!sidebarExpanded)}
-            title={sidebarExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
-          >
-            {sidebarExpanded ? <PanelLeftClose size={18} className="text-gray-400" /> : <PanelLeft size={18} className="text-gray-400" />}
-          </button>
-        </div>
-
-        {/* Create New Button */}
-        <div className={`${sidebarExpanded ? 'px-3' : 'px-2'} mb-4 flex-shrink-0`}>
-          <button
-            onClick={() => { setCurrentView('STUDIO'); setShowModeModal(true); }}
-            className={`w-full flex items-center gap-2 ${sidebarExpanded ? 'px-3 justify-start' : 'justify-center'} py-2.5 rounded-lg bg-transparent border border-white/20 hover:border-white/40 hover:bg-white/5 transition-all text-white font-medium text-sm`}
-          >
-            <Plus size={18} />
-            {sidebarExpanded && <span>Create New</span>}
-          </button>
-        </div>
-
-        {/* Nav Items */}
-        <nav className={`flex-1 flex flex-col gap-1 ${sidebarExpanded ? 'px-3' : 'px-2'} overflow-y-auto`}>
-          <NavItem
-            icon={<FolderKanban size={20} />}
-            label="Projects"
-            active={currentView === 'PROJECTS'}
-            expanded={sidebarExpanded}
-            onClick={() => { setCurrentView('PROJECTS'); setSidebarOpen(false); }}
-          />
-          <NavItem
-            icon={<Home size={20} />}
-            label="Studio"
-            active={currentView === 'STUDIO'}
-            expanded={sidebarExpanded}
-            onClick={() => { setCurrentView('STUDIO'); setSidebarOpen(false); }}
-          />
-          <NavItem
-            icon={<Radio size={20} />}
-            label="Live"
-            expanded={sidebarExpanded}
-            onClick={() => { router.push('/vizual/live'); setSidebarOpen(false); }}
-          />
-          <NavItem
-            icon={<Lightbulb size={20} />}
-            label="Inspiration"
-            active={inspirationOpen}
-            expanded={sidebarExpanded}
-            onClick={() => { setInspirationOpen(!inspirationOpen); setSidebarOpen(false); }}
-          />
-          <NavItem
-            icon={<Compass size={20} />}
-            label="Community"
-            expanded={sidebarExpanded}
-            onClick={() => { router.push('/vizual/community'); setSidebarOpen(false); }}
-          />
-        </nav>
-
-        {/* Bottom Section - Feedback & Profile */}
-        <div className={`${sidebarExpanded ? 'px-3' : 'px-2'} pt-4 border-t border-white/5 mt-4 flex-shrink-0 space-y-2`}>
-          <NavItem
-            icon={<MessageSquareQuote size={20} />}
-            label="Feedback"
-            expanded={sidebarExpanded}
-            onClick={() => { setShowFeedbackModal(true); setSidebarOpen(false); }}
-          />
-          <button
-            onClick={() => setShowAccountModal(true)}
-            className={`w-full flex items-center gap-3 ${sidebarExpanded ? 'px-2' : 'justify-center'} py-2 rounded-lg hover:bg-white/5 transition-colors`}
-          >
-            {user?.user_metadata?.avatar_url || user?.user_metadata?.picture ? (
-              <img
-                src={user.user_metadata.avatar_url || user.user_metadata.picture}
-                alt="Profile"
-                className="w-8 h-8 rounded-full object-cover border border-white/20 flex-shrink-0"
-              />
-            ) : (
-              <div className="w-8 h-8 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
-                {(user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email || 'G')[0].toUpperCase()}
-              </div>
-            )}
-            {sidebarExpanded && (
-              <div className="flex-1 text-left min-w-0">
-                <div className="text-sm font-medium text-white truncate">
-                  {user?.user_metadata?.full_name || user?.user_metadata?.name || 'Artist'}
-                </div>
-              </div>
-            )}
-            {sidebarExpanded && <ChevronDown size={16} className="text-gray-400 flex-shrink-0" />}
-          </button>
-        </div>
-      </aside>
+      {/* Shared Sidebar */}
+      <Sidebar
+        sidebarOpen={sidebarOpen}
+        setSidebarOpen={setSidebarOpen}
+        sidebarExpanded={sidebarExpanded}
+        setSidebarExpanded={setSidebarExpanded}
+        activePage={inspirationOpen ? 'INSPIRATION' : currentView}
+        onAction={(page) => {
+          if (page === 'STUDIO' || page === 'PROJECTS') {
+            setCurrentView(page);
+          }
+        }}
+        onProfileClick={() => setShowAccountModal(true)}
+        onFeedbackClick={() => setShowFeedbackModal(true)}
+        onInspirationClick={() => {
+          setInspirationOpen(!inspirationOpen);
+          setSidebarOpen(false);
+        }}
+        onCreateNew={() => {
+          setCurrentView('STUDIO');
+          setShowModeModal(true);
+        }}
+      />
 
       {/* Main Content Area */}
       {currentView === 'PROJECTS' ? (
@@ -1362,7 +1266,7 @@ export default function VizualStudioApp() {
               </div>
 
               {/* Bottom Input Area - STICKY */}
-              <div 
+              <div
                 className="sticky bottom-0 w-full p-4 md:p-6 shrink-0 z-30 bg-black/90 backdrop-blur-lg border-t border-white/5"
                 style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom, 16px))' }}
               >
@@ -1849,30 +1753,43 @@ export default function VizualStudioApp() {
                       addTag(style.name, 'style');
                       setShowStyleModal(false);
                     }}
-                    className="group relative p-4 rounded-xl bg-gradient-to-b from-white/[0.05] to-transparent border border-white/10 hover:border-purple-400/30 hover:bg-purple-500/5 transition-all duration-300 text-left"
+                    className="group relative p-0 rounded-2xl overflow-hidden bg-white/5 border border-white/10 hover:border-purple-500/50 transition-all duration-300 h-32 sm:h-40"
                     style={{ animationDelay: `${index * 50}ms` }}
                   >
-                    {/* Icon */}
-                    <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 group-hover:border-purple-400/30 group-hover:bg-purple-500/10 flex items-center justify-center mb-3 transition-all duration-300">
-                      {style.icon === 'film' && <Video size={20} className="text-gray-400 group-hover:text-purple-300" />}
-                      {style.icon === 'user' && <User size={20} className="text-gray-400 group-hover:text-purple-300" />}
-                      {style.icon === 'box' && <LayoutGrid size={20} className="text-gray-400 group-hover:text-purple-300" />}
-                      {style.icon === 'smile' && <Sparkles size={20} className="text-gray-400 group-hover:text-purple-300" />}
-                      {style.icon === 'zap' && <Zap size={20} className="text-gray-400 group-hover:text-purple-300" />}
-                      {style.icon === 'camera' && <ImageIcon size={20} className="text-gray-400 group-hover:text-purple-300" />}
-                      {style.icon === 'moon' && <Moon size={20} className="text-gray-400 group-hover:text-purple-300" />}
-                    </div>
+                    {/* Thumbnail */}
+                    <img
+                      src={style.thumbnail}
+                      alt={style.name}
+                      className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-80 group-hover:scale-110 transition-all duration-500"
+                    />
 
-                    {/* Name */}
-                    <span className="text-sm font-medium text-white group-hover:text-purple-200 transition-colors">
-                      {style.name}
-                    </span>
+                    {/* Gradient Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+
+                    {/* Content */}
+                    <div className="absolute inset-0 p-3 flex flex-col justify-end">
+                      {/* Icon & Name Row */}
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-lg bg-black/40 backdrop-blur-md flex items-center justify-center text-purple-400">
+                          {style.icon === 'film' && <Video size={14} />}
+                          {style.icon === 'user' && <User size={14} />}
+                          {style.icon === 'box' && <LayoutGrid size={14} />}
+                          {style.icon === 'smile' && <Sparkles size={14} />}
+                          {style.icon === 'zap' && <Zap size={14} />}
+                          {style.icon === 'camera' && <ImageIcon size={14} />}
+                          {style.icon === 'moon' && <Moon size={14} />}
+                        </div>
+                        <span className="text-xs font-bold text-white tracking-wide uppercase">
+                          {style.name}
+                        </span>
+                      </div>
+                    </div>
 
                     {/* Selection indicator */}
                     {selectedTags.find(t => t.label === style.name && t.type === 'style') && (
-                      <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center">
-                        <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-purple-500 border-2 border-white flex items-center justify-center shadow-lg animate-in zoom-in-50 duration-200">
+                        <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={4} d="M5 13l4 4L19 7" />
                         </svg>
                       </div>
                     )}

@@ -2,9 +2,10 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
-import { Heart, MessageCircle, Share2, Sparkles, TrendingUp, Play, Image as ImageIcon, Grid3X3, Filter, Maximize2, X } from "lucide-react";
+import { Heart, MessageCircle, Share2, Sparkles, TrendingUp, Play, Image as ImageIcon, Grid3X3, Filter, Maximize2, X, Menu } from "lucide-react";
 import { Inter, Space_Grotesk } from "next/font/google";
 import { HoverBorderGradient } from "@/src/components/ui/hover-border-gradient";
+import { Sidebar } from "@/components/vizual/sidebar";
 
 const inter = Inter({ subsets: ["latin"], weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"] });
 const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], weight: ["300", "400", "500", "600", "700"] });
@@ -278,6 +279,8 @@ export default function CommunityPage() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [activeFilter, setActiveFilter] = useState("Trending");
   const [hoveredCard, setHoveredCard] = useState<string | number | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarExpanded, setSidebarExpanded] = useState(true);
 
   // Real Data State
   const [realCreations, setRealCreations] = useState<any[]>([]);
@@ -315,142 +318,151 @@ export default function CommunityPage() {
   }, []);
 
   return (
-    <div className={`relative w-full min-h-screen bg-black text-white ${inter.className}`}>
-      {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-[100] bg-black/80 backdrop-blur-xl border-b border-white/5 py-3 md:py-4">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 flex items-center justify-between">
-          <div className="flex items-center gap-8">
-            <div
-              onClick={() => router.push('/vizual')}
-              className="cursor-pointer flex items-center gap-2 group"
-            >
-              <svg width="20" height="20" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-white transition-transform group-hover:scale-110 md:w-6 md:h-6">
-                <path d="M25 20 L85 50 L25 80 V20 Z" fill="currentColor" />
-              </svg>
-              <div className="font-bold text-lg md:text-xl tracking-tight flex items-center">
-                <ChromeText>VIZUAL</ChromeText>
-              </div>
-            </div>
+    <div className={`h-[100dvh] w-screen bg-black text-white flex overflow-hidden ${inter.className}`}>
+      {/* Shared Sidebar */}
+      <Sidebar
+        sidebarOpen={sidebarOpen}
+        setSidebarOpen={setSidebarOpen}
+        sidebarExpanded={sidebarExpanded}
+        setSidebarExpanded={setSidebarExpanded}
+        activePage="COMMUNITY"
+        onProfileClick={() => router.push('/vizual/studio')}
+        onFeedbackClick={() => { }}
+        onCreateNew={() => router.push('/vizual/studio')}
+      />
 
-            <div className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-300">
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col min-w-0 overflow-y-auto overflow-x-hidden">
+        {/* Mobile Header */}
+        <header className="md:hidden flex items-center justify-between p-4 border-b border-white/5 bg-black/50 backdrop-blur-md sticky top-0 z-[60]">
+          <button onClick={() => setSidebarOpen(true)} className="p-2 text-gray-400 hover:text-white">
+            <Menu size={24} />
+          </button>
+          <div className="font-bold text-lg tracking-tight">
+            <ChromeText>VIZUAL</ChromeText>
+          </div>
+          <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-xs">A</div>
+        </header>
+
+        {/* Existing Navigation (Desktop only or as a secondary bar) */}
+        <nav className="hidden md:block transition-all duration-300 border-b border-white/5 py-4 px-6 bg-black/50 backdrop-blur-xl">
+          <div className="max-w-7xl mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-6 text-sm font-medium text-gray-300">
               <a href="/vizual/studio" className="hover:text-white transition-colors">STUDIO</a>
               <a href="/vizual/api" className="hover:text-white transition-colors">API</a>
               <a href="/vizual/enterprise" className="hover:text-white transition-colors">ENTERPRISE</a>
-              <a href="/vizual/community" className="text-white transition-colors">COMMUNITY</a>
+              <a href="/vizual/community" className="text-white border-b-2 border-white pb-1 transition-colors">COMMUNITY</a>
             </div>
-          </div>
-
-          <div className="flex items-center gap-4">
             <button
               onClick={() => router.push('/vizual/studio')}
-              className="px-5 py-2 md:px-6 md:py-2 rounded-full bg-white text-black text-xs md:text-sm font-bold hover:bg-gray-200 transition-colors"
+              className="px-6 py-2 rounded-full bg-white text-black text-sm font-bold hover:bg-gray-200 transition-colors"
             >
               CREATE
             </button>
           </div>
-        </div>
-      </nav>
+        </nav>
 
-      {/* Header */}
-      <div className="pt-32 pb-12 px-4">
-        <div className="max-w-7xl mx-auto text-center md:text-left">
-          <h1 className={`text-4xl md:text-7xl font-bold mb-6 tracking-tight ${spaceGrotesk.className}`}>
-            Community <ChromeText>Creations</ChromeText>
-          </h1>
-          <p className="text-gray-400 text-lg md:text-xl max-w-2xl font-light">
-            Explore the next generation of AI-generated media created by the Vizual community.
-          </p>
+        {/* Header */}
+        <div className="pt-12 md:pt-20 pb-12 px-4">
+          <div className="max-w-7xl mx-auto text-center md:text-left">
+            <h1 className={`text-4xl md:text-7xl font-bold mb-6 tracking-tight ${spaceGrotesk.className}`}>
+              Community <ChromeText>Creations</ChromeText>
+            </h1>
+            <p className="text-gray-400 text-lg md:text-xl max-w-2xl font-light">
+              Explore the next generation of AI-generated media created by the Vizual community.
+            </p>
 
-          {/* Filter Bar */}
-          <div className="flex flex-col md:flex-row items-center gap-6 mt-12 border-b border-white/5 pb-8">
-            {/* Sort & Type Filters */}
-            <div className="flex items-center gap-2 p-1 rounded-full bg-white/5 border border-white/10">
-              {filters.map((filter) => (
-                <button
-                  key={filter.name}
-                  onClick={() => setActiveFilter(filter.name)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${activeFilter === filter.name
-                    ? "bg-white text-black shadow-lg shadow-white/10"
-                    : "text-gray-400 hover:text-white hover:bg-white/5"
-                    }`}
-                >
-                  {filter.icon}
-                  <span>{filter.name}</span>
-                </button>
-              ))}
+            {/* Filter Bar */}
+            <div className="flex flex-col md:flex-row items-center gap-6 mt-12 border-b border-white/5 pb-8">
+              {/* Sort & Type Filters */}
+              <div className="flex items-center gap-2 p-1 rounded-full bg-white/5 border border-white/10">
+                {filters.map((filter) => (
+                  <button
+                    key={filter.name}
+                    onClick={() => setActiveFilter(filter.name)}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${activeFilter === filter.name
+                      ? "bg-white text-black shadow-lg shadow-white/10"
+                      : "text-gray-400 hover:text-white hover:bg-white/5"
+                      }`}
+                  >
+                    {filter.icon}
+                    <span>{filter.name}</span>
+                  </button>
+                ))}
+              </div>
+
+              {/* Category Pills */}
+              <div className="flex flex-wrap justify-center md:justify-start items-center gap-2 flex-1">
+                {categories.map((category) => (
+                  <button
+                    key={category}
+                    onClick={() => setActiveCategory(category)}
+                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 border ${activeCategory === category
+                      ? "bg-white/10 text-white border-white/20"
+                      : "bg-transparent text-gray-500 border-transparent hover:text-white hover:border-white/10"
+                      }`}
+                  >
+                    {category}
+                  </button>
+                ))}
+              </div>
             </div>
+          </div>
+        </div>
 
-            {/* Category Pills */}
-            <div className="flex flex-wrap justify-center md:justify-start items-center gap-2 flex-1">
-              {categories.map((category) => (
-                <button
-                  key={category}
-                  onClick={() => setActiveCategory(category)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 border ${activeCategory === category
-                    ? "bg-white/10 text-white border-white/20"
-                    : "bg-transparent text-gray-500 border-transparent hover:text-white hover:border-white/10"
-                    }`}
-                >
-                  {category}
-                </button>
-              ))}
+        {/* Masonry Grid */}
+        <div className="px-4 pb-32">
+          <div className="max-w-7xl mx-auto">
+            <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6">
+              {[...realCreations, ...communityCreations].map((creation, index) => {
+                // Vary heights for masonry effect
+                const heights = ["aspect-[3/4]", "aspect-square", "aspect-[4/5]", "aspect-[3/4]", "aspect-[5/4]"];
+                const heightClass = heights[index % heights.length];
+
+                return (
+                  <CreationCard
+                    key={creation.id}
+                    creation={creation}
+                    heightClass={heightClass}
+                    active={hoveredCard === creation.id}
+                    onHover={() => setHoveredCard(creation.id)}
+                    onLeave={() => setHoveredCard(null)}
+                    onClick={() => setHoveredCard(creation.id)}
+                    onRemix={handleRemix}
+                  />
+                );
+              })}
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Masonry Grid */}
-      <div className="px-4 pb-32">
-        <div className="max-w-7xl mx-auto">
-          <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6">
-            {[...realCreations, ...communityCreations].map((creation, index) => {
-              // Vary heights for masonry effect
-              const heights = ["aspect-[3/4]", "aspect-square", "aspect-[4/5]", "aspect-[3/4]", "aspect-[5/4]"];
-              const heightClass = heights[index % heights.length];
-
-              return (
-                <CreationCard
-                  key={creation.id}
-                  creation={creation}
-                  heightClass={heightClass}
-                  active={hoveredCard === creation.id}
-                  onHover={() => setHoveredCard(creation.id)}
-                  onLeave={() => setHoveredCard(null)}
-                  onClick={() => setHoveredCard(creation.id)}
-                  onRemix={handleRemix}
-                />
-              );
-            })}
-          </div>
+        {/* Load More */}
+        <div className="flex justify-center pb-32">
+          <button
+            onClick={() => {
+              const nextPage = page + 1;
+              setPage(nextPage);
+              fetchCreations(nextPage);
+            }}
+            disabled={loading || !hasMore}
+            className="px-8 py-4 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 font-medium text-sm tracking-widest uppercase transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
+            {loading ? 'Loading...' : hasMore ? 'Load More' : 'No More Items'}
+          </button>
         </div>
-      </div>
 
-      {/* Load More */}
-      <div className="flex justify-center pb-32">
-        <button
-          onClick={() => {
-            const nextPage = page + 1;
-            setPage(nextPage);
-            fetchCreations(nextPage);
-          }}
-          disabled={loading || !hasMore}
-          className="px-8 py-4 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 font-medium text-sm tracking-widest uppercase transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
-          {loading ? 'Loading...' : hasMore ? 'Load More' : 'No More Items'}
-        </button>
-      </div>
-
-      {/* Footer */}
-      <footer className="border-t border-white/5 py-12 px-4 bg-black">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-2 opacity-50 hover:opacity-100 transition-opacity">
-            <svg width="20" height="20" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-white">
-              <path d="M25 20 L85 50 L25 80 V20 Z" fill="currentColor" />
-            </svg>
-            <span className={`font-bold ${spaceGrotesk.className}`}>VIZUAL</span>
+        {/* Footer */}
+        <footer className="border-t border-white/5 py-12 px-4 bg-black">
+          <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-2 opacity-50 hover:opacity-100 transition-opacity">
+              <svg width="20" height="20" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-white">
+                <path d="M25 20 L85 50 L25 80 V20 Z" fill="currentColor" />
+              </svg>
+              <span className={`font-bold ${spaceGrotesk.className}`}>VIZUAL</span>
+            </div>
+            <p className="text-gray-600 text-xs uppercase tracking-wider">© 2025 Vizual AI. All rights reserved.</p>
           </div>
-          <p className="text-gray-600 text-xs uppercase tracking-wider">© 2025 Vizual AI. All rights reserved.</p>
-        </div>
-      </footer>
+        </footer>
+      </main>
     </div>
   );
 }
