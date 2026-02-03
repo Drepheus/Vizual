@@ -13,7 +13,8 @@ import {
     ChevronDown,
     PanelLeftClose,
     PanelLeft,
-    X
+    X,
+    User
 } from "lucide-react";
 import { Space_Grotesk } from "next/font/google";
 import { useAuth } from "@/context/auth-context";
@@ -32,8 +33,8 @@ const NavItem = ({ icon, label, active, expanded, onClick }: NavItemProps) => (
     <button
         onClick={onClick}
         className={`w-full flex items-center gap-3 ${expanded ? 'px-3' : 'justify-center'} py-2.5 rounded-lg transition-colors ${active
-                ? 'bg-white/10 text-white font-semibold'
-                : 'text-gray-400 hover:text-white hover:bg-white/5 font-medium'
+            ? 'bg-white/10 text-white font-semibold'
+            : 'text-gray-400 hover:text-white hover:bg-white/5 font-medium'
             }`}
         title={!expanded ? label : undefined}
     >
@@ -47,8 +48,8 @@ interface SidebarProps {
     setSidebarOpen: (open: boolean) => void;
     sidebarExpanded: boolean;
     setSidebarExpanded: (expanded: boolean) => void;
-    activePage?: 'STUDIO' | 'PROJECTS' | 'LIVE' | 'COMMUNITY' | 'INSPIRATION';
-    onAction?: (page: 'STUDIO' | 'PROJECTS' | 'LIVE' | 'COMMUNITY' | 'INSPIRATION') => void;
+    activePage?: 'STUDIO' | 'PROJECTS' | 'LIVE' | 'COMMUNITY' | 'INSPIRATION' | 'AVATAR';
+    onAction?: (page: 'STUDIO' | 'PROJECTS' | 'LIVE' | 'COMMUNITY' | 'INSPIRATION' | 'AVATAR') => void;
     onProfileClick?: () => void;
     onFeedbackClick?: () => void;
     onInspirationClick?: () => void;
@@ -70,7 +71,7 @@ export function Sidebar({
     const router = useRouter();
     const { user } = useAuth();
 
-    const handleNav = (path: string, pageKey: 'STUDIO' | 'PROJECTS' | 'LIVE' | 'COMMUNITY' | 'INSPIRATION') => {
+    const handleNav = (path: string, pageKey: 'STUDIO' | 'PROJECTS' | 'LIVE' | 'COMMUNITY' | 'INSPIRATION' | 'AVATAR') => {
         setSidebarOpen(false);
 
         // If we're already on the page or have an action handler, use it
@@ -84,6 +85,8 @@ export function Sidebar({
                 router.push('/vizual/community');
             } else if ((pageKey === 'STUDIO' || pageKey === 'PROJECTS') && !window.location.pathname.includes('/studio')) {
                 router.push('/vizual/studio');
+            } else if (pageKey === 'AVATAR' && !path.includes(window.location.pathname)) {
+                router.push('/vizual/avatar');
             }
         } else {
             router.push(path);
@@ -172,11 +175,26 @@ export function Sidebar({
                         onClick={() => handleNav('/vizual/live', 'LIVE')}
                     />
                     <NavItem
+                        icon={<User size={20} />}
+                        label="Avatar"
+                        active={activePage === 'AVATAR'}
+                        expanded={sidebarExpanded}
+                        onClick={() => handleNav('/vizual/avatar', 'AVATAR')}
+                    />
+                    <NavItem
                         icon={<Lightbulb size={20} />}
                         label="Inspiration"
                         active={activePage === 'INSPIRATION'}
                         expanded={sidebarExpanded}
-                        onClick={onInspirationClick}
+                        onClick={() => {
+                            setSidebarOpen(false);
+                            if (onInspirationClick) {
+                                onInspirationClick();
+                            } else {
+                                // Navigate to studio with inspiration view
+                                router.push('/vizual/studio?view=inspiration');
+                            }
+                        }}
                     />
                     <NavItem
                         icon={<Compass size={20} />}

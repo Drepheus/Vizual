@@ -73,3 +73,9 @@ Vizual is an AI-powered creative studio platform allowing users to generate high
 *   **Local Dev:** `pnpm dev` (Runs at localhost:3000).
 *   **Deployment:** Run `.\deploy-optimized.ps1` from root.
 *   **Linting:** ESLint is enabled but configured to not block builds on non-critical warnings.
+
+## 8. Recent Updates (v2.0 Refactor - Completed)
+*   **Unified Navigation:** Replaced localized sidebars with a shared `Sidebar` component (`components/vizual/sidebar.tsx`) across Studio, Community, and Live pages for consistent UX.
+*   **Studio UI Polish:** Enhanced style picker with thumbnail previews and "Instagram-style" active tag indicators in the prompt input.
+*   **Live Page Redesign:** Refactored `live/page.tsx` to remove aggressive red themes, adopting a premium glassmorphism aesthetic consistent with the Studio.
+*   **Build Fixes:** Resolved server-side authentication issues in `app/api/decart/stream` and `config` by replacing incorrect `createClient` imports with `createRouteHandlerClient`.

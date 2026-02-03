@@ -698,7 +698,22 @@ export default function VizualStudioApp() {
   };
 
   const handleGenerate = async () => {
-    if (!prompt.trim()) return;
+    if (!prompt.trim()) {
+      showToast('Please enter a prompt', 'error');
+      return;
+    }
+
+    // Check if Reference or Remix mode requires attachments
+    const isReferenceMode = activeTab === 'REFERENCE' || activeTab === 'IMAGE REFERENCE';
+    const isRemixMode = activeTab === 'REMIX';
+
+    if ((isReferenceMode || isRemixMode) && attachments.length === 0) {
+      const modeLabel = isRemixMode ? 'Remix' : 'Reference';
+      showToast(`${modeLabel} mode requires you to attach media first. Click the image icon to upload.`, 'error', 4000);
+      // Highlight the upload button
+      fileInputRef.current?.click();
+      return;
+    }
 
     // Start the loading animation
     setIsGenerating(true);
@@ -714,6 +729,12 @@ export default function VizualStudioApp() {
       console.log('📝 Original prompt:', prompt);
       console.log('✨ Enhanced prompt:', enhancedPrompt);
       console.log('🏷️ Selected tags:', selectedTags);
+      console.log('🎨 Active tab:', activeTab);
+      console.log('📎 Attachments:', attachments.length);
+
+      // Determine generation mode based on active tab
+      const generationMode = isRemixMode ? 'remix' : isReferenceMode ? 'reference' : 'generate';
+      console.log('🔄 Generation mode:', generationMode);
 
       // Extract keywords from prompt for display
       const keywords = prompt.match(/\b\w{4,}\b/g)?.slice(0, 5) || [];
@@ -726,6 +747,23 @@ export default function VizualStudioApp() {
         headers['Authorization'] = `Bearer ${session.access_token}`;
       }
 
+      // Prepare attachment data if present (for reference/remix modes)
+      let attachmentData: string | undefined;
+      if (attachments.length > 0 && (isReferenceMode || isRemixMode)) {
+        // Convert first attachment to base64 for API
+        const firstAttachment = attachments[0];
+        if (firstAttachment.file) {
+          const base64 = await new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.readAsDataURL(firstAttachment.file!);
+          });
+          attachmentData = base64;
+        } else if (firstAttachment.url) {
+          attachmentData = firstAttachment.url;
+        }
+      }
+
       if (creationMode === 'IMAGE') {
         // Call image generation API with enhanced prompt
         const response = await fetch('/api/generate-image', {
@@ -735,6 +773,10 @@ export default function VizualStudioApp() {
             prompt: enhancedPrompt,
             model: modelId,
             aspectRatio: '16:9',
+            // Include reference/remix data
+            mode: generationMode,
+            referenceImage: isReferenceMode ? attachmentData : undefined,
+            remixImage: isRemixMode ? attachmentData : undefined,
           }),
         });
 
@@ -748,10 +790,11 @@ export default function VizualStudioApp() {
         const styleNames = selectedTags.filter(t => t.type === 'style').map(t => t.label).join(', ');
         const modeNames = selectedTags.filter(t => t.type === 'mode').map(t => t.label).join(', ');
         const appliedStyles = [styleNames, modeNames].filter(Boolean).join(' + ');
+        const modeDescription = isRemixMode ? ' (remixed)' : isReferenceMode ? ' (using reference)' : '';
 
         setGeneratedContent({
           prompt: prompt,
-          description: `I've created an image based on your prompt "${prompt}"${appliedStyles ? ` with ${appliedStyles} style` : ''}, using the ${model} model.`,
+          description: `I've created an image based on your prompt "${prompt}"${appliedStyles ? ` with ${appliedStyles} style` : ''}${modeDescription}, using the ${model} model.`,
           keywords: keywords,
           imageUrl: data.imageUrl,
           type: 'image',
@@ -766,6 +809,11 @@ export default function VizualStudioApp() {
             model: modelId,
             aspectRatio: '16:9',
             duration: 5, // 5 second video
+            // Include reference/remix data
+            mode: generationMode,
+            referenceMedia: isReferenceMode ? attachmentData : undefined,
+            remixMedia: isRemixMode ? attachmentData : undefined,
+            mediaType: attachments.length > 0 ? attachments[0].type : undefined,
           }),
         });
 
@@ -779,10 +827,11 @@ export default function VizualStudioApp() {
         const styleNames = selectedTags.filter(t => t.type === 'style').map(t => t.label).join(', ');
         const modeNames = selectedTags.filter(t => t.type === 'mode').map(t => t.label).join(', ');
         const appliedStyles = [styleNames, modeNames].filter(Boolean).join(' + ');
+        const modeDescription = isRemixMode ? ' (remixed)' : isReferenceMode ? ' (using reference)' : '';
 
         setGeneratedContent({
           prompt: prompt,
-          description: `I've created a video based on your prompt "${prompt}"${appliedStyles ? ` with ${appliedStyles} style` : ''}, using the ${model} model.`,
+          description: `I've created a video based on your prompt "${prompt}"${appliedStyles ? ` with ${appliedStyles} style` : ''}${modeDescription}, using the ${model} model.`,
           keywords: keywords,
           videoUrl: data.videoUrl,
           type: 'video',
@@ -966,74 +1015,124 @@ export default function VizualStudioApp() {
               <div className="relative">
                 <button
                   onClick={() => setShowModelDropdown(!showModelDropdown)}
-                  className="flex items-center gap-1 md:gap-2 text-xs md:text-sm font-medium hover:text-gray-300 transition-colors"
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all duration-300 ${showModelDropdown
+                    ? 'bg-white/10 border-white/20 text-white'
+                    : 'bg-transparent border-transparent hover:bg-white/5 text-gray-400 hover:text-white'
+                    }`}
                 >
-                  <span className="text-gray-400 hidden sm:inline">MODEL</span>
-                  <span className={`font-bold ${spaceGrotesk.className}`}>{model}</span>
-                  <ChevronDown size={16} />
+                  <span className="text-[10px] font-bold tracking-widest uppercase hidden sm:inline opacity-60">Model</span>
+                  <div className="flex items-center gap-2">
+                    <span className={`font-medium ${spaceGrotesk.className}`}>{model}</span>
+                    <ChevronDown size={14} className={`transition-transform duration-300 ${showModelDropdown ? 'rotate-180' : ''}`} />
+                  </div>
                 </button>
 
                 {showModelDropdown && (
-                  <div className="absolute top-full left-0 mt-2 min-w-[280px] sm:min-w-[320px] bg-[#1a1a1a] border border-white/10 rounded-lg overflow-hidden z-50 shadow-2xl max-h-[80vh] overflow-y-auto">
-                    {/* Backdrop for click away */}
-                    <div className="fixed inset-0 z-[-1]" onClick={() => setShowModelDropdown(false)} />
-                    <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-white/5">
-                      Select {creationMode === 'IMAGE' ? 'Image' : 'Video'} Model
-                    </div>
-                    {/* Free Models Section */}
-                    <div className="px-3 py-1.5 text-[10px] font-bold text-emerald-400 uppercase tracking-wider bg-emerald-500/5">
-                      ✓ Free Tier
-                    </div>
-                    {currentModels.filter(m => m.isFree).map((m) => (
-                      <button
-                        key={m.id}
-                        onClick={() => { setModel(m.name); setShowModelDropdown(false); }}
-                        className={`w-full px-4 py-3 text-left hover:bg-white/5 transition-colors border-l-2 ${model === m.name ? 'border-emerald-400 bg-emerald-500/10' : 'border-transparent'} hover:border-emerald-400/50 flex items-start justify-between gap-4 group`}
-                      >
-                        <div className="flex items-start gap-2">
-                          <div>
-                            <div className="text-sm font-medium text-white mb-0.5 group-hover:text-emerald-400 transition-colors flex items-center gap-2">
-                              {m.name}
-                              {model === m.name && <span className="text-[10px] px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 rounded">SELECTED</span>}
-                            </div>
-                            <div className="text-xs text-gray-500">{m.description}</div>
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setShowModelDropdown(false)} />
+                    <div className="absolute top-full right-0 mt-3 min-w-[320px] bg-[#0a0a0a]/90 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden z-50 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+
+                      {/* Header */}
+                      <div className="px-5 py-4 border-b border-white/5 bg-white/[0.02]">
+                        <h4 className="text-xs font-bold text-white uppercase tracking-widest mb-0.5">
+                          {creationMode === 'IMAGE' ? 'Image Generation' : 'Video Generation'}
+                        </h4>
+                        <p className="text-[10px] text-gray-500 font-medium">Select a model engine</p>
+                      </div>
+
+                      <div className="max-h-[60vh] overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent p-2 space-y-2">
+
+                        {/* Free Tier Group */}
+                        <div className="px-2">
+                          <div className="flex items-center gap-2 px-2 py-2 text-[10px] font-bold text-emerald-400 uppercase tracking-widest opacity-80">
+                            <Sparkles size={10} />
+                            Available Now
+                          </div>
+
+                          <div className="space-y-1">
+                            {currentModels.filter(m => m.isFree).map((m) => (
+                              <button
+                                key={m.id}
+                                onClick={() => { setModel(m.name); setShowModelDropdown(false); }}
+                                className={`w-full p-3 rounded-xl text-left transition-all duration-200 border group relative overflow-hidden ${model === m.name
+                                    ? 'bg-emerald-500/10 border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.1)]'
+                                    : 'bg-white/[0.02] border-white/5 hover:bg-white/[0.05] hover:border-white/10'
+                                  }`}
+                              >
+                                {model === m.name && (
+                                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500 rounded-l-xl" />
+                                )}
+                                <div className="flex justify-between items-start gap-3">
+                                  <div>
+                                    <div className={`text-sm font-bold flex items-center gap-2 ${model === m.name ? 'text-white' : 'text-gray-300 group-hover:text-white'}`}>
+                                      {m.name}
+                                      {model === m.name && (
+                                        <div className="px-1.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 text-[10px] leading-none">Active</div>
+                                      )}
+                                    </div>
+                                    <div className="text-[11px] text-gray-500 mt-0.5 group-hover:text-gray-400 transition-colors">
+                                      {m.description}
+                                    </div>
+                                  </div>
+                                  <div className="flex flex-col items-end flex-shrink-0">
+                                    <div className="text-[10px] font-bold text-emerald-400 bg-emerald-500/5 px-2 py-1 rounded-md border border-emerald-500/10">
+                                      FREE
+                                    </div>
+                                  </div>
+                                </div>
+                              </button>
+                            ))}
                           </div>
                         </div>
-                        <div className="text-right flex-shrink-0">
-                          <div className="text-xs font-bold text-emerald-400">{m.cost}</div>
-                          <div className="text-[10px] text-gray-600">{m.detail}</div>
-                        </div>
-                      </button>
-                    ))}
-                    {/* Premium Models Section */}
-                    <div className="px-3 py-1.5 text-[10px] font-bold text-amber-400 uppercase tracking-wider bg-amber-500/5 border-t border-white/5 mt-1">
-                      ⭐ Premium Models
-                    </div>
-                    {currentModels.filter(m => !m.isFree).map((m) => (
-                      <button
-                        key={m.id}
-                        onClick={() => {
-                          setShowModelDropdown(false);
-                          setShowPricingModal(true);
-                        }}
-                        className="w-full px-4 py-3 text-left hover:bg-amber-500/5 transition-colors border-l-2 border-transparent hover:border-amber-400/50 flex items-start justify-between gap-4 group"
-                      >
-                        <div className="flex items-start gap-2">
-                          <div>
-                            <div className="text-sm font-medium text-white/70 mb-0.5 group-hover:text-amber-400 transition-colors flex items-center gap-2">
-                              {m.name}
-                              <span className="text-[10px] px-1.5 py-0.5 bg-amber-500/20 text-amber-400 rounded font-bold">PRO</span>
-                            </div>
-                            <div className="text-xs text-gray-500">{m.description}</div>
+
+                        {/* Premium Tier Group */}
+                        <div className="px-2 pb-2">
+                          <div className="flex items-center gap-2 px-2 py-2 mt-2 text-[10px] font-bold text-amber-400 uppercase tracking-widest opacity-80">
+                            <Zap size={10} />
+                            Premium Models
+                          </div>
+
+                          <div className="space-y-1">
+                            {currentModels.filter(m => !m.isFree).map((m) => (
+                              <button
+                                key={m.id}
+                                onClick={() => {
+                                  setShowModelDropdown(false);
+                                  setShowPricingModal(true);
+                                }}
+                                className="w-full p-3 rounded-xl text-left transition-all duration-200 border bg-gradient-to-r from-amber-500/[0.02] to-transparent border-amber-500/10 hover:border-amber-500/30 hover:bg-amber-500/[0.05] group relative overflow-hidden"
+                              >
+                                <div className="absolute inset-0 bg-gradient-to-r from-amber-500/0 via-amber-500/[0.05] to-amber-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+
+                                <div className="flex justify-between items-start gap-3 relative z-10">
+                                  <div>
+                                    <div className="text-sm font-bold text-white/50 group-hover:text-amber-200 transition-colors flex items-center gap-2">
+                                      {m.name}
+                                      <span className="px-1.5 py-0.5 rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[10px] leading-none">PRO</span>
+                                    </div>
+                                    <div className="text-[11px] text-gray-600 mt-0.5 group-hover:text-gray-500 transition-colors">
+                                      {m.description}
+                                    </div>
+                                  </div>
+                                  <div className="flex flex-col items-end flex-shrink-0">
+                                    <div className="text-[10px] font-bold text-amber-500/80 group-hover:text-amber-400 bg-amber-900/10 group-hover:bg-amber-500/10 px-2 py-1 rounded-md transition-colors">
+                                      {m.cost}
+                                    </div>
+                                  </div>
+                                </div>
+                              </button>
+                            ))}
                           </div>
                         </div>
-                        <div className="text-right flex-shrink-0">
-                          <div className="text-xs font-bold text-gray-400">{m.cost}</div>
-                          <div className="text-[10px] text-gray-600">{m.detail}</div>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
+
+                      </div>
+
+                      {/* Footer */}
+                      <div className="px-4 py-3 bg-white/[0.02] border-t border-white/5 text-[10px] text-center text-gray-500">
+                        {creationMode === 'IMAGE' ? 'Images generate in ~3.5s' : 'Videos generate in ~2mins'}
+                      </div>
+                    </div>
+                  </>
                 )}
               </div>
             </div>
@@ -1275,24 +1374,63 @@ export default function VizualStudioApp() {
                   <div className="flex items-center justify-center gap-1 md:gap-2 overflow-x-auto mb-2">
                     {(creationMode === "IMAGE"
                       ? ["STYLE", "REFERENCE", "REMIX"]
-                      : ["STYLE", "REFERENCE", "MODIFY"]).map((tab) => (
-                        <button
-                          key={tab}
-                          onClick={() => {
-                            setActiveTab(tab as TabMode);
-                            if (tab === "STYLE") {
-                              setShowStyleModal(true);
-                            }
-                          }}
-                          className={`px-3 md:px-4 py-1.5 rounded-full text-[10px] md:text-xs font-medium transition-colors whitespace-nowrap ${activeTab === tab || (tab === "REFERENCE" && activeTab === "IMAGE REFERENCE")
-                            ? "bg-white/15 text-white border border-white/20"
-                            : "text-gray-500 hover:text-gray-300"
-                            }`}
-                        >
-                          {tab}
-                        </button>
-                      ))}
+                      : ["STYLE", "REFERENCE", "MODIFY"]).map((tab) => {
+                        const isActive = activeTab === tab || (tab === "REFERENCE" && activeTab === "IMAGE REFERENCE");
+                        const needsMedia = (tab === "REFERENCE" || tab === "REMIX") && attachments.length === 0;
+
+                        return (
+                          <button
+                            key={tab}
+                            onClick={() => {
+                              setActiveTab(tab as TabMode);
+                              if (tab === "STYLE") {
+                                setShowStyleModal(true);
+                              } else if ((tab === "REFERENCE" || tab === "REMIX") && attachments.length === 0) {
+                                // Prompt user to upload media when selecting Reference or Remix
+                                showToast(
+                                  tab === "REMIX"
+                                    ? 'Remix mode: Upload media to edit what\'s inside it'
+                                    : 'Reference mode: Upload an image to generate something new based on it',
+                                  'success',
+                                  3000
+                                );
+                                fileInputRef.current?.click();
+                              }
+                            }}
+                            className={`px-3 md:px-4 py-1.5 rounded-full text-[10px] md:text-xs font-medium transition-colors whitespace-nowrap flex items-center gap-1.5 ${isActive
+                              ? "bg-white/15 text-white border border-white/20"
+                              : "text-gray-500 hover:text-gray-300"
+                              }`}
+                          >
+                            {tab}
+                            {/* Show indicator if media is attached for reference/remix */}
+                            {(tab === "REFERENCE" || tab === "REMIX") && attachments.length > 0 && isActive && (
+                              <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                            )}
+                            {/* Show upload hint if no media for reference/remix */}
+                            {(tab === "REFERENCE" || tab === "REMIX") && attachments.length === 0 && isActive && (
+                              <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse" />
+                            )}
+                          </button>
+                        );
+                      })}
                   </div>
+
+                  {/* Mode hint text */}
+                  {(activeTab === 'REFERENCE' || activeTab === 'IMAGE REFERENCE' || activeTab === 'REMIX') && (
+                    <div className="text-center mb-2">
+                      <p className="text-[10px] text-gray-500">
+                        {activeTab === 'REMIX'
+                          ? attachments.length > 0
+                            ? '✓ Media attached - will edit what\'s inside it'
+                            : '↑ Upload media to edit what\'s inside it'
+                          : attachments.length > 0
+                            ? '✓ Reference attached - will create something new based on it'
+                            : '↑ Upload an image to use as reference for generation'
+                        }
+                      </p>
+                    </div>
+                  )}
 
                   {/* Input Container - Floating transparency */}
                   <div className="relative rounded-2xl p-[1px] group">
