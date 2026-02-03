@@ -98,8 +98,8 @@ const IMAGE_MODELS = [
     id: "p-image",
     name: "PrunaAI P-Image",
     description: "High efficiency",
-    cost: "$0.005",
-    detail: "200 images / $1",
+    cost: "0.5 Credits",
+    detail: "200 images / 100 Credits",
     isFree: true
   },
 
@@ -108,24 +108,24 @@ const IMAGE_MODELS = [
     id: "imagen-4-fast",
     name: "Imagen 4 Fast",
     description: "Google DeepMind",
-    cost: "$0.02",
-    detail: "50 images / $1",
+    cost: "2 Credits",
+    detail: "50 images / 100 Credits",
     isFree: true
   },
   {
     id: "imagen-3-fast",
     name: "Imagen 3 Fast",
     description: "Google DeepMind",
-    cost: "$0.025",
-    detail: "40 images / $1",
+    cost: "2.5 Credits",
+    detail: "40 images / 100 Credits",
     isFree: true
   },
   {
     id: "imagen-4-ultra",
     name: "Imagen 4 Ultra",
     description: "Google DeepMind",
-    cost: "$0.06",
-    detail: "16 images / $1",
+    cost: "6 Credits",
+    detail: "16 images / 100 Credits",
     isFree: false
   },
 
@@ -134,8 +134,8 @@ const IMAGE_MODELS = [
     id: "ideogram-v3-turbo",
     name: "Ideogram v3 Turbo",
     description: "Ideogram",
-    cost: "$0.03",
-    detail: "33 images / $1",
+    cost: "3 Credits",
+    detail: "33 images / 100 Credits",
     isFree: true
   },
 
@@ -144,16 +144,16 @@ const IMAGE_MODELS = [
     id: "seedream-4",
     name: "SeaDream 4",
     description: "ByteDance",
-    cost: "$0.03",
-    detail: "33 images / $1",
+    cost: "3 Credits",
+    detail: "33 images / 100 Credits",
     isFree: true
   },
   {
     id: "seedream-4.5",
     name: "SeaDream 4.5",
     description: "ByteDance",
-    cost: "$0.04",
-    detail: "25 images / $1",
+    cost: "4 Credits",
+    detail: "25 images / 100 Credits",
     isFree: false
   },
 
@@ -162,8 +162,8 @@ const IMAGE_MODELS = [
     id: "nano-banana-pro",
     name: "Nano Banana Pro",
     description: "Nano",
-    cost: "$0.15",
-    detail: "66 images / $10",
+    cost: "15 Credits",
+    detail: "66 images / 1000 Credits",
     isFree: false
   }
 ];
@@ -174,24 +174,24 @@ const VIDEO_MODELS = [
     id: "seedance-1-pro-fast",
     name: "Seedance 1 Pro Fast",
     description: "ByteDance (480p-1080p)",
-    cost: "From $0.015/s",
-    detail: "approx 66s / $1",
+    cost: "From 1.5 Credits/s",
+    detail: "approx 66s / 100 Credits",
     isFree: true
   },
   {
     id: "seedance-1-lite",
     name: "Seedance 1 Lite",
     description: "ByteDance (480p-1080p)",
-    cost: "From $0.018/s",
-    detail: "approx 55s / $1",
+    cost: "From 1.8 Credits/s",
+    detail: "approx 55s / 100 Credits",
     isFree: true
   },
   {
     id: "seedance-1-pro",
     name: "Seedance 1 Pro",
     description: "ByteDance (480p-1080p)",
-    cost: "From $0.03/s",
-    detail: "approx 33s / $1",
+    cost: "From 3 Credits/s",
+    detail: "approx 33s / 100 Credits",
     isFree: false
   },
 
@@ -200,40 +200,40 @@ const VIDEO_MODELS = [
     id: "wan-2.5-i2v",
     name: "Wan 2.5 I2V",
     description: "Wan Video (480p-1080p)",
-    cost: "From $0.05/s",
-    detail: "20s / $1",
+    cost: "From 5 Credits/s",
+    detail: "20s / 100 Credits",
     isFree: false
   },
   {
     id: "wan-2.5-t2v",
     name: "Wan 2.5 T2V",
     description: "Wan Video (480p-1080p)",
-    cost: "From $0.05/s",
-    detail: "20s / $1",
+    cost: "From 5 Credits/s",
+    detail: "20s / 100 Credits",
     isFree: false
   },
   {
     id: "wan-2.5-t2v-fast",
     name: "Wan 2.5 T2V Fast",
     description: "Wan Video (720p-1080p)",
-    cost: "From $0.068/s",
-    detail: "approx 14s / $1",
+    cost: "From 6.8 Credits/s",
+    detail: "approx 14s / 100 Credits",
     isFree: false
   },
   {
     id: "wan-2.1-t2v-720p",
     name: "Wan 2.1 T2V",
     description: "WavespeedAI (720p)",
-    cost: "$0.24/s",
-    detail: "41s / $10",
+    cost: "24 Credits/s",
+    detail: "41s / 1000 Credits",
     isFree: false
   },
   {
     id: "wan-2.1-i2v-720p",
     name: "Wan 2.1 I2V",
     description: "WavespeedAI (720p)",
-    cost: "$0.25/s",
-    detail: "40s / $10",
+    cost: "25 Credits/s",
+    detail: "40s / 1000 Credits",
     isFree: false
   },
 
@@ -242,7 +242,7 @@ const VIDEO_MODELS = [
     id: "pixverse-v4.5",
     name: "Pixverse v4.5",
     description: "Pixverse (360p-1080p)",
-    cost: "From $0.06/s",
+    cost: "From 6 Credits/s",
     detail: "Variable by resolution",
     isFree: false
   },
@@ -252,8 +252,8 @@ const VIDEO_MODELS = [
     id: "kling-v2.5-turbo-pro",
     name: "Kling v2.5 Turbo Pro",
     description: "Kuaishou",
-    cost: "$0.07/s",
-    detail: "approx 14s / $1",
+    cost: "7 Credits/s",
+    detail: "approx 14s / 100 Credits",
     isFree: false
   },
 
@@ -262,16 +262,16 @@ const VIDEO_MODELS = [
     id: "hailuo-2.3-fast",
     name: "Hailuo 2.3 Fast",
     description: "Minimax (6s-10s)",
-    cost: "From $0.19/vid",
-    detail: "approx 52 vids / $10",
+    cost: "From 19 Credits/vid",
+    detail: "approx 52 vids / 1000 Credits",
     isFree: false
   },
   {
     id: "hailuo-2.3",
     name: "Hailuo 2.3",
     description: "Minimax (6s-10s)",
-    cost: "From $0.28/vid",
-    detail: "approx 35 vids / $10",
+    cost: "From 28 Credits/vid",
+    detail: "approx 35 vids / 1000 Credits",
     isFree: false
   },
 
@@ -280,7 +280,7 @@ const VIDEO_MODELS = [
     id: "sora-2",
     name: "Sora 2",
     description: "OpenAI",
-    cost: "$0.10/s",
+    cost: "10 Credits/s",
     detail: "Standard quality",
     isFree: false
   },
@@ -298,40 +298,40 @@ const VIDEO_MODELS = [
     id: "veo-3-fast",
     name: "Veo 3 Fast",
     description: "Google DeepMind",
-    cost: "From $0.10/s",
-    detail: "10s / $1 (No Audio)",
+    cost: "From 10 Credits/s",
+    detail: "10s / 100 Credits (No Audio)",
     isFree: false
   },
   {
     id: "veo-3.1-fast",
     name: "Veo 3.1 Fast",
     description: "Google DeepMind",
-    cost: "From $0.10/s",
-    detail: "10s / $1 (No Audio)",
+    cost: "From 10 Credits/s",
+    detail: "10s / 100 Credits (No Audio)",
     isFree: false
   },
   {
     id: "veo-3",
     name: "Veo 3",
     description: "Google DeepMind",
-    cost: "From $0.20/s",
-    detail: "50s / $10 (No Audio)",
+    cost: "From 20 Credits/s",
+    detail: "50s / 1000 Credits (No Audio)",
     isFree: false
   },
   {
     id: "veo-3.1",
     name: "Veo 3.1",
     description: "Google DeepMind",
-    cost: "From $0.20/s",
-    detail: "50s / $10 (No Audio)",
+    cost: "From 20 Credits/s",
+    detail: "50s / 1000 Credits (No Audio)",
     isFree: false
   },
   {
     id: "veo-2",
     name: "Veo 2",
     description: "Google DeepMind",
-    cost: "$0.50/s",
-    detail: "20s / $10",
+    cost: "50 Credits/s",
+    detail: "20s / 1000 Credits",
     isFree: false
   }
 ];
@@ -1030,7 +1030,7 @@ export default function VizualStudioApp() {
                 {showModelDropdown && (
                   <>
                     <div className="fixed inset-0 z-40" onClick={() => setShowModelDropdown(false)} />
-                    <div className="absolute top-full right-0 mt-3 min-w-[280px] sm:min-w-[320px] bg-[#0a0a0a]/95 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden z-50 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+                    <div className="absolute top-full left-0 mt-3 min-w-[280px] sm:min-w-[320px] bg-[#0a0a0a]/95 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden z-[100] shadow-2xl">
 
                       {/* Header */}
                       <div className="px-5 py-4 border-b border-white/5 bg-white/[0.02]">
@@ -1087,7 +1087,7 @@ export default function VizualStudioApp() {
 
                         {/* Premium Tier Group */}
                         <div className="px-2 pb-2">
-                          <div className="flex items-center gap-2 px-2 py-2 mt-2 text-[10px] font-bold text-amber-400 uppercase tracking-widest opacity-80">
+                          <div className="flex items-center gap-2 px-2 py-2 mt-2 text-[10px] font-bold text-yellow-500 uppercase tracking-widest opacity-80">
                             <Zap size={10} />
                             Premium Models
                           </div>
@@ -1100,22 +1100,22 @@ export default function VizualStudioApp() {
                                   setShowModelDropdown(false);
                                   setShowPricingModal(true);
                                 }}
-                                className="w-full p-3 rounded-xl text-left transition-all duration-200 border bg-gradient-to-r from-amber-500/[0.02] to-transparent border-amber-500/10 hover:border-amber-500/30 hover:bg-amber-500/[0.05] group relative overflow-hidden"
+                                className="w-full p-3 rounded-xl text-left transition-all duration-200 border bg-gradient-to-r from-yellow-500/[0.02] to-transparent border-yellow-500/10 hover:border-yellow-500/30 hover:bg-yellow-500/[0.05] group relative overflow-hidden"
                               >
-                                <div className="absolute inset-0 bg-gradient-to-r from-amber-500/0 via-amber-500/[0.05] to-amber-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+                                <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/0 via-yellow-500/[0.05] to-yellow-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
 
                                 <div className="flex justify-between items-start gap-3 relative z-10">
                                   <div>
-                                    <div className="text-sm font-bold text-white/50 group-hover:text-amber-200 transition-colors flex items-center gap-2">
+                                    <div className="text-sm font-bold text-white/50 group-hover:text-yellow-400 transition-colors flex items-center gap-2">
                                       {m.name}
-                                      <span className="px-1.5 py-0.5 rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[10px] leading-none">PRO</span>
+                                      <span className="px-1.5 py-0.5 rounded-md bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 text-[10px] leading-none">PRO</span>
                                     </div>
                                     <div className="text-[11px] text-gray-600 mt-0.5 group-hover:text-gray-500 transition-colors">
                                       {m.description}
                                     </div>
                                   </div>
                                   <div className="flex flex-col items-end flex-shrink-0">
-                                    <div className="text-[10px] font-bold text-amber-500/80 group-hover:text-amber-400 bg-amber-900/10 group-hover:bg-amber-500/10 px-2 py-1 rounded-md transition-colors">
+                                    <div className="text-[10px] font-bold text-yellow-500/80 group-hover:text-yellow-400 bg-yellow-900/10 group-hover:bg-yellow-500/10 px-2 py-1 rounded-md transition-colors">
                                       {m.cost}
                                     </div>
                                   </div>
