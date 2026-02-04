@@ -190,17 +190,17 @@ export default function EnterprisePage() {
             {[
               {
                 title: "Media & Entertainment",
-                video: "/videos/film.mp4`},
+                video: `${CDN_BASE}/videos/film.mp4`,
                 description: "Create stunning visual effects, trailers, and promotional content at scale."
               },
               {
                 title: "E-Commerce",
-                video: "/videos/product.mp4`},
+                video: `${CDN_BASE}/videos/product.mp4`,
                 description: "Generate product videos and lifestyle imagery that converts."
               },
               {
                 title: "Marketing Agencies",
-                video: "/videos/design.mp4`},
+                video: `${CDN_BASE}/videos/design.mp4`,
                 description: "Produce campaign assets 10x faster without sacrificing quality."
               }
             ].map((useCase, i) => (
