@@ -906,43 +906,73 @@ export default function VizualStudioApp() {
       }
 
       if (creationMode === 'IMAGE') {
-        // Call image generation API with enhanced prompt
-        const response = await fetch('/api/generate-image', {
-          method: 'POST',
-          headers,
-          body: JSON.stringify({
-            prompt: enhancedPrompt,
-            model: modelId,
-            aspectRatio: '16:9',
-            // Include reference/remix data
-            mode: generationMode,
-            referenceImage: isReferenceMode ? attachmentData : undefined,
-            remixImage: isRemixMode ? attachmentData : undefined,
-          }),
-        });
+        // Use Decart API for remix mode, otherwise use regular generation
+        if (isRemixMode && attachmentData) {
+          // Call Decart remix API for image-to-image transformation
+          const response = await fetch('/api/decart/remix', {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({
+              prompt: enhancedPrompt,
+              image: attachmentData,
+              mode: 'remix',
+            }),
+          });
 
-        const data = await response.json();
+          const data = await response.json();
 
-        if (!response.ok) {
-          throw new Error(data.error || 'Failed to generate image');
+          if (!response.ok) {
+            throw new Error(data.error || 'Failed to remix image');
+          }
+
+          setGeneratedContent({
+            prompt: prompt,
+            description: `I've remixed your image with the prompt "${prompt}" using the Decart lucy-pro-i2i model.`,
+            keywords: keywords,
+            imageUrl: data.imageUrl || data.url,
+            type: 'image',
+          });
+
+          // Deduct credits after successful generation
+          await deductCredits(estimatedCost);
+        } else {
+          // Call regular image generation API
+          const response = await fetch('/api/generate-image', {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({
+              prompt: enhancedPrompt,
+              model: modelId,
+              aspectRatio: '16:9',
+              // Include reference data
+              mode: generationMode,
+              referenceImage: isReferenceMode ? attachmentData : undefined,
+            }),
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.error || 'Failed to generate image');
+          }
+
+          // Build style description for user feedback
+          const styleNames = selectedTags.filter(t => t.type === 'style').map(t => t.label).join(', ');
+          const modeNames = selectedTags.filter(t => t.type === 'mode').map(t => t.label).join(', ');
+          const appliedStyles = [styleNames, modeNames].filter(Boolean).join(' + ');
+          const modeDescription = isReferenceMode ? ' (using reference)' : '';
+
+          setGeneratedContent({
+            prompt: prompt,
+            description: `I've created an image based on your prompt "${prompt}"${appliedStyles ? ` with ${appliedStyles} style` : ''}${modeDescription}, using the ${model} model.`,
+            keywords: keywords,
+            imageUrl: data.imageUrl,
+            type: 'image',
+          });
+
+          // Deduct credits after successful generation
+          await deductCredits(estimatedCost);
         }
-
-        // Build style description for user feedback
-        const styleNames = selectedTags.filter(t => t.type === 'style').map(t => t.label).join(', ');
-        const modeNames = selectedTags.filter(t => t.type === 'mode').map(t => t.label).join(', ');
-        const appliedStyles = [styleNames, modeNames].filter(Boolean).join(' + ');
-        const modeDescription = isRemixMode ? ' (remixed)' : isReferenceMode ? ' (using reference)' : '';
-
-        setGeneratedContent({
-          prompt: prompt,
-          description: `I've created an image based on your prompt "${prompt}"${appliedStyles ? ` with ${appliedStyles} style` : ''}${modeDescription}, using the ${model} model.`,
-          keywords: keywords,
-          imageUrl: data.imageUrl,
-          type: 'image',
-        });
-
-        // Deduct credits after successful generation
-        await deductCredits(estimatedCost);
       } else {
         // Call video generation API with enhanced prompt
         const response = await fetch('/api/generate-video', {
@@ -1100,9 +1130,27 @@ export default function VizualStudioApp() {
                   break;
 
                 case 'MORE_LIKE_THIS':
-                case 'COPY_PROMPT':
-                  // Just set prompt mostly, maybe set mode
+                  // Set up remix mode with the image/video
                   setCreationMode(card.type === 'video' ? 'VIDEO' : 'IMAGE');
+                  setActiveTab('REMIX');
+                  setPrompt(card.prompt || 'Create a variation of this image');
+                  // Add the media as an attachment for remix
+                  if (card.url) {
+                    setAttachments([{
+                      id: `remix-${Date.now()}`,
+                      url: card.url,
+                      type: card.type === 'video' ? 'video' : 'image',
+                      name: 'Original for remix',
+                    }]);
+                  }
+                  showToast('Ready to remix! Modify the prompt and click Generate.', 'success');
+                  break;
+
+                case 'COPY_PROMPT':
+                  // Just copy the prompt
+                  setCreationMode(card.type === 'video' ? 'VIDEO' : 'IMAGE');
+                  setPrompt(card.prompt || '');
+                  showToast('Prompt copied!', 'success');
                   break;
 
                 case 'REFRAME':

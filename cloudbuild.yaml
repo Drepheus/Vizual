@@ -9,8 +9,41 @@ steps:
           --build-arg NEXT_PUBLIC_SUPABASE_URL=$_NEXT_PUBLIC_SUPABASE_URL \
           --build-arg NEXT_PUBLIC_SUPABASE_ANON_KEY=$_NEXT_PUBLIC_SUPABASE_ANON_KEY \
           -t gcr.io/$PROJECT_ID/omi-ai .
+  
   # Push the container image to Container Registry
   - name: 'gcr.io/cloud-builders/docker'
     args: ['push', 'gcr.io/$PROJECT_ID/omi-ai']
+  
+  # Deploy to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'omi-ai'
+      - '--image=gcr.io/$PROJECT_ID/omi-ai'
+      - '--region=us-central1'
+      - '--platform=managed'
+      - '--allow-unauthenticated'
+      - '--memory=2Gi'
+      - '--cpu=2'
+      - '--min-instances=0'
+      - '--max-instances=10'
+      - '--set-env-vars=NEXT_PUBLIC_SUPABASE_URL=$_NEXT_PUBLIC_SUPABASE_URL,NEXT_PUBLIC_SUPABASE_ANON_KEY=$_NEXT_PUBLIC_SUPABASE_ANON_KEY,GOOGLE_GENERATIVE_AI_API_KEY=$_GOOGLE_GENERATIVE_AI_API_KEY,TAVILY_API_KEY=$_TAVILY_API_KEY,DECART_API_KEY=$_DECART_API_KEY,STRIPE_SECRET_KEY=$_STRIPE_SECRET_KEY,STRIPE_WEBHOOK_SECRET=$_STRIPE_WEBHOOK_SECRET,NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=$_NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY'
+
 images:
   - 'gcr.io/$PROJECT_ID/omi-ai'
+
+# Substitution variables - set these in Cloud Build Trigger settings
+substitutions:
+  _NEXT_PUBLIC_SUPABASE_URL: ''
+  _NEXT_PUBLIC_SUPABASE_ANON_KEY: ''
+  _GOOGLE_GENERATIVE_AI_API_KEY: ''
+  _TAVILY_API_KEY: ''
+  _DECART_API_KEY: ''
+  _STRIPE_SECRET_KEY: ''
+  _STRIPE_WEBHOOK_SECRET: ''
+  _NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ''
+
+options:
+  logging: CLOUD_LOGGING_ONLY

@@ -1,5 +1,6 @@
 {
   "/_not-found/page": "app/_not-found/page.js",
   "/api/decart/stream/route": "app/api/decart/stream/route.js",
-  "/vizual/live/page": "app/vizual/live/page.js"
+  "/vizual/live/page": "app/vizual/live/page.js",
+  "/vizual/studio/page": "app/vizual/studio/page.js"
 }

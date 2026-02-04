@@ -281,6 +281,15 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
   type __Unused = __Check
 }
 
+// Validate ../../../app/api/decart/remix/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/decart/remix">> = Specific
+  const handler = {} as typeof import("../../../app/api/decart/remix/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
 // Validate ../../../app/api/decart/stream/route.ts
 {
   type __IsExpected<Specific extends RouteHandlerConfig<"/api/decart/stream">> = Specific

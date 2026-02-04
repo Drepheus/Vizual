@@ -563,41 +563,230 @@ export default function LivePage() {
           onCreateNew={() => router.push('/vizual/studio')}
         />
 
-        {/* Main Content - Fixed layout on desktop, scrollable on mobile */}
-        <main className="flex-1 flex flex-col h-full overflow-y-auto lg:overflow-hidden" style={{ background: 'linear-gradient(180deg, #0f0505 0%, #0a0a0a 100%)' }}>
-          {/* Header */}
-          <header className="flex items-center justify-between px-4 md:px-6 py-3 border-b border-white/5 bg-black/50 backdrop-blur-md flex-shrink-0 sticky top-0 z-20">
-            <div className="flex items-center gap-4">
+        {/* MOBILE: Full-screen camera experience */}
+        <main className="flex-1 flex flex-col h-full lg:hidden relative overflow-hidden">
+          {/* Full-screen video background */}
+          <div className="absolute inset-0 z-0">
+            {connectionState === 'idle' ? (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 p-6 bg-black">
+                <div className="w-20 h-20 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center">
+                  <Camera size={36} className="text-red-400" />
+                </div>
+                <p className="text-gray-400 text-base text-center">Enable camera to start</p>
+                <div className="flex gap-3">
+                  <button
+                    onClick={requestCameraAccess}
+                    className="btn-glow px-6 py-3 bg-transparent border-2 border-red-500 text-red-400 rounded-full font-bold text-sm hover:bg-red-500/10 transition-all duration-300 flex items-center gap-2"
+                  >
+                    <Camera size={18} />
+                    Enable Camera
+                  </button>
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="px-6 py-3 bg-transparent border border-white/30 text-white/70 rounded-full font-medium text-sm hover:border-white/60 transition-all duration-300 flex items-center gap-2"
+                  >
+                    <Upload size={18} />
+                    Upload
+                  </button>
+                </div>
+              </div>
+            ) : connectionState === 'requesting' ? (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-black">
+                <div className="w-12 h-12 border-2 border-red-500/30 border-t-red-500 rounded-full animate-spin" />
+                <p className="text-gray-400 text-sm">Requesting camera...</p>
+              </div>
+            ) : (
+              <>
+                {/* Show output (swapped) video if streaming, otherwise show input */}
+                <video
+                  ref={isStreaming ? remoteVideoRef : localVideoRef}
+                  autoPlay
+                  muted={!isStreaming}
+                  playsInline
+                  loop={!isUsingCamera && !isStreaming}
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+                {/* Hidden video refs for the other stream */}
+                {isStreaming && (
+                  <video
+                    ref={localVideoRef}
+                    autoPlay
+                    muted
+                    playsInline
+                    className="hidden"
+                  />
+                )}
+              </>
+            )}
+          </div>
+
+          {/* Top overlay - Header */}
+          <div className="relative z-10 flex items-center justify-between px-4 py-3 bg-gradient-to-b from-black/80 via-black/40 to-transparent">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="p-2 rounded-full bg-black/30 backdrop-blur-md hover:bg-black/50 transition-colors"
+            >
+              <Menu size={22} className="text-white" />
+            </button>
+            <div className="flex items-center gap-2">
+              {isStreaming && (
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-red-500/20 backdrop-blur-md">
+                  <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                  <span className="text-xs text-red-400 font-bold uppercase">Live</span>
+                </div>
+              )}
+              {(connectionState === 'connected' || connectionState === 'streaming') && isUsingCamera && !isStreaming && (
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/30 backdrop-blur-md">
+                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                  <span className="text-xs text-green-400 font-medium">Ready</span>
+                </div>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              {isUsingCamera && (
+                <button
+                  onClick={() => {
+                    if (localStream) {
+                      localStream.getAudioTracks().forEach(track => track.enabled = !track.enabled);
+                      setIsMuted(!isMuted);
+                    }
+                  }}
+                  className="p-2 rounded-full bg-black/30 backdrop-blur-md hover:bg-black/50 transition-colors"
+                >
+                  {isMuted ? <MicOff size={20} className="text-red-400" /> : <Mic size={20} className="text-white" />}
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Spacer to push controls to bottom */}
+          <div className="flex-1" />
+
+          {/* Bottom overlay - Controls */}
+          <div className="relative z-10 bg-gradient-to-t from-black/90 via-black/70 to-transparent pt-16 pb-6 px-4">
+            {/* Character prompt - Transparent */}
+            <div className="mb-4">
+              <div className="flex items-center gap-2 mb-2">
+                <ImageIcon size={14} className="text-purple-400" />
+                <span className="text-[10px] font-bold text-white/70 uppercase tracking-widest">Character</span>
+                {referenceImage && (
+                  <div className="relative w-8 h-8 rounded-lg overflow-hidden border border-purple-500/50 ml-auto">
+                    <img src={referenceImage} alt="Ref" className="w-full h-full object-cover" />
+                    <button
+                      onClick={() => setReferenceImage(null)}
+                      className="absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 flex items-center justify-center transition-opacity"
+                    >
+                      <X size={12} className="text-white" />
+                    </button>
+                  </div>
+                )}
+                <button
+                  onClick={() => imageInputRef.current?.click()}
+                  className="p-1.5 rounded-lg bg-white/10 text-white/70 hover:bg-white/20 transition-colors"
+                >
+                  <Upload size={14} />
+                </button>
+              </div>
+              <textarea
+                value={characterPrompt}
+                onChange={(e) => setCharacterPrompt(e.target.value)}
+                placeholder="Describe who you want to become..."
+                className="w-full h-16 bg-black/40 backdrop-blur-md border border-white/20 rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-purple-500/50 transition-all duration-300 resize-none"
+              />
+            </div>
+
+            {/* Style prompt - Transparent (collapsed) */}
+            <div className="mb-4">
+              <textarea
+                value={stylePrompt}
+                onChange={(e) => {
+                  setStylePrompt(e.target.value);
+                  if (isStreaming) {
+                    updatePrompt(e.target.value);
+                  }
+                }}
+                placeholder="Style: dramatic lighting, cinematic..."
+                className="w-full h-10 bg-black/30 backdrop-blur-md border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white/80 placeholder:text-white/30 focus:outline-none focus:border-white/30 transition-all duration-300 resize-none"
+              />
+            </div>
+
+            {/* Action button */}
+            {!isStreaming ? (
               <button
-                onClick={() => setSidebarOpen(true)}
-                className="md:hidden p-2 rounded-lg hover:bg-white/10 transition-colors"
-                title="Menu"
+                onClick={startStreaming}
+                disabled={connectionState === 'idle' || connectionState === 'requesting'}
+                className="w-full py-4 bg-white/90 backdrop-blur-md text-black rounded-2xl font-bold text-sm uppercase tracking-[0.15em] flex items-center justify-center gap-3 transition-all duration-300 hover:bg-white active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
               >
-                <Menu size={22} className="text-gray-400" />
+                <Play size={20} fill="currentColor" />
+                Start Swap
               </button>
+            ) : (
+              <button
+                onClick={stopStreaming}
+                className="w-full py-4 bg-red-500/80 backdrop-blur-md text-white rounded-2xl font-bold text-sm uppercase tracking-[0.15em] flex items-center justify-center gap-3 transition-all duration-300 hover:bg-red-500 active:scale-95"
+              >
+                <Square size={20} fill="currentColor" />
+                Stop
+              </button>
+            )}
+          </div>
+
+          {/* Hidden file inputs */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="video/*"
+            className="hidden"
+            onChange={handleVideoUpload}
+          />
+          <input
+            ref={imageInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              if (e.target.files?.[0]) {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                  const dataUrl = event.target?.result as string;
+                  setReferenceImage(dataUrl);
+                  if (isStreaming) {
+                    updateReferenceImage(dataUrl);
+                  }
+                };
+                reader.readAsDataURL(file);
+              }
+            }}
+          />
+        </main>
+
+        {/* DESKTOP: Original layout */}
+        <main className="hidden lg:flex flex-1 flex-col h-full overflow-hidden" style={{ background: 'linear-gradient(180deg, #0f0505 0%, #0a0a0a 100%)' }}>
+          {/* Header */}
+          <header className="flex items-center justify-between px-4 md:px-6 py-3 border-b border-white/5 bg-black/50 backdrop-blur-md flex-shrink-0">
+            <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
                 <Radio size={22} className="text-red-500" />
                 <h1 className={`text-lg font-bold tracking-tight ${spaceGrotesk.className}`}>
                   REALTIME <span className="text-gray-500">SWAP</span>
                 </h1>
-                <span className="hidden sm:inline px-2 py-0.5 text-[10px] font-bold border border-red-500/50 text-red-400 rounded-full uppercase tracking-wider">
+                <span className="px-2 py-0.5 text-[10px] font-bold border border-red-500/50 text-red-400 rounded-full uppercase tracking-wider">
                   Beta
                 </span>
               </div>
             </div>
           </header>
 
-          {/* Main Grid - Scrollable on mobile, fixed on desktop */}
-          <div className="flex-1 flex flex-col lg:flex-row gap-4 p-4 lg:min-h-0">
-
+          {/* Main Grid */}
+          <div className="flex-1 flex flex-row gap-4 p-4 min-h-0">
             {/* Left: Video Panels */}
-            <div className="flex-1 flex flex-col lg:flex-row gap-4 lg:min-h-0">
+            <div className="flex-1 flex flex-row gap-4 min-h-0">
               {/* Input Video */}
-              <div className="flex-1 flex flex-col min-h-[200px] lg:min-h-0">
+              <div className="flex-1 flex flex-col min-h-0">
                 <div className="flex items-center justify-between mb-2 flex-shrink-0">
                   <div className="flex items-center gap-2">
                     <h3 className="text-xs font-medium text-gray-400 uppercase tracking-wider">Input</h3>
-                    {/* Blinking red light when camera is connected */}
                     {(connectionState === 'connected' || connectionState === 'streaming') && isUsingCamera && (
                       <div className="flex items-center gap-1.5">
                         <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse shadow-[0_0_8px_2px_rgba(239,68,68,0.6)]" />
@@ -620,13 +809,6 @@ export default function LivePage() {
                     >
                       <Upload size={16} />
                     </button>
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="video/*"
-                      className="hidden"
-                      onChange={handleVideoUpload}
-                    />
                   </div>
                 </div>
 
@@ -643,14 +825,14 @@ export default function LivePage() {
                       <div className="flex gap-2">
                         <button
                           onClick={requestCameraAccess}
-                          className="btn-glow px-4 py-2 bg-transparent border-2 border-red-500 text-red-400 rounded-full font-medium text-xs hover:bg-red-500/10 hover:text-red-300 transition-all duration-300 flex items-center gap-2"
+                          className="btn-glow px-4 py-2 bg-transparent border-2 border-red-500 text-red-400 rounded-full font-medium text-xs hover:bg-red-500/10 transition-all duration-300 flex items-center gap-2"
                         >
                           <Camera size={14} />
                           Enable Camera
                         </button>
                         <button
                           onClick={() => fileInputRef.current?.click()}
-                          className="px-4 py-2 bg-transparent border border-white/30 text-white/70 rounded-full font-medium text-xs hover:border-white/60 hover:text-white hover:bg-white/5 transition-all duration-300 flex items-center gap-2"
+                          className="px-4 py-2 bg-transparent border border-white/30 text-white/70 rounded-full font-medium text-xs hover:border-white/60 transition-all duration-300 flex items-center gap-2"
                         >
                           <Upload size={14} />
                           Upload
@@ -672,7 +854,6 @@ export default function LivePage() {
                         loop={!isUsingCamera}
                         className="absolute inset-0 w-full h-full object-cover"
                       />
-                      {/* Mute button */}
                       {isUsingCamera && (
                         <button
                           onClick={() => {
@@ -705,7 +886,6 @@ export default function LivePage() {
 
                 <div className={`flex-1 relative rounded-xl overflow-hidden border transition-all duration-300 ${isStreaming ? 'border-white/40 shadow-[0_0_30px_rgba(255,255,255,0.05)]' : 'border-white/5'
                   }`} style={{ background: 'linear-gradient(180deg, #0a0a0a 0%, #050505 100%)' }}>
-                  {/* Always render video element, just hide placeholder when streaming */}
                   <video
                     ref={remoteVideoRef}
                     autoPlay
@@ -721,7 +901,7 @@ export default function LivePage() {
                       <div className="w-16 h-16 rounded-full border border-white/10 flex items-center justify-center" style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%)' }}>
                         <Sparkles size={28} className="text-white/30" />
                       </div>
-                      <p className="text-gray-500 text-sm text-center font-medium tracking-tight">Swapped output appears here</p>
+                      <p className="text-gray-500 text-sm text-center font-medium">Swapped output appears here</p>
                     </div>
                   )}
                 </div>
@@ -729,7 +909,7 @@ export default function LivePage() {
             </div>
 
             {/* Right: Controls Panel */}
-            <div className="w-full lg:w-80 flex flex-col gap-3 flex-shrink-0 pb-6 lg:pb-0 lg:overflow-y-auto">
+            <div className="w-80 flex flex-col gap-3 flex-shrink-0 overflow-y-auto">
               {/* Character - Prompt & Upload */}
               <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4 flex-shrink-0">
                 <div className="flex items-center gap-2 mb-3">
@@ -737,15 +917,13 @@ export default function LivePage() {
                   <span className="text-xs font-bold text-gray-300 uppercase tracking-widest">Character</span>
                 </div>
 
-                {/* Character Prompt Input */}
                 <textarea
                   value={characterPrompt}
                   onChange={(e) => setCharacterPrompt(e.target.value)}
-                  placeholder="Describe the character you want to become... e.g. 'A cyberpunk hacker with neon hair' or 'An anime protagonist with spiky blue hair'"
-                  className="w-full h-20 bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/30 transition-all duration-300 resize-none mb-3"
+                  placeholder="Describe the character you want to become..."
+                  className="w-full h-20 bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-purple-500/50 transition-all duration-300 resize-none mb-3"
                 />
 
-                {/* Upload Section */}
                 <div className="flex items-center gap-3">
                   {referenceImage ? (
                     <div className="relative w-16 h-16 rounded-lg overflow-hidden border border-purple-500/30 flex-shrink-0">
@@ -767,8 +945,8 @@ export default function LivePage() {
                     </button>
                   )}
                   <div className="text-[10px] text-gray-500">
-                    <p className="text-gray-400 mb-1">Optional: Upload a reference image</p>
-                    <p>Or just describe the character above</p>
+                    <p className="text-gray-400 mb-1">Optional: Upload reference</p>
+                    <p>Or describe above</p>
                   </div>
                 </div>
 
