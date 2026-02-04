@@ -109,7 +109,7 @@ const inter = Inter({ subsets: ["latin"], weight: ["300", "400", "500", "600", "
 const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], weight: ["300", "400", "500", "600", "700"] });
 
 type CreationMode = "IMAGE" | "VIDEO";
-type TabMode = "STYLE" | "REFERENCE" | "MODIFY" | "IMAGE REFERENCE" | "REMIX";
+type TabMode = "STYLE" | "REFERENCE" | "MODIFY" | "IMAGE REFERENCE" | "REMIX" | null;
 
 const STYLE_PRESETS = [
   { name: "Cinematic", icon: "film", thumbnail: "https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=400&auto=format&fit=crop" },
@@ -428,15 +428,12 @@ export default function VizualStudioApp() {
   const { isGuestMode } = useGuestMode();
   const { showToast } = useToast();
   const [creationMode, setCreationMode] = useState<CreationMode>("IMAGE");
-  const [activeTab, setActiveTab] = useState<TabMode>("STYLE");
+  const [activeTab, setActiveTab] = useState<TabMode>(null);
 
   // Reset active tab when creation mode changes
   useEffect(() => {
-    if (creationMode === 'IMAGE') {
-      setActiveTab('IMAGE REFERENCE');
-    } else {
-      setActiveTab('STYLE');
-    }
+    // Don't auto-select a tab - let user choose or just use prompt
+    setActiveTab(null);
   }, [creationMode]);
   const [currentView, setCurrentView] = useState<'STUDIO' | 'PROJECTS'>('STUDIO');
   const [prompt, setPrompt] = useState("");
@@ -486,6 +483,9 @@ export default function VizualStudioApp() {
   const [showFlowTV, setShowFlowTV] = useState(false);
   const [showAccountModal, setShowAccountModal] = useState(false);
   const [expandBilling, setExpandBilling] = useState(false);
+  const [expandNotifications, setExpandNotifications] = useState(false);
+  const [expandSecurity, setExpandSecurity] = useState(false);
+  const [expandAppearance, setExpandAppearance] = useState(false);
   const [showPricingModal, setShowPricingModal] = useState(false);
 
   const [isExtending, setIsExtending] = useState(false);
@@ -495,7 +495,7 @@ export default function VizualStudioApp() {
   const [showStyleGuideModal, setShowStyleGuideModal] = useState(false);
 
   // Credits System State
-  const [userCredits, setUserCredits] = useState<number>(50);
+  const [userCredits, setUserCredits] = useState<number>(5);
   const [creditsUsed, setCreditsUsed] = useState<number>(0);
   const [isLoadingCredits, setIsLoadingCredits] = useState(true);
   const [accountData, setAccountData] = useState<UserCreditsAndUsage | null>(null);
@@ -701,8 +701,8 @@ export default function VizualStudioApp() {
   useEffect(() => {
     const fetchCredits = async () => {
       if (!user) {
-        // Guest mode gets 50 free credits
-        setUserCredits(50);
+        // Guest mode gets 5 free credits
+        setUserCredits(5);
         setCreditsUsed(0);
         setAccountData(null);
         setIsLoadingCredits(false);
@@ -716,7 +716,7 @@ export default function VizualStudioApp() {
         const usageData = await getUserCreditsAndUsage(user.id);
         if (usageData) {
           setAccountData(usageData);
-          setUserCredits(usageData.credits || 50);
+          setUserCredits(usageData.credits || 5);
           setCreditsUsed(usageData.credits_used || 0);
         } else {
           // Fallback to direct query
@@ -729,10 +729,10 @@ export default function VizualStudioApp() {
           if (error) {
             console.error('Error fetching credits:', error);
             // Default to free tier credits
-            setUserCredits(50);
+            setUserCredits(5);
             setCreditsUsed(0);
           } else if (data) {
-            setUserCredits(data.credits || 50);
+            setUserCredits(data.credits || 5);
             setCreditsUsed(data.credits_used || 0);
           }
         }
@@ -1626,6 +1626,11 @@ export default function VizualStudioApp() {
                           <button
                             key={tab}
                             onClick={() => {
+                              // Toggle off if already active, otherwise set the tab
+                              if (isActive) {
+                                setActiveTab(null);
+                                return;
+                              }
                               setActiveTab(tab as TabMode);
                               if (tab === "STYLE") {
                                 setShowStyleModal(true);
@@ -1827,53 +1832,58 @@ export default function VizualStudioApp() {
                             <Wand2 size={18} />
                           </button>
 
-                          <div className="w-px h-5 bg-white/10 mx-2" />
+                          {/* Video-only controls: Timer and Extend Clip */}
+                          {creationMode === 'VIDEO' && (
+                            <>
+                              <div className="w-px h-5 bg-white/10 mx-2" />
 
-                          {/* Video Timer */}
-                          <div className="relative">
-                            <button
-                              onClick={() => setShowTimerSlider(!showTimerSlider)}
-                              className={`p-2 rounded-lg transition-colors ${showTimerSlider ? 'bg-white/10 text-white' : 'hover:bg-white/5 text-gray-400 hover:text-white'}`}
-                              title="Set Duration"
-                            >
-                              <Timer size={18} />
-                            </button>
+                              {/* Video Timer */}
+                              <div className="relative">
+                                <button
+                                  onClick={() => setShowTimerSlider(!showTimerSlider)}
+                                  className={`p-2 rounded-lg transition-colors ${showTimerSlider ? 'bg-white/10 text-white' : 'hover:bg-white/5 text-gray-400 hover:text-white'}`}
+                                  title="Set Duration"
+                                >
+                                  <Timer size={18} />
+                                </button>
 
-                            {/* Timer Slider Popup */}
-                            {showTimerSlider && (
-                              <div className="absolute bottom-full left-0 mb-2 p-4 bg-[#1a1a1a] border border-white/10 rounded-xl shadow-2xl w-64 z-[200]">
-                                <div className="flex justify-between items-center mb-3">
-                                  <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Duration</span>
-                                  <span className="text-xs text-white font-mono">{Math.floor(duration / 60)}:{(duration % 60).toString().padStart(2, '0')}</span>
-                                </div>
-                                <input
-                                  type="range" min="0" max="300" value={duration}
-                                  onChange={(e) => setDuration(parseInt(e.target.value))}
-                                  className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-white"
-                                />
-                                <div className="flex justify-between mt-1 text-[10px] text-gray-500">
-                                  <span>0s</span>
-                                  <span>5m</span>
-                                </div>
+                                {/* Timer Slider Popup */}
+                                {showTimerSlider && (
+                                  <div className="absolute bottom-full left-0 mb-2 p-4 bg-[#1a1a1a] border border-white/10 rounded-xl shadow-2xl w-64 z-[200]">
+                                    <div className="flex justify-between items-center mb-3">
+                                      <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Duration</span>
+                                      <span className="text-xs text-white font-mono">{Math.floor(duration / 60)}:{(duration % 60).toString().padStart(2, '0')}</span>
+                                    </div>
+                                    <input
+                                      type="range" min="0" max="300" value={duration}
+                                      onChange={(e) => setDuration(parseInt(e.target.value))}
+                                      className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-white"
+                                    />
+                                    <div className="flex justify-between mt-1 text-[10px] text-gray-500">
+                                      <span>0s</span>
+                                      <span>5m</span>
+                                    </div>
+                                  </div>
+                                )}
                               </div>
-                            )}
-                          </div>
 
-                          {/* Video Extender */}
-                          <button
-                            onClick={() => {
-                              if (attachments.length === 0 && !generatedContent) {
-                                // If no file uploaded AND no generated content to extend, show upload popup
-                                setUploadPopup('video');
-                                return;
-                              }
-                              setIsExtending(true);
-                            }}
-                            className="p-2 rounded-lg hover:bg-white/5 transition-colors text-gray-400 hover:text-white"
-                            title="Extend Clip"
-                          >
-                            <ArrowRightFromLine size={18} />
-                          </button>
+                              {/* Video Extender */}
+                              <button
+                                onClick={() => {
+                                  if (attachments.length === 0 && !generatedContent) {
+                                    // If no file uploaded AND no generated content to extend, show upload popup
+                                    setUploadPopup('video');
+                                    return;
+                                  }
+                                  setIsExtending(true);
+                                }}
+                                className="p-2 rounded-lg hover:bg-white/5 transition-colors text-gray-400 hover:text-white"
+                                title="Extend Clip"
+                              >
+                                <ArrowRightFromLine size={18} />
+                              </button>
+                            </>
+                          )}
                         </div>
 
                         {/* Right Controls */}
@@ -2632,35 +2642,106 @@ export default function VizualStudioApp() {
                     )}
                   </div>
 
-                  <button className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-white/5 transition-colors group">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-white/5 text-gray-400 group-hover:text-white group-hover:bg-white/10 transition-colors">
-                        <Bell size={18} />
+                  {/* Notifications */}
+                  <div className="overflow-hidden transition-all duration-300">
+                    <button
+                      onClick={() => setExpandNotifications(!expandNotifications)}
+                      className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-white/5 transition-colors group"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-lg bg-white/5 text-gray-400 group-hover:text-white group-hover:bg-white/10 transition-colors">
+                          <Bell size={18} />
+                        </div>
+                        <span className="text-sm font-medium text-gray-300 group-hover:text-white">Notifications</span>
                       </div>
-                      <span className="text-sm font-medium text-gray-300 group-hover:text-white">Notifications</span>
-                    </div>
-                    <div className="w-2 h-2 rounded-full bg-red-500" />
-                  </button>
+                      <ChevronRight size={16} className={`text-gray-500 group-hover:text-white transition-transform ${expandNotifications ? 'rotate-90' : ''}`} />
+                    </button>
+                    {expandNotifications && (
+                      <div className="p-4 bg-white/5 rounded-lg mx-3 mb-3 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-gray-400">Email Notifications</span>
+                          <button className="w-10 h-5 bg-white/20 rounded-full relative">
+                            <span className="absolute right-0.5 top-0.5 w-4 h-4 bg-white rounded-full" />
+                          </button>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-gray-400">Generation Complete</span>
+                          <button className="w-10 h-5 bg-white/20 rounded-full relative">
+                            <span className="absolute right-0.5 top-0.5 w-4 h-4 bg-white rounded-full" />
+                          </button>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-gray-400">Marketing Updates</span>
+                          <button className="w-10 h-5 bg-white/10 rounded-full relative">
+                            <span className="absolute left-0.5 top-0.5 w-4 h-4 bg-gray-500 rounded-full" />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
 
-                  <button className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-white/5 transition-colors group">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-white/5 text-gray-400 group-hover:text-white group-hover:bg-white/10 transition-colors">
-                        <Shield size={18} />
+                  {/* Security */}
+                  <div className="overflow-hidden transition-all duration-300">
+                    <button
+                      onClick={() => setExpandSecurity(!expandSecurity)}
+                      className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-white/5 transition-colors group"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-lg bg-white/5 text-gray-400 group-hover:text-white group-hover:bg-white/10 transition-colors">
+                          <Shield size={18} />
+                        </div>
+                        <span className="text-sm font-medium text-gray-300 group-hover:text-white">Security</span>
                       </div>
-                      <span className="text-sm font-medium text-gray-300 group-hover:text-white">Security</span>
-                    </div>
-                    <ChevronRight size={16} className="text-gray-500 group-hover:text-white" />
-                  </button>
+                      <ChevronRight size={16} className={`text-gray-500 group-hover:text-white transition-transform ${expandSecurity ? 'rotate-90' : ''}`} />
+                    </button>
+                    {expandSecurity && (
+                      <div className="p-4 bg-white/5 rounded-lg mx-3 mb-3 space-y-3">
+                        <button className="w-full py-2 px-3 text-xs text-left text-gray-300 hover:bg-white/10 rounded-lg transition-colors">
+                          Change Password
+                        </button>
+                        <button className="w-full py-2 px-3 text-xs text-left text-gray-300 hover:bg-white/10 rounded-lg transition-colors">
+                          Two-Factor Authentication
+                        </button>
+                        <button className="w-full py-2 px-3 text-xs text-left text-gray-300 hover:bg-white/10 rounded-lg transition-colors">
+                          Connected Accounts
+                        </button>
+                        <button className="w-full py-2 px-3 text-xs text-left text-red-400 hover:bg-red-500/10 rounded-lg transition-colors">
+                          Delete Account
+                        </button>
+                      </div>
+                    )}
+                  </div>
 
-                  <button className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-white/5 transition-colors group">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-white/5 text-gray-400 group-hover:text-white group-hover:bg-white/10 transition-colors">
-                        <Moon size={18} />
+                  {/* Appearance */}
+                  <div className="overflow-hidden transition-all duration-300">
+                    <button
+                      onClick={() => setExpandAppearance(!expandAppearance)}
+                      className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-white/5 transition-colors group"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-lg bg-white/5 text-gray-400 group-hover:text-white group-hover:bg-white/10 transition-colors">
+                          <Moon size={18} />
+                        </div>
+                        <span className="text-sm font-medium text-gray-300 group-hover:text-white">Appearance</span>
                       </div>
-                      <span className="text-sm font-medium text-gray-300 group-hover:text-white">Appearance</span>
-                    </div>
-                    <span className="text-xs text-gray-500">Dark</span>
-                  </button>
+                      <ChevronRight size={16} className={`text-gray-500 group-hover:text-white transition-transform ${expandAppearance ? 'rotate-90' : ''}`} />
+                    </button>
+                    {expandAppearance && (
+                      <div className="p-4 bg-white/5 rounded-lg mx-3 mb-3 space-y-3">
+                        <div className="flex items-center gap-2">
+                          <button className="flex-1 py-2 px-3 text-xs text-center bg-white/10 border border-white/20 text-white rounded-lg">
+                            Dark
+                          </button>
+                          <button className="flex-1 py-2 px-3 text-xs text-center text-gray-400 hover:bg-white/5 rounded-lg transition-colors">
+                            Light
+                          </button>
+                          <button className="flex-1 py-2 px-3 text-xs text-center text-gray-400 hover:bg-white/5 rounded-lg transition-colors">
+                            System
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {/* Footer */}
