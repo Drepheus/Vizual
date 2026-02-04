@@ -82,20 +82,10 @@ export function Sidebar({
         // If we're already on the page or have an action handler, use it
         if (onAction) {
             onAction(pageKey);
-
-            // If it's a page change that requires navigation, do it
-            if (pageKey === 'LIVE' && !path.includes(window.location.pathname)) {
-                router.push('/vizual/live');
-            } else if (pageKey === 'COMMUNITY' && !path.includes(window.location.pathname)) {
-                router.push('/vizual/community');
-            } else if ((pageKey === 'STUDIO' || pageKey === 'PROJECTS') && !window.location.pathname.includes('/studio')) {
-                router.push('/vizual/studio');
-            } else if (pageKey === 'AVATAR' && !path.includes(window.location.pathname)) {
-                router.push('/vizual/avatar');
-            }
-        } else {
-            router.push(path);
         }
+
+        // Always navigate to the correct path
+        router.push(path);
     };
 
     return (

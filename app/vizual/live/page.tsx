@@ -79,7 +79,8 @@ export default function LivePage() {
   const [uploadedVideo, setUploadedVideo] = useState<string | null>(null);
   const [isUsingCamera, setIsUsingCamera] = useState(true);
   const [debugInfo, setDebugInfo] = useState<string>('');
-  const [referenceImage, setReferenceImage] = useState<string | null>(null);
+  // Default to Einstein image
+  const [referenceImage, setReferenceImage] = useState<string | null>('https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Einstein_1921_by_F_Schmutzer_-_restoration.jpg/440px-Einstein_1921_by_F_Schmutzer_-_restoration.jpg');
   const [characterPrompt, setCharacterPrompt] = useState<string>('');
 
   // Effect to attach stream to video element when both are available
@@ -501,6 +502,25 @@ export default function LivePage() {
     requestCameraAccess();
   };
 
+  // Disable/stop camera and go back to idle
+  const disableCamera = () => {
+    if (localStream) {
+      localStream.getTracks().forEach(track => track.stop());
+      setLocalStream(null);
+    }
+    if (uploadedVideo) {
+      URL.revokeObjectURL(uploadedVideo);
+      setUploadedVideo(null);
+    }
+    setIsUsingCamera(false);
+    setConnectionState('idle');
+    if (localVideoRef.current) {
+      localVideoRef.current.srcObject = null;
+      localVideoRef.current.src = '';
+    }
+    showToast('Camera disabled', 'success');
+  };
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -643,6 +663,16 @@ export default function LivePage() {
               )}
             </div>
             <div className="flex items-center gap-2">
+              {/* Disable Camera Button - only show when camera is active */}
+              {(connectionState === 'connected' || connectionState === 'streaming') && !isStreaming && (
+                <button
+                  onClick={disableCamera}
+                  className="p-2 rounded-full bg-black/30 backdrop-blur-md hover:bg-red-500/30 transition-colors"
+                  title="Disable Camera"
+                >
+                  <X size={20} className="text-white" />
+                </button>
+              )}
               {isUsingCamera && (
                 <button
                   onClick={() => {
@@ -809,6 +839,16 @@ export default function LivePage() {
                     >
                       <Upload size={16} />
                     </button>
+                    {/* Disable Camera Button */}
+                    {(connectionState === 'connected' || connectionState === 'streaming') && !isStreaming && (
+                      <button
+                        onClick={disableCamera}
+                        className="p-1.5 rounded-lg transition-colors text-gray-400 hover:text-red-400 hover:bg-red-500/10"
+                        title="Disable Camera"
+                      >
+                        <X size={16} />
+                      </button>
+                    )}
                   </div>
                 </div>
 
