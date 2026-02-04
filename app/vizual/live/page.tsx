@@ -78,7 +78,9 @@ export default function LivePage() {
   const [isMuted, setIsMuted] = useState(false);
   const [uploadedVideo, setUploadedVideo] = useState<string | null>(null);
   const [isUsingCamera, setIsUsingCamera] = useState(true);
+  const [debugInfo, setDebugInfo] = useState<string>('');
   const [referenceImage, setReferenceImage] = useState<string | null>(null);
+  const [characterPrompt, setCharacterPrompt] = useState<string>('');
 
   // Effect to attach stream to video element when both are available
   // This fixes the issue where the video element isn't rendered yet when the stream is set
@@ -167,29 +169,48 @@ export default function LivePage() {
     }
   };
 
-  // Handle reference image upload
-  const handleReferenceImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setReferenceImage(event.target?.result as string);
-        showToast('Reference image added!', 'success');
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
   // Get WebSocket URL from server
   const getStreamConfig = async (model: string) => {
     try {
       const res = await fetch(`/api/decart/stream?model=${model}`);
+      
+      // Check if response has content
+      const contentType = res.headers.get('content-type');
+      const hasJsonContent = contentType && contentType.includes('application/json');
+      
       if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.message || 'Failed to get stream configuration');
+        let errorMessage = `Server error: ${res.status}`;
+        
+        // Only try to parse JSON if content-type indicates JSON
+        if (hasJsonContent) {
+          try {
+            const text = await res.text();
+            if (text) {
+              const error = JSON.parse(text);
+              errorMessage = error.message || error.error || errorMessage;
+            }
+          } catch (parseError) {
+            // Ignore parse errors, use default message
+            console.error('Error parsing error response:', parseError);
+          }
+        }
+        
+        throw new Error(errorMessage);
       }
-      return await res.json();
+      
+      // Also handle empty successful responses
+      if (!hasJsonContent) {
+        throw new Error('Invalid response from server');
+      }
+      
+      const text = await res.text();
+      if (!text) {
+        throw new Error('Empty response from server');
+      }
+      
+      return JSON.parse(text);
     } catch (error: any) {
+      console.error('Stream config error:', error);
       showToast(error.message || 'Failed to connect to streaming service', 'error');
       return null;
     }
@@ -197,8 +218,9 @@ export default function LivePage() {
 
   // Start streaming
   const startStreaming = async () => {
-    if (!stylePrompt.trim()) {
-      showToast('Please enter a style prompt first', 'error');
+    // For character reference, we need a reference image
+    if (!referenceImage) {
+      showToast('Please add a character reference image first', 'error');
       return;
     }
 
@@ -211,7 +233,8 @@ export default function LivePage() {
     showToast('Connecting to stream...', 'success');
 
     try {
-      const config = await getStreamConfig('mirage_v2');
+      // Use lucy_2_rt model for character reference/face swap
+      const config = await getStreamConfig('lucy_2_rt');
 
       if (!config) {
         setConnectionState('connected');
@@ -228,15 +251,26 @@ export default function LivePage() {
 
       ws.onmessage = async (event) => {
         const message = JSON.parse(event.data);
+        console.log('WS message received:', message.type);
 
         if (message.type === 'answer' && peerConnectionRef.current) {
+          console.log('Setting remote description (answer)');
           await peerConnectionRef.current.setRemoteDescription({
             type: 'answer',
             sdp: message.sdp
           });
+        } else if (message.type === 'ice-candidate' && peerConnectionRef.current) {
+          // Handle ICE candidates from server
+          try {
+            await peerConnectionRef.current.addIceCandidate(message.candidate);
+          } catch (e) {
+            console.log('ICE candidate error:', e);
+          }
         } else if (message.type === 'error') {
           console.error('Stream error:', message);
           showToast(message.message || 'Stream error', 'error');
+        } else if (message.type === 'ready') {
+          console.log('Server ready for streaming');
         }
       };
 
@@ -263,13 +297,17 @@ export default function LivePage() {
 
   // Set up WebRTC
   const setupWebRTC = async (ws: WebSocket, specs: { fps: number; width: number; height: number }) => {
+    setDebugInfo('Setting up WebRTC...');
+    
     const peerConnection = new RTCPeerConnection({
       iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
     });
     peerConnectionRef.current = peerConnection;
 
+    // Handle ICE candidates
     peerConnection.onicecandidate = (event) => {
       if (event.candidate && ws.readyState === WebSocket.OPEN) {
+        console.log('Sending ICE candidate');
         ws.send(JSON.stringify({
           type: 'ice-candidate',
           candidate: event.candidate
@@ -277,34 +315,148 @@ export default function LivePage() {
       }
     };
 
-    peerConnection.ontrack = (event) => {
-      console.log('Received remote track');
-      if (remoteVideoRef.current) {
-        remoteVideoRef.current.srcObject = event.streams[0];
-      }
-      setIsStreaming(true);
-      showToast('Stream connected!', 'success');
+    // Track ICE gathering state
+    peerConnection.onicegatheringstatechange = () => {
+      console.log('ICE gathering state:', peerConnection.iceGatheringState);
+      setDebugInfo(`ICE: ${peerConnection.iceGatheringState}`);
     };
 
+    // Handle incoming tracks (transformed video)
+    peerConnection.ontrack = (event) => {
+      console.log('=== RECEIVED REMOTE TRACK ===');
+      console.log('Track kind:', event.track.kind);
+      console.log('Track enabled:', event.track.enabled);
+      console.log('Track readyState:', event.track.readyState);
+      console.log('Streams count:', event.streams.length);
+      
+      setDebugInfo(`Track received: ${event.track.kind}`);
+      
+      if (event.streams[0]) {
+        const stream = event.streams[0];
+        console.log('Stream active:', stream.active);
+        console.log('Stream tracks:', stream.getTracks().map(t => `${t.kind}:${t.readyState}`));
+        
+        if (remoteVideoRef.current) {
+          console.log('Setting srcObject on remote video element');
+          remoteVideoRef.current.srcObject = stream;
+          
+          // Add event listeners to track video state
+          remoteVideoRef.current.onloadeddata = () => {
+            console.log('Remote video: data loaded');
+            setDebugInfo('Video data loaded');
+          };
+          
+          // Force play with user interaction context
+          const playPromise = remoteVideoRef.current.play();
+          if (playPromise !== undefined) {
+            playPromise
+              .then(() => {
+                console.log('Remote video playing successfully');
+                setDebugInfo('Video playing!');
+              })
+              .catch(e => {
+                console.log('Auto-play prevented:', e.message);
+                setDebugInfo(`Play blocked: ${e.message}`);
+                // Try muted autoplay as fallback
+                if (remoteVideoRef.current) {
+                  remoteVideoRef.current.muted = true;
+                  remoteVideoRef.current.play()
+                    .then(() => setDebugInfo('Playing (muted)'))
+                    .catch(e2 => {
+                      console.error('Muted play also failed:', e2);
+                      setDebugInfo(`Play failed: ${e2.message}`);
+                    });
+                }
+              });
+          }
+        } else {
+          console.warn('Remote video ref not available!');
+          setDebugInfo('ERROR: No video element ref');
+        }
+      } else {
+        console.warn('No streams in track event!');
+        setDebugInfo('ERROR: No streams received');
+      }
+      
+      setIsStreaming(true);
+      showToast('Stream connected! Transformation active.', 'success');
+    };
+
+    // Handle connection state changes
+    peerConnection.onconnectionstatechange = () => {
+      console.log('Connection state:', peerConnection.connectionState);
+      setDebugInfo(`Connection: ${peerConnection.connectionState}`);
+      if (peerConnection.connectionState === 'failed') {
+        showToast('Connection failed. Please try again.', 'error');
+        stopStreaming();
+      }
+    };
+
+    // Add local stream tracks to peer connection
     if (localStream) {
       localStream.getTracks().forEach(track => {
+        console.log('Adding local track:', track.kind, track.readyState);
         peerConnection.addTrack(track, localStream);
       });
+      setDebugInfo(`Added ${localStream.getTracks().length} local tracks`);
+    } else if (uploadedVideo && localVideoRef.current) {
+      // For uploaded video, capture from video element
+      const videoEl = localVideoRef.current;
+      const capturedStream = (videoEl as any).captureStream ? (videoEl as any).captureStream(specs.fps) : (videoEl as any).mozCaptureStream(specs.fps);
+      if (capturedStream) {
+        capturedStream.getTracks().forEach((track: MediaStreamTrack) => {
+          console.log('Adding captured track:', track.kind);
+          peerConnection.addTrack(track, capturedStream);
+        });
+      }
     }
 
-    const offer = await peerConnection.createOffer();
-    await peerConnection.setLocalDescription(offer);
-
-    ws.send(JSON.stringify({
-      type: 'offer',
-      sdp: offer.sdp
-    }));
-
+    // Send the prompt if provided (optional for character reference)
     if (stylePrompt) {
+      console.log('Sending prompt:', stylePrompt);
       ws.send(JSON.stringify({
         type: 'prompt',
         prompt: stylePrompt
       }));
+      setDebugInfo('Sent prompt');
+    }
+
+    // For character reference (lucy_2_rt), send the reference image BEFORE the offer
+    if (referenceImage) {
+      console.log('Sending character reference image');
+      const imageData = referenceImage.split(',')[1];
+      ws.send(JSON.stringify({
+        type: 'set_image',
+        image_data: imageData
+      }));
+      setDebugInfo('Sent character reference image');
+    }
+
+    // Create offer
+    const offer = await peerConnection.createOffer({
+      offerToReceiveVideo: true,
+      offerToReceiveAudio: true
+    });
+    await peerConnection.setLocalDescription(offer);
+    
+    console.log('Sending offer');
+    setDebugInfo('Sending offer...');
+    
+    ws.send(JSON.stringify({
+      type: 'offer',
+      sdp: offer.sdp
+    }));
+  };
+
+  // Update the character reference image while streaming
+  const updateReferenceImage = (imageDataUrl: string) => {
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      const imageData = imageDataUrl.split(',')[1];
+      wsRef.current.send(JSON.stringify({
+        type: 'set_image',
+        image_data: imageData
+      }));
+      showToast('Character updated!', 'success');
     }
   };
 
@@ -553,20 +705,24 @@ export default function LivePage() {
 
                 <div className={`flex-1 relative rounded-xl overflow-hidden border transition-all duration-300 ${isStreaming ? 'border-white/40 shadow-[0_0_30px_rgba(255,255,255,0.05)]' : 'border-white/5'
                   }`} style={{ background: 'linear-gradient(180deg, #0a0a0a 0%, #050505 100%)' }}>
-                  {!isStreaming ? (
+                  {/* Always render video element, just hide placeholder when streaming */}
+                  <video
+                    ref={remoteVideoRef}
+                    autoPlay
+                    playsInline
+                    muted={false}
+                    className={`absolute inset-0 w-full h-full object-cover ${isStreaming ? 'opacity-100' : 'opacity-0'}`}
+                    onLoadedMetadata={() => console.log('Remote video: metadata loaded')}
+                    onPlay={() => console.log('Remote video: playing')}
+                    onError={(e) => console.error('Remote video error:', e)}
+                  />
+                  {!isStreaming && (
                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-4">
                       <div className="w-16 h-16 rounded-full border border-white/10 flex items-center justify-center" style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%)' }}>
                         <Sparkles size={28} className="text-white/30" />
                       </div>
                       <p className="text-gray-500 text-sm text-center font-medium tracking-tight">Swapped output appears here</p>
                     </div>
-                  ) : (
-                    <video
-                      ref={remoteVideoRef}
-                      autoPlay
-                      playsInline
-                      className="absolute inset-0 w-full h-full object-cover"
-                    />
                   )}
                 </div>
               </div>
@@ -574,11 +730,75 @@ export default function LivePage() {
 
             {/* Right: Controls Panel */}
             <div className="w-full lg:w-80 flex flex-col gap-3 flex-shrink-0 pb-6 lg:pb-0 lg:overflow-y-auto">
-              {/* Style Prompt */}
+              {/* Character - Prompt & Upload */}
+              <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4 flex-shrink-0">
+                <div className="flex items-center gap-2 mb-3">
+                  <ImageIcon size={16} className="text-purple-400" />
+                  <span className="text-xs font-bold text-gray-300 uppercase tracking-widest">Character</span>
+                </div>
+
+                {/* Character Prompt Input */}
+                <textarea
+                  value={characterPrompt}
+                  onChange={(e) => setCharacterPrompt(e.target.value)}
+                  placeholder="Describe the character you want to become... e.g. 'A cyberpunk hacker with neon hair' or 'An anime protagonist with spiky blue hair'"
+                  className="w-full h-20 bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/30 transition-all duration-300 resize-none mb-3"
+                />
+
+                {/* Upload Section */}
+                <div className="flex items-center gap-3">
+                  {referenceImage ? (
+                    <div className="relative w-16 h-16 rounded-lg overflow-hidden border border-purple-500/30 flex-shrink-0">
+                      <img src={referenceImage} alt="Reference" className="w-full h-full object-cover" />
+                      <button
+                        onClick={() => setReferenceImage(null)}
+                        className="absolute top-1 right-1 p-1 rounded-full bg-black/70 text-gray-300 hover:text-white transition-colors"
+                      >
+                        <X size={10} />
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => imageInputRef.current?.click()}
+                      className="w-16 h-16 border-2 border-dashed border-white/20 rounded-lg flex flex-col items-center justify-center gap-1 text-gray-500 hover:text-purple-400 hover:border-purple-500/50 transition-all duration-300 flex-shrink-0"
+                    >
+                      <Upload size={16} />
+                      <span className="text-[8px] uppercase tracking-wider">Image</span>
+                    </button>
+                  )}
+                  <div className="text-[10px] text-gray-500">
+                    <p className="text-gray-400 mb-1">Optional: Upload a reference image</p>
+                    <p>Or just describe the character above</p>
+                  </div>
+                </div>
+
+                <input
+                  ref={imageInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    if (e.target.files?.[0]) {
+                      const file = e.target.files[0];
+                      const reader = new FileReader();
+                      reader.onload = (event) => {
+                        const dataUrl = event.target?.result as string;
+                        setReferenceImage(dataUrl);
+                        if (isStreaming) {
+                          updateReferenceImage(dataUrl);
+                        }
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                />
+              </div>
+
+              {/* Style Prompt (Optional) */}
               <div className="rounded-xl border border-white/5 p-4 flex-shrink-0 bg-white/[0.02]">
                 <div className="flex items-center gap-2 mb-3">
                   <Palette size={16} className="text-white/60" />
-                  <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Style Prompt</span>
+                  <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Style (Optional)</span>
                   {isStreaming && (
                     <div className="ml-auto flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-red-500/10 border border-red-500/20">
                       <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
@@ -594,63 +814,9 @@ export default function LivePage() {
                       updatePrompt(e.target.value);
                     }
                   }}
-                  placeholder="Describe the style... (e.g., 'Cyberpunk', 'Anime')"
+                  placeholder="Optional: Add style modifiers (e.g., 'dramatic lighting')"
                   className="w-full bg-white/5 text-white placeholder-gray-600 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-white/20 rounded-xl p-3 border border-white/10 transition-all"
                   rows={2}
-                />
-
-                {/* Quick Presets */}
-                <div className="flex flex-wrap gap-1.5 mt-3">
-                  {['Cyberpunk', 'Anime', 'Realistic', 'Film Noir', '3D Render'].map((style) => (
-                    <button
-                      key={style}
-                      onClick={() => {
-                        setStylePrompt(style);
-                        if (isStreaming) updatePrompt(style);
-                      }}
-                      className="px-3 py-1.5 text-[10px] font-bold bg-white/5 hover:bg-white/10 border border-white/10 text-gray-400 hover:text-white rounded-full transition-all uppercase tracking-wider"
-                    >
-                      {style}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Reference Image (Optional) */}
-              <div className="rounded-xl border border-white/5 p-4 flex-shrink-0 bg-white/[0.02]">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <ImageIcon size={16} className="text-white/40" />
-                    <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Reference Image</span>
-                  </div>
-                  <span className="text-[10px] text-gray-500 uppercase tracking-tighter">Optional</span>
-                </div>
-
-                {referenceImage ? (
-                  <div className="relative w-full h-24 rounded-xl overflow-hidden border border-white/20">
-                    <img src={referenceImage} alt="Reference" className="w-full h-full object-cover" />
-                    <button
-                      onClick={() => setReferenceImage(null)}
-                      className="absolute top-2 right-2 p-1.5 rounded-full bg-black/70 text-gray-300 hover:text-white transition-colors backdrop-blur-md"
-                    >
-                      <X size={14} />
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => imageInputRef.current?.click()}
-                    className="w-full h-20 border border-dashed border-white/10 rounded-xl flex flex-col items-center justify-center gap-2 text-gray-500 hover:text-white hover:border-white/30 hover:bg-white/[0.05] transition-all duration-300 group"
-                  >
-                    <Plus size={20} className="group-hover:scale-110 transition-transform" />
-                    <span className="text-[10px] font-bold uppercase tracking-widest">Add Face Ref</span>
-                  </button>
-                )}
-                <input
-                  ref={imageInputRef}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleReferenceImageUpload}
                 />
               </div>
 
@@ -675,6 +841,17 @@ export default function LivePage() {
                   </button>
                 )}
               </div>
+
+              {/* Debug Info - Shows connection status */}
+              {debugInfo && (
+                <div className="bg-black/50 border border-yellow-500/30 rounded-xl p-3 flex-shrink-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse" />
+                    <span className="text-[10px] font-bold text-yellow-400 uppercase tracking-widest">Debug</span>
+                  </div>
+                  <p className="text-[10px] text-yellow-300 font-mono">{debugInfo}</p>
+                </div>
+              )}
 
               {/* API Notice */}
               <div className="bg-white/[0.03] border border-white/10 rounded-xl p-4 flex-shrink-0">

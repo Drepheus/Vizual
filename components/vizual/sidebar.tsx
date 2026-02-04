@@ -14,10 +14,13 @@ import {
     PanelLeftClose,
     PanelLeft,
     X,
-    User
+    User,
+    Zap,
+    Image
 } from "lucide-react";
 import { Space_Grotesk } from "next/font/google";
 import { useAuth } from "@/context/auth-context";
+import { CreditDisplay } from "./CreditDisplay";
 
 const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], weight: ["300", "400", "500", "600", "700"] });
 
@@ -54,6 +57,7 @@ interface SidebarProps {
     onFeedbackClick?: () => void;
     onInspirationClick?: () => void;
     onCreateNew?: () => void;
+    onUpgradeClick?: () => void;
 }
 
 export function Sidebar({
@@ -66,7 +70,8 @@ export function Sidebar({
     onProfileClick,
     onFeedbackClick,
     onInspirationClick,
-    onCreateNew
+    onCreateNew,
+    onUpgradeClick
 }: SidebarProps) {
     const router = useRouter();
     const { user } = useAuth();
@@ -207,6 +212,16 @@ export function Sidebar({
 
                 {/* Bottom Section */}
                 <div className={`${sidebarExpanded ? 'px-3' : 'px-2'} pt-4 border-t border-white/5 mt-4 flex-shrink-0 space-y-2`}>
+                    {/* Credit Display - Only show when expanded */}
+                    {sidebarExpanded && (
+                        <CreditDisplay 
+                            variant="compact" 
+                            showUpgrade={true}
+                            onUpgradeClick={onUpgradeClick}
+                            className="mb-3"
+                        />
+                    )}
+                    
                     <NavItem
                         icon={<MessageSquareQuote size={20} />}
                         label="Feedback"
