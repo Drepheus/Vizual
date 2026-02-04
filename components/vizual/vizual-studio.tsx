@@ -26,9 +26,10 @@ const ChromeText = ({ children, className = "" }: { children: React.ReactNode; c
   </span>
 );
 
-// HoverVideo component - shows gradient placeholder, plays ONLY on hover (desktop) or tap (mobile)
-// Performance optimized: uses preload="none", no auto-play, tap-to-play on mobile
-const HoverVideo = ({ src, className = "" }: { src: string; className?: string }) => {
+// HoverVideo component - two modes:
+// 1. autoPlay=true: plays when visible, pauses when not (for hero/single videos)
+// 2. autoPlay=false: plays on hover (desktop) or tap (mobile) - for video grids like Categories
+const HoverVideo = ({ src, className = "", autoPlay = false }: { src: string; className?: string; autoPlay?: boolean }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
@@ -41,7 +42,7 @@ const HoverVideo = ({ src, className = "" }: { src: string; className?: string }
     setIsMobile('ontouchstart' in window || navigator.maxTouchPoints > 0);
   }, []);
 
-  // Intersection observer for visibility tracking only (no auto-play)
+  // Intersection observer - handles visibility-based autoplay for single videos
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -49,11 +50,21 @@ const HoverVideo = ({ src, className = "" }: { src: string; className?: string }
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
+          const wasVisible = isVisible;
           setIsVisible(entry.isIntersecting);
-          // Pause when not visible to save resources
-          if (!entry.isIntersecting && videoRef.current && isPlaying) {
-            videoRef.current.pause();
-            setIsPlaying(false);
+          
+          if (entry.isIntersecting) {
+            // AutoPlay mode: play when visible
+            if (autoPlay && videoRef.current) {
+              videoRef.current.play().catch(() => { });
+              setIsPlaying(true);
+            }
+          } else {
+            // Pause when not visible (both modes)
+            if (videoRef.current && isPlaying) {
+              videoRef.current.pause();
+              setIsPlaying(false);
+            }
           }
         });
       },
@@ -65,28 +76,28 @@ const HoverVideo = ({ src, className = "" }: { src: string; className?: string }
 
     observer.observe(container);
     return () => observer.disconnect();
-  }, [isPlaying]);
+  }, [autoPlay, isPlaying, isVisible]);
 
-  // Desktop: Play on mouse enter
+  // Desktop hover: Play on mouse enter (only for non-autoPlay mode)
   const handleMouseEnter = () => {
-    if (!isMobile && videoRef.current && isVisible) {
+    if (!autoPlay && !isMobile && videoRef.current && isVisible) {
       videoRef.current.play().catch(() => { });
       setIsPlaying(true);
     }
   };
 
-  // Desktop: Pause on mouse leave
+  // Desktop hover: Pause on mouse leave (only for non-autoPlay mode)
   const handleMouseLeave = () => {
-    if (!isMobile && videoRef.current) {
+    if (!autoPlay && !isMobile && videoRef.current) {
       videoRef.current.pause();
       videoRef.current.currentTime = 0;
       setIsPlaying(false);
     }
   };
 
-  // Mobile: Toggle play on tap
+  // Mobile: Toggle play on tap (only for non-autoPlay mode)
   const handleTap = () => {
-    if (isMobile && videoRef.current && isVisible) {
+    if (!autoPlay && isMobile && videoRef.current && isVisible) {
       if (isPlaying) {
         videoRef.current.pause();
         videoRef.current.currentTime = 0;
@@ -98,10 +109,10 @@ const HoverVideo = ({ src, className = "" }: { src: string; className?: string }
     }
   };
 
-  // Handle video loaded - show first frame
+  // Handle video loaded - show first frame for non-autoPlay
   const handleLoadedData = () => {
     setHasLoaded(true);
-    if (videoRef.current && !isPlaying) {
+    if (videoRef.current && !autoPlay && !isPlaying) {
       videoRef.current.currentTime = 0.1; // Show first frame
     }
   };
@@ -109,7 +120,7 @@ const HoverVideo = ({ src, className = "" }: { src: string; className?: string }
   return (
     <div
       ref={containerRef}
-      className={`relative cursor-pointer ${className}`}
+      className={`relative ${!autoPlay ? 'cursor-pointer' : ''} ${className}`}
       style={{
         contentVisibility: 'auto',
         contain: 'layout style paint'
@@ -122,7 +133,7 @@ const HoverVideo = ({ src, className = "" }: { src: string; className?: string }
       {!hasLoaded && (
         <div className="absolute inset-0 bg-gradient-to-br from-neutral-700 via-neutral-800 to-neutral-900" />
       )}
-      {/* Video - preload metadata to get first frame, but don't auto-play */}
+      {/* Video */}
       <video
         ref={videoRef}
         loop
@@ -134,8 +145,8 @@ const HoverVideo = ({ src, className = "" }: { src: string; className?: string }
       >
         <source src={src} type="video/mp4" />
       </video>
-      {/* Play indicator on mobile when not playing */}
-      {isMobile && !isPlaying && hasLoaded && (
+      {/* Play indicator on mobile when not playing (only for non-autoPlay) */}
+      {!autoPlay && isMobile && !isPlaying && hasLoaded && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center">
             <svg className="w-4 h-4 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24">
