@@ -26,21 +26,22 @@ const ChromeText = ({ children, className = "" }: { children: React.ReactNode; c
   </span>
 );
 
-// HoverVideo component - shows first frame, plays on hover/touch (optimized for mobile)
-// Performance optimized: uses preload="metadata" to only load video metadata initially
-const HoverVideo = ({ src, className = "", autoPlay = false }: { src: string; className?: string; autoPlay?: boolean }) => {
+// HoverVideo component - shows gradient placeholder, plays ONLY on hover (desktop) or tap (mobile)
+// Performance optimized: uses preload="none", no auto-play, tap-to-play on mobile
+const HoverVideo = ({ src, className = "" }: { src: string; className?: string }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [hasStartedLoad, setHasStartedLoad] = useState(false);
-  const isMobileRef = useRef(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [hasLoaded, setHasLoaded] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   // Detect mobile on mount
   useEffect(() => {
-    isMobileRef.current = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    setIsMobile('ontouchstart' in window || navigator.maxTouchPoints > 0);
   }, []);
 
+  // Intersection observer for visibility tracking only (no auto-play)
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -48,84 +49,101 @@ const HoverVideo = ({ src, className = "", autoPlay = false }: { src: string; cl
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setIsVisible(true);
-            // Start loading video when it becomes visible
-            if (!hasStartedLoad && videoRef.current) {
-              setHasStartedLoad(true);
-              videoRef.current.load();
-            }
-            // On mobile or autoPlay, start playing when visible
-            if ((autoPlay || isMobileRef.current) && videoRef.current) {
-              videoRef.current.play().catch(() => { });
-            }
-          } else {
-            setIsVisible(false);
-            if (videoRef.current) {
-              videoRef.current.pause();
-            }
+          setIsVisible(entry.isIntersecting);
+          // Pause when not visible to save resources
+          if (!entry.isIntersecting && videoRef.current && isPlaying) {
+            videoRef.current.pause();
+            setIsPlaying(false);
           }
         });
       },
       {
         threshold: 0.1,
-        rootMargin: '100px 0px' // Start loading slightly before visible
+        rootMargin: '50px 0px'
       }
     );
 
     observer.observe(container);
-
     return () => observer.disconnect();
-  }, [autoPlay, hasStartedLoad]);
+  }, [isPlaying]);
 
+  // Desktop: Play on mouse enter
   const handleMouseEnter = () => {
-    if (!autoPlay && !isMobileRef.current && videoRef.current && isVisible) {
+    if (!isMobile && videoRef.current && isVisible) {
       videoRef.current.play().catch(() => { });
+      setIsPlaying(true);
     }
   };
 
+  // Desktop: Pause on mouse leave
   const handleMouseLeave = () => {
-    if (!autoPlay && !isMobileRef.current && videoRef.current) {
+    if (!isMobile && videoRef.current) {
       videoRef.current.pause();
       videoRef.current.currentTime = 0;
+      setIsPlaying(false);
     }
   };
 
-  // Handle loaded data - seek to first frame to show thumbnail
+  // Mobile: Toggle play on tap
+  const handleTap = () => {
+    if (isMobile && videoRef.current && isVisible) {
+      if (isPlaying) {
+        videoRef.current.pause();
+        videoRef.current.currentTime = 0;
+        setIsPlaying(false);
+      } else {
+        videoRef.current.play().catch(() => { });
+        setIsPlaying(true);
+      }
+    }
+  };
+
+  // Handle video loaded - show first frame
   const handleLoadedData = () => {
-    setIsLoaded(true);
-    if (videoRef.current && !autoPlay && !isMobileRef.current) {
-      // Seek to 0.1s to show a frame (not black)
-      videoRef.current.currentTime = 0.1;
+    setHasLoaded(true);
+    if (videoRef.current && !isPlaying) {
+      videoRef.current.currentTime = 0.1; // Show first frame
     }
   };
 
   return (
     <div
       ref={containerRef}
-      className={`relative ${className}`}
+      className={`relative cursor-pointer ${className}`}
       style={{
         contentVisibility: 'auto',
         contain: 'layout style paint'
       }}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onClick={handleTap}
     >
-      {/* Placeholder shown while video loads */}
-      {!isLoaded && (
-        <div className="absolute inset-0 bg-neutral-800 animate-pulse" />
+      {/* Placeholder gradient - shown while video not loaded */}
+      {!hasLoaded && (
+        <div className="absolute inset-0 bg-gradient-to-br from-neutral-700 via-neutral-800 to-neutral-900" />
       )}
+      {/* Video - preload metadata to get first frame, but don't auto-play */}
       <video
         ref={videoRef}
         loop
         muted
         playsInline
-        preload="none"
-        className={`w-full h-full object-cover transition-opacity duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
+        preload={isVisible ? "metadata" : "none"}
+        className={`w-full h-full object-cover transition-opacity duration-200 ${hasLoaded ? 'opacity-100' : 'opacity-0'}`}
         onLoadedData={handleLoadedData}
       >
         <source src={src} type="video/mp4" />
       </video>
+      {/* Play indicator on mobile when not playing */}
+      {isMobile && !isPlaying && hasLoaded && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center">
+            <svg className="w-4 h-4 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
