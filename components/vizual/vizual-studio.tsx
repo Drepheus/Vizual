@@ -27,10 +27,13 @@ const ChromeText = ({ children, className = "" }: { children: React.ReactNode; c
 );
 
 // HoverVideo component - shows first frame, plays on hover/touch (optimized for mobile)
+// Performance optimized: uses preload="metadata" to only load video metadata initially
 const HoverVideo = ({ src, className = "", autoPlay = false }: { src: string; className?: string; autoPlay?: boolean }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [hasStartedLoad, setHasStartedLoad] = useState(false);
   const isMobileRef = useRef(false);
 
   // Detect mobile on mount
@@ -39,35 +42,41 @@ const HoverVideo = ({ src, className = "", autoPlay = false }: { src: string; cl
   }, []);
 
   useEffect(() => {
-    if (!videoRef.current) return;
-
-    const video = videoRef.current;
+    const container = containerRef.current;
+    if (!container) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             setIsVisible(true);
+            // Start loading video when it becomes visible
+            if (!hasStartedLoad && videoRef.current) {
+              setHasStartedLoad(true);
+              videoRef.current.load();
+            }
             // On mobile or autoPlay, start playing when visible
-            if (autoPlay || isMobileRef.current) {
-              video.play().catch(() => { });
+            if ((autoPlay || isMobileRef.current) && videoRef.current) {
+              videoRef.current.play().catch(() => { });
             }
           } else {
             setIsVisible(false);
-            video.pause();
+            if (videoRef.current) {
+              videoRef.current.pause();
+            }
           }
         });
       },
       {
         threshold: 0.1,
-        rootMargin: '50px 0px'
+        rootMargin: '100px 0px' // Start loading slightly before visible
       }
     );
 
-    observer.observe(video);
+    observer.observe(container);
 
     return () => observer.disconnect();
-  }, [autoPlay]);
+  }, [autoPlay, hasStartedLoad]);
 
   const handleMouseEnter = () => {
     if (!autoPlay && !isMobileRef.current && videoRef.current && isVisible) {
@@ -92,23 +101,32 @@ const HoverVideo = ({ src, className = "", autoPlay = false }: { src: string; cl
   };
 
   return (
-    <video
-      ref={videoRef}
-      loop
-      muted
-      playsInline
-      preload="auto"
-      className={`${className} ${isLoaded ? '' : 'bg-neutral-800'}`}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      onLoadedData={handleLoadedData}
+    <div
+      ref={containerRef}
+      className={`relative ${className}`}
       style={{
         contentVisibility: 'auto',
         contain: 'layout style paint'
       }}
     >
-      <source src={src} type="video/mp4" />
-    </video>
+      {/* Placeholder shown while video loads */}
+      {!isLoaded && (
+        <div className="absolute inset-0 bg-neutral-800 animate-pulse" />
+      )}
+      <video
+        ref={videoRef}
+        loop
+        muted
+        playsInline
+        preload="none"
+        className={`w-full h-full object-cover transition-opacity duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        onLoadedData={handleLoadedData}
+      >
+        <source src={src} type="video/mp4" />
+      </video>
+    </div>
   );
 };
 
