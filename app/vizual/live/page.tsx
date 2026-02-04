@@ -25,7 +25,9 @@ import {
   Palette,
   Zap,
   Image as ImageIcon,
-  Plus
+  Plus,
+  Send,
+  Loader2
 } from "lucide-react";
 import { Inter, Space_Grotesk } from "next/font/google";
 import { useToast } from "@/components/ui/toast";
@@ -82,6 +84,7 @@ export default function LivePage() {
   // Default to Einstein image
   const [referenceImage, setReferenceImage] = useState<string | null>('https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Einstein_1921_by_F_Schmutzer_-_restoration.jpg/440px-Einstein_1921_by_F_Schmutzer_-_restoration.jpg');
   const [characterPrompt, setCharacterPrompt] = useState<string>('');
+  const [isGeneratingCharacter, setIsGeneratingCharacter] = useState(false);
 
   // Effect to attach stream to video element when both are available
   // This fixes the issue where the video element isn't rendered yet when the stream is set
@@ -461,13 +464,75 @@ export default function LivePage() {
     }
   };
 
-  // Update prompt while streaming
+  // Update prompt while streaming (for style changes)
   const updatePrompt = (newPrompt: string) => {
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify({
         type: 'prompt',
         prompt: newPrompt
       }));
+    }
+  };
+
+  // Generate a character image from text prompt
+  const generateCharacterFromPrompt = async () => {
+    if (!characterPrompt.trim()) {
+      showToast('Please enter a character description', 'error');
+      return;
+    }
+
+    setIsGeneratingCharacter(true);
+    showToast('Generating character...', 'success');
+
+    try {
+      // Enhance prompt for portrait generation
+      const enhancedPrompt = `Portrait photo of ${characterPrompt}, detailed face, high quality, professional headshot, centered, looking at camera`;
+      
+      const response = await fetch('/api/generate-image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: enhancedPrompt,
+          aspectRatio: '1:1',
+          model: 'flux-schnell'
+        })
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to generate character');
+      }
+
+      const data = await response.json();
+      
+      if (data.imageUrl) {
+        setReferenceImage(data.imageUrl);
+        showToast('Character generated!', 'success');
+        
+        // If streaming, update the reference image in the stream
+        if (isStreaming && wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+          // Fetch the image and convert to base64
+          try {
+            const imgResponse = await fetch(data.imageUrl);
+            const blob = await imgResponse.blob();
+            const reader = new FileReader();
+            reader.onload = () => {
+              const dataUrl = reader.result as string;
+              updateReferenceImage(dataUrl);
+            };
+            reader.readAsDataURL(blob);
+          } catch (err) {
+            console.error('Error converting image for stream:', err);
+          }
+        }
+      } else {
+        throw new Error('No image returned');
+      }
+    } catch (error: any) {
+      console.error('Character generation error:', error);
+      showToast(error.message || 'Failed to generate character', 'error');
+    } finally {
+      setIsGeneratingCharacter(false);
     }
   };
 
@@ -713,16 +778,37 @@ export default function LivePage() {
                 <button
                   onClick={() => imageInputRef.current?.click()}
                   className="p-1.5 rounded-lg bg-white/10 text-white/70 hover:bg-white/20 transition-colors"
+                  title="Upload image"
                 >
                   <Upload size={14} />
                 </button>
               </div>
-              <textarea
-                value={characterPrompt}
-                onChange={(e) => setCharacterPrompt(e.target.value)}
-                placeholder="Describe who you want to become..."
-                className="w-full h-16 bg-black/40 backdrop-blur-md border border-white/20 rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-purple-500/50 transition-all duration-300 resize-none"
-              />
+              <div className="flex gap-2">
+                <textarea
+                  value={characterPrompt}
+                  onChange={(e) => setCharacterPrompt(e.target.value)}
+                  placeholder="Describe who you want to become..."
+                  className="flex-1 h-12 bg-black/40 backdrop-blur-md border border-white/20 rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-purple-500/50 transition-all duration-300 resize-none"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      generateCharacterFromPrompt();
+                    }
+                  }}
+                />
+                <button
+                  onClick={generateCharacterFromPrompt}
+                  disabled={isGeneratingCharacter || !characterPrompt.trim()}
+                  className="px-4 rounded-xl bg-purple-500/80 hover:bg-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center"
+                  title="Generate character"
+                >
+                  {isGeneratingCharacter ? (
+                    <Loader2 size={18} className="text-white animate-spin" />
+                  ) : (
+                    <Send size={18} className="text-white" />
+                  )}
+                </button>
+              </div>
             </div>
 
             {/* Style prompt - Transparent (collapsed) */}
@@ -957,12 +1043,32 @@ export default function LivePage() {
                   <span className="text-xs font-bold text-gray-300 uppercase tracking-widest">Character</span>
                 </div>
 
-                <textarea
-                  value={characterPrompt}
-                  onChange={(e) => setCharacterPrompt(e.target.value)}
-                  placeholder="Describe the character you want to become..."
-                  className="w-full h-20 bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-purple-500/50 transition-all duration-300 resize-none mb-3"
-                />
+                <div className="flex gap-2 mb-3">
+                  <textarea
+                    value={characterPrompt}
+                    onChange={(e) => setCharacterPrompt(e.target.value)}
+                    placeholder="Describe the character you want to become..."
+                    className="flex-1 h-16 bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-purple-500/50 transition-all duration-300 resize-none"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        generateCharacterFromPrompt();
+                      }
+                    }}
+                  />
+                  <button
+                    onClick={generateCharacterFromPrompt}
+                    disabled={isGeneratingCharacter || !characterPrompt.trim()}
+                    className="px-4 rounded-xl bg-purple-500/80 hover:bg-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center"
+                    title="Generate character from prompt"
+                  >
+                    {isGeneratingCharacter ? (
+                      <Loader2 size={18} className="text-white animate-spin" />
+                    ) : (
+                      <Send size={18} className="text-white" />
+                    )}
+                  </button>
+                </div>
 
                 <div className="flex items-center gap-3">
                   {referenceImage ? (
@@ -985,8 +1091,7 @@ export default function LivePage() {
                     </button>
                   )}
                   <div className="text-[10px] text-gray-500">
-                    <p className="text-gray-400 mb-1">Optional: Upload reference</p>
-                    <p>Or describe above</p>
+                    <p className="text-gray-400 mb-1">Or upload a reference image</p>
                   </div>
                 </div>
 
