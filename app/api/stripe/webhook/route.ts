@@ -1,15 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2023-10-16',
-});
+// Initialize Stripe lazily to avoid build-time errors
+let stripeInstance: Stripe | null = null;
+const getStripe = (): Stripe => {
+  if (!stripeInstance) {
+    if (!process.env.STRIPE_SECRET_KEY) {
+      throw new Error('STRIPE_SECRET_KEY is not configured');
+    }
+    stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY);
+  }
+  return stripeInstance;
+};
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// Initialize Supabase admin lazily
+let supabaseAdminInstance: SupabaseClient | null = null;
+const getSupabaseAdmin = (): SupabaseClient => {
+  if (!supabaseAdminInstance) {
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      throw new Error('Supabase credentials not configured');
+    }
+    supabaseAdminInstance = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    );
+  }
+  return supabaseAdminInstance;
+};
 
 // Credit amounts for each product (map your Stripe price IDs to credits)
 const CREDIT_AMOUNTS: Record<string, number> = {
@@ -25,6 +43,9 @@ export async function POST(request: NextRequest) {
   if (!signature) {
     return NextResponse.json({ error: 'No signature' }, { status: 400 });
   }
+
+  const stripe = getStripe();
+  const supabaseAdmin = getSupabaseAdmin();
 
   let event: Stripe.Event;
 
@@ -80,10 +101,10 @@ export async function POST(request: NextRequest) {
             .single();
 
           if (profile) {
-            await handleCreditPurchase(session, profile.id, profile.credits || 0);
+            await handleCreditPurchase(stripe, supabaseAdmin, session, profile.id, profile.credits || 0);
           }
         } else {
-          await handleCreditPurchase(session, user.id, user.credits || 0);
+          await handleCreditPurchase(stripe, supabaseAdmin, session, user.id, user.credits || 0);
         }
         
         // Update Stripe customer ID on user profile
@@ -100,22 +121,20 @@ export async function POST(request: NextRequest) {
       case 'customer.subscription.created':
       case 'customer.subscription.updated': {
         const subscription = event.data.object as Stripe.Subscription;
-        await handleSubscriptionUpdate(subscription);
+        await handleSubscriptionUpdate(supabaseAdmin, subscription);
         break;
       }
 
       case 'customer.subscription.deleted': {
         const subscription = event.data.object as Stripe.Subscription;
-        await handleSubscriptionCancelled(subscription);
+        await handleSubscriptionCancelled(supabaseAdmin, subscription);
         break;
       }
 
       case 'invoice.payment_succeeded': {
         const invoice = event.data.object as Stripe.Invoice;
         // Handle recurring subscription payment
-        if (invoice.subscription) {
-          console.log('Recurring payment succeeded for subscription:', invoice.subscription);
-        }
+        console.log('Recurring payment succeeded for invoice:', invoice.id);
         break;
       }
 
@@ -134,7 +153,13 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function handleCreditPurchase(session: Stripe.Checkout.Session, userId: string, currentCredits: number) {
+async function handleCreditPurchase(
+  stripe: Stripe,
+  supabaseAdmin: SupabaseClient,
+  session: Stripe.Checkout.Session,
+  userId: string,
+  currentCredits: number
+) {
   // Get line items to determine credits purchased
   const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
   
@@ -173,7 +198,7 @@ async function handleCreditPurchase(session: Stripe.Checkout.Session, userId: st
   }
 }
 
-async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
+async function handleSubscriptionUpdate(supabaseAdmin: SupabaseClient, subscription: Stripe.Subscription) {
   const customerId = subscription.customer as string;
   
   // Find user by Stripe customer ID
@@ -191,20 +216,23 @@ async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
   const priceId = subscription.items.data[0]?.price?.id;
   const status = subscription.status;
 
+  // Get current period end from subscription items
+  const currentPeriodEnd = (subscription as any).current_period_end;
+  
   await supabaseAdmin
     .from('profiles')
     .update({
       subscription_status: status,
       subscription_price_id: priceId,
       subscription_id: subscription.id,
-      subscription_current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+      ...(currentPeriodEnd && { subscription_current_period_end: new Date(currentPeriodEnd * 1000).toISOString() }),
     })
     .eq('id', user.id);
 
   console.log(`Updated subscription for user ${user.id}: ${status}`);
 }
 
-async function handleSubscriptionCancelled(subscription: Stripe.Subscription) {
+async function handleSubscriptionCancelled(supabaseAdmin: SupabaseClient, subscription: Stripe.Subscription) {
   const customerId = subscription.customer as string;
   
   const { data: user } = await supabaseAdmin
