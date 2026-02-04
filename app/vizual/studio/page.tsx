@@ -66,6 +66,7 @@ import { ProjectsView } from "@/components/vizual/projects-view";
 import { Sidebar } from "@/components/vizual/sidebar";
 import { useToast } from "@/components/ui/toast";
 import { getBrowserSupabaseClient } from "@/lib/supabase-browser";
+import { getUserCreditsAndUsage, UserCreditsAndUsage } from "@/lib/usage-tracking";
 
 const supabase = getBrowserSupabaseClient();
 
@@ -497,6 +498,7 @@ export default function VizualStudioApp() {
   const [userCredits, setUserCredits] = useState<number>(50);
   const [creditsUsed, setCreditsUsed] = useState<number>(0);
   const [isLoadingCredits, setIsLoadingCredits] = useState(true);
+  const [accountData, setAccountData] = useState<UserCreditsAndUsage | null>(null);
   const creditsRemaining = userCredits - creditsUsed;
 
   // Calculate credit cost for current generation
@@ -702,26 +704,37 @@ export default function VizualStudioApp() {
         // Guest mode gets 50 free credits
         setUserCredits(50);
         setCreditsUsed(0);
+        setAccountData(null);
         setIsLoadingCredits(false);
         return;
       }
 
       try {
         setIsLoadingCredits(true);
-        const { data, error } = await supabase
-          .from('users')
-          .select('credits, credits_used, subscription_tier')
-          .eq('id', user.id)
-          .single();
+        
+        // Fetch full account data using our tracking function
+        const usageData = await getUserCreditsAndUsage(user.id);
+        if (usageData) {
+          setAccountData(usageData);
+          setUserCredits(usageData.credits || 50);
+          setCreditsUsed(usageData.credits_used || 0);
+        } else {
+          // Fallback to direct query
+          const { data, error } = await supabase
+            .from('users')
+            .select('credits, credits_used, subscription_tier')
+            .eq('id', user.id)
+            .single();
 
-        if (error) {
-          console.error('Error fetching credits:', error);
-          // Default to free tier credits
-          setUserCredits(50);
-          setCreditsUsed(0);
-        } else if (data) {
-          setUserCredits(data.credits || 50);
-          setCreditsUsed(data.credits_used || 0);
+          if (error) {
+            console.error('Error fetching credits:', error);
+            // Default to free tier credits
+            setUserCredits(50);
+            setCreditsUsed(0);
+          } else if (data) {
+            setUserCredits(data.credits || 50);
+            setCreditsUsed(data.credits_used || 0);
+          }
         }
       } catch (err) {
         console.error('Error fetching credits:', err);
@@ -2472,20 +2485,51 @@ export default function VizualStudioApp() {
                       {user?.email || 'artist@vizual.ai'}
                     </p>
                   </div>
-                  <div className="px-3 py-1 rounded-full bg-white/10 border border-white/10 text-xs font-medium text-white">
-                    Free Plan
+                  <div className={`px-3 py-1 rounded-full border text-xs font-medium ${
+                    accountData?.subscription_tier === 'ultra' ? 'bg-gradient-to-r from-purple-500/20 to-pink-500/20 border-purple-500/30 text-purple-300' :
+                    accountData?.subscription_tier === 'pro' ? 'bg-blue-500/20 border-blue-500/30 text-blue-300' :
+                    'bg-white/10 border-white/10 text-white'
+                  }`}>
+                    {accountData?.subscription_tier ? 
+                      accountData.subscription_tier.charAt(0).toUpperCase() + accountData.subscription_tier.slice(1) + ' Plan' 
+                      : 'Free Plan'}
                   </div>
                 </div>
 
-                {/* Usage Stats - Updated to visual style per request */}
+                {/* Usage Stats - Real data */}
                 <div className="p-4 rounded-xl bg-white/5 border border-white/10 mb-6">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-xs font-medium text-gray-400">Monthly Credits</span>
-                    <span className="text-xs font-bold text-white">12 / 50</span>
+                    <span className="text-xs font-bold text-white">
+                      {accountData?.credits_remaining ?? creditsRemaining} / {accountData?.credits ?? userCredits}
+                    </span>
                   </div>
                   <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
-                    <div className="h-full bg-white w-[24%]" />
+                    <div 
+                      className="h-full bg-white transition-all duration-300" 
+                      style={{ 
+                        width: `${accountData?.credits ? 
+                          Math.round((accountData.credits_remaining / accountData.credits) * 100) : 
+                          Math.round((creditsRemaining / userCredits) * 100)}%` 
+                      }} 
+                    />
                   </div>
+                  {accountData?.daily_free_images_limit && accountData.daily_free_images_limit > 0 && (
+                    <div className="mt-3 pt-3 border-t border-white/10">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs font-medium text-gray-400">Daily Free Images</span>
+                        <span className="text-xs font-bold text-white">
+                          {accountData.daily_free_images_remaining} / {accountData.daily_free_images_limit}
+                        </span>
+                      </div>
+                      <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-green-400 transition-all duration-300" 
+                          style={{ width: `${Math.round((accountData.daily_free_images_remaining / accountData.daily_free_images_limit) * 100)}%` }} 
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Menu Items */}
@@ -2509,35 +2553,67 @@ export default function VizualStudioApp() {
                         <div className="p-4 bg-white/5 rounded-xl border border-white/10 space-y-3">
                           <div className="flex justify-between items-center">
                             <span className="text-xs text-gray-400">Current Plan</span>
-                            <span className="text-xs text-white font-bold px-2 py-0.5 bg-white/10 rounded-full">Free Tier</span>
+                            <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                              accountData?.subscription_tier === 'ultra' ? 'bg-purple-500/20 text-purple-300' :
+                              accountData?.subscription_tier === 'pro' ? 'bg-blue-500/20 text-blue-300' :
+                              'bg-white/10 text-white'
+                            }`}>
+                              {accountData?.subscription_tier ? 
+                                accountData.subscription_tier.charAt(0).toUpperCase() + accountData.subscription_tier.slice(1) 
+                                : 'Free'} Tier
+                            </span>
                           </div>
                           <div className="flex justify-between items-center">
                             <span className="text-xs text-gray-400">Billing Cycle</span>
-                            <span className="text-xs text-white font-medium">Monthly</span>
+                            <span className="text-xs text-white font-medium">
+                              {accountData?.is_paid_user ? 'Monthly' : '-'}
+                            </span>
                           </div>
                           <div className="flex justify-between items-center">
-                            <span className="text-xs text-gray-400">Next Bill Date</span>
-                            <span className="text-xs text-gray-300">-</span>
+                            <span className="text-xs text-gray-400">Credits Reset</span>
+                            <span className="text-xs text-gray-300">
+                              {accountData?.credits_reset_at ? 
+                                new Date(accountData.credits_reset_at).toLocaleDateString() 
+                                : '-'}
+                            </span>
                           </div>
                           <div className="border-t border-white/10 pt-3 mt-2">
                             <div className="flex justify-between items-center mb-2">
                               <span className="text-xs text-gray-400">Credits Used</span>
-                              <span className="text-xs text-white font-medium">12 / 50</span>
+                              <span className="text-xs text-white font-medium">
+                                {accountData?.credits_used ?? creditsUsed} / {accountData?.credits ?? userCredits}
+                              </span>
                             </div>
                             <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
-                              <div className="h-full bg-gradient-to-r from-white to-gray-400 w-[24%]" />
+                              <div 
+                                className="h-full bg-gradient-to-r from-white to-gray-400 transition-all duration-300" 
+                                style={{ 
+                                  width: `${accountData?.credits ? 
+                                    Math.round((accountData.credits_used / accountData.credits) * 100) : 
+                                    Math.round((creditsUsed / userCredits) * 100)}%` 
+                                }} 
+                              />
                             </div>
                           </div>
-                          <div className="border-t border-white/10 pt-3 mt-2">
-                            <span className="text-[10px] text-gray-500 uppercase tracking-wider">Payment Method</span>
-                            <div className="flex items-center gap-2 mt-2">
-                              <div className="w-8 h-5 bg-gradient-to-r from-gray-700 to-gray-600 rounded flex items-center justify-center text-[8px] text-white font-bold">
-                                VISA
+                          {accountData?.is_paid_user && (
+                            <div className="border-t border-white/10 pt-3 mt-2">
+                              <span className="text-[10px] text-gray-500 uppercase tracking-wider">Payment Method</span>
+                              <div className="flex items-center gap-2 mt-2">
+                                <div className="w-8 h-5 bg-gradient-to-r from-gray-700 to-gray-600 rounded flex items-center justify-center text-[8px] text-white font-bold">
+                                  CARD
+                                </div>
+                                <span className="text-xs text-gray-300">Managed by Stripe</span>
+                                <a 
+                                  href="https://billing.stripe.com/p/login/6oE7tk8g403j5os7ss" 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="ml-auto text-[10px] text-blue-400 hover:text-blue-300"
+                                >
+                                  Manage
+                                </a>
                               </div>
-                              <span className="text-xs text-gray-300">•••• 4242</span>
-                              <button className="ml-auto text-[10px] text-blue-400 hover:text-blue-300">Edit</button>
                             </div>
-                          </div>
+                          )}
                         </div>
                         <button
                           onClick={() => {
