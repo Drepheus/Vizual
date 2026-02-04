@@ -22,6 +22,23 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        {/* Resource Hints for Performance Optimization */}
+        {/* Preconnect to critical third-party origins */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+
+        {/* DNS prefetch for analytics (non-critical) */}
+        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+        <link rel="dns-prefetch" href="https://www.google-analytics.com" />
+
+        {/* Preconnect to Supabase for faster auth/data */}
+        <link rel="preconnect" href="https://supabase.co" />
+        <link rel="dns-prefetch" href="https://supabase.co" />
+
+        {/* Preconnect to media CDN if using external hosting */}
+        <link rel="dns-prefetch" href="https://replicate.delivery" />
+      </head>
       <body className="min-h-screen bg-[#020205] text-white antialiased">
         {/* Google Tag Manager (noscript) */}
         <noscript>

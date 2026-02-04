@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { Building2, Shield, Users, Headphones, Gauge, Lock, Globe, Cpu, ArrowRight, Check } from "lucide-react";
 import { Inter, Space_Grotesk } from "next/font/google";
+import { LazyVideo } from "@/components/ui/lazy-video";
 
 const inter = Inter({ subsets: ["latin"], weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"] });
 const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], weight: ["300", "400", "500", "600", "700"] });
@@ -69,15 +70,14 @@ export default function EnterprisePage() {
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 px-4 overflow-hidden">
         <div className="absolute inset-0">
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="w-full h-full object-cover opacity-30"
-          >
-            <source src="/videos/ray3darkspace.mp4" type="video/mp4" />
-          </video>
+          <LazyVideo
+            src="/videos/ray3darkspace.mp4"
+            className="opacity-30"
+            containerClassName="w-full h-full"
+            aspectRatio=""
+            priority={true}
+            showPlayButton={false}
+          />
           <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/80 to-black" />
         </div>
         
@@ -203,15 +203,15 @@ export default function EnterprisePage() {
             ].map((useCase, i) => (
               <div key={i} className="group">
                 <div className="aspect-video rounded-2xl overflow-hidden mb-6 bg-gray-900">
-                  <video
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity group-hover:scale-105 transition-transform duration-500"
-                  >
-                    <source src={useCase.video} type="video/mp4" />
-                  </video>
+                  <LazyVideo
+                    src={useCase.video}
+                    className="opacity-80 group-hover:opacity-100 transition-opacity group-hover:scale-105 transition-transform duration-500"
+                    containerClassName="w-full h-full"
+                    aspectRatio=""
+                    threshold={0.1}
+                    rootMargin="100px"
+                    showPlayButton={false}
+                  />
                 </div>
                 <h3 className={`text-xl font-bold mb-2 ${spaceGrotesk.className}`}>{useCase.title}</h3>
                 <p className="text-gray-400">{useCase.description}</p>
@@ -266,15 +266,15 @@ export default function EnterprisePage() {
             
             <div className="relative">
               <div className="aspect-square rounded-3xl overflow-hidden bg-gradient-to-br from-blue-900/20 to-purple-900/20 border border-white/10">
-                <video
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  className="w-full h-full object-cover opacity-60"
-                >
-                  <source src="/videos/matrixcode.mp4" type="video/mp4" />
-                </video>
+                <LazyVideo
+                  src="/videos/matrixcode.mp4"
+                  className="opacity-60"
+                  containerClassName="w-full h-full"
+                  aspectRatio=""
+                  threshold={0.2}
+                  rootMargin="150px"
+                  showPlayButton={false}
+                />
               </div>
             </div>
           </div>
