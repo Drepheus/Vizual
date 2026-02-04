@@ -6,6 +6,9 @@ import gsap from 'gsap';
 import './veo.css';
 import { VertexSidebar } from '../../src/components/VertexSidebar';
 
+// CDN base URL for video assets
+const CDN_BASE = "https://storage.googleapis.com/vizual-cdn-assets";
+
 export default function VeoPage() {
     const router = useRouter();
     const heroRef = useRef<HTMLDivElement>(null);
@@ -75,7 +78,7 @@ export default function VeoPage() {
                         muted
                         playsInline
                     >
-                        <source src="/videos/veo-hero.mp4" type="video/mp4" />
+                        <source src={`${CDN_BASE}/videos/veo-hero.mp4`} type="video/mp4" />
                     </video>
                     <div className="veo-hero-overlay"></div>
 
@@ -153,7 +156,7 @@ export default function VeoPage() {
                             muted
                             playsInline
                         >
-                            <source src="/videos/veo1.mp4" type="video/mp4" />
+                            <source src={`${CDN_BASE}/videos/veo1.mp4`} type="video/mp4" />
                         </video>
                         <div className="showcase-caption">Bathroom orchestra</div>
                     </div>
@@ -165,7 +168,7 @@ export default function VeoPage() {
                             muted
                             playsInline
                         >
-                            <source src="/videos/veo2.mp4" type="video/mp4" />
+                            <source src={`${CDN_BASE}/videos/veo2.mp4`} type="video/mp4" />
                         </video>
                         <div className="showcase-caption">Helicopter DJ</div>
                     </div>
@@ -177,7 +180,7 @@ export default function VeoPage() {
                             muted
                             playsInline
                         >
-                            <source src="/videos/veo3.mp4" type="video/mp4" />
+                            <source src={`${CDN_BASE}/videos/veo3.mp4`} type="video/mp4" />
                         </video>
                         <div className="showcase-caption">Mini walking Mushrooms</div>
                     </div>

@@ -5,6 +5,9 @@ import { Building2, Shield, Users, Headphones, Gauge, Lock, Globe, Cpu, ArrowRig
 import { Inter, Space_Grotesk } from "next/font/google";
 import { LazyVideo } from "@/components/ui/lazy-video";
 
+// CDN base URL for video assets
+const CDN_BASE = "https://storage.googleapis.com/vizual-cdn-assets";
+
 const inter = Inter({ subsets: ["latin"], weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"] });
 const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], weight: ["300", "400", "500", "600", "700"] });
 
@@ -71,7 +74,7 @@ export default function EnterprisePage() {
       <section className="relative pt-32 pb-20 px-4 overflow-hidden">
         <div className="absolute inset-0">
           <LazyVideo
-            src="/videos/ray3darkspace.mp4"
+            src={`${CDN_BASE}/videos/ray3darkspace.mp4`}
             className="opacity-30"
             containerClassName="w-full h-full"
             aspectRatio=""
@@ -187,17 +190,17 @@ export default function EnterprisePage() {
             {[
               {
                 title: "Media & Entertainment",
-                video: "/videos/film.mp4",
+                video: "/videos/film.mp4`},
                 description: "Create stunning visual effects, trailers, and promotional content at scale."
               },
               {
                 title: "E-Commerce",
-                video: "/videos/product.mp4",
+                video: "/videos/product.mp4`},
                 description: "Generate product videos and lifestyle imagery that converts."
               },
               {
                 title: "Marketing Agencies",
-                video: "/videos/design.mp4",
+                video: "/videos/design.mp4`},
                 description: "Produce campaign assets 10x faster without sacrificing quality."
               }
             ].map((useCase, i) => (
@@ -267,7 +270,7 @@ export default function EnterprisePage() {
             <div className="relative">
               <div className="aspect-square rounded-3xl overflow-hidden bg-gradient-to-br from-blue-900/20 to-purple-900/20 border border-white/10">
                 <LazyVideo
-                  src="/videos/matrixcode.mp4"
+                  src={`${CDN_BASE}/videos/matrixcode.mp4`}
                   className="opacity-60"
                   containerClassName="w-full h-full"
                   aspectRatio=""

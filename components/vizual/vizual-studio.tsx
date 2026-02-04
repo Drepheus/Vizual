@@ -11,6 +11,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import Aurora from "./Aurora";
 import { HoverBorderGradient } from "@/src/components/ui/hover-border-gradient";
 
+// CDN base URL for video assets
+const CDN_BASE = "https://storage.googleapis.com/vizual-cdn-assets";
+
 // Chrome/Silver gradient text component with shimmer animation
 const ChromeText = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
   <span
@@ -425,7 +428,7 @@ export function VizualStudio() {
             className="min-h-full min-w-full object-cover opacity-70 will-change-transform"
             style={{ contentVisibility: 'auto' }}
           >
-            <source src="/videos/veo2.mp4" type="video/mp4" />
+            <source src={`${CDN_BASE}/videos/veo2.mp4`} type="video/mp4" />
           </video>
           <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/80" />
         </div>
@@ -539,7 +542,7 @@ export function VizualStudio() {
 
               <div className="relative w-full aspect-[4/3] md:aspect-[21/9] bg-[#1a1a1a] mt-auto">
                 <HoverVideo
-                  src="/videos/klingnextgen.mp4"
+                  src={`${CDN_BASE}/videos/klingnextgen.mp4`}
                   className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500"
                   autoPlay={true}
                 />
@@ -578,7 +581,7 @@ export function VizualStudio() {
               playsInline
               className="absolute inset-0 w-full h-full object-cover"
             >
-              <source src="/videos/RAYVID.mp4" type="video/mp4" />
+              <source src={`${CDN_BASE}/videos/RAYVID.mp4`} type="video/mp4" />
             </video>
             <div className="absolute inset-0 bg-black/30" />
 
@@ -753,22 +756,22 @@ export function VizualStudio() {
             {[...Array(2)].map((_, i) => (
               <div key={i} className="flex gap-4">
                 <div className="carousel-item rounded-xl overflow-hidden relative group bg-gray-900">
-                  <HoverVideo src="/videos/film.mp4" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                  <HoverVideo src={`${CDN_BASE}/videos/film.mp4`} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                 </div>
                 <div className="carousel-item rounded-xl overflow-hidden relative group bg-gray-900">
-                  <HoverVideo src="/videos/film2.mp4" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                  <HoverVideo src={`${CDN_BASE}/videos/film2.mp4`} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                 </div>
                 <div className="carousel-item rounded-xl overflow-hidden relative group bg-gray-900">
-                  <HoverVideo src="/videos/film3.mp4" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                  <HoverVideo src={`${CDN_BASE}/videos/film3.mp4`} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                 </div>
                 <div className="carousel-item rounded-xl overflow-hidden relative group bg-gray-900">
-                  <HoverVideo src="/videos/film5.mp4" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                  <HoverVideo src={`${CDN_BASE}/videos/film5.mp4`} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                 </div>
                 <div className="carousel-item rounded-xl overflow-hidden relative group bg-gray-900">
-                  <HoverVideo src="/videos/film6.mp4" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                  <HoverVideo src={`${CDN_BASE}/videos/film6.mp4`} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                 </div>
                 <div className="carousel-item rounded-xl overflow-hidden relative group bg-gray-900">
-                  <HoverVideo src="/videos/film7.mp4" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                  <HoverVideo src={`${CDN_BASE}/videos/film7.mp4`} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                 </div>
               </div>
             ))}
@@ -792,13 +795,13 @@ export function VizualStudio() {
               {[...Array(2)].map((_, i) => (
                 <div key={i} className="flex gap-4">
                   <div className="carousel-item rounded-xl overflow-hidden relative group bg-gray-900">
-                    <HoverVideo src="/videos/ani.mp4" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                    <HoverVideo src={`${CDN_BASE}/videos/ani.mp4`} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                   </div>
                   <div className="carousel-item rounded-xl overflow-hidden relative group bg-gray-900">
-                    <HoverVideo src="/videos/ani1.mp4" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                    <HoverVideo src={`${CDN_BASE}/videos/ani1.mp4`} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                   </div>
                   <div className="carousel-item rounded-xl overflow-hidden relative group bg-gray-900">
-                    <HoverVideo src="/videos/ani4.mp4" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                    <HoverVideo src={`${CDN_BASE}/videos/ani4.mp4`} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                   </div>
                 </div>
               ))}
@@ -819,10 +822,10 @@ export function VizualStudio() {
               {[...Array(2)].map((_, i) => (
                 <div key={i} className="flex gap-4">
                   <div className="carousel-item rounded-xl overflow-hidden relative group bg-gray-900">
-                    <HoverVideo src="/videos/design.mp4" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                    <HoverVideo src={`${CDN_BASE}/videos/design.mp4`} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                   </div>
                   <div className="carousel-item rounded-xl overflow-hidden relative group bg-gray-900">
-                    <HoverVideo src="/videos/design2.mp4" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                    <HoverVideo src={`${CDN_BASE}/videos/design2.mp4`} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                   </div>
                 </div>
               ))}
@@ -843,28 +846,28 @@ export function VizualStudio() {
               {[...Array(2)].map((_, i) => (
                 <div key={i} className="flex gap-4">
                   <div className="carousel-item rounded-xl overflow-hidden relative group bg-gray-900">
-                    <HoverVideo src="/videos/product.mp4" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                    <HoverVideo src={`${CDN_BASE}/videos/product.mp4`} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                   </div>
                   <div className="carousel-item rounded-xl overflow-hidden relative group bg-gray-900">
-                    <HoverVideo src="/videos/product1.mp4" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                    <HoverVideo src={`${CDN_BASE}/videos/product1.mp4`} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                   </div>
                   <div className="carousel-item rounded-xl overflow-hidden relative group bg-gray-900">
-                    <HoverVideo src="/videos/product2.mp4" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                    <HoverVideo src={`${CDN_BASE}/videos/product2.mp4`} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                   </div>
                   <div className="carousel-item rounded-xl overflow-hidden relative group bg-gray-900">
-                    <HoverVideo src="/videos/product3.mp4" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                    <HoverVideo src={`${CDN_BASE}/videos/product3.mp4`} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                   </div>
                   <div className="carousel-item rounded-xl overflow-hidden relative group bg-gray-900">
-                    <HoverVideo src="/videos/product4.mp4" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                    <HoverVideo src={`${CDN_BASE}/videos/product4.mp4`} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                   </div>
                   <div className="carousel-item rounded-xl overflow-hidden relative group bg-gray-900">
-                    <HoverVideo src="/videos/product5.mp4" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                    <HoverVideo src={`${CDN_BASE}/videos/product5.mp4`} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                   </div>
                   <div className="carousel-item rounded-xl overflow-hidden relative group bg-gray-900">
-                    <HoverVideo src="/videos/product6.mp4" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                    <HoverVideo src={`${CDN_BASE}/videos/product6.mp4`} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                   </div>
                   <div className="carousel-item rounded-xl overflow-hidden relative group bg-gray-900">
-                    <HoverVideo src="/videos/product7.mp4" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                    <HoverVideo src={`${CDN_BASE}/videos/product7.mp4`} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                   </div>
                 </div>
               ))}
@@ -885,10 +888,10 @@ export function VizualStudio() {
               {[...Array(2)].map((_, i) => (
                 <div key={i} className="flex gap-4">
                   <div className="carousel-item rounded-xl overflow-hidden relative group bg-gray-900">
-                    <HoverVideo src="/videos/music.mp4" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                    <HoverVideo src={`${CDN_BASE}/videos/music.mp4`} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                   </div>
                   <div className="carousel-item rounded-xl overflow-hidden relative group bg-gray-900">
-                    <HoverVideo src="/videos/music2.mp4" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                    <HoverVideo src={`${CDN_BASE}/videos/music2.mp4`} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                   </div>
                 </div>
               ))}
@@ -921,7 +924,7 @@ export function VizualStudio() {
       {/* New Freedoms Section */}
       < section className="relative z-60 w-full min-h-screen bg-black pb-32 px-4 flex items-center justify-center" >
         <div className="relative w-full max-w-md md:max-w-6xl mx-auto aspect-[3/4] md:aspect-[21/9] rounded-[40px] overflow-hidden group">
-          <HoverVideo src="/videos/veo1.mp4" className="absolute inset-0 w-full h-full object-cover opacity-70" autoPlay={true} />
+          <HoverVideo src={`${CDN_BASE}/videos/veo1.mp4`} className="absolute inset-0 w-full h-full object-cover opacity-70" autoPlay={true} />
           <div className="absolute inset-0 bg-black/20 pointer-events-none" />
 
           <div className={`absolute inset-0 flex flex-col items-center justify-center text-center z-10 p-4 leading-none select-none ${spaceGrotesk.className} pointer-events-none`}>
@@ -945,7 +948,7 @@ export function VizualStudio() {
             See how Vizual fits naturally into your creative workflow
           </p>
           <div className="relative w-full max-w-6xl mx-auto rounded-[32px] overflow-hidden border border-black/10 shadow-2xl shadow-black/5 animate-on-scroll animate-scale-fade delay-300">
-            <HoverVideo src="/videos/videsectionloop.mp4" className="w-full h-auto" autoPlay={true} />
+            <HoverVideo src={`${CDN_BASE}/videos/videsectionloop.mp4`} className="w-full h-auto" autoPlay={true} />
           </div>
         </div>
       </section>
@@ -984,7 +987,7 @@ export function VizualStudio() {
             {/* Portrait Video */}
             <div className="order-1 md:order-2 flex justify-center animate-on-scroll animate-fade-in-right delay-300">
               <div className="relative w-full max-w-[300px] md:max-w-[350px] aspect-[9/16] rounded-[32px] overflow-hidden border border-white/10 shadow-2xl shadow-white/5">
-                <HoverVideo src="/videos/verticalvid.mp4" className="w-full h-full object-cover" autoPlay={true} />
+                <HoverVideo src={`${CDN_BASE}/videos/verticalvid.mp4`} className="w-full h-full object-cover" autoPlay={true} />
               </div>
             </div>
           </div>
@@ -1001,7 +1004,7 @@ export function VizualStudio() {
             Transform your words into stunning visuals with unparalleled precision and creativity
           </p>
           <div className="relative w-full max-w-6xl mx-auto rounded-[32px] overflow-hidden border border-black/10 shadow-2xl shadow-black/5 animate-on-scroll animate-scale-fade delay-300">
-            <HoverVideo src="/videos/text2image.mp4" className="w-full h-auto" autoPlay={true} />
+            <HoverVideo src={`${CDN_BASE}/videos/text2image.mp4`} className="w-full h-auto" autoPlay={true} />
           </div>
         </div>
       </section>
@@ -1013,7 +1016,7 @@ export function VizualStudio() {
             {/* Portrait Video */}
             <div className="flex justify-center animate-on-scroll animate-fade-in-left">
               <div className="relative w-full max-w-[300px] md:max-w-[350px] aspect-[9/16] rounded-[32px] overflow-hidden border border-white/10 shadow-2xl shadow-white/5">
-                <HoverVideo src="/videos/samchar.mp4" className="w-full h-full object-cover" autoPlay={true} />
+                <HoverVideo src={`${CDN_BASE}/videos/samchar.mp4`} className="w-full h-full object-cover" autoPlay={true} />
               </div>
             </div>
 
@@ -1079,7 +1082,7 @@ export function VizualStudio() {
                 preload="metadata"
                 className="w-full aspect-video object-cover"
               >
-                <source src="/videos/avatarscene.mp4" type="video/mp4" />
+                <source src={`${CDN_BASE}/videos/avatarscene.mp4`} type="video/mp4" />
               </video>
               <div className="p-4">
                 <h3 className={`text-xl font-bold mb-2 ${spaceGrotesk.className}`}>
@@ -1097,7 +1100,7 @@ export function VizualStudio() {
                 preload="metadata"
                 className="w-full aspect-video object-cover"
               >
-                <source src="/videos/twoavatars.mp4" type="video/mp4" />
+                <source src={`${CDN_BASE}/videos/twoavatars.mp4`} type="video/mp4" />
               </video>
               <div className="p-4">
                 <h3 className={`text-xl font-bold mb-2 ${spaceGrotesk.className}`}>
@@ -1134,7 +1137,7 @@ export function VizualStudio() {
             <div className="flex-1 order-1 md:order-2 animate-on-scroll animate-fade-in-right delay-200">
               <div className="relative rounded-2xl overflow-hidden border border-black/10 bg-gray-100 group-hover:border-blue-500/30 transition-colors duration-500 shadow-xl shadow-black/10">
                 <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <HoverVideo src="/videos/ani.mp4" className="w-full aspect-video object-cover" autoPlay={true} />
+                <HoverVideo src={`${CDN_BASE}/videos/ani.mp4`} className="w-full aspect-video object-cover" autoPlay={true} />
               </div>
             </div>
           </div>
@@ -1144,7 +1147,7 @@ export function VizualStudio() {
             <div className="flex-1 animate-on-scroll animate-fade-in-left">
               <div className="relative rounded-2xl overflow-hidden border border-black/10 bg-gray-100 group-hover:border-emerald-500/30 transition-colors duration-500 shadow-xl shadow-black/10">
                 <div className="absolute inset-0 bg-gradient-to-tr from-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <HoverVideo src="/videos/nature.mp4" className="w-full aspect-video object-cover" autoPlay={true} />
+                <HoverVideo src={`${CDN_BASE}/videos/nature.mp4`} className="w-full aspect-video object-cover" autoPlay={true} />
               </div>
             </div>
             <div className="flex-1 animate-on-scroll animate-fade-in-right delay-200">
@@ -1178,7 +1181,7 @@ export function VizualStudio() {
             <div className="flex-1 order-1 md:order-2 animate-on-scroll animate-fade-in-right delay-200">
               <div className="relative rounded-2xl overflow-hidden border border-black/10 bg-gray-100 group-hover:border-purple-500/30 transition-colors duration-500 shadow-xl shadow-black/10">
                 <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <HoverVideo src="/videos/film2.mp4" className="w-full aspect-video object-cover" autoPlay={true} />
+                <HoverVideo src={`${CDN_BASE}/videos/film2.mp4`} className="w-full aspect-video object-cover" autoPlay={true} />
               </div>
             </div>
           </div>
@@ -1211,7 +1214,7 @@ export function VizualStudio() {
             </div>
             <div className="flex-1">
               <div className="rounded-2xl overflow-hidden border border-white/10 bg-[#0a0a0a] shadow-2xl shadow-blue-500/5">
-                <HoverVideo src="/videos/fantasy.mp4" className="w-full aspect-video object-cover" autoPlay={true} />
+                <HoverVideo src={`${CDN_BASE}/videos/fantasy.mp4`} className="w-full aspect-video object-cover" autoPlay={true} />
               </div>
             </div>
           </div>
@@ -1228,7 +1231,7 @@ export function VizualStudio() {
             </div>
             <div className="flex-1 order-1 md:order-2">
               <div className="rounded-2xl overflow-hidden border border-white/10 bg-[#111] shadow-2xl shadow-purple-500/5">
-                <HoverVideo src="/videos/design.mp4" className="w-full aspect-video object-cover" autoPlay={true} />
+                <HoverVideo src={`${CDN_BASE}/videos/design.mp4`} className="w-full aspect-video object-cover" autoPlay={true} />
               </div>
             </div>
           </div>
@@ -1485,7 +1488,7 @@ export function VizualStudio() {
                 playsInline
                 className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500"
               >
-                <source src="/videos/grok-video-163f4b90-6e8d-43d2-88d0-6450a84086c0 (5).mp4" type="video/mp4" />
+                <source src={`${CDN_BASE}/videos/grok-video-163f4b90-6e8d-43d2-88d0-6450a84086c0 (5).mp4`} type="video/mp4" />
               </video>
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
             </div>
@@ -1529,7 +1532,7 @@ export function VizualStudio() {
 
               <div className="relative aspect-[4/3] bg-black">
                 <video autoPlay loop muted playsInline className="w-full h-full object-cover">
-                  <source src="/videos/film.mp4" type="video/mp4" />
+                  <source src={`${CDN_BASE}/videos/film.mp4`} type="video/mp4" />
                 </video>
               </div>
 
@@ -1581,7 +1584,7 @@ export function VizualStudio() {
                       playsInline
                       className="w-full h-full object-cover"
                     >
-                      <source src="/videos/grok-video-163f4b90-6e8d-43d2-88d0-6450a84086c0 (5).mp4" type="video/mp4" />
+                      <source src={`${CDN_BASE}/videos/grok-video-163f4b90-6e8d-43d2-88d0-6450a84086c0 (5).mp4`} type="video/mp4" />
                     </video>
                   </div>
                 </div>

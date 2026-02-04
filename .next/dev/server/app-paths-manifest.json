@@ -3,6 +3,7 @@
   "/api/decart/stream/route": "app/api/decart/stream/route.js",
   "/page": "app/page.js",
   "/vizual/api/page": "app/vizual/api/page.js",
+  "/vizual/avatar/page": "app/vizual/avatar/page.js",
   "/vizual/live/page": "app/vizual/live/page.js",
   "/vizual/page": "app/vizual/page.js",
   "/vizual/studio/page": "app/vizual/studio/page.js"

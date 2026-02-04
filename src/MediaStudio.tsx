@@ -8,6 +8,9 @@ import { ShinyText } from '@/components/typography/shiny-text';
 import './MediaStudio.css';
 import { useDraggableScroll } from '../hooks/useDraggableScroll';
 
+// CDN base URL for video assets
+const CDN_BASE = "https://storage.googleapis.com/vizual-cdn-assets";
+
 import PaywallModal from './PaywallModal';
 import { useAuth } from '@/context/auth-context';
 import { saveGeneratedMedia } from './mediaService';
@@ -1176,7 +1179,7 @@ const ViewAllModal = ({ isOpen, onClose, title, items, renderItem }: ViewAllModa
                   muted
                   playsInline
                   loop
-                  src="/videos/klingdemovid.mp4"
+                  src={`${CDN_BASE}/videos/klingdemovid.mp4`}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
