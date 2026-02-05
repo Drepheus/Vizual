@@ -538,6 +538,7 @@ export default function VizualStudioApp() {
 
     try {
       const result = await consumeImageGeneration(user.id);
+      console.log('consumeImageGen result:', result);
       if (result?.success) {
         if (result.source === 'daily_free') {
           showToast('Used 1 daily free image', 'success', 2000);
@@ -550,9 +551,22 @@ export default function VizualStudioApp() {
           showToast('-1 credit used', 'success', 2000);
           setCreditsUsed(prev => prev + 1);
         }
+      } else {
+        console.error('consumeImageGen failed:', result);
       }
     } catch (err) {
       console.error('Error consuming image generation:', err);
+    }
+  };
+
+  // Sign out and redirect to homepage
+  const handleSignOut = async () => {
+    try {
+      await supabase.auth.signOut();
+      router.push('/');
+    } catch (err) {
+      console.error('Error signing out:', err);
+      showToast('Error signing out', 'error', 3000);
     }
   };
 
@@ -2865,7 +2879,10 @@ export default function VizualStudioApp() {
                   <button className="text-xs text-gray-500 hover:text-white transition-colors">
                     Privacy Policy
                   </button>
-                  <button className="flex items-center gap-2 text-red-400 hover:text-red-300 transition-colors text-sm font-medium">
+                  <button 
+                    onClick={handleSignOut}
+                    className="flex items-center gap-2 text-red-400 hover:text-red-300 transition-colors text-sm font-medium"
+                  >
                     <LogOut size={16} />
                     Sign Out
                   </button>

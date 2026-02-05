@@ -28,6 +28,15 @@ export interface ImageGenerationCheck {
   message: string | null;
 }
 
+// Result from consume_image_generation RPC (different from check)
+export interface ConsumeImageResult {
+  success: boolean;
+  source: 'daily_free' | 'credits' | 'none';
+  daily_free_remaining: number;
+  credits_remaining: number;
+  message: string | null;
+}
+
 export interface CreditDeductionResult {
   success: boolean;
   new_balance: number;
@@ -87,13 +96,15 @@ export async function canGenerateImage(userId: string): Promise<ImageGenerationC
  * Uses daily free images first, then credits
  * Returns result with updated balances
  */
-export async function consumeImageGeneration(userId: string): Promise<ImageGenerationCheck | null> {
+export async function consumeImageGeneration(userId: string): Promise<ConsumeImageResult | null> {
   if (!userId) return null;
   
   try {
     const { data, error } = await supabase.rpc('consume_image_generation', {
       p_user_id: userId
     });
+    
+    console.log('consume_image_generation response:', { data, error });
     
     if (error) {
       console.error('Error consuming image generation:', error);
