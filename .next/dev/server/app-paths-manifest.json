@@ -2,6 +2,7 @@
   "/_not-found/page": "app/_not-found/page.js",
   "/api/community/feed/route": "app/api/community/feed/route.js",
   "/api/decart/stream/route": "app/api/decart/stream/route.js",
+  "/api/generate-image/route": "app/api/generate-image/route.js",
   "/page": "app/page.js",
   "/vizual/api/page": "app/vizual/api/page.js",
   "/vizual/avatar/page": "app/vizual/avatar/page.js",

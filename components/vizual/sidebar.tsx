@@ -191,13 +191,6 @@ export function Sidebar({
                             }
                         }}
                     />
-                    <NavItem
-                        icon={<Compass size={20} />}
-                        label="Community"
-                        active={activePage === 'COMMUNITY'}
-                        expanded={sidebarExpanded}
-                        onClick={() => handleNav('/vizual/community', 'COMMUNITY')}
-                    />
                 </nav>
 
                 {/* Bottom Section */}

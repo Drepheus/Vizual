@@ -494,6 +494,13 @@ export default function VizualStudioApp() {
   const [showColorPaletteModal, setShowColorPaletteModal] = useState(false);
   const [showStyleGuideModal, setShowStyleGuideModal] = useState(false);
 
+  // Community Feed State
+  const [communityFeed, setCommunityFeed] = useState<any[]>([]);
+  const [loadingCommunity, setLoadingCommunity] = useState(false);
+
+  // Limit Reached Modal State
+  const [showLimitModal, setShowLimitModal] = useState(false);
+
   // Credits System State
   const [userCredits, setUserCredits] = useState<number>(5);
   const [creditsUsed, setCreditsUsed] = useState<number>(0);
@@ -697,6 +704,27 @@ export default function VizualStudioApp() {
     }
   }, [user, loading, router, isGuestMode]);
 
+  // Fetch community feed when inspiration panel opens
+  useEffect(() => {
+    if (inspirationOpen && communityFeed.length === 0 && !loadingCommunity) {
+      const fetchCommunity = async () => {
+        setLoadingCommunity(true);
+        try {
+          const res = await fetch('/api/community/feed?page=0&limit=10');
+          if (res.ok) {
+            const data = await res.json();
+            setCommunityFeed(data);
+          }
+        } catch (err) {
+          console.error('Failed to fetch community:', err);
+        } finally {
+          setLoadingCommunity(false);
+        }
+      };
+      fetchCommunity();
+    }
+  }, [inspirationOpen, communityFeed.length, loadingCommunity]);
+
   // Fetch user credits from database
   useEffect(() => {
     const fetchCredits = async () => {
@@ -855,6 +883,14 @@ export default function VizualStudioApp() {
     if (!prompt.trim()) {
       showToast('Please enter a prompt', 'error');
       return;
+    }
+
+    // Check if free user is out of daily free images (for image mode)
+    if (creationMode === 'IMAGE' && accountData && !accountData.is_paid_user) {
+      if (accountData.daily_free_images_remaining <= 0 && accountData.credits_remaining <= 0) {
+        setShowLimitModal(true);
+        return;
+      }
     }
 
     // Check if Reference or Remix mode requires attachments
@@ -1352,6 +1388,36 @@ export default function VizualStudioApp() {
 
             {/* Credits Display - Glowing Vizual Theme */}
             <div className="flex items-center gap-3">
+              {/* Daily Free Images Counter - Show for free/non-paid users */}
+              {user && (accountData === null || accountData?.is_paid_user !== true) && (
+                <div 
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 bg-black/40 backdrop-blur-sm cursor-pointer hover:bg-white/5 transition-colors"
+                  onClick={() => setShowAccountModal(true)}
+                  title="Daily free image generations"
+                  style={{
+                    boxShadow: (accountData?.daily_free_images_remaining ?? 3) > 0 
+                      ? '0 0 15px rgba(34, 197, 94, 0.3)' 
+                      : '0 0 15px rgba(239, 68, 68, 0.4)',
+                  }}
+                >
+                  <ImageIcon size={14} className={(accountData?.daily_free_images_remaining ?? 3) > 0 ? 'text-green-400' : 'text-red-400'} />
+                  <span className="text-[10px] uppercase tracking-wider text-gray-400 font-medium hidden sm:inline">Free</span>
+                  <span 
+                    className={`text-sm font-bold ${spaceGrotesk.className}`}
+                    style={{
+                      background: (accountData?.daily_free_images_remaining ?? 3) > 0 
+                        ? 'linear-gradient(135deg, #22c55e, #4ade80)' 
+                        : 'linear-gradient(135deg, #ef4444, #f97316)',
+                      backgroundClip: 'text',
+                      WebkitBackgroundClip: 'text',
+                      color: 'transparent',
+                    }}
+                  >
+                    {accountData?.daily_free_images_remaining ?? 3}/{accountData?.daily_free_images_limit ?? 3}
+                  </span>
+                </div>
+              )}
+              
               <div 
                 className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 bg-black/40 backdrop-blur-sm"
                 style={{
@@ -2262,48 +2328,70 @@ export default function VizualStudioApp() {
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto py-4">
-          {/* Prompt Ideas Section */}
+          {/* Community Generations Section */}
           <div className="px-5 mb-6">
-            <h3 className={`text-sm font-semibold text-white mb-3 ${spaceGrotesk.className}`}>Cosmic Heroic Action</h3>
-            <div className="overflow-x-auto pb-2 -mx-5 px-5 scrollbar-none" onWheel={(e) => { if (e.deltaY !== 0) e.currentTarget.scrollLeft += e.deltaY; }}>
-              <div className="flex gap-3 w-max">
-                {[
-                  { prompt: "A dynamic hero mid-air, nebulae and galaxies swirling around, comet streaks enhancing motion." },
-                  { prompt: "Hero illuminated by starburst, reflective metallic costume glowing amidst mystical outer space elements." },
-                  { prompt: "Warrior standing on asteroid, cosmic storm raging behind, ethereal energy radiating from hands." },
-                ].map((item, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setPrompt(item.prompt)}
-                    className="flex items-start gap-3 p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 transition-all min-w-[200px] max-w-[200px] text-left group"
-                  >
-                    <div className="w-10 h-10 rounded-full bg-white/10 flex-shrink-0" />
-                    <p className="text-xs text-gray-400 group-hover:text-gray-300 line-clamp-3">{item.prompt}</p>
-                  </button>
-                ))}
-              </div>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className={`text-sm font-semibold text-white ${spaceGrotesk.className}`}>Community</h3>
+              <button
+                onClick={() => router.push('/vizual/community')}
+                className="text-xs text-gray-400 hover:text-white transition-colors"
+              >
+                View All
+              </button>
             </div>
-          </div>
-
-          {/* More Prompt Categories */}
-          <div className="px-5 mb-6">
-            <h3 className={`text-sm font-semibold text-white mb-3 ${spaceGrotesk.className}`}>Futuristic Celestial Design</h3>
             <div className="overflow-x-auto pb-2 -mx-5 px-5 scrollbar-none" onWheel={(e) => { if (e.deltaY !== 0) e.currentTarget.scrollLeft += e.deltaY; }}>
               <div className="flex gap-3 w-max">
-                {[
-                  { prompt: "Sleek crystalline board glowing with energy, blending futuristic design and cosmic mysticism." },
-                  { prompt: "Neon-lit spacecraft hovering above alien landscape, bioluminescent flora illuminating the scene." },
-                  { prompt: "Cybernetic angel with holographic wings ascending through a digital nebula." },
-                ].map((item, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setPrompt(item.prompt)}
-                    className="flex items-start gap-3 p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 transition-all min-w-[200px] max-w-[200px] text-left group"
-                  >
-                    <div className="w-10 h-10 rounded-full bg-white/10 flex-shrink-0" />
-                    <p className="text-xs text-gray-400 group-hover:text-gray-300 line-clamp-3">{item.prompt}</p>
-                  </button>
-                ))}
+                {loadingCommunity ? (
+                  // Loading skeleton
+                  [...Array(4)].map((_, i) => (
+                    <div key={i} className="w-32 h-32 rounded-xl bg-white/5 animate-pulse flex-shrink-0" />
+                  ))
+                ) : communityFeed.length > 0 ? (
+                  communityFeed.slice(0, 10).map((item, i) => (
+                    <button
+                      key={item.id || i}
+                      onClick={() => {
+                        if (item.prompt) setPrompt(item.prompt);
+                      }}
+                      className="relative w-32 h-32 rounded-xl overflow-hidden border border-white/10 hover:border-white/30 transition-all group flex-shrink-0"
+                    >
+                      {(item.src || item.media_url) ? (
+                        (item.type === 'video' || item.media_type === 'video') ? (
+                          <video
+                            src={item.src || item.media_url}
+                            className="w-full h-full object-cover"
+                            muted
+                            loop
+                            onMouseEnter={(e) => e.currentTarget.play()}
+                            onMouseLeave={(e) => { e.currentTarget.pause(); e.currentTarget.currentTime = 0; }}
+                          />
+                        ) : (
+                          <img
+                            src={item.src || item.media_url}
+                            alt={item.prompt || 'Community generation'}
+                            className="w-full h-full object-cover"
+                          />
+                        )
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-purple-500/20 to-blue-500/20 flex items-center justify-center">
+                          <ImageIcon size={24} className="text-gray-500" />
+                        </div>
+                      )}
+                      {/* Overlay on hover */}
+                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2">
+                        <p className="text-[10px] text-white line-clamp-2">{item.prompt || 'No prompt'}</p>
+                      </div>
+                      {/* Media type indicator */}
+                      {(item.type === 'video' || item.media_type === 'video') && (
+                        <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-black/50 flex items-center justify-center">
+                          <Play size={10} className="text-white" />
+                        </div>
+                      )}
+                    </button>
+                  ))
+                ) : (
+                  <div className="text-xs text-gray-500 py-4">No community content yet</div>
+                )}
               </div>
             </div>
           </div>
@@ -2858,6 +2946,82 @@ export default function VizualStudioApp() {
                   showToast('Feedback submitted! Thank you.', 'success');
                   setShowFeedbackModal(false);
                 }} className="px-5 py-2 rounded-lg bg-white text-black font-medium text-sm hover:bg-gray-200">Submit</button>
+              </div>
+            </div>
+          </div>
+        )
+      }
+
+      {/* Limit Reached Modal - Vizual Dark Theme */}
+      {
+        showLimitModal && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+            <div
+              className="absolute inset-0 bg-black/90 backdrop-blur-xl"
+              onClick={() => setShowLimitModal(false)}
+            />
+            <div className="relative w-full max-w-md p-8 rounded-3xl bg-gradient-to-b from-[#1a1a1a] to-[#0d0d0d] border border-white/10 shadow-2xl">
+              {/* Close button */}
+              <button
+                onClick={() => setShowLimitModal(false)}
+                className="absolute top-4 right-4 p-2 hover:bg-white/10 rounded-full text-gray-400 hover:text-white transition-colors"
+              >
+                <X size={18} />
+              </button>
+
+              {/* Icon */}
+              <div className="flex justify-center mb-6">
+                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-red-500/20 to-orange-500/20 flex items-center justify-center border border-red-500/30">
+                  <Zap size={36} className="text-red-400" />
+                </div>
+              </div>
+
+              {/* Title */}
+              <h2 className={`text-2xl font-bold text-white text-center mb-3 ${spaceGrotesk.className}`}>
+                Daily Limit Reached
+              </h2>
+
+              {/* Description */}
+              <p className="text-gray-400 text-center mb-6 text-sm leading-relaxed">
+                You've used all your free image generations for today. Come back in 24 hours or upgrade to continue creating.
+              </p>
+
+              {/* Stats */}
+              <div className="bg-white/5 rounded-2xl p-4 mb-6 border border-white/5">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs text-gray-500">Daily Free Images</span>
+                  <span className="text-xs font-medium text-red-400">
+                    0 / {accountData?.daily_free_images_limit || 3}
+                  </span>
+                </div>
+                <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+                  <div className="h-full bg-red-500/50 w-0" />
+                </div>
+                {accountData?.daily_free_images_reset_at && (
+                  <p className="text-[10px] text-gray-600 mt-2 text-center">
+                    Resets at {new Date(accountData.daily_free_images_reset_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </p>
+                )}
+              </div>
+
+              {/* Actions */}
+              <div className="space-y-3">
+                <button
+                  onClick={() => {
+                    setShowLimitModal(false);
+                    setShowPricingModal(true);
+                  }}
+                  className="w-full py-3.5 rounded-xl bg-gradient-to-r from-white to-gray-200 text-black font-semibold text-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+                >
+                  <Crown size={16} />
+                  Upgrade Now
+                </button>
+                <button
+                  onClick={() => setShowLimitModal(false)}
+                  className="w-full py-3 rounded-xl bg-white/5 text-gray-400 font-medium text-sm hover:bg-white/10 transition-colors border border-white/5"
+                >
+                  Wait Until Tomorrow
+                </button>
               </div>
             </div>
           </div>

@@ -765,7 +765,7 @@ export default function LivePage() {
                 <ImageIcon size={14} className="text-purple-400" />
                 <span className="text-[10px] font-bold text-white/70 uppercase tracking-widest">Character</span>
                 {referenceImage && (
-                  <div className="relative w-8 h-8 rounded-lg overflow-hidden border border-purple-500/50 ml-auto">
+                  <div className="relative w-8 h-8 rounded-lg overflow-hidden border border-red-500/50 ml-auto">
                     <img src={referenceImage} alt="Ref" className="w-full h-full object-cover" />
                     <button
                       onClick={() => setReferenceImage(null)}
@@ -788,7 +788,7 @@ export default function LivePage() {
                   value={characterPrompt}
                   onChange={(e) => setCharacterPrompt(e.target.value)}
                   placeholder="Describe who you want to become..."
-                  className="flex-1 h-12 bg-black/40 backdrop-blur-md border border-white/20 rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-purple-500/50 transition-all duration-300 resize-none"
+                  className="flex-1 h-12 bg-black/40 backdrop-blur-md border border-white/20 rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-red-500/50 transition-all duration-300 resize-none"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
                       e.preventDefault();
@@ -799,7 +799,7 @@ export default function LivePage() {
                 <button
                   onClick={generateCharacterFromPrompt}
                   disabled={isGeneratingCharacter || !characterPrompt.trim()}
-                  className="px-4 rounded-xl bg-purple-500/80 hover:bg-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center"
+                  className="px-4 rounded-xl bg-red-500/80 hover:bg-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center"
                   title="Generate character"
                 >
                   {isGeneratingCharacter ? (
@@ -1048,7 +1048,7 @@ export default function LivePage() {
                     value={characterPrompt}
                     onChange={(e) => setCharacterPrompt(e.target.value)}
                     placeholder="Describe the character you want to become..."
-                    className="flex-1 h-16 bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-purple-500/50 transition-all duration-300 resize-none"
+                    className="flex-1 h-16 bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-red-500/50 transition-all duration-300 resize-none"
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault();
@@ -1059,7 +1059,7 @@ export default function LivePage() {
                   <button
                     onClick={generateCharacterFromPrompt}
                     disabled={isGeneratingCharacter || !characterPrompt.trim()}
-                    className="px-4 rounded-xl bg-purple-500/80 hover:bg-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center"
+                    className="px-4 rounded-xl bg-red-500/80 hover:bg-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center"
                     title="Generate character from prompt"
                   >
                     {isGeneratingCharacter ? (
@@ -1072,7 +1072,7 @@ export default function LivePage() {
 
                 <div className="flex items-center gap-3">
                   {referenceImage ? (
-                    <div className="relative w-16 h-16 rounded-lg overflow-hidden border border-purple-500/30 flex-shrink-0">
+                    <div className="relative w-16 h-16 rounded-lg overflow-hidden border border-red-500/30 flex-shrink-0">
                       <img src={referenceImage} alt="Reference" className="w-full h-full object-cover" />
                       <button
                         onClick={() => setReferenceImage(null)}
@@ -1084,7 +1084,7 @@ export default function LivePage() {
                   ) : (
                     <button
                       onClick={() => imageInputRef.current?.click()}
-                      className="w-16 h-16 border-2 border-dashed border-white/20 rounded-lg flex flex-col items-center justify-center gap-1 text-gray-500 hover:text-purple-400 hover:border-purple-500/50 transition-all duration-300 flex-shrink-0"
+                      className="w-16 h-16 border-2 border-dashed border-white/20 rounded-lg flex flex-col items-center justify-center gap-1 text-gray-500 hover:text-red-400 hover:border-red-500/50 transition-all duration-300 flex-shrink-0"
                     >
                       <Upload size={16} />
                       <span className="text-[8px] uppercase tracking-wider">Image</span>
