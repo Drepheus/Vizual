@@ -92,28 +92,35 @@ export default function LivePage() {
     if (localStream && localVideoRef.current && isUsingCamera) {
       const videoElement = localVideoRef.current;
       
-      // Only set if not already set
-      if (videoElement.srcObject !== localStream) {
-        videoElement.srcObject = localStream;
-        videoElement.muted = true;
-        
-        // Ensure video plays
-        const playVideo = async () => {
-          try {
-            await videoElement.play();
-            console.log('Camera video playing successfully');
-          } catch (error) {
-            console.error('Error playing camera video:', error);
-          }
-        };
-        
-        // Play when metadata is loaded or immediately if already loaded
-        if (videoElement.readyState >= 2) {
-          playVideo();
-        } else {
-          videoElement.onloadedmetadata = () => playVideo();
+      // Always set srcObject on mobile to ensure it's attached
+      videoElement.srcObject = localStream;
+      videoElement.muted = true;
+      videoElement.setAttribute('playsinline', 'true');
+      videoElement.setAttribute('webkit-playsinline', 'true');
+      
+      // Force play on mobile Safari
+      const playVideo = async () => {
+        try {
+          await videoElement.play();
+          console.log('Camera video playing successfully');
+        } catch (error) {
+          console.error('Error playing camera video:', error);
+          // Retry after a short delay (mobile Safari sometimes needs this)
+          setTimeout(async () => {
+            try {
+              await videoElement.play();
+              console.log('Camera video playing on retry');
+            } catch (e) {
+              console.error('Retry failed:', e);
+            }
+          }, 100);
         }
-      }
+      };
+      
+      // Play immediately and also on metadata load
+      playVideo();
+      videoElement.onloadedmetadata = () => playVideo();
+      videoElement.oncanplay = () => playVideo();
     }
   }, [localStream, connectionState, isUsingCamera]);
 
@@ -141,6 +148,16 @@ export default function LivePage() {
       setLocalStream(stream);
       setIsUsingCamera(true);
       setConnectionState('connected');
+      
+      // For mobile: try to attach stream immediately after a short delay
+      // This handles cases where the video element isn't rendered yet
+      setTimeout(() => {
+        if (localVideoRef.current) {
+          localVideoRef.current.srcObject = stream;
+          localVideoRef.current.muted = true;
+          localVideoRef.current.play().catch(console.error);
+        }
+      }, 100);
       
       showToast('Camera connected successfully!', 'success');
     } catch (error: any) {
@@ -689,8 +706,18 @@ export default function LivePage() {
                   autoPlay
                   muted={!isStreaming}
                   playsInline
+                  webkit-playsinline="true"
                   loop={!isUsingCamera && !isStreaming}
                   className="absolute inset-0 w-full h-full object-cover"
+                  style={{ transform: 'scaleX(-1)' }} // Mirror for selfie camera
+                  onCanPlay={(e) => {
+                    const video = e.currentTarget;
+                    video.play().catch(() => {});
+                  }}
+                  onLoadedMetadata={(e) => {
+                    const video = e.currentTarget;
+                    video.play().catch(() => {});
+                  }}
                 />
                 {/* Hidden video refs for the other stream */}
                 {isStreaming && (
