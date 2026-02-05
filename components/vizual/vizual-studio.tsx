@@ -1093,7 +1093,8 @@ export function VizualStudio() {
                 <video
                   playsInline
                   controls
-                  preload="auto"
+                  preload="metadata"
+                  poster={`${CDN_BASE}/images/avatarscene-thumb.jpg`}
                   className="absolute inset-0 w-full h-full object-cover"
                 >
                   <source src={`${CDN_BASE}/videos/avatarscene.mp4`} type="video/mp4" />
@@ -1113,7 +1114,8 @@ export function VizualStudio() {
                 <video
                   playsInline
                   controls
-                  preload="auto"
+                  preload="metadata"
+                  poster={`${CDN_BASE}/images/twoavatars-thumb.jpg`}
                   className="absolute inset-0 w-full h-full object-cover"
                 >
                   <source src={`${CDN_BASE}/videos/twoavatars.mp4`} type="video/mp4" />
