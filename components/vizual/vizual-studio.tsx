@@ -32,7 +32,7 @@ const ChromeText = ({ children, className = "" }: { children: React.ReactNode; c
 // HoverVideo component - two modes:
 // 1. autoPlay=true: plays when visible, pauses when not (for hero/single videos)
 // 2. autoPlay=false: plays on hover (desktop) or tap (mobile) - for video grids like Categories
-const HoverVideo = ({ src, className = "", autoPlay = false }: { src: string; className?: string; autoPlay?: boolean }) => {
+const HoverVideo = ({ src, className = "", autoPlay = false, poster }: { src: string; className?: string; autoPlay?: boolean; poster?: string }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
@@ -42,7 +42,12 @@ const HoverVideo = ({ src, className = "", autoPlay = false }: { src: string; cl
 
   // Detect mobile on mount
   useEffect(() => {
-    setIsMobile('ontouchstart' in window || navigator.maxTouchPoints > 0);
+    const mobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    setIsMobile(mobile);
+    // On mobile, try to load video immediately for first frame
+    if (mobile && videoRef.current) {
+      videoRef.current.load();
+    }
   }, []);
 
   // Intersection observer - handles visibility-based autoplay for single videos
@@ -134,7 +139,14 @@ const HoverVideo = ({ src, className = "", autoPlay = false }: { src: string; cl
     >
       {/* Placeholder gradient - shown while video not loaded */}
       {!hasLoaded && (
-        <div className="absolute inset-0 bg-gradient-to-br from-neutral-700 via-neutral-800 to-neutral-900" />
+        <div className="absolute inset-0 bg-gradient-to-br from-neutral-600 via-neutral-700 to-neutral-800 flex items-center justify-center">
+          {/* Play button indicator */}
+          <div className="w-12 h-12 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center">
+            <svg className="w-5 h-5 text-white/80 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+          </div>
+        </div>
       )}
       {/* Video */}
       <video
@@ -142,7 +154,8 @@ const HoverVideo = ({ src, className = "", autoPlay = false }: { src: string; cl
         loop
         muted
         playsInline
-        preload={isVisible ? "metadata" : "none"}
+        poster={poster}
+        preload={isMobile ? "auto" : (isVisible ? "metadata" : "none")}
         className={`w-full h-full object-cover transition-opacity duration-200 ${hasLoaded ? 'opacity-100' : 'opacity-0'}`}
         onLoadedData={handleLoadedData}
       >
@@ -1076,14 +1089,16 @@ export function VizualStudio() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
             {/* Avatar Scene Video */}
             <div className="relative rounded-[24px] overflow-hidden border border-white/10 bg-[#111] group animate-on-scroll animate-fade-in-up delay-300">
-              <video
-                playsInline
-                controls
-                preload="metadata"
-                className="w-full aspect-video object-cover"
-              >
-                <source src={`${CDN_BASE}/videos/avatarscene.mp4`} type="video/mp4" />
-              </video>
+              <div className="relative w-full aspect-video bg-gradient-to-br from-neutral-700 via-neutral-800 to-neutral-900">
+                <video
+                  playsInline
+                  controls
+                  preload="auto"
+                  className="absolute inset-0 w-full h-full object-cover"
+                >
+                  <source src={`${CDN_BASE}/videos/avatarscene.mp4`} type="video/mp4" />
+                </video>
+              </div>
               <div className="p-4">
                 <h3 className={`text-xl font-bold mb-2 ${spaceGrotesk.className}`}>
                   <ChromeText>Scene Generation</ChromeText>
@@ -1094,14 +1109,16 @@ export function VizualStudio() {
 
             {/* Two Avatars Video */}
             <div className="relative rounded-[24px] overflow-hidden border border-white/10 bg-[#111] group animate-on-scroll animate-fade-in-up delay-500">
-              <video
-                playsInline
-                controls
-                preload="metadata"
-                className="w-full aspect-video object-cover"
-              >
-                <source src={`${CDN_BASE}/videos/twoavatars.mp4`} type="video/mp4" />
-              </video>
+              <div className="relative w-full aspect-video bg-gradient-to-br from-neutral-700 via-neutral-800 to-neutral-900">
+                <video
+                  playsInline
+                  controls
+                  preload="auto"
+                  className="absolute inset-0 w-full h-full object-cover"
+                >
+                  <source src={`${CDN_BASE}/videos/twoavatars.mp4`} type="video/mp4" />
+                </video>
+              </div>
               <div className="p-4">
                 <h3 className={`text-xl font-bold mb-2 ${spaceGrotesk.className}`}>
                   <ChromeText>Multi-Avatar Conversations</ChromeText>
