@@ -128,6 +128,7 @@ export default function LivePage() {
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: true,
         video: {
+          facingMode: 'user', // Use front camera on mobile
           frameRate: { ideal: 25 },
           width: { ideal: 1280 },
           height: { ideal: 720 },

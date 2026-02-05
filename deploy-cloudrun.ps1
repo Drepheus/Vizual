@@ -65,17 +65,46 @@ if ($LASTEXITCODE -ne 0) {
 
 Write-Host " Build successful!" -ForegroundColor Green
 
-# Runtime environment variables for Cloud Run
+# Runtime environment variables for Cloud Run - loaded from .env.local
+# NOTE: This script reads secrets from .env.local file (not committed to git)
+# Make sure .env.local exists with all required API keys before deploying
+
+Write-Host ""
+Write-Host " Loading environment variables from .env.local for deployment..." -ForegroundColor Yellow
+
+# Load .env.local file
+$envFile = ".\.env.local"
+if (-not (Test-Path $envFile)) {
+    Write-Host " Error: .env.local file not found! Create it with all required API keys." -ForegroundColor Red
+    exit 1
+}
+
+$envVarsFromFile = @{}
+Get-Content $envFile | ForEach-Object {
+    if ($_ -match '^\s*([^#][^=]+)=(.*)$') {
+        $key = $matches[1].Trim()
+        $value = $matches[2].Trim()
+        $envVarsFromFile[$key] = $value
+    }
+}
+
+# Build env vars array from .env.local
 $envVars = @(
-    "NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL",
-    "NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY",
-    "GOOGLE_GENERATIVE_AI_API_KEY=AIzaSyAPUrVUTLGnhPOY6KFypgSqqFB3hRKLEug",
-    "TAVILY_API_KEY=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",
-    "REPLICATE_API_TOKEN=r8_7Rzu9SCF1v90RVWZ8BFxqGASScz0yQX2LDb0U",
-    "OPENAI_API_KEY=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",
-    "GROQ_API_KEY=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",
+    "NEXT_PUBLIC_SUPABASE_URL=$($envVarsFromFile['NEXT_PUBLIC_SUPABASE_URL'])",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY=$($envVarsFromFile['NEXT_PUBLIC_SUPABASE_ANON_KEY'])",
+    "GOOGLE_GENERATIVE_AI_API_KEY=$($envVarsFromFile['GOOGLE_GENERATIVE_AI_API_KEY'])",
+    "TAVILY_API_KEY=$($envVarsFromFile['TAVILY_API_KEY'])",
+    "REPLICATE_API_TOKEN=$($envVarsFromFile['REPLICATE_API_TOKEN'])",
+    "OPENAI_API_KEY=$($envVarsFromFile['OPENAI_API_KEY'])",
+    "GROQ_API_KEY=$($envVarsFromFile['GROQ_API_KEY'])",
     "GOOGLE_CLOUD_PROJECT_ID=$ProjectId",
-    "GOOGLE_CLOUD_LOCATION=us-central1"
+    "GOOGLE_CLOUD_LOCATION=us-central1",
+    "WAVESPEED_API_KEY=$($envVarsFromFile['WAVESPEED_API_KEY'])",
+    "SUPABASE_SERVICE_ROLE_KEY=$($envVarsFromFile['SUPABASE_SERVICE_ROLE_KEY'])",
+    "DECART_API_KEY=$($envVarsFromFile['DECART_API_KEY'])",
+    "STRIPE_SECRET_KEY=$($envVarsFromFile['STRIPE_SECRET_KEY'])",
+    "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=$($envVarsFromFile['NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY'])",
+    "STRIPE_WEBHOOK_SECRET=$($envVarsFromFile['STRIPE_WEBHOOK_SECRET'])"
 )
 
 if ($VertexDataStoreId) {

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Sidebar } from "@/components/vizual/sidebar";
 import { useRouter } from "next/navigation";
 import { Space_Grotesk } from "next/font/google";
-import { ExternalLink, ArrowRight } from "lucide-react";
+import { ExternalLink, ArrowRight, Menu } from "lucide-react";
 
 const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], weight: ["300", "400", "500", "600", "700"] });
 
@@ -28,6 +28,14 @@ export default function AvatarPage() {
             />
 
             <main className="flex-1 relative flex flex-col bg-black overflow-hidden relative">
+
+                {/* Mobile Menu Button */}
+                <button
+                    className="md:hidden fixed top-4 left-4 z-50 p-2 bg-black/80 hover:bg-white/10 rounded-lg transition-colors border border-white/10"
+                    onClick={() => setSidebarOpen(true)}
+                >
+                    <Menu size={24} className="text-white" />
+                </button>
 
                 {/* Background ambient glow */}
                 <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-yellow-500/10 rounded-full blur-[120px] pointer-events-none" />

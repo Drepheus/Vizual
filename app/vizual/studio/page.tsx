@@ -66,7 +66,7 @@ import { ProjectsView } from "@/components/vizual/projects-view";
 import { Sidebar } from "@/components/vizual/sidebar";
 import { useToast } from "@/components/ui/toast";
 import { getBrowserSupabaseClient } from "@/lib/supabase-browser";
-import { getUserCreditsAndUsage, UserCreditsAndUsage } from "@/lib/usage-tracking";
+import { getUserCreditsAndUsage, UserCreditsAndUsage, consumeImageGeneration } from "@/lib/usage-tracking";
 
 const supabase = getBrowserSupabaseClient();
 
@@ -528,7 +528,35 @@ export default function VizualStudioApp() {
 
   const estimatedCost = calculateCreditCost();
 
-  // Deduct credits after successful generation
+  // Consume image generation (uses daily free first, then credits)
+  const consumeImageGen = async () => {
+    if (!user) {
+      // Guest mode - just update local state
+      setCreditsUsed(prev => prev + 1);
+      return;
+    }
+
+    try {
+      const result = await consumeImageGeneration(user.id);
+      if (result?.success) {
+        if (result.source === 'daily_free') {
+          showToast('Used 1 daily free image', 'success', 2000);
+          // Update the daily free counter in accountData
+          setAccountData(prev => prev ? {
+            ...prev,
+            daily_free_images_remaining: result.daily_free_remaining ?? 0
+          } : null);
+        } else {
+          showToast('-1 credit used', 'success', 2000);
+          setCreditsUsed(prev => prev + 1);
+        }
+      }
+    } catch (err) {
+      console.error('Error consuming image generation:', err);
+    }
+  };
+
+  // Deduct credits after successful video generation
   const deductCredits = async (amount: number) => {
     if (!user) {
       // Guest mode - just update local state
@@ -982,8 +1010,8 @@ export default function VizualStudioApp() {
             type: 'image',
           });
 
-          // Deduct credits after successful generation
-          await deductCredits(estimatedCost);
+          // Consume image generation (uses daily free first, then credits)
+          await consumeImageGen();
         } else {
           // Call regular image generation API
           const response = await fetch('/api/generate-image', {
@@ -1019,8 +1047,8 @@ export default function VizualStudioApp() {
             type: 'image',
           });
 
-          // Deduct credits after successful generation
-          await deductCredits(estimatedCost);
+          // Consume image generation (uses daily free first, then credits)
+          await consumeImageGen();
         }
       } else {
         // Call video generation API with enhanced prompt
