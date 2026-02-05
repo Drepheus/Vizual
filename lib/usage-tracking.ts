@@ -1,10 +1,13 @@
-import { createClient } from '@supabase/supabase-js';
+import { createBrowserClient } from '@supabase/ssr';
 
-// Initialize Supabase client
-// We use the anon key here. For sensitive operations, ensure RLS policies are set correctly.
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-const supabase = createClient(supabaseUrl, supabaseKey);
+// Use the browser client that maintains user session
+// This ensures RPC calls are made as the authenticated user
+const getSupabaseClient = () => {
+  return createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+};
 
 // Types for credit and usage tracking
 export interface UserCreditsAndUsage {
@@ -51,6 +54,7 @@ export async function getUserCreditsAndUsage(userId: string): Promise<UserCredit
   if (!userId) return null;
   
   try {
+    const supabase = getSupabaseClient();
     const { data, error } = await supabase.rpc('get_user_credits_and_usage', {
       p_user_id: userId
     });
@@ -75,6 +79,7 @@ export async function canGenerateImage(userId: string): Promise<ImageGenerationC
   if (!userId) return null;
   
   try {
+    const supabase = getSupabaseClient();
     const { data, error } = await supabase.rpc('can_generate_image', {
       p_user_id: userId
     });
@@ -100,6 +105,7 @@ export async function consumeImageGeneration(userId: string): Promise<ConsumeIma
   if (!userId) return null;
   
   try {
+    const supabase = getSupabaseClient();
     const { data, error } = await supabase.rpc('consume_image_generation', {
       p_user_id: userId
     });
@@ -126,6 +132,7 @@ export async function deductCredits(userId: string, amount: number): Promise<Cre
   if (!userId) return null;
   
   try {
+    const supabase = getSupabaseClient();
     const { data, error } = await supabase.rpc('deduct_credits', {
       p_user_id: userId,
       p_amount: amount
@@ -163,6 +170,7 @@ export async function trackUsage(userId: string, usageType: 'chat' | 'image_gen'
     }
     
     // For chat, use the original usage tracking
+    const supabase = getSupabaseClient();
     const { error } = await supabase.rpc('increment_usage', {
       p_user_id: userId,
       p_usage_type: usageType
@@ -188,6 +196,7 @@ export async function logApiCall(data: {
   try {
     // We use a separate client or just the same one. 
     // Ensure 'api_logs' table has RLS policy allowing insert.
+    const supabase = getSupabaseClient();
     const { error } = await supabase.from('api_logs').insert({
       ...data,
       created_at: new Date().toISOString()
