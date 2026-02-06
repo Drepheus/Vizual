@@ -34,3 +34,8 @@ pnpm-lock.yaml.*
 # Large unnecessary files
 codebase.jsonl
 *.pem
+
+# Large media files - served from CDN, not needed in Docker build
+public/videos/
+public/images/categories/
+static/

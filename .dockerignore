@@ -17,3 +17,8 @@ pnpm-debug.log*
 *.pem
 coverage
 .turbo
+
+# Large media files - served from CDN
+public/videos/
+public/images/categories/
+static/
