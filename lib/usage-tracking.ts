@@ -50,22 +50,32 @@ export async function getUserCreditsAndUsage(userId: string): Promise<UserCredit
   
   try {
     const supabase = getSupabaseClient();
+    
+    // Verify the client has an active session before calling RPC
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData?.session) {
+      // No auth session yet — skip RPC, caller will use fallback
+      return null;
+    }
+    
     const { data, error } = await supabase.rpc('get_user_credits_and_usage', {
       p_user_id: userId
     });
     
     if (error) {
-      // RPC function may not be deployed yet - this is expected,
-      // callers have a fallback to query the users table directly
       if (process.env.NODE_ENV === 'development') {
-        console.warn('Credits RPC unavailable, using fallback:', error?.message || 'function not found');
+        console.warn('Credits RPC error:', error?.message || error?.code || JSON.stringify(error));
       }
       return null;
     }
     
-    return data?.[0] || null;
+    // RPC returns a table (array) — grab first row
+    if (Array.isArray(data)) {
+      return data[0] || null;
+    }
+    // Some Supabase versions return a single object for single-row results
+    return data || null;
   } catch (e) {
-    // Silently fall through - callers handle null with a direct query fallback
     return null;
   }
 }
@@ -79,18 +89,22 @@ export async function canGenerateImage(userId: string): Promise<ImageGenerationC
   
   try {
     const supabase = getSupabaseClient();
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData?.session) return null;
+    
     const { data, error } = await supabase.rpc('can_generate_image', {
       p_user_id: userId
     });
     
     if (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.warn('Image generation check RPC unavailable:', error?.message || 'function not found');
+        console.warn('can_generate_image RPC error:', error?.message || error?.code || JSON.stringify(error));
       }
       return null;
     }
     
-    return data?.[0] || null;
+    if (Array.isArray(data)) return data[0] || null;
+    return data || null;
   } catch (e) {
     return null;
   }
@@ -106,18 +120,22 @@ export async function consumeImageGeneration(userId: string): Promise<ConsumeIma
   
   try {
     const supabase = getSupabaseClient();
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData?.session) return null;
+    
     const { data, error } = await supabase.rpc('consume_image_generation', {
       p_user_id: userId
     });
     
     if (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.warn('Consume image RPC unavailable:', error?.message || 'function not found');
+        console.warn('consume_image_generation RPC error:', error?.message || error?.code || JSON.stringify(error));
       }
       return null;
     }
     
-    return data?.[0] || null;
+    if (Array.isArray(data)) return data[0] || null;
+    return data || null;
   } catch (e) {
     return null;
   }
@@ -132,6 +150,9 @@ export async function deductCredits(userId: string, amount: number): Promise<Cre
   
   try {
     const supabase = getSupabaseClient();
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData?.session) return null;
+    
     const { data, error } = await supabase.rpc('deduct_credits', {
       p_user_id: userId,
       p_amount: amount
@@ -139,12 +160,13 @@ export async function deductCredits(userId: string, amount: number): Promise<Cre
     
     if (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.warn('Deduct credits RPC unavailable:', error?.message || 'function not found');
+        console.warn('deduct_credits RPC error:', error?.message || error?.code || JSON.stringify(error));
       }
       return null;
     }
     
-    return data?.[0] || null;
+    if (Array.isArray(data)) return data[0] || null;
+    return data || null;
   } catch (e) {
     return null;
   }
