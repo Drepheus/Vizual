@@ -846,22 +846,23 @@ export default function VizualStudioApp() {
     fetchCredits();
   }, [user]);
 
-  // Welcome modal — show every time the user signs in (per session)
+  // Welcome modal — show once per page load when user is authenticated
+  // Uses a ref so it fires exactly once when auth resolves, regardless of storage APIs
+  const welcomeShownRef = useRef(false);
   useEffect(() => {
-    if (!user || loading) return;
-    const key = `vizual_welcomed_session_${user.id}`;
-    if (!sessionStorage.getItem(key)) {
-      // Small delay so the studio renders first
-      const t = setTimeout(() => setShowWelcomeModal(true), 800);
-      return () => clearTimeout(t);
-    }
+    // Skip if already shown this page load, or auth still loading, or no user
+    if (welcomeShownRef.current || loading || !user) return;
+    
+    // Mark as shown immediately so it can't double-fire
+    welcomeShownRef.current = true;
+    
+    // Small delay so the studio renders first
+    const t = setTimeout(() => setShowWelcomeModal(true), 600);
+    return () => clearTimeout(t);
   }, [user, loading]);
 
   const handleCloseWelcome = () => {
     setShowWelcomeModal(false);
-    if (user) {
-      sessionStorage.setItem(`vizual_welcomed_session_${user.id}`, 'true');
-    }
   };
 
   // Lock body scroll for mobile app-like behavior
