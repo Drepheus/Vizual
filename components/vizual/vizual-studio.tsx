@@ -39,18 +39,17 @@ const HoverVideo = ({ src, className = "", autoPlay = false, poster }: { src: st
   const [isPlaying, setIsPlaying] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  // Use refs to avoid stale closures in IntersectionObserver callback
+  const isPlayingRef = useRef(false);
+  const isVisibleRef = useRef(false);
 
   // Detect mobile on mount
   useEffect(() => {
     const mobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     setIsMobile(mobile);
-    // On mobile, try to load video immediately for first frame
-    if (mobile && videoRef.current) {
-      videoRef.current.load();
-    }
   }, []);
 
-  // Intersection observer - handles visibility-based autoplay for single videos
+  // Intersection observer - stable deps, uses refs to avoid churn
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -58,19 +57,20 @@ const HoverVideo = ({ src, className = "", autoPlay = false, poster }: { src: st
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          const wasVisible = isVisible;
-          setIsVisible(entry.isIntersecting);
-          
-          if (entry.isIntersecting) {
-            // AutoPlay mode: play when visible
+          const nowVisible = entry.isIntersecting;
+          isVisibleRef.current = nowVisible;
+          setIsVisible(nowVisible);
+
+          if (nowVisible) {
             if (autoPlay && videoRef.current) {
               videoRef.current.play().catch(() => { });
+              isPlayingRef.current = true;
               setIsPlaying(true);
             }
           } else {
-            // Pause when not visible (both modes)
-            if (videoRef.current && isPlaying) {
+            if (videoRef.current && isPlayingRef.current) {
               videoRef.current.pause();
+              isPlayingRef.current = false;
               setIsPlaying(false);
             }
           }
@@ -78,18 +78,19 @@ const HoverVideo = ({ src, className = "", autoPlay = false, poster }: { src: st
       },
       {
         threshold: 0.1,
-        rootMargin: '50px 0px'
+        rootMargin: '200px 0px' // Start loading earlier for smoother scroll
       }
     );
 
     observer.observe(container);
     return () => observer.disconnect();
-  }, [autoPlay, isPlaying, isVisible]);
+  }, [autoPlay]); // Only depends on autoPlay (immutable per instance)
 
   // Desktop hover: Play on mouse enter (only for non-autoPlay mode)
   const handleMouseEnter = () => {
-    if (!autoPlay && !isMobile && videoRef.current && isVisible) {
+    if (!autoPlay && !isMobile && videoRef.current && isVisibleRef.current) {
       videoRef.current.play().catch(() => { });
+      isPlayingRef.current = true;
       setIsPlaying(true);
     }
   };
@@ -99,19 +100,22 @@ const HoverVideo = ({ src, className = "", autoPlay = false, poster }: { src: st
     if (!autoPlay && !isMobile && videoRef.current) {
       videoRef.current.pause();
       videoRef.current.currentTime = 0;
+      isPlayingRef.current = false;
       setIsPlaying(false);
     }
   };
 
   // Mobile: Toggle play on tap (only for non-autoPlay mode)
   const handleTap = () => {
-    if (!autoPlay && isMobile && videoRef.current && isVisible) {
-      if (isPlaying) {
+    if (!autoPlay && isMobile && videoRef.current && isVisibleRef.current) {
+      if (isPlayingRef.current) {
         videoRef.current.pause();
         videoRef.current.currentTime = 0;
+        isPlayingRef.current = false;
         setIsPlaying(false);
       } else {
         videoRef.current.play().catch(() => { });
+        isPlayingRef.current = true;
         setIsPlaying(true);
       }
     }
@@ -155,7 +159,7 @@ const HoverVideo = ({ src, className = "", autoPlay = false, poster }: { src: st
         muted
         playsInline
         poster={poster}
-        preload={isMobile ? "auto" : (isVisible ? "metadata" : "none")}
+        preload={isVisible ? "metadata" : "none"}
         className={`w-full h-full object-cover transition-opacity duration-200 ${hasLoaded ? 'opacity-100' : 'opacity-0'}`}
         onLoadedData={handleLoadedData}
       >
@@ -437,9 +441,8 @@ export function VizualStudio() {
             loop
             muted
             playsInline
-            preload="metadata"
-            className="min-h-full min-w-full object-cover opacity-70 will-change-transform"
-            style={{ contentVisibility: 'auto' }}
+            preload="auto"
+            className="min-h-full min-w-full object-cover opacity-70"
           >
             <source src={`${CDN_BASE}/videos/veo2.mp4`} type="video/mp4" />
           </video>
@@ -592,6 +595,7 @@ export function VizualStudio() {
               loop
               muted
               playsInline
+              preload="metadata"
               className="absolute inset-0 w-full h-full object-cover"
             >
               <source src={`${CDN_BASE}/videos/RAYVID.mp4`} type="video/mp4" />

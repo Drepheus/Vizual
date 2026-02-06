@@ -99,6 +99,17 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
 
+        {/* Preconnect to Google Cloud Storage CDN — serves all landing page videos */}
+        <link rel="preconnect" href="https://storage.googleapis.com" />
+
+        {/* Preload hero video for fastest LCP */}
+        <link
+          rel="preload"
+          href="https://storage.googleapis.com/vizual-cdn-assets/videos/veo2.mp4"
+          as="video"
+          type="video/mp4"
+        />
+
         {/* DNS prefetch for analytics (non-critical) */}
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
         <link rel="dns-prefetch" href="https://www.google-analytics.com" />
@@ -107,7 +118,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://supabase.co" />
         <link rel="dns-prefetch" href="https://supabase.co" />
 
-        {/* Preconnect to media CDN if using external hosting */}
+        {/* DNS prefetch for media delivery (non-critical) */}
         <link rel="dns-prefetch" href="https://replicate.delivery" />
       </head>
       <body className="min-h-screen bg-[#020205] text-white antialiased">
