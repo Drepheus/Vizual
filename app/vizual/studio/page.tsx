@@ -816,8 +816,8 @@ export default function VizualStudioApp() {
             .single();
 
           if (error) {
-            console.error('Error fetching credits:', error);
-            // Default to free tier credits
+            // Users table may not have credits columns yet - use defaults
+            console.warn('Credits query fallback:', error?.message || 'unknown');
             setUserCredits(5);
             setCreditsUsed(0);
           } else if (data) {

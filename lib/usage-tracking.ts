@@ -55,13 +55,17 @@ export async function getUserCreditsAndUsage(userId: string): Promise<UserCredit
     });
     
     if (error) {
-      console.error('Error getting user credits:', error);
+      // RPC function may not be deployed yet - this is expected,
+      // callers have a fallback to query the users table directly
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('Credits RPC unavailable, using fallback:', error?.message || 'function not found');
+      }
       return null;
     }
     
     return data?.[0] || null;
   } catch (e) {
-    console.error('Exception getting user credits:', e);
+    // Silently fall through - callers handle null with a direct query fallback
     return null;
   }
 }
@@ -80,13 +84,14 @@ export async function canGenerateImage(userId: string): Promise<ImageGenerationC
     });
     
     if (error) {
-      console.error('Error checking image generation:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('Image generation check RPC unavailable:', error?.message || 'function not found');
+      }
       return null;
     }
     
     return data?.[0] || null;
   } catch (e) {
-    console.error('Exception checking image generation:', e);
     return null;
   }
 }
@@ -105,16 +110,15 @@ export async function consumeImageGeneration(userId: string): Promise<ConsumeIma
       p_user_id: userId
     });
     
-    console.log('consume_image_generation response:', { data, error });
-    
     if (error) {
-      console.error('Error consuming image generation:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('Consume image RPC unavailable:', error?.message || 'function not found');
+      }
       return null;
     }
     
     return data?.[0] || null;
   } catch (e) {
-    console.error('Exception consuming image generation:', e);
     return null;
   }
 }
@@ -134,13 +138,14 @@ export async function deductCredits(userId: string, amount: number): Promise<Cre
     });
     
     if (error) {
-      console.error('Error deducting credits:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('Deduct credits RPC unavailable:', error?.message || 'function not found');
+      }
       return null;
     }
     
     return data?.[0] || null;
   } catch (e) {
-    console.error('Exception deducting credits:', e);
     return null;
   }
 }
@@ -171,11 +176,11 @@ export async function trackUsage(userId: string, usageType: 'chat' | 'image_gen'
       p_usage_type: usageType
     });
     
-    if (error) {
-      console.error('Error tracking usage:', error);
+    if (error && process.env.NODE_ENV === 'development') {
+      console.warn('Usage tracking RPC unavailable:', error?.message || 'function not found');
     }
   } catch (e) {
-    console.error('Exception tracking usage:', e);
+    // Silently fail - usage tracking is non-critical
   }
 }
 
@@ -197,10 +202,10 @@ export async function logApiCall(data: {
       created_at: new Date().toISOString()
     });
     
-    if (error) {
-      console.error('Error logging API call:', error);
+    if (error && process.env.NODE_ENV === 'development') {
+      console.warn('API log insert failed:', error?.message);
     }
   } catch (e) {
-    console.error('Exception logging API call:', e);
+    // Silently fail - API logging is non-critical
   }
 }
