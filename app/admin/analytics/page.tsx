@@ -100,9 +100,9 @@ export default function AnalyticsDashboard() {
     "overview" | "generations" | "users" | "errors" | "live"
   >("overview");
 
-  // Auth guard
+  // Auth guard - wait for auth to fully load before making redirect decisions
   useEffect(() => {
-    if (loading) return;
+    if (loading) return; // Still loading, don't redirect yet
     if (!session || !user) {
       router.replace("/login");
       return;
@@ -112,6 +112,24 @@ export default function AnalyticsDashboard() {
       return;
     }
   }, [user, session, loading, router]);
+
+  // Don't render anything while auth is loading
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  // Don't render if not authenticated or not admin
+  if (!session || !user || user.email !== "andregreengp@gmail.com") {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   // Fetch analytics from PostHog
   const fetchAnalytics = useCallback(async () => {

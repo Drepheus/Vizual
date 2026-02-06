@@ -16,7 +16,7 @@ export function initPostHog() {
   posthog.init(POSTHOG_KEY, {
     api_host: POSTHOG_HOST,
     person_profiles: 'identified_only',
-    capture_pageview: true,
+    capture_pageview: false, // We manually capture in PostHogProvider for SPA route changes
     capture_pageleave: true,
     autocapture: true,
     session_recording: {
@@ -26,9 +26,9 @@ export function initPostHog() {
       },
     },
     loaded: (ph) => {
-      // Enable debug mode in development
-      if (process.env.NODE_ENV === 'development') {
-        ph.debug();
+      // Disable debug in production
+      if (process.env.NODE_ENV !== 'development') {
+        ph.debug(false);
       }
     },
   });

@@ -3275,10 +3275,10 @@ export default function VizualStudioApp() {
                   <ul className="space-y-2.5 mb-5 flex-1">
                     {[
                       { Icon: Coins, text: "1,000 credits / month", highlight: true },
-                      { Icon: Image, text: "~50-200 images / month" },
+                      { Icon: Image, text: "Unlimited images of select models" },
                       { Icon: Radio, text: "~5 mins Live feature / month" },
                       { Icon: Film, text: "~3-5 short videos / month" },
-                      { Icon: Settings, text: "Access to more models" },
+                      { Icon: Settings, text: "Access to all models" },
                       { Icon: Zap, text: "Faster queue" },
                     ].map((feature, i) => (
                       <li key={i} className="flex items-center gap-2.5 group/feature">
@@ -3337,10 +3337,10 @@ export default function VizualStudioApp() {
                   <ul className="space-y-2.5 mb-5 flex-1">
                     {[
                       { Icon: Coins, text: "2,000 credits / month", highlight: true },
-                      { Icon: Image, text: "~100-400 images / month" },
-                      { Icon: Radio, text: "~10 mins Live feature / month" },
-                      { Icon: Film, text: "~8-12 videos / month" },
-                      { Icon: Sparkles, text: "All premium models" },
+                      { Icon: Image, text: "Unlimited images" },
+                      { Icon: Radio, text: "1 hr live streaming / month" },
+                      { Icon: Film, text: "10+ videos / month" },
+                      { Icon: Sparkles, text: "Access to all models" },
                       { Icon: Zap, text: "Priority queue" },
                       { Icon: Brain, text: "Long-term memory" },
                     ].map((feature, i) => (
@@ -3386,15 +3386,15 @@ export default function VizualStudioApp() {
                     <p className="text-[10px] text-gray-500">For power users</p>
                   </div>
                   <div className="mb-4 pb-4 border-b border-white/5">
-                    <span className="text-3xl font-bold bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text text-transparent">$50</span>
+                    <span className="text-3xl font-bold bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text text-transparent">$60</span>
                     <span className="text-xs text-gray-500 ml-1">/ month</span>
                   </div>
                   <ul className="space-y-2.5 mb-5 flex-1">
                     {[
                       { Icon: Coins, text: "5,000 credits / month", highlight: true },
                       { Icon: Image, text: "Unlimited images (soft cap)" },
-                      { Icon: Radio, text: "~30 mins Live feature / month" },
-                      { Icon: Film, text: "~25-40 videos / month" },
+                      { Icon: Radio, text: "3 hrs live streaming / month" },
+                      { Icon: Film, text: "25+ videos / month" },
                       { Icon: Star, text: "All models + early access" },
                       { Icon: Zap, text: "Instant priority queue" },
                       { Icon: Brain, text: "Infinite memory" },

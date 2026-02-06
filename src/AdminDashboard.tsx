@@ -79,8 +79,8 @@ const AdminDashboard = () => {
     
     // Check if admin
     if (user.email !== 'andregreengp@gmail.com') {
-      console.log('AdminDashboard: Not admin (' + user.email + '), redirecting to /chat');
-      router.replace('/chat');
+      console.log('AdminDashboard: Not admin (' + user.email + '), redirecting to /vizual/studio');
+      router.replace('/vizual/studio');
       return;
     }
     
@@ -364,7 +364,7 @@ const AdminDashboard = () => {
       {/* Header */}
       <div className="admin-header">
         <div className="header-left">
-          <button className="back-btn" onClick={() => router.push('/chat')}>
+          <button className="back-btn" onClick={() => router.push('/vizual/studio')}>
             ← Back to App
           </button>
           <div className="admin-title">
