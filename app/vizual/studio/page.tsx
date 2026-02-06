@@ -835,11 +835,11 @@ export default function VizualStudioApp() {
     fetchCredits();
   }, [user]);
 
-  // Welcome modal — show once per user on first login
+  // Welcome modal — show every time the user signs in (per session)
   useEffect(() => {
     if (!user || loading) return;
-    const key = `vizual_welcomed_${user.id}`;
-    if (!localStorage.getItem(key)) {
+    const key = `vizual_welcomed_session_${user.id}`;
+    if (!sessionStorage.getItem(key)) {
       // Small delay so the studio renders first
       const t = setTimeout(() => setShowWelcomeModal(true), 800);
       return () => clearTimeout(t);
@@ -849,7 +849,7 @@ export default function VizualStudioApp() {
   const handleCloseWelcome = () => {
     setShowWelcomeModal(false);
     if (user) {
-      localStorage.setItem(`vizual_welcomed_${user.id}`, 'true');
+      sessionStorage.setItem(`vizual_welcomed_session_${user.id}`, 'true');
     }
   };
 
@@ -1529,13 +1529,13 @@ export default function VizualStudioApp() {
                   className={`text-sm font-bold ${spaceGrotesk.className}`}
                   style={{
                     background: creditsRemaining > 0 
-                      ? 'linear-gradient(135deg, #a855f7, #ec4899, #8b5cf6)' 
+                      ? 'linear-gradient(135deg, #ffffff, #b8b8b8, #ffffff)' 
                       : 'linear-gradient(135deg, #ef4444, #f97316)',
                     backgroundClip: 'text',
                     WebkitBackgroundClip: 'text',
                     color: 'transparent',
                     textShadow: creditsRemaining > 0 
-                      ? '0 0 20px rgba(168, 85, 247, 0.5)' 
+                      ? '0 0 20px rgba(255, 255, 255, 0.3)' 
                       : '0 0 20px rgba(239, 68, 68, 0.5)',
                   }}
                 >
