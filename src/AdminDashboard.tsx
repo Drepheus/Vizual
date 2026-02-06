@@ -56,36 +56,12 @@ const AdminDashboard = () => {
   const [logFilter, setLogFilter] = useState<'all' | 'errors' | 'success'>('all');
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Check if user is admin - wait for auth to load
+  // Admin access - just log for debugging, render guards handle the rest
   useEffect(() => {
-    console.log('AdminDashboard: Auth state -', { 
-      loading, 
-      user: user?.email, 
-      session: !!session 
-    });
-    
-    // Wait for auth to finish loading
-    if (loading) {
-      console.log('AdminDashboard: Auth still loading...');
-      return;
+    if (!loading && user) {
+      console.log('AdminDashboard: ✅ Loaded for', user.email);
     }
-    
-    // Check if logged in
-    if (!session || !user) {
-      console.log('AdminDashboard: No session, redirecting to /login');
-      router.replace('/login');
-      return;
-    }
-    
-    // Check if admin
-    if (user.email !== 'andregreengp@gmail.com') {
-      console.log('AdminDashboard: Not admin (' + user.email + '), redirecting to /vizual/studio');
-      router.replace('/vizual/studio');
-      return;
-    }
-    
-    console.log('AdminDashboard: ✅ Admin access confirmed for', user.email);
-  }, [user, session, loading, router]);
+  }, [user, loading]);
 
   // Fetch system metrics
   const fetchSystemMetrics = async () => {
