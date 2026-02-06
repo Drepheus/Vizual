@@ -113,6 +113,7 @@ export default function RootLayout({
         {/* DNS prefetch for analytics (non-critical) */}
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
         <link rel="dns-prefetch" href="https://www.google-analytics.com" />
+        <link rel="dns-prefetch" href="https://us.i.posthog.com" />
 
         {/* Preconnect to Supabase for faster auth/data */}
         <link rel="preconnect" href="https://supabase.co" />

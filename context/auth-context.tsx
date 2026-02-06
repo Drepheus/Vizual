@@ -10,6 +10,7 @@ import {
 } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { getBrowserSupabaseClient } from "@/lib/supabase-browser";
+import { identifyUser, resetUser, trackSignIn, trackSignOut } from "@/lib/posthog";
 
 interface AuthContextValue {
   session: Session | null;
@@ -47,6 +48,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     subscription = supabase.auth.onAuthStateChange((_event, nextSession) => {
       setSession(nextSession);
       setUser(nextSession?.user ?? null);
+      
+      // Track auth events in PostHog
+      if (_event === 'SIGNED_IN' && nextSession?.user) {
+        const u = nextSession.user;
+        identifyUser(u.id, {
+          email: u.email,
+          name: u.user_metadata?.name,
+          auth_provider: u.app_metadata?.provider,
+        });
+        trackSignIn(
+          u.app_metadata?.provider === 'google' ? 'google' : 'email',
+          u.email
+        );
+      } else if (_event === 'SIGNED_OUT') {
+        trackSignOut();
+        resetUser();
+      }
     });
 
     return () => {

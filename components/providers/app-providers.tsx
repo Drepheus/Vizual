@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, type ReactNode } from "react";
+import { Suspense, useEffect, type ReactNode } from "react";
 import { AuthProvider } from "@/context/auth-context";
 import { GuestModeProvider } from "@/context/guest-mode-context";
 import { ToastProvider } from "@/components/ui/toast";
+import { PostHogProvider } from "@/components/providers/posthog-provider";
 import { initSentry } from "@/lib/sentry-client";
 
 export function AppProviders({ children }: { children: ReactNode }) {
@@ -14,9 +15,13 @@ export function AppProviders({ children }: { children: ReactNode }) {
   return (
     <GuestModeProvider>
       <AuthProvider>
-        <ToastProvider>
-          {children}
-        </ToastProvider>
+        <Suspense fallback={null}>
+          <PostHogProvider>
+            <ToastProvider>
+              {children}
+            </ToastProvider>
+          </PostHogProvider>
+        </Suspense>
       </AuthProvider>
     </GuestModeProvider>
   );

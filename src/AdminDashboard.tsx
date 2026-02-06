@@ -483,6 +483,14 @@ const AdminDashboard = () => {
           <span className="tab-icon">⚙️</span>
           Control Panel
         </button>
+        <button
+          className="tab-btn"
+          onClick={() => router.push('/admin/analytics')}
+          style={{ borderLeft: '1px solid rgba(255,255,255,0.1)', marginLeft: 8, paddingLeft: 16 }}
+        >
+          <span className="tab-icon">📊</span>
+          PostHog Analytics
+        </button>
       </div>
 
       {/* Tab Content */}

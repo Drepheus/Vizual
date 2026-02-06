@@ -1,8 +1,13 @@
+#!include:.gitignore
+
 # GCloud Ignore - exclude files from Cloud Build upload
 # This dramatically reduces upload size (from ~870MB to ~50MB)
 
+.git/
 .git
+node_modules/
 node_modules
+.next/
 .next
 .vercel
 .vscode

@@ -68,6 +68,7 @@ import { useToast } from "@/components/ui/toast";
 import { WelcomeModal } from "@/components/vizual/WelcomeModal";
 import { getBrowserSupabaseClient } from "@/lib/supabase-browser";
 import { getUserCreditsAndUsage, UserCreditsAndUsage, consumeImageGeneration, canGenerateImage } from "@/lib/usage-tracking";
+import { trackGenerationStarted, trackGenerationCompleted, trackGenerationFailed, trackModelSelected, trackCreditsConsumed, trackCreditLimitReached, trackCreationModeSwitch, identifyUser } from "@/lib/posthog";
 
 const supabase = getBrowserSupabaseClient();
 
@@ -807,6 +808,16 @@ export default function VizualStudioApp() {
           setAccountData(usageData);
           setUserCredits(usageData.credits || 5);
           setCreditsUsed(usageData.credits_used || 0);
+          
+          // Identify user in PostHog with their properties
+          identifyUser(user.id, {
+            email: user.email,
+            name: user.user_metadata?.name,
+            subscription_tier: usageData.subscription_tier,
+            credits: usageData.credits,
+            credits_remaining: usageData.credits_remaining,
+            is_paid_user: usageData.is_paid_user,
+          });
         } else {
           // Fallback to direct query
           const { data, error } = await supabase
@@ -976,6 +987,11 @@ export default function VizualStudioApp() {
           setCreditsUsed(freshData.credits_used || 0);
         }
         setShowLimitModal(true);
+        trackCreditLimitReached({
+          subscription_tier: freshData?.subscription_tier || 'free',
+          credits_remaining: freshData?.credits_remaining || 0,
+          daily_free_remaining: freshData?.daily_free_images_remaining || 0,
+        });
         return;
       }
     }
@@ -994,6 +1010,7 @@ export default function VizualStudioApp() {
 
     // Start the loading animation
     setIsGenerating(true);
+    const generationStartTime = Date.now();
 
     try {
       // Find the current model object to get its ID
@@ -1008,6 +1025,17 @@ export default function VizualStudioApp() {
       console.log('🏷️ Selected tags:', selectedTags);
       console.log('🎨 Active tab:', activeTab);
       console.log('📎 Attachments:', attachments.length);
+
+      // Track generation start
+      trackGenerationStarted({
+        creation_mode: creationMode,
+        model_id: modelId,
+        model_name: model,
+        prompt_length: prompt.length,
+        has_attachments: attachments.length > 0,
+        active_tab: activeTab || undefined,
+        style_tags: selectedTags.filter(t => t.type === 'style').map(t => t.label),
+      });
 
       // Determine generation mode based on active tab
       const generationMode = isRemixMode ? 'remix' : isReferenceMode ? 'reference' : 'generate';
@@ -1073,6 +1101,15 @@ export default function VizualStudioApp() {
             imageUrl: data.imageUrl || data.url,
             type: 'image',
           });
+
+          trackGenerationCompleted({
+            creation_mode: 'IMAGE',
+            model_id: 'decart-remix',
+            model_name: 'Decart Remix',
+            prompt_length: prompt.length,
+            duration_ms: Date.now() - generationStartTime,
+            has_style: selectedTags.some(t => t.type === 'style'),
+          });
         } else {
           // Call regular image generation API
           const response = await fetch('/api/generate-image', {
@@ -1111,6 +1148,16 @@ export default function VizualStudioApp() {
             keywords: keywords,
             imageUrl: data.imageUrl,
             type: 'image',
+          });
+
+          trackGenerationCompleted({
+            creation_mode: 'IMAGE',
+            model_id: modelId,
+            model_name: model,
+            prompt_length: prompt.length,
+            duration_ms: Date.now() - generationStartTime,
+            has_style: !!styleNames,
+            style_names: styleNames ? [styleNames] : undefined,
           });
         }
       } else {
@@ -1151,11 +1198,27 @@ export default function VizualStudioApp() {
           type: 'video',
         });
 
+        trackGenerationCompleted({
+          creation_mode: 'VIDEO',
+          model_id: modelId,
+          model_name: model,
+          prompt_length: prompt.length,
+          duration_ms: Date.now() - generationStartTime,
+          has_style: !!styleNames,
+          style_names: styleNames ? [styleNames] : undefined,
+        });
+
         // Deduct credits after successful generation
         await deductCredits(estimatedCost);
       }
     } catch (error: any) {
       console.error('Generation error:', error);
+      trackGenerationFailed({
+        creation_mode: creationMode,
+        model_id: '',
+        model_name: model,
+        error_message: error?.message || 'Unknown error',
+      });
       showToast(`Generation failed: ${error.message}`, 'error', 5000);
     } finally {
       setIsGenerating(false);
