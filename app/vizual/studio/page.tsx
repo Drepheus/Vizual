@@ -2171,13 +2171,13 @@ export default function VizualStudioApp() {
                           {/* Send Button */}
                           <button
                             onClick={handleGenerate}
-                            disabled={!prompt.trim() || estimatedCost > creditsRemaining}
+                            disabled={!prompt.trim()}
                             className={`p-2 md:p-2.5 rounded-full transition-colors ${
-                              prompt.trim() && estimatedCost <= creditsRemaining
+                              prompt.trim()
                                 ? 'bg-white text-black hover:bg-gray-200'
                                 : 'bg-white/10 text-gray-500 cursor-not-allowed'
                             }`}
-                            title={estimatedCost > creditsRemaining ? 'Not enough credits' : 'Generate'}
+                            title={estimatedCost > creditsRemaining ? 'Not enough credits — click to upgrade' : 'Generate'}
                           >
                             <Send size={18} />
                           </button>
