@@ -66,7 +66,7 @@ import { ProjectsView } from "@/components/vizual/projects-view";
 import { Sidebar } from "@/components/vizual/sidebar";
 import { useToast } from "@/components/ui/toast";
 import { getBrowserSupabaseClient } from "@/lib/supabase-browser";
-import { getUserCreditsAndUsage, UserCreditsAndUsage, consumeImageGeneration } from "@/lib/usage-tracking";
+import { getUserCreditsAndUsage, UserCreditsAndUsage, consumeImageGeneration, canGenerateImage } from "@/lib/usage-tracking";
 
 const supabase = getBrowserSupabaseClient();
 
@@ -559,6 +559,21 @@ export default function VizualStudioApp() {
     }
   };
 
+  // Refresh credits from database to keep UI counters accurate
+  const refreshCreditsFromDB = async () => {
+    if (!user) return;
+    try {
+      const usageData = await getUserCreditsAndUsage(user.id);
+      if (usageData) {
+        setAccountData(usageData);
+        setUserCredits(usageData.credits || 5);
+        setCreditsUsed(usageData.credits_used || 0);
+      }
+    } catch (err) {
+      console.error('Error refreshing credits:', err);
+    }
+  };
+
   // Sign out and redirect to homepage
   const handleSignOut = async () => {
     try {
@@ -927,9 +942,17 @@ export default function VizualStudioApp() {
       return;
     }
 
-    // Check if free user is out of daily free images (for image mode)
-    if (creationMode === 'IMAGE' && accountData && !accountData.is_paid_user) {
-      if (accountData.daily_free_images_remaining <= 0 && accountData.credits_remaining <= 0) {
+    // SERVER-SIDE credit check: call the DB to get real-time limits (not stale client state)
+    if (creationMode === 'IMAGE' && user) {
+      const canGen = await canGenerateImage(user.id);
+      if (!canGen || !canGen.can_generate) {
+        // Re-fetch account data to update UI counters
+        const freshData = await getUserCreditsAndUsage(user.id);
+        if (freshData) {
+          setAccountData(freshData);
+          setUserCredits(freshData.credits || 5);
+          setCreditsUsed(freshData.credits_used || 0);
+        }
         setShowLimitModal(true);
         return;
       }
@@ -1016,6 +1039,11 @@ export default function VizualStudioApp() {
             throw new Error(data.error || 'Failed to remix image');
           }
 
+          // Consume BEFORE setting result so credits are deducted even if user navigates away
+          await consumeImageGen();
+          // Refresh credits from DB to keep counter accurate
+          await refreshCreditsFromDB();
+
           setGeneratedContent({
             prompt: prompt,
             description: `I've remixed your image with the prompt "${prompt}" using the Decart lucy-pro-i2i model.`,
@@ -1023,9 +1051,6 @@ export default function VizualStudioApp() {
             imageUrl: data.imageUrl || data.url,
             type: 'image',
           });
-
-          // Consume image generation (uses daily free first, then credits)
-          await consumeImageGen();
         } else {
           // Call regular image generation API
           const response = await fetch('/api/generate-image', {
@@ -1053,6 +1078,11 @@ export default function VizualStudioApp() {
           const appliedStyles = [styleNames, modeNames].filter(Boolean).join(' + ');
           const modeDescription = isReferenceMode ? ' (using reference)' : '';
 
+          // Consume BEFORE setting result so credits are deducted reliably
+          await consumeImageGen();
+          // Refresh credits from DB to keep counter accurate
+          await refreshCreditsFromDB();
+
           setGeneratedContent({
             prompt: prompt,
             description: `I've created an image based on your prompt "${prompt}"${appliedStyles ? ` with ${appliedStyles} style` : ''}${modeDescription}, using the ${model} model.`,
@@ -1060,9 +1090,6 @@ export default function VizualStudioApp() {
             imageUrl: data.imageUrl,
             type: 'image',
           });
-
-          // Consume image generation (uses daily free first, then credits)
-          await consumeImageGen();
         }
       } else {
         // Call video generation API with enhanced prompt
@@ -1303,13 +1330,19 @@ export default function VizualStudioApp() {
                   onClick={() => setShowModelDropdown(!showModelDropdown)}
                   className={`flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all duration-300 ${showModelDropdown
                     ? 'bg-white/10 border-white/20 text-white'
-                    : 'bg-transparent border-transparent hover:bg-white/5 text-gray-400 hover:text-white'
+                    : 'bg-white/[0.03] border-purple-500/30 hover:border-purple-400/50 hover:bg-white/5 text-white'
                     }`}
+                  style={!showModelDropdown ? {
+                    boxShadow: '0 0 12px rgba(168, 85, 247, 0.15), inset 0 0 12px rgba(168, 85, 247, 0.05)',
+                  } : undefined}
                 >
-                  <span className="text-[10px] font-bold tracking-widest uppercase hidden sm:inline opacity-60">Model</span>
+                  <span className="text-[10px] font-bold tracking-widest uppercase hidden sm:inline bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Model</span>
                   <div className="flex items-center gap-2">
-                    <span className={`font-medium ${spaceGrotesk.className}`}>{model}</span>
-                    <ChevronDown size={14} className={`transition-transform duration-300 ${showModelDropdown ? 'rotate-180' : ''}`} />
+                    <span
+                      className={`font-medium ${spaceGrotesk.className} bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent animate-pulse`}
+                      style={{ animationDuration: '3s' }}
+                    >{model}</span>
+                    <ChevronDown size={14} className={`transition-transform duration-300 text-purple-400 ${showModelDropdown ? 'rotate-180' : ''}`} />
                   </div>
                 </button>
 
@@ -2007,15 +2040,19 @@ export default function VizualStudioApp() {
                             </button>
                           </div>
 
-                          {/* Model/Aspect Ratio */}
-                          <div className="flex items-center gap-1 md:gap-2 text-[10px] md:text-xs text-gray-400">
+                          {/* Model/Aspect Ratio - Clickable to change model */}
+                          <button
+                            onClick={() => setShowModelDropdown(!showModelDropdown)}
+                            className="flex items-center gap-1 md:gap-2 text-[10px] md:text-xs text-gray-400 hover:text-white transition-colors cursor-pointer rounded-full px-2 py-1 hover:bg-white/5 border border-transparent hover:border-purple-500/20"
+                            title="Click to change model"
+                          >
                             <span className="hidden sm:inline">{creationMode}</span>
                             <span className="hidden sm:inline">·</span>
-                            <span className="text-white font-medium">{model}</span>
+                            <span className="text-white font-medium bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">{model}</span>
                             <span>·</span>
                             <span>{aspectRatio}</span>
-                            <ChevronDown size={14} />
-                          </div>
+                            <ChevronDown size={14} className="text-purple-400" />
+                          </button>
 
                           {/* Credit Cost Preview - Border only indicator */}
                           <div 
