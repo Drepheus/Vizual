@@ -104,12 +104,12 @@ console.log(response.videoUrl);`,
 
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 px-4 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-purple-900/20 via-transparent to-transparent" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-purple-500/10 rounded-full blur-[120px]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-gray-900/20 via-transparent to-transparent" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-white/5 rounded-full blur-[120px]" />
         
         <div className="relative max-w-5xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-8">
-            <Code className="w-4 h-4 text-purple-400" />
+            <Code className="w-4 h-4 text-gray-300" />
             <span className="text-sm text-gray-300">Developer API</span>
           </div>
           
@@ -153,7 +153,7 @@ console.log(response.videoUrl);`,
                   onClick={() => setActiveTab(tab)}
                   className={`px-6 py-4 text-sm font-medium transition-colors ${
                     activeTab === tab 
-                      ? "text-white bg-white/5 border-b-2 border-purple-500" 
+                      ? "text-white bg-white/5 border-b-2 border-white" 
                       : "text-gray-500 hover:text-gray-300"
                   }`}
                 >
@@ -173,7 +173,7 @@ console.log(response.videoUrl);`,
       </section>
 
       {/* Features Grid */}
-      <section className="py-20 px-4 bg-gradient-to-b from-transparent via-purple-900/5 to-transparent">
+      <section className="py-20 px-4 bg-gradient-to-b from-transparent via-gray-900/5 to-transparent">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <h2 className={`text-3xl md:text-5xl font-bold mb-4 ${spaceGrotesk.className}`}>
@@ -219,9 +219,9 @@ console.log(response.videoUrl);`,
             ].map((feature, i) => (
               <div 
                 key={i}
-                className="p-8 rounded-2xl bg-white/5 border border-white/10 hover:border-purple-500/50 transition-all group"
+                className="p-8 rounded-2xl bg-white/5 border border-white/10 hover:border-white/30 transition-all group"
               >
-                <div className="w-16 h-16 rounded-xl bg-purple-500/10 flex items-center justify-center mb-6 text-purple-400 group-hover:bg-purple-500/20 transition-colors">
+                <div className="w-16 h-16 rounded-xl bg-white/[0.06] flex items-center justify-center mb-6 text-gray-300 group-hover:bg-white/10 transition-colors">
                   {feature.icon}
                 </div>
                 <h3 className={`text-xl font-bold mb-3 ${spaceGrotesk.className}`}>{feature.title}</h3>
@@ -276,7 +276,7 @@ console.log(response.videoUrl);`,
                 key={i}
                 className={`p-8 rounded-2xl border transition-all ${
                   plan.highlighted 
-                    ? "bg-gradient-to-b from-purple-900/20 to-transparent border-purple-500/50 scale-105" 
+                    ? "bg-gradient-to-b from-gray-900/20 to-transparent border-white/30 scale-105" 
                     : "bg-white/5 border-white/10 hover:border-white/20"
                 }`}
               >
@@ -289,8 +289,8 @@ console.log(response.videoUrl);`,
                 <ul className="space-y-3 mb-8">
                   {plan.features.map((feature, j) => (
                     <li key={j} className="flex items-center gap-3 text-sm text-gray-300">
-                      <div className="w-5 h-5 rounded-full bg-purple-500/20 flex items-center justify-center">
-                        <ChevronRight className="w-3 h-3 text-purple-400" />
+                      <div className="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center">
+                        <ChevronRight className="w-3 h-3 text-gray-300" />
                       </div>
                       {feature}
                     </li>

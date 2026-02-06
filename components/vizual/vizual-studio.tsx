@@ -481,7 +481,7 @@ export function VizualStudio() {
             transition={{ duration: 0.5, delay: 0.25, ease: "easeOut" }}
             className="w-full max-w-3xl mx-auto relative group"
           >
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 rounded-[32px] blur opacity-0 group-hover:opacity-100 transition duration-1000"></div>
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-white/10 via-white/20 to-white/10 rounded-[32px] blur opacity-0 group-hover:opacity-100 transition duration-1000"></div>
             <motion.div
               whileHover={{ scale: 1.01 }}
               transition={{ type: "spring", stiffness: 400, damping: 30 }}
@@ -1202,8 +1202,8 @@ export function VizualStudio() {
               </p>
             </div>
             <div className="flex-1 order-1 md:order-2 animate-on-scroll animate-fade-in-right delay-200">
-              <div className="relative rounded-2xl overflow-hidden border border-black/10 bg-gray-100 group-hover:border-purple-500/30 transition-colors duration-500 shadow-xl shadow-black/10">
-                <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="relative rounded-2xl overflow-hidden border border-black/10 bg-gray-100 group-hover:border-white/30 transition-colors duration-500 shadow-xl shadow-black/10">
+                <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <HoverVideo src={`${CDN_BASE}/videos/film2.mp4`} className="w-full aspect-video object-cover" autoPlay={true} />
               </div>
             </div>
@@ -1253,7 +1253,7 @@ export function VizualStudio() {
               </p>
             </div>
             <div className="flex-1 order-1 md:order-2">
-              <div className="rounded-2xl overflow-hidden border border-white/10 bg-[#111] shadow-2xl shadow-purple-500/5">
+              <div className="rounded-2xl overflow-hidden border border-white/10 bg-[#111] shadow-2xl shadow-white/5">
                 <HoverVideo src={`${CDN_BASE}/videos/design.mp4`} className="w-full aspect-video object-cover" autoPlay={true} />
               </div>
             </div>
@@ -1328,7 +1328,7 @@ export function VizualStudio() {
       < section className="relative z-[99] w-full bg-gradient-to-b from-black via-[#0a0a1a] to-black py-24 px-4 overflow-hidden" >
         {/* Background gradient orbs */}
         < div className="absolute top-0 left-0 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[150px] pointer-events-none" />
-        <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-purple-600/10 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-white/5 rounded-full blur-[120px] pointer-events-none" />
 
         <div className="relative max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-12 md:gap-20">
 

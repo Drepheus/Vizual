@@ -233,7 +233,7 @@ export default function ContactPage() {
                             </div>
 
                             {/* Social Links */}
-                            <div className="mt-8 p-6 rounded-2xl bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-white/10">
+                            <div className="mt-8 p-6 rounded-2xl bg-gradient-to-br from-blue-500/10 to-white/5 border border-white/10">
                                 <h3 className={`text-lg font-bold mb-4 ${spaceGrotesk.className}`}>Follow Us</h3>
                                 <div className="flex gap-4">
                                     {["Twitter", "LinkedIn", "Discord", "YouTube"].map((social, i) => (

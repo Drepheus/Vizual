@@ -132,11 +132,11 @@ export function LoginPage() {
   return (
     <div className="min-h-screen bg-black flex items-center justify-center p-4">
       {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-black to-blue-900/20" />
+      <div className="absolute inset-0 bg-gradient-to-br from-gray-900/20 via-black to-gray-900/20" />
 
       {/* Login Card */}
       <div className="relative w-full max-w-md">
-        <div className="absolute -inset-1 bg-gradient-to-r from-purple-600/20 via-blue-600/20 to-cyan-600/20 rounded-3xl blur-xl" />
+        <div className="absolute -inset-1 bg-gradient-to-r from-white/10 via-white/5 to-white/10 rounded-3xl blur-xl" />
 
         <div className="relative bg-black/80 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl">
           {/* Logo/Header */}

@@ -56,15 +56,15 @@ const toastConfig: Record<ToastType, {
     },
     favorite: {
         icon: Heart,
-        bgGradient: 'from-pink-500/20 via-pink-600/10 to-transparent',
-        borderColor: 'border-pink-500/30',
-        iconColor: 'text-pink-400',
+        bgGradient: 'from-red-500/20 via-red-600/10 to-transparent',
+        borderColor: 'border-red-500/30',
+        iconColor: 'text-red-400',
     },
     copied: {
         icon: Link2,
-        bgGradient: 'from-violet-500/20 via-violet-600/10 to-transparent',
-        borderColor: 'border-violet-500/30',
-        iconColor: 'text-violet-400',
+        bgGradient: 'from-white/20 via-white/10 to-transparent',
+        borderColor: 'border-white/30',
+        iconColor: 'text-gray-300',
     },
     download: {
         icon: Download,

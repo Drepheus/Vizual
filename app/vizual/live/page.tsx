@@ -790,7 +790,7 @@ export default function LivePage() {
             {/* Character prompt - Transparent */}
             <div className="mb-4">
               <div className="flex items-center gap-2 mb-2">
-                <ImageIcon size={14} className="text-purple-400" />
+                <ImageIcon size={14} className="text-gray-300" />
                 <span className="text-[10px] font-bold text-white/70 uppercase tracking-widest">Character</span>
                 {referenceImage && (
                   <div className="relative w-8 h-8 rounded-lg overflow-hidden border border-red-500/50 ml-auto">
@@ -1067,7 +1067,7 @@ export default function LivePage() {
               {/* Character - Prompt & Upload */}
               <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4 flex-shrink-0">
                 <div className="flex items-center gap-2 mb-3">
-                  <ImageIcon size={16} className="text-purple-400" />
+                  <ImageIcon size={16} className="text-gray-300" />
                   <span className="text-xs font-bold text-gray-300 uppercase tracking-widest">Character</span>
                 </div>
 

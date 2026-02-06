@@ -146,7 +146,7 @@ export default function BlogPage() {
             {/* Featured Post */}
             <section className="py-8 px-6">
                 <div className="max-w-6xl mx-auto">
-                    <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-blue-500/20 via-purple-500/10 to-transparent border border-white/10 p-8 md:p-12 group cursor-pointer hover:border-white/20 transition-all">
+                    <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-blue-500/20 via-white/5 to-transparent border border-white/10 p-8 md:p-12 group cursor-pointer hover:border-white/20 transition-all">
                         <div className="absolute top-4 left-4">
                             <span className="px-3 py-1 rounded-full bg-blue-500/20 text-blue-400 text-xs font-medium border border-blue-500/30">
                                 Featured

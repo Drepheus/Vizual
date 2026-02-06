@@ -116,7 +116,7 @@ export default function APIStudio({ onClose }: APIStudioProps) {
       case 'openai': return 'bg-green-500/10 text-green-400 border-green-500/20';
       case 'anthropic': return 'bg-orange-500/10 text-orange-400 border-orange-500/20';
       case 'google': return 'bg-blue-500/10 text-blue-400 border-blue-500/20';
-      case 'replicate': return 'bg-purple-500/10 text-purple-400 border-purple-500/20';
+      case 'replicate': return 'bg-white/[0.06] text-gray-300 border-white/15';
       case 'meta': return 'bg-blue-400/10 text-blue-300 border-blue-400/20';
       default: return 'bg-gray-500/10 text-gray-400 border-gray-500/20';
     }

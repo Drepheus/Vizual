@@ -268,7 +268,7 @@ export default function EnterprisePage() {
             </div>
             
             <div className="relative">
-              <div className="aspect-square rounded-3xl overflow-hidden bg-gradient-to-br from-blue-900/20 to-purple-900/20 border border-white/10">
+              <div className="aspect-square rounded-3xl overflow-hidden bg-gradient-to-br from-blue-900/20 to-gray-900/20 border border-white/10">
                 <LazyVideo
                   src={`${CDN_BASE}/videos/matrixcode.mp4`}
                   className="opacity-60"

@@ -22,7 +22,7 @@ export default function GoogleAIPage() {
     {
       title: 'Summarize info',
       icon: <BookOpen className="w-6 h-6" />,
-      gradient: 'from-pink-500 to-rose-500'
+      gradient: 'from-gray-400 to-gray-500'
     },
     {
       title: 'Code explanation',
@@ -32,7 +32,7 @@ export default function GoogleAIPage() {
     {
       title: 'Creative writing',
       icon: <Sparkles className="w-6 h-6" />,
-      gradient: 'from-purple-500 to-violet-500'
+      gradient: 'from-gray-300 to-gray-400'
     },
     {
       title: 'Visual analysis',
@@ -54,9 +54,9 @@ export default function GoogleAIPage() {
       title: 'Veo',
       description: 'Generative video model for creating high-quality 1080p clips.',
       link: 'https://deepmind.google/veo',
-      color: 'text-purple-400',
-      bg: 'bg-purple-500/10',
-      border: 'border-purple-500/20'
+      color: 'text-gray-300',
+      bg: 'bg-white/[0.06]',
+      border: 'border-white/15'
     },
     {
       title: 'Imagen 3',
@@ -154,7 +154,7 @@ export default function GoogleAIPage() {
               opacity: [0.3, 0.5, 0.3] 
             }}
             transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl"
+            className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-white/5 rounded-full blur-3xl"
           />
         </div>
       </section>

@@ -569,12 +569,12 @@ const ViewAllModal = ({ isOpen, onClose, title, items, renderItem }: ViewAllModa
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
-        className="w-full max-w-6xl h-[85vh] bg-[#0f0f1a] rounded-2xl border border-purple-500/20 flex flex-col overflow-hidden shadow-2xl"
+        className="w-full max-w-6xl h-[85vh] bg-[#0f0f1a] rounded-2xl border border-white/15 flex flex-col overflow-hidden shadow-2xl"
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-center justify-between p-6 border-b border-white/10 bg-[#13131f]">
           <h2 className="text-2xl font-bold text-white flex items-center gap-3">
-            <span className="w-1 h-6 bg-gradient-to-b from-purple-500 to-pink-500 rounded-full"></span>
+            <span className="w-1 h-6 bg-gradient-to-b from-white to-gray-500 rounded-full"></span>
             {title}
           </h2>
           <button 
@@ -1332,11 +1332,11 @@ const ViewAllModal = ({ isOpen, onClose, title, items, renderItem }: ViewAllModa
                   title: 'Featured Voice Presets',
                   items: featuredVoices,
                   renderItem: (voice, i) => (
-                    <div className="bg-purple-500/10 border border-purple-500/30 rounded-2xl p-6 hover:bg-purple-500/20 transition-colors cursor-pointer">
+                    <div className="bg-white/[0.06] border border-white/15 rounded-2xl p-6 hover:bg-white/10 transition-colors cursor-pointer">
                       <div className="text-4xl mb-4">{voice.icon}</div>
                       <h3 className="text-white text-lg font-semibold mb-2">{voice.title}</h3>
                       <p className="text-white/60 text-sm mb-4">{voice.description}</p>
-                      <button className="w-full py-2 bg-purple-500/30 border border-purple-500/50 rounded-lg text-white text-sm hover:bg-purple-500/50 transition-colors">
+                      <button className="w-full py-2 bg-white/10 border border-white/20 rounded-lg text-white text-sm hover:bg-white/20 transition-colors">
                         Use Voice
                       </button>
                     </div>
@@ -1439,13 +1439,13 @@ const ViewAllModal = ({ isOpen, onClose, title, items, renderItem }: ViewAllModa
                   items: featuredMusic,
                   renderItem: (track, i) => (
                     <div className="bg-white/5 border border-white/10 rounded-2xl p-6 flex items-center gap-4 hover:bg-white/10 transition-colors cursor-pointer">
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-xl shadow-lg shadow-purple-500/30">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-white/20 to-gray-500/20 flex items-center justify-center text-xl shadow-lg shadow-white/10">
                         {track.icon}
                       </div>
                       <div className="flex-1">
                         <h3 className="text-white font-semibold mb-1">{track.title}</h3>
                         <div className="flex items-center gap-2 text-xs">
-                          <span className="bg-purple-500/20 text-purple-200 px-2 py-0.5 rounded-full border border-purple-500/30">{track.genre}</span>
+                          <span className="bg-white/10 text-gray-300 px-2 py-0.5 rounded-full border border-white/20">{track.genre}</span>
                           <span className="text-white/40">• {track.duration}</span>
                         </div>
                       </div>
@@ -1792,7 +1792,7 @@ const ViewAllModal = ({ isOpen, onClose, title, items, renderItem }: ViewAllModa
                       <img src={avatar.image} alt={avatar.title} className="w-24 h-24 rounded-full border-4 border-indigo-500/30 mb-4 object-cover" />
                       <h3 className="text-white font-semibold mb-2">{avatar.title}</h3>
                       <p className="text-white/60 text-sm mb-4">{avatar.description}</p>
-                      <button className="px-6 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg text-white text-sm font-medium hover:shadow-lg hover:shadow-indigo-500/30 transition-all">
+                      <button className="px-6 py-2 bg-white hover:bg-gray-200 rounded-lg text-black text-sm font-medium hover:shadow-lg transition-all">
                         Custvizualze
                       </button>
                     </div>
@@ -2051,8 +2051,8 @@ const ViewAllModal = ({ isOpen, onClose, title, items, renderItem }: ViewAllModa
                             </div>
                           </div>
                         ) : item.type === 'avatar' ? (
-                          <div className="w-full h-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center">
-                            <img src={item.src} alt={item.title} className="w-20 h-20 rounded-full border-2 border-purple-500/50" />
+                          <div className="w-full h-full bg-gradient-to-br from-white/[0.06] to-white/[0.03] flex items-center justify-center">
+                            <img src={item.src} alt={item.title} className="w-20 h-20 rounded-full border-2 border-white/30" />
                           </div>
                         ) : (
                           <img src={item.src} alt={item.title} className="w-full h-full object-cover" />

@@ -145,7 +145,7 @@ export default function SettingsModal({ isOpen, onClose, user }: SettingsModalPr
                       }}
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400">
+                        <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-gray-300">
                           <Shield size={16} />
                         </div>
                         <div>

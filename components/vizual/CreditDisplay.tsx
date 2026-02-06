@@ -57,14 +57,14 @@ export function CreditDisplay({
   const tierColors: Record<string, string> = {
     free: 'text-gray-400',
     basic: 'text-blue-400',
-    pro: 'text-purple-400',
+    pro: 'text-gray-300',
     ultra: 'text-amber-400'
   };
 
   const tierBadgeColors: Record<string, string> = {
     free: 'bg-gray-500/20 text-gray-400 border-gray-500/30',
     basic: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-    pro: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
+    pro: 'bg-white/10 text-gray-300 border-white/20',
     ultra: 'bg-amber-500/20 text-amber-400 border-amber-500/30'
   };
 
@@ -151,7 +151,7 @@ export function CreditDisplay({
         {showUpgrade && !usage.is_paid_user && (
           <button
             onClick={onUpgradeClick}
-            className="w-full flex items-center justify-center gap-2 py-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 rounded-lg text-white text-sm font-medium transition-all"
+            className="w-full flex items-center justify-center gap-2 py-2 bg-white hover:bg-gray-200 rounded-lg text-black text-sm font-medium transition-all"
           >
             <Sparkles size={14} />
             Upgrade for More
@@ -240,7 +240,7 @@ export function CreditDisplay({
       {showUpgrade && !usage.is_paid_user && (
         <button
           onClick={onUpgradeClick}
-          className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 rounded-xl text-white font-medium transition-all"
+          className="w-full flex items-center justify-center gap-2 py-3 bg-white hover:bg-gray-200 rounded-xl text-black font-medium transition-all"
         >
           <Sparkles size={16} />
           Upgrade for Unlimited Creativity

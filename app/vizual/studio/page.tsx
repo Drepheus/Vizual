@@ -1352,19 +1352,19 @@ export default function VizualStudioApp() {
                   onClick={() => setShowModelDropdown(!showModelDropdown)}
                   className={`flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all duration-300 ${showModelDropdown
                     ? 'bg-white/10 border-white/20 text-white'
-                    : 'bg-white/[0.03] border-purple-500/30 hover:border-purple-400/50 hover:bg-white/5 text-white'
+                    : 'bg-white/[0.03] border-white/20 hover:border-white/40 hover:bg-white/5 text-white'
                     }`}
                   style={!showModelDropdown ? {
-                    boxShadow: '0 0 12px rgba(168, 85, 247, 0.15), inset 0 0 12px rgba(168, 85, 247, 0.05)',
+                    boxShadow: '0 0 12px rgba(255, 255, 255, 0.08), inset 0 0 12px rgba(255, 255, 255, 0.03)',
                   } : undefined}
                 >
-                  <span className="text-[10px] font-bold tracking-widest uppercase hidden sm:inline bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Model</span>
+                  <span className="text-[10px] font-bold tracking-widest uppercase hidden sm:inline text-gray-400">Model</span>
                   <div className="flex items-center gap-2">
                     <span
-                      className={`font-medium ${spaceGrotesk.className} bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent animate-pulse`}
+                      className={`font-medium ${spaceGrotesk.className} bg-gradient-to-r from-white via-gray-300 to-white bg-clip-text text-transparent animate-pulse`}
                       style={{ animationDuration: '3s' }}
                     >{model}</span>
-                    <ChevronDown size={14} className={`transition-transform duration-300 text-purple-400 ${showModelDropdown ? 'rotate-180' : ''}`} />
+                    <ChevronDown size={14} className={`transition-transform duration-300 text-gray-400 ${showModelDropdown ? 'rotate-180' : ''}`} />
                   </div>
                 </button>
 
@@ -1519,11 +1519,11 @@ export default function VizualStudioApp() {
                 className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 bg-black/40 backdrop-blur-sm"
                 style={{
                   boxShadow: creditsRemaining > 0 
-                    ? '0 0 15px rgba(139, 92, 246, 0.3), 0 0 30px rgba(236, 72, 153, 0.2), inset 0 1px 0 rgba(255,255,255,0.1)' 
+                    ? '0 0 15px rgba(255, 255, 255, 0.1), inset 0 1px 0 rgba(255,255,255,0.1)' 
                     : '0 0 15px rgba(239, 68, 68, 0.4)',
                 }}
               >
-                <Coins size={14} className="text-purple-400" />
+                <Coins size={14} className="text-gray-300" />
                 <span className="text-[10px] uppercase tracking-wider text-gray-400 font-medium hidden sm:inline">Credits</span>
                 <span 
                   className={`text-sm font-bold ${spaceGrotesk.className}`}
@@ -1923,8 +1923,8 @@ export default function VizualStudioApp() {
                             <div
                               key={tag.id}
                               className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${tag.type === 'style'
-                                ? 'bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-400/30 text-purple-300'
-                                : 'bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border border-blue-400/30 text-blue-300'
+                                ? 'bg-white/[0.08] border border-white/20 text-gray-300'
+                                : 'bg-white/[0.06] border border-white/15 text-gray-400'
                                 }`}
                             >
                               <span className="text-white/70">@</span>
@@ -2065,28 +2065,28 @@ export default function VizualStudioApp() {
                           {/* Model/Aspect Ratio - Clickable to change model */}
                           <button
                             onClick={() => setShowModelDropdown(!showModelDropdown)}
-                            className="flex items-center gap-1 md:gap-2 text-[10px] md:text-xs text-gray-400 hover:text-white transition-colors cursor-pointer rounded-full px-2 py-1 hover:bg-white/5 border border-transparent hover:border-purple-500/20"
+                            className="flex items-center gap-1 md:gap-2 text-[10px] md:text-xs text-gray-400 hover:text-white transition-colors cursor-pointer rounded-full px-2 py-1 hover:bg-white/5 border border-transparent hover:border-white/15"
                             title="Click to change model"
                           >
                             <span className="hidden sm:inline">{creationMode}</span>
                             <span className="hidden sm:inline">·</span>
-                            <span className="text-white font-medium bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">{model}</span>
+                            <span className="text-white font-medium">{model}</span>
                             <span>·</span>
                             <span>{aspectRatio}</span>
-                            <ChevronDown size={14} className="text-purple-400" />
+                            <ChevronDown size={14} className="text-gray-400" />
                           </button>
 
                           {/* Credit Cost Preview - Border only indicator */}
                           <div 
                             className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border-2 transition-all ${
                               estimatedCost <= creditsRemaining 
-                                ? 'border-purple-500' 
+                                ? 'border-white/30' 
                                 : 'border-red-500'
                             }`}
                             style={{
                               background: 'transparent',
                               boxShadow: estimatedCost <= creditsRemaining 
-                                ? '0 0 12px rgba(168, 85, 247, 0.4)' 
+                                ? '0 0 12px rgba(255, 255, 255, 0.15)' 
                                 : '0 0 12px rgba(239, 68, 68, 0.5)',
                             }}
                             title={estimatedCost <= creditsRemaining 
@@ -2094,10 +2094,10 @@ export default function VizualStudioApp() {
                               : `Not enough credits! Need ${estimatedCost}, have ${creditsRemaining}`
                             }
                           >
-                            <Zap size={12} className={estimatedCost <= creditsRemaining ? 'text-purple-400' : 'text-red-400'} />
+                            <Zap size={12} className={estimatedCost <= creditsRemaining ? 'text-white/70' : 'text-red-400'} />
                             <span 
                               className={`text-[10px] font-bold ${spaceGrotesk.className} ${
-                                estimatedCost <= creditsRemaining ? 'text-purple-400' : 'text-red-400'
+                                estimatedCost <= creditsRemaining ? 'text-white/70' : 'text-red-400'
                               }`}
                             >
                               {estimatedCost} {estimatedCost === 1 ? 'credit' : 'credits'}
@@ -2151,7 +2151,7 @@ export default function VizualStudioApp() {
             {/* Modal Content */}
             <div className="relative z-10 w-full max-w-2xl max-h-[90vh] sm:max-h-[85vh] overflow-hidden">
               {/* Glowing border effect */}
-              <div className="absolute -inset-[1px] bg-gradient-to-r from-blue-500/50 via-purple-500/50 to-pink-500/50 rounded-[20px] sm:rounded-[32px] blur-sm opacity-60" />
+              <div className="absolute -inset-[1px] bg-gradient-to-r from-white/20 via-white/30 to-white/20 rounded-[20px] sm:rounded-[32px] blur-sm opacity-60" />
 
               {/* Main container */}
               <div className="relative bg-[#0a0a0a]/95 backdrop-blur-2xl rounded-[20px] sm:rounded-[32px] border border-white/10 overflow-hidden">
@@ -2185,7 +2185,7 @@ export default function VizualStudioApp() {
                 {/* Header */}
                 <div className="text-center pt-8 sm:pt-10 pb-4 sm:pb-6 px-4 sm:px-8">
                   <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-white/5 border border-white/10 mb-3 sm:mb-4">
-                    <Sparkles size={12} className="sm:w-[14px] sm:h-[14px] text-purple-400" />
+                    <Sparkles size={12} className="sm:w-[14px] sm:h-[14px] text-gray-300" />
                     <span className="text-[10px] sm:text-xs font-medium text-gray-300 tracking-wider uppercase">Creative Studio</span>
                   </div>
                   <h2 className={`text-2xl sm:text-3xl md:text-4xl font-bold mb-2 sm:mb-3 bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent ${spaceGrotesk.className}`}>
@@ -2309,7 +2309,7 @@ export default function VizualStudioApp() {
             {/* Modal Content */}
             <div className="relative z-10 w-full max-w-lg bg-[#0a0a0a]/95 backdrop-blur-2xl rounded-[20px] sm:rounded-[28px] border border-white/10 overflow-hidden shadow-2xl">
               {/* Glow line */}
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-[1px] bg-gradient-to-r from-transparent via-purple-400/50 to-transparent" />
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-[1px] bg-gradient-to-r from-transparent via-white/30 to-transparent" />
 
               {/* Close Button */}
               <button
@@ -2321,9 +2321,9 @@ export default function VizualStudioApp() {
 
               {/* Header */}
               <div className="text-center pt-8 pb-4 px-6">
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-500/10 border border-purple-400/20 mb-4">
-                  <Palette size={14} className="text-purple-400" />
-                  <span className="text-xs font-medium text-purple-300 tracking-wider">STYLE PRESETS</span>
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/[0.06] border border-white/15 mb-4">
+                  <Palette size={14} className="text-gray-300" />
+                  <span className="text-xs font-medium text-gray-300 tracking-wider">STYLE PRESETS</span>
                 </div>
                 <h2 className={`text-2xl sm:text-3xl font-bold mb-2 text-white ${spaceGrotesk.className}`}>
                   Choose a Style
@@ -2342,7 +2342,7 @@ export default function VizualStudioApp() {
                       addTag(style.name, 'style');
                       setShowStyleModal(false);
                     }}
-                    className="group relative p-0 rounded-2xl overflow-hidden bg-white/5 border border-white/10 hover:border-purple-500/50 transition-all duration-300 h-32 sm:h-40"
+                    className="group relative p-0 rounded-2xl overflow-hidden bg-white/5 border border-white/10 hover:border-white/30 transition-all duration-300 h-32 sm:h-40"
                     style={{ animationDelay: `${index * 50}ms` }}
                   >
                     {/* Thumbnail */}
@@ -2359,7 +2359,7 @@ export default function VizualStudioApp() {
                     <div className="absolute inset-0 p-3 flex flex-col justify-end">
                       {/* Icon & Name Row */}
                       <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-lg bg-black/40 backdrop-blur-md flex items-center justify-center text-purple-400">
+                        <div className="w-6 h-6 rounded-lg bg-black/40 backdrop-blur-md flex items-center justify-center text-gray-300">
                           {style.icon === 'film' && <Video size={14} />}
                           {style.icon === 'user' && <User size={14} />}
                           {style.icon === 'box' && <LayoutGrid size={14} />}
@@ -2376,8 +2376,8 @@ export default function VizualStudioApp() {
 
                     {/* Selection indicator */}
                     {selectedTags.find(t => t.label === style.name && t.type === 'style') && (
-                      <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-purple-500 border-2 border-white flex items-center justify-center shadow-lg animate-in zoom-in-50 duration-200">
-                        <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-white border-2 border-gray-300 flex items-center justify-center shadow-lg animate-in zoom-in-50 duration-200">
+                        <svg className="w-3.5 h-3.5 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={4} d="M5 13l4 4L19 7" />
                         </svg>
                       </div>
@@ -2389,13 +2389,13 @@ export default function VizualStudioApp() {
               {/* Selected count */}
               {selectedTags.filter(t => t.type === 'style').length > 0 && (
                 <div className="px-6 pb-4">
-                  <div className="px-4 py-2 rounded-xl bg-purple-500/10 border border-purple-400/20 flex items-center justify-between">
-                    <span className="text-sm text-purple-300">
+                  <div className="px-4 py-2 rounded-xl bg-white/[0.06] border border-white/15 flex items-center justify-between">
+                    <span className="text-sm text-gray-300">
                       {selectedTags.filter(t => t.type === 'style').length} style{selectedTags.filter(t => t.type === 'style').length > 1 ? 's' : ''} selected
                     </span>
                     <button
                       onClick={() => setSelectedTags(prev => prev.filter(t => t.type !== 'style'))}
-                      className="text-xs text-purple-400 hover:text-purple-300 transition-colors"
+                      className="text-xs text-gray-400 hover:text-white transition-colors"
                     >
                       Clear all
                     </button>
@@ -2474,7 +2474,7 @@ export default function VizualStudioApp() {
                           />
                         )
                       ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-purple-500/20 to-blue-500/20 flex items-center justify-center">
+                        <div className="w-full h-full bg-gradient-to-br from-white/[0.06] to-white/[0.03] flex items-center justify-center">
                           <ImageIcon size={24} className="text-gray-500" />
                         </div>
                       )}
@@ -2508,10 +2508,10 @@ export default function VizualStudioApp() {
                 {/* Flow TV Card */}
                 <button
                   onClick={() => setShowFlowTV(true)}
-                  className="flex flex-col items-center p-4 rounded-xl bg-gradient-to-br from-purple-500/20 to-blue-500/20 hover:from-purple-500/30 hover:to-blue-500/30 border border-white/10 hover:border-white/20 transition-all min-w-[140px] group"
+                  className="flex flex-col items-center p-4 rounded-xl bg-gradient-to-br from-white/[0.08] to-white/[0.03] hover:from-white/[0.12] hover:to-white/[0.06] border border-white/10 hover:border-white/20 transition-all min-w-[140px] group"
                 >
                   <div className="w-16 h-16 rounded-2xl bg-black/50 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                    <Tv size={28} className="text-purple-400" />
+                    <Tv size={28} className="text-gray-300" />
                   </div>
                   <span className="text-xs font-medium text-white">Flow TV</span>
                   <span className="text-[10px] text-gray-500">Google Labs</span>
@@ -2523,7 +2523,7 @@ export default function VizualStudioApp() {
                   className="flex flex-col items-center p-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 transition-all min-w-[140px] group cursor-pointer"
                 >
                   <div className="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                    <Palette size={28} className="text-pink-400" />
+                    <Palette size={28} className="text-gray-300" />
                   </div>
                   <span className="text-xs font-medium text-white">Color Palettes</span>
                   <span className="text-[10px] text-gray-500">Explore Colors</span>
@@ -2562,7 +2562,7 @@ export default function VizualStudioApp() {
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 bg-black border-b border-white/10">
               <div className="flex items-center gap-3">
-                <Tv size={20} className="text-purple-400" />
+                <Tv size={20} className="text-gray-300" />
                 <span className={`font-semibold ${spaceGrotesk.className}`}>Flow TV</span>
                 <span className="text-xs text-gray-500">by Google Labs</span>
               </div>
@@ -2685,7 +2685,7 @@ export default function VizualStudioApp() {
                     </p>
                   </div>
                   <div className={`px-3 py-1 rounded-full border text-xs font-medium ${
-                    accountData?.subscription_tier === 'ultra' ? 'bg-gradient-to-r from-purple-500/20 to-pink-500/20 border-purple-500/30 text-purple-300' :
+                    accountData?.subscription_tier === 'ultra' ? 'bg-gradient-to-r from-white/10 to-white/[0.06] border-white/20 text-white' :
                     accountData?.subscription_tier === 'pro' ? 'bg-blue-500/20 border-blue-500/30 text-blue-300' :
                     'bg-white/10 border-white/10 text-white'
                   }`}>
@@ -2753,7 +2753,7 @@ export default function VizualStudioApp() {
                           <div className="flex justify-between items-center">
                             <span className="text-xs text-gray-400">Current Plan</span>
                             <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-                              accountData?.subscription_tier === 'ultra' ? 'bg-purple-500/20 text-purple-300' :
+                              accountData?.subscription_tier === 'ultra' ? 'bg-white/10 text-white' :
                               accountData?.subscription_tier === 'pro' ? 'bg-blue-500/20 text-blue-300' :
                               'bg-white/10 text-white'
                             }`}>
