@@ -3,16 +3,87 @@ import Script from "next/script";
 import { AppProviders } from "@/components/providers/app-providers";
 import "./globals.css";
 
+const SITE_URL = "https://vizual.video";
+
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
   viewportFit: 'cover',
+  themeColor: '#020205',
 };
 
 export const metadata: Metadata = {
-  title: "Vizual AI",
-  description: "Multimodal AI workbench powered by Supabase + Next.js",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "Vizual — AI Creative Studio | Chat, Create Images & Videos",
+    template: "%s | Vizual",
+  },
+  description:
+    "The all-in-one AI creative studio. Chat with advanced AI, generate stunning images with Flux Pro & Ideogram, create videos with Seedance & Wan 2.1 — all in one beautiful workspace. Try free.",
+  keywords: [
+    "AI creative studio",
+    "AI image generator",
+    "AI video generator",
+    "text to image",
+    "text to video",
+    "AI chat",
+    "Gemini AI",
+    "Flux Pro",
+    "Ideogram",
+    "Seedance",
+    "AI workspace",
+    "AI tools",
+    "creative AI",
+    "Vizual AI",
+  ],
+  authors: [{ name: "Vizual" }],
+  creator: "Vizual",
+  publisher: "Vizual",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  alternates: {
+    canonical: SITE_URL,
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: SITE_URL,
+    siteName: "Vizual",
+    title: "Vizual — AI Creative Studio | Chat, Create Images & Videos",
+    description:
+      "The all-in-one AI creative studio. Chat with advanced AI, generate images, create videos — all in one beautiful workspace. Modern AI, without the complexity.",
+    images: [
+      {
+        url: `/opengraph-image`,
+        width: 1200,
+        height: 630,
+        alt: "Vizual — AI Creative Studio",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Vizual — AI Creative Studio",
+    description:
+      "Chat, create images & generate videos — all in one AI workspace. Modern AI, without the complexity.",
+    images: [`/opengraph-image`],
+    creator: "@vizualvideo",
+  },
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
+  },
+  manifest: "/site.webmanifest",
 };
 
 export default function RootLayout({
@@ -40,6 +111,41 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://replicate.delivery" />
       </head>
       <body className="min-h-screen bg-[#020205] text-white antialiased">
+        {/* JSON-LD Structured Data for SEO */}
+        <Script
+          id="json-ld"
+          type="application/ld+json"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "SoftwareApplication",
+              name: "Vizual",
+              url: "https://vizual.video",
+              description:
+                "The all-in-one AI creative studio. Chat with advanced AI, generate images, create videos — all in one beautiful workspace.",
+              applicationCategory: "CreativeApplication",
+              operatingSystem: "Web",
+              offers: [
+                {
+                  "@type": "Offer",
+                  price: "0",
+                  priceCurrency: "USD",
+                  name: "Free",
+                  description: "Daily free image generations and 5 credits",
+                },
+                {
+                  "@type": "Offer",
+                  price: "5",
+                  priceCurrency: "USD",
+                  name: "Pro",
+                  description: "Unlimited images, videos, and chat",
+                },
+              ],
+            }),
+          }}
+        />
+
         {/* Google Tag Manager (noscript) */}
         <noscript>
           <iframe

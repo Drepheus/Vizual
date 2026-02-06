@@ -104,7 +104,8 @@ $envVars = @(
     "DECART_API_KEY=$($envVarsFromFile['DECART_API_KEY'])",
     "STRIPE_SECRET_KEY=$($envVarsFromFile['STRIPE_SECRET_KEY'])",
     "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=$($envVarsFromFile['NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY'])",
-    "STRIPE_WEBHOOK_SECRET=$($envVarsFromFile['STRIPE_WEBHOOK_SECRET'])"
+    "STRIPE_WEBHOOK_SECRET=$($envVarsFromFile['STRIPE_WEBHOOK_SECRET'])",
+    "NEXT_PUBLIC_SITE_URL=https://vizual.video"
 )
 
 if ($VertexDataStoreId) {

@@ -45,6 +45,7 @@ Cannot log in with Google account - OAuth is not fully configured.
 ```
 http://localhost:5175
 http://localhost:3000
+https://vizual.video
 https://cnysdbjajxnpmrugnpme.supabase.co
 ```
 
@@ -53,10 +54,11 @@ https://cnysdbjajxnpmrugnpme.supabase.co
 http://localhost:5175
 http://localhost:5175/
 http://localhost:3000
+https://vizual.video/auth/callback
 https://cnysdbjajxnpmrugnpme.supabase.co/auth/v1/callback
 ```
 
-*(When you deploy to Vercel, you'll add your Vercel URLs here too)*
+*(Production domain: vizual.video)*
 
 5. Click **Create**
 6. **IMPORTANT**: Copy the **Client ID** and **Client Secret** - you'll need these!
@@ -75,13 +77,15 @@ https://cnysdbjajxnpmrugnpme.supabase.co/auth/v1/callback
 
 ### Step 5: Configure Supabase URL Configuration
 1. In Supabase Dashboard → **Authentication** → **URL Configuration**
-2. Set **Site URL**: `http://localhost:5175` (for development)
+2. Set **Site URL**: `https://vizual.video` (production) or `http://localhost:3000` (development)
 3. Add **Redirect URLs**:
    ```
    http://localhost:5175
    http://localhost:5175/**
    http://localhost:3000
    http://localhost:3000/**
+   https://vizual.video
+   https://vizual.video/**
    ```
 
 ### Step 6: Test the Login

@@ -47,7 +47,7 @@ This project is automatically deployed to GitHub Pages using GitHub Actions. Eve
 
 ## Live Demo
 
-Visit: https://dretrader25.github.io/Vizual-AI-1/
+Visit: https://vizual.video
 
 ## License
 

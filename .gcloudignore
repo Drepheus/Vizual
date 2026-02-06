@@ -1,0 +1,31 @@
+# GCloud Ignore - exclude files from Cloud Build upload
+# This dramatically reduces upload size (from ~870MB to ~50MB)
+
+.git
+node_modules
+.next
+.vercel
+.vscode
+.idea
+.turbo
+coverage
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Local env files (secrets loaded at runtime)
+.env*.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Lock file backups
+pnpm-lock.yaml.*
+
+# Large unnecessary files
+codebase.jsonl
+*.pem
