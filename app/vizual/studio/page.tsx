@@ -65,6 +65,7 @@ import Aurora from "@/components/vizual/Aurora";
 import { ProjectsView } from "@/components/vizual/projects-view";
 import { Sidebar } from "@/components/vizual/sidebar";
 import { useToast } from "@/components/ui/toast";
+import { WelcomeModal } from "@/components/vizual/WelcomeModal";
 import { getBrowserSupabaseClient } from "@/lib/supabase-browser";
 import { getUserCreditsAndUsage, UserCreditsAndUsage, consumeImageGeneration, canGenerateImage } from "@/lib/usage-tracking";
 
@@ -501,6 +502,9 @@ export default function VizualStudioApp() {
   // Limit Reached Modal State
   const [showLimitModal, setShowLimitModal] = useState(false);
 
+  // Welcome Modal State (first-time login)
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+
   // Credits System State
   const [userCredits, setUserCredits] = useState<number>(5);
   const [creditsUsed, setCreditsUsed] = useState<number>(0);
@@ -830,6 +834,24 @@ export default function VizualStudioApp() {
 
     fetchCredits();
   }, [user]);
+
+  // Welcome modal — show once per user on first login
+  useEffect(() => {
+    if (!user || loading) return;
+    const key = `vizual_welcomed_${user.id}`;
+    if (!localStorage.getItem(key)) {
+      // Small delay so the studio renders first
+      const t = setTimeout(() => setShowWelcomeModal(true), 800);
+      return () => clearTimeout(t);
+    }
+  }, [user, loading]);
+
+  const handleCloseWelcome = () => {
+    setShowWelcomeModal(false);
+    if (user) {
+      localStorage.setItem(`vizual_welcomed_${user.id}`, 'true');
+    }
+  };
 
   // Lock body scroll for mobile app-like behavior
   useEffect(() => {
@@ -3475,6 +3497,8 @@ export default function VizualStudioApp() {
           </div>
         )
       }
+      {/* Welcome Modal for first-time users */}
+      <WelcomeModal isOpen={showWelcomeModal} onClose={handleCloseWelcome} />
     </div >
   );
 }
