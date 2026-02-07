@@ -3,6 +3,8 @@
 import { useRef, useEffect } from 'react';
 import { gsap } from 'gsap';
 
+const CDN_BASE = "https://storage.googleapis.com/vizual-cdn-assets";
+
 export interface ChromaGridItem {
   image: string;
   title: string;
@@ -86,7 +88,7 @@ export const ChromaGrid: React.FC<ChromaGridProps> = ({
       url: '#'
     },
     {
-      image: '/images/personas/scientist.jpg',
+      image: `${CDN_BASE}/images/personas/scientist.jpg`,
       title: 'The Scientist',
       subtitle: 'Logical & Precise',
       handle: '@researcher',

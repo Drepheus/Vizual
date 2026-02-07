@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 
+const CDN_BASE = "https://storage.googleapis.com/vizual-cdn-assets";
+
 interface ImagePreviewTooltipProps {
   isVisible: boolean;
 }
@@ -11,10 +13,10 @@ const ImagePreviewTooltip: React.FC<ImagePreviewTooltipProps> = ({ isVisible }) 
 
   // Sample images - replace these URLs with actual sample images
   const sampleImages = [
-    '/images/samples/ai.jpg',
-    '/images/samples/sample2.jpg',
-    '/images/samples/little guy.png',
-    '/images/samples/overl.png',
+    `${CDN_BASE}/images/samples/ai.jpg`,
+    `${CDN_BASE}/images/samples/sample2.jpg`,
+    `${CDN_BASE}/images/samples/little guy.png`,
+    `${CDN_BASE}/images/samples/overl.png`,
   ];
 
   useEffect(() => {

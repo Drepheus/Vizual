@@ -8,6 +8,8 @@ import { ExternalLink, ArrowRight, Menu } from "lucide-react";
 
 const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], weight: ["300", "400", "500", "600", "700"] });
 
+const CDN_BASE = "https://storage.googleapis.com/vizual-cdn-assets";
+
 export default function AvatarPage() {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [sidebarExpanded, setSidebarExpanded] = useState(true);
@@ -48,7 +50,7 @@ export default function AvatarPage() {
                         <div className="mb-8 w-24 h-24 md:w-32 md:h-32 bg-black rounded-3xl border border-white/10 shadow-2xl flex items-center justify-center relative overflow-hidden group">
                             <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/20 to-transparent opacity-50" />
                             <img
-                                src="/images/percify-logo.png"
+                                src={`${CDN_BASE}/images/percify-logo.png`}
                                 alt="Percify"
                                 className="w-full h-full object-contain p-2 relative z-10 transition-transform duration-500 group-hover:scale-110"
                             />

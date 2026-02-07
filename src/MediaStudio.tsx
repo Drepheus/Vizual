@@ -57,7 +57,7 @@ const featuredBlueprints = [
   },
   {
     title: 'Abstract UHD',
-    image: '/videos/14618955-uhd_2160_3840_24fps.mp4',
+    image: `${CDN_BASE}/videos/14618955-uhd_2160_3840_24fps.mp4`,
     gradient: 'linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%)',
     type: 'video'
   },
@@ -68,7 +68,7 @@ const featuredBlueprints = [
   },
   {
     title: 'Pulse Effect',
-    image: '/videos/Standard_Mode_add_a_pulse_effect_to_the_middle.mp4',
+    image: `${CDN_BASE}/videos/Standard_Mode_add_a_pulse_effect_to_the_middle.mp4`,
     gradient: 'linear-gradient(135deg, #2af598 0%, #009efd 100%)',
     type: 'video'
   },
@@ -79,7 +79,7 @@ const featuredBlueprints = [
   },
   {
     title: 'Dog Climb',
-    image: '/videos/dogclimb.mp4',
+    image: `${CDN_BASE}/videos/dogclimb.mp4`,
     gradient: 'linear-gradient(135deg, #fee140 0%, #fa709a 100%)',
     type: 'video'
   },
@@ -90,7 +90,7 @@ const featuredBlueprints = [
   },
   {
     title: 'Showcase',
-    image: '/videos/examples.mp4',
+    image: `${CDN_BASE}/videos/examples.mp4`,
     gradient: 'linear-gradient(135deg, #c471f5 0%, #fa71cd 100%)',
     type: 'video'
   },
@@ -101,7 +101,7 @@ const featuredBlueprints = [
   },
   {
     title: 'Intro Sequence',
-    image: '/videos/intro.mp4',
+    image: `${CDN_BASE}/videos/intro.mp4`,
     gradient: 'linear-gradient(135deg, #0ba360 0%, #3cba92 100%)',
     type: 'video'
   },
@@ -112,43 +112,43 @@ const featuredBlueprints = [
   },
   {
     title: 'Matrix Code',
-    image: '/videos/matrixcode.mp4',
+    image: `${CDN_BASE}/videos/matrixcode.mp4`,
     gradient: 'linear-gradient(135deg, #00c6ff 0%, #0072ff 100%)',
     type: 'video'
   },
   {
     title: 'Rock Bug',
-    image: '/videos/rockbug.mp4',
+    image: `${CDN_BASE}/videos/rockbug.mp4`,
     gradient: 'linear-gradient(135deg, #fccb90 0%, #d57eeb 100%)',
     type: 'video'
   },
   {
     title: 'Veo Hero',
-    image: '/videos/veo-hero.mp4',
+    image: `${CDN_BASE}/videos/veo-hero.mp4`,
     gradient: 'linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%)',
     type: 'video'
   },
   {
     title: 'Veo Demo 1',
-    image: '/videos/veo1.mp4',
+    image: `${CDN_BASE}/videos/veo1.mp4`,
     gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
     type: 'video'
   },
   {
     title: 'Veo Demo 2',
-    image: '/videos/veo2.mp4',
+    image: `${CDN_BASE}/videos/veo2.mp4`,
     gradient: 'linear-gradient(135deg, #d299c2 0%, #fef9d7 100%)',
     type: 'video'
   },
   {
     title: 'Veo Demo 3',
-    image: '/videos/veo3.mp4',
+    image: `${CDN_BASE}/videos/veo3.mp4`,
     gradient: 'linear-gradient(135deg, #ebc0fd 0%, #d9ded8 100%)',
     type: 'video'
   },
   {
     title: 'Video Preview',
-    image: '/videos/vidpreview.mp4',
+    image: `${CDN_BASE}/videos/vidpreview.mp4`,
     gradient: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%)',
     type: 'video'
   }
@@ -281,21 +281,21 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
   /* Video Hero State */
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const heroVideos = [
-    '/videos/klingnextgen.mp4',
-    '/videos/examples.mp4',
-    '/videos/klingmodel.mp4'
+    `${CDN_BASE}/videos/klingnextgen.mp4`,
+    `${CDN_BASE}/videos/examples.mp4`,
+    `${CDN_BASE}/videos/klingmodel.mp4`
   ];
 
   /* Image Studio Hero State */
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const imageStudioHeroImages = [
-    '/images/samples/avatar-standard-1760736610612-0.png',
-    '/images/samples/CYBER DRE.png',
-    '/images/samples/image (45).jpg',
-    '/images/samples/image (52).jpg',
-    '/images/samples/image (59).jpg',
-    '/images/samples/image (63).jpg',
-    '/images/samples/little guy.png'
+    `${CDN_BASE}/images/samples/avatar-standard-1760736610612-0.png`,
+    `${CDN_BASE}/images/samples/CYBER DRE.png`,
+    `${CDN_BASE}/images/samples/image (45).jpg`,
+    `${CDN_BASE}/images/samples/image (52).jpg`,
+    `${CDN_BASE}/images/samples/image (59).jpg`,
+    `${CDN_BASE}/images/samples/image (63).jpg`,
+    `${CDN_BASE}/images/samples/little guy.png`
   ];
 
   useEffect(() => {
@@ -416,22 +416,22 @@ export default function MediaStudio({ onClose }: MediaStudioProps) {
   };
 
   const imageBlueprints = [
-    { title: 'AI Portrait', image: '/images/blueprints/ai.jpg', type: 'image' },
-    { title: 'Standard Avatar', image: '/images/blueprints/avatar-standard-1760736610612-0.png', type: 'image' },
-    { title: 'Lucky Dice', image: '/images/blueprints/dice.png', type: 'image' },
-    { title: 'Abstract Composition', image: '/images/blueprints/image (35).jpg', type: 'image' },
-    { title: 'Little Character', image: '/images/blueprints/little guy.png', type: 'image' },
-    { title: 'Phone Demo', image: '/images/blueprints/caphone.mp4', type: 'video' },
-    { title: 'Rocket Kid', image: '/images/blueprints/frogkidrocket.mp4', type: 'video' },
+    { title: 'AI Portrait', image: `${CDN_BASE}/images/blueprints/ai.jpg`, type: 'image' },
+    { title: 'Standard Avatar', image: `${CDN_BASE}/images/blueprints/avatar-standard-1760736610612-0.png`, type: 'image' },
+    { title: 'Lucky Dice', image: `${CDN_BASE}/images/blueprints/dice.png`, type: 'image' },
+    { title: 'Abstract Composition', image: `${CDN_BASE}/images/blueprints/image (35).jpg`, type: 'image' },
+    { title: 'Little Character', image: `${CDN_BASE}/images/blueprints/little guy.png`, type: 'image' },
+    { title: 'Phone Demo', image: `${CDN_BASE}/images/blueprints/caphone.mp4`, type: 'video' },
+    { title: 'Rocket Kid', image: `${CDN_BASE}/images/blueprints/frogkidrocket.mp4`, type: 'video' },
   ];
 
   const featuredVideos = [
-    { title: 'Hair Simulation', image: '/videos/mediafeaturedvids/imagehairvid.mp4' },
-    { title: 'Image to Video', image: '/videos/mediafeaturedvids/imageto vid.mp4' },
-    { title: 'Motion Transfer', image: '/videos/mediafeaturedvids/imagetovid.mp4' },
-    { title: 'Multi-Model Gen', image: '/videos/mediafeaturedvids/multimodelvid1.mp4' },
-    { title: 'AI Prediction', image: '/videos/mediafeaturedvids/replicate-prediction-nxmrtf1fsdrma0cv4qrbq5grzg.mp4' },
-    { title: 'Video Example', image: '/videos/mediafeaturedvids/videxample.mp4' },
+    { title: 'Hair Simulation', image: `${CDN_BASE}/videos/mediafeaturedvids/imagehairvid.mp4` },
+    { title: 'Image to Video', image: `${CDN_BASE}/videos/mediafeaturedvids/imageto vid.mp4` },
+    { title: 'Motion Transfer', image: `${CDN_BASE}/videos/mediafeaturedvids/imagetovid.mp4` },
+    { title: 'Multi-Model Gen', image: `${CDN_BASE}/videos/mediafeaturedvids/multimodelvid1.mp4` },
+    { title: 'AI Prediction', image: `${CDN_BASE}/videos/mediafeaturedvids/replicate-prediction-nxmrtf1fsdrma0cv4qrbq5grzg.mp4` },
+    { title: 'Video Example', image: `${CDN_BASE}/videos/mediafeaturedvids/videxample.mp4` },
   ];
 
   const featuredVoices = [
@@ -2087,17 +2087,17 @@ const ViewAllModal = ({ isOpen, onClose, title, items, renderItem }: ViewAllModa
                   {/* Community Creations - Mix of videos and images */}
                   {(() => {
                     const allItems = [
-                      { type: 'video', src: '/videos/veo1.mp4', title: 'Veo Creation', creator: 'AI Studio' },
+                      { type: 'video', src: `${CDN_BASE}/videos/veo1.mp4`, title: 'Veo Creation', creator: 'AI Studio' },
                       { type: 'image', src: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=400&h=400&fit=crop', title: 'Cosmic Dreams', creator: 'StarGazer' },
-                      { type: 'video', src: '/videos/rockbug.mp4', title: 'Nature Macro', creator: 'NatureLens' },
+                      { type: 'video', src: `${CDN_BASE}/videos/rockbug.mp4`, title: 'Nature Macro', creator: 'NatureLens' },
                       { type: 'image', src: 'https://images.unsplash.com/photo-1541963463532-d68292c34b19?w=400&h=400&fit=crop', title: 'Abstract Art', creator: 'PixelArtist' },
-                      { type: 'video', src: '/videos/dogclimb.mp4', title: 'Adventure Dog', creator: 'PetLovers' },
+                      { type: 'video', src: `${CDN_BASE}/videos/dogclimb.mp4`, title: 'Adventure Dog', creator: 'PetLovers' },
                       { type: 'image', src: 'https://images.unsplash.com/photo-1555680202-c86f0e12f086?w=400&h=400&fit=crop', title: 'Neon City', creator: 'CyberPunk' },
-                      { type: 'video', src: '/videos/matrixcode.mp4', title: 'Matrix Effect', creator: 'CodeArt' },
+                      { type: 'video', src: `${CDN_BASE}/videos/matrixcode.mp4`, title: 'Matrix Effect', creator: 'CodeArt' },
                       { type: 'image', src: 'https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=400&h=400&fit=crop', title: 'Ocean Depths', creator: 'DeepDive' },
-                      { type: 'video', src: '/videos/klingmodel.mp4', title: 'Model Showcase', creator: 'Vizual Team' },
+                      { type: 'video', src: `${CDN_BASE}/videos/klingmodel.mp4`, title: 'Model Showcase', creator: 'Vizual Team' },
                       { type: 'image', src: 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=400&h=400&fit=crop', title: 'Urban Lights', creator: 'CityScape' },
-                      { type: 'video', src: '/videos/veo2.mp4', title: 'Veo Magic', creator: 'AI Studio' },
+                      { type: 'video', src: `${CDN_BASE}/videos/veo2.mp4`, title: 'Veo Magic', creator: 'AI Studio' },
                       { type: 'image', src: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=400&h=400&fit=crop', title: 'Aurora Night', creator: 'NightSky' },
                       { type: 'audio', src: '', title: 'Ambient Waves', creator: 'SoundScape' },
                       { type: 'audio', src: '', title: 'Lo-Fi Dreams', creator: 'ChillBeats' },

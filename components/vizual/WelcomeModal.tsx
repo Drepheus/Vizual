@@ -6,10 +6,12 @@ import { Space_Grotesk } from "next/font/google";
 
 const spaceGrotesk = Space_Grotesk({ subsets: ["latin"] });
 
+const CDN_BASE = "https://storage.googleapis.com/vizual-cdn-assets";
+
 const WELCOME_VIDEOS = [
-  "/videos/grokquick6.mp4",
-  "/videos/grokquick2.mp4",
-  "/videos/grokquick5.mp4",
+  `${CDN_BASE}/videos/grokquick6.mp4`,
+  `${CDN_BASE}/videos/grokquick2.mp4`,
+  `${CDN_BASE}/videos/grokquick5.mp4`,
 ];
 
 interface WelcomeModalProps {

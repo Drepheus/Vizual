@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 
+const CDN_BASE = "https://storage.googleapis.com/vizual-cdn-assets";
+
 interface VideoPreviewTooltipProps {
   isVisible: boolean;
 }
@@ -12,10 +14,10 @@ const VideoPreviewTooltip: React.FC<VideoPreviewTooltipProps> = ({ isVisible }) 
 
   // Sample videos from the static/videos folder
   const sampleVideos = [
-    '/videos/vidpreview.mp4',
-    '/videos/dogclimb.mp4',
-    '/videos/matrixcode.mp4',
-    '/videos/rockbug.mp4'
+    `${CDN_BASE}/videos/vidpreview.mp4`,
+    `${CDN_BASE}/videos/dogclimb.mp4`,
+    `${CDN_BASE}/videos/matrixcode.mp4`,
+    `${CDN_BASE}/videos/rockbug.mp4`
   ];
 
   useEffect(() => {

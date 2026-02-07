@@ -25,6 +25,11 @@ build/
 .DS_Store
 Thumbs.db
 
+# Large media - served from CDN (https://storage.googleapis.com/vizual-cdn-assets)
+public/videos/
+public/images/
+static/
+
 # Python
 __pycache__/
 *.pyc
