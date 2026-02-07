@@ -71,6 +71,8 @@ export default function LivePage() {
   // Video refs
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
+  const mobileVideoRef = useRef<HTMLVideoElement>(null);
+  const mobileRemoteVideoRef = useRef<HTMLVideoElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
 
@@ -86,41 +88,59 @@ export default function LivePage() {
   const [characterPrompt, setCharacterPrompt] = useState<string>('');
   const [isGeneratingCharacter, setIsGeneratingCharacter] = useState(false);
 
-  // Effect to attach stream to video element when both are available
-  // This fixes the issue where the video element isn't rendered yet when the stream is set
+  // Helper: attach stream to a video element and force play (iOS Safari compatible)
+  const attachStreamToVideo = (videoElement: HTMLVideoElement, stream: MediaStream) => {
+    videoElement.srcObject = stream;
+    videoElement.muted = true;
+    videoElement.setAttribute('playsinline', 'true');
+    videoElement.setAttribute('webkit-playsinline', 'true');
+    videoElement.setAttribute('autoplay', 'true');
+    
+    const playVideo = () => {
+      const playPromise = videoElement.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => console.log('Video playing successfully'))
+          .catch(() => {
+            // iOS Safari: retry muted after a frame
+            videoElement.muted = true;
+            setTimeout(() => videoElement.play().catch(() => {}), 50);
+          });
+      }
+    };
+    
+    // Play immediately
+    playVideo();
+    // Also re-trigger on metadata/canplay for iOS Safari
+    videoElement.onloadedmetadata = playVideo;
+    videoElement.oncanplay = playVideo;
+  };
+
+  // Effect to attach stream to ALL video elements (desktop + mobile)
   useEffect(() => {
-    if (localStream && localVideoRef.current && isUsingCamera) {
-      const videoElement = localVideoRef.current;
+    if (localStream && isUsingCamera) {
+      // Attach to desktop ref
+      if (localVideoRef.current) {
+        attachStreamToVideo(localVideoRef.current, localStream);
+      }
+      // Attach to mobile ref
+      if (mobileVideoRef.current) {
+        attachStreamToVideo(mobileVideoRef.current, localStream);
+      }
       
-      // Always set srcObject on mobile to ensure it's attached
-      videoElement.srcObject = localStream;
-      videoElement.muted = true;
-      videoElement.setAttribute('playsinline', 'true');
-      videoElement.setAttribute('webkit-playsinline', 'true');
-      
-      // Force play on mobile Safari
-      const playVideo = async () => {
-        try {
-          await videoElement.play();
-          console.log('Camera video playing successfully');
-        } catch (error) {
-          console.error('Error playing camera video:', error);
-          // Retry after a short delay (mobile Safari sometimes needs this)
-          setTimeout(async () => {
-            try {
-              await videoElement.play();
-              console.log('Camera video playing on retry');
-            } catch (e) {
-              console.error('Retry failed:', e);
-            }
-          }, 100);
+      // Retry after a short delay for elements that may not be rendered yet
+      const retryTimer = setTimeout(() => {
+        if (localStream) {
+          if (localVideoRef.current && !localVideoRef.current.srcObject) {
+            attachStreamToVideo(localVideoRef.current, localStream);
+          }
+          if (mobileVideoRef.current && !mobileVideoRef.current.srcObject) {
+            attachStreamToVideo(mobileVideoRef.current, localStream);
+          }
         }
-      };
+      }, 200);
       
-      // Play immediately and also on metadata load
-      playVideo();
-      videoElement.onloadedmetadata = () => playVideo();
-      videoElement.oncanplay = () => playVideo();
+      return () => clearTimeout(retryTimer);
     }
   }, [localStream, connectionState, isUsingCamera]);
 
@@ -153,11 +173,18 @@ export default function LivePage() {
       // This handles cases where the video element isn't rendered yet
       setTimeout(() => {
         if (localVideoRef.current) {
-          localVideoRef.current.srcObject = stream;
-          localVideoRef.current.muted = true;
-          localVideoRef.current.play().catch(console.error);
+          attachStreamToVideo(localVideoRef.current, stream);
+        }
+        if (mobileVideoRef.current) {
+          attachStreamToVideo(mobileVideoRef.current, stream);
         }
       }, 100);
+      // Extra retry for iOS Safari which can be slow to render
+      setTimeout(() => {
+        if (mobileVideoRef.current && !mobileVideoRef.current.srcObject) {
+          attachStreamToVideo(mobileVideoRef.current, stream);
+        }
+      }, 500);
       
       showToast('Camera connected successfully!', 'success');
     } catch (error: any) {
@@ -358,41 +385,51 @@ export default function LivePage() {
         console.log('Stream active:', stream.active);
         console.log('Stream tracks:', stream.getTracks().map(t => `${t.kind}:${t.readyState}`));
         
-        if (remoteVideoRef.current) {
-          console.log('Setting srcObject on remote video element');
-          remoteVideoRef.current.srcObject = stream;
+        // Helper to attach remote stream to a video element
+        const attachRemoteStream = (videoEl: HTMLVideoElement, label: string) => {
+          console.log(`Setting srcObject on ${label} video element`);
+          videoEl.srcObject = stream;
+          videoEl.setAttribute('playsinline', 'true');
+          videoEl.setAttribute('webkit-playsinline', 'true');
           
-          // Add event listeners to track video state
-          remoteVideoRef.current.onloadeddata = () => {
-            console.log('Remote video: data loaded');
+          videoEl.onloadeddata = () => {
+            console.log(`${label} video: data loaded`);
             setDebugInfo('Video data loaded');
           };
           
-          // Force play with user interaction context
-          const playPromise = remoteVideoRef.current.play();
+          const playPromise = videoEl.play();
           if (playPromise !== undefined) {
             playPromise
               .then(() => {
-                console.log('Remote video playing successfully');
+                console.log(`${label} video playing successfully`);
                 setDebugInfo('Video playing!');
               })
               .catch(e => {
-                console.log('Auto-play prevented:', e.message);
+                console.log(`${label} auto-play prevented:`, e.message);
                 setDebugInfo(`Play blocked: ${e.message}`);
-                // Try muted autoplay as fallback
-                if (remoteVideoRef.current) {
-                  remoteVideoRef.current.muted = true;
-                  remoteVideoRef.current.play()
-                    .then(() => setDebugInfo('Playing (muted)'))
-                    .catch(e2 => {
-                      console.error('Muted play also failed:', e2);
-                      setDebugInfo(`Play failed: ${e2.message}`);
-                    });
-                }
+                // Try muted autoplay as fallback (iOS Safari requirement)
+                videoEl.muted = true;
+                videoEl.play()
+                  .then(() => setDebugInfo('Playing (muted)'))
+                  .catch(e2 => {
+                    console.error(`${label} muted play also failed:`, e2);
+                    setDebugInfo(`Play failed: ${e2.message}`);
+                  });
               });
           }
-        } else {
-          console.warn('Remote video ref not available!');
+        };
+
+        // Attach to desktop remote video
+        if (remoteVideoRef.current) {
+          attachRemoteStream(remoteVideoRef.current, 'desktop-remote');
+        }
+        // Attach to mobile remote video
+        if (mobileRemoteVideoRef.current) {
+          attachRemoteStream(mobileRemoteVideoRef.current, 'mobile-remote');
+        }
+        
+        if (!remoteVideoRef.current && !mobileRemoteVideoRef.current) {
+          console.warn('No remote video refs available!');
           setDebugInfo('ERROR: No video element ref');
         }
       } else {
@@ -700,35 +737,45 @@ export default function LivePage() {
               </div>
             ) : (
               <>
-                {/* Show output (swapped) video if streaming, otherwise show input */}
+                {/* Mobile: Input camera video - always mounted, hidden when streaming */}
                 <video
-                  ref={isStreaming ? remoteVideoRef : localVideoRef}
+                  ref={(el) => {
+                    mobileVideoRef.current = el;
+                    // Immediately attach stream when ref is assigned (fixes iOS blank screen)
+                    if (el && localStream && isUsingCamera) {
+                      el.srcObject = localStream;
+                      el.muted = true;
+                      el.setAttribute('playsinline', 'true');
+                      el.setAttribute('webkit-playsinline', 'true');
+                      el.play().catch(() => {});
+                    }
+                  }}
                   autoPlay
-                  muted={!isStreaming}
+                  muted
                   playsInline
-                  webkit-playsinline="true"
-                  loop={!isUsingCamera && !isStreaming}
-                  className="absolute inset-0 w-full h-full object-cover"
-                  style={{ transform: 'scaleX(-1)' }} // Mirror for selfie camera
-                  onCanPlay={(e) => {
-                    const video = e.currentTarget;
-                    video.play().catch(() => {});
-                  }}
-                  onLoadedMetadata={(e) => {
-                    const video = e.currentTarget;
-                    video.play().catch(() => {});
-                  }}
+                  loop={!isUsingCamera}
+                  className={`absolute inset-0 w-full h-full object-cover ${isStreaming ? 'hidden' : ''}`}
+                  style={{ transform: isUsingCamera ? 'scaleX(-1)' : 'none' }}
+                  onCanPlay={(e) => e.currentTarget.play().catch(() => {})}
+                  onLoadedMetadata={(e) => e.currentTarget.play().catch(() => {})}
                 />
-                {/* Hidden video refs for the other stream */}
-                {isStreaming && (
-                  <video
-                    ref={localVideoRef}
-                    autoPlay
-                    muted
-                    playsInline
-                    className="hidden"
-                  />
-                )}
+                {/* Mobile: Output (swapped) video - always mounted, hidden when not streaming */}
+                <video
+                  ref={(el) => {
+                    mobileRemoteVideoRef.current = el;
+                    // Also keep desktop remoteVideoRef in sync for WebRTC track handler
+                    if (el && !remoteVideoRef.current) {
+                      remoteVideoRef.current = el;
+                    }
+                  }}
+                  autoPlay
+                  playsInline
+                  muted={false}
+                  className={`absolute inset-0 w-full h-full object-cover ${isStreaming ? '' : 'hidden'}`}
+                  style={{ transform: 'scaleX(-1)' }}
+                  onCanPlay={(e) => e.currentTarget.play().catch(() => {})}
+                  onLoadedMetadata={(e) => e.currentTarget.play().catch(() => {})}
+                />
               </>
             )}
           </div>
