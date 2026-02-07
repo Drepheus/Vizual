@@ -1,12 +1,12 @@
 -- ============================================================
 -- CREDITS SYSTEM V2 - With Daily Free Images for Free Users
--- New users start with 5 credits
+-- New users start with 10 credits
 -- Free users get 3 free image generations per day (separate counter)
 -- ============================================================
 
 -- 1. Add/Update credits columns to users table
 ALTER TABLE public.users 
-ADD COLUMN IF NOT EXISTS credits INTEGER DEFAULT 5,
+ADD COLUMN IF NOT EXISTS credits INTEGER DEFAULT 10,
 ADD COLUMN IF NOT EXISTS credits_used INTEGER DEFAULT 0,
 ADD COLUMN IF NOT EXISTS credits_reset_at TIMESTAMP WITH TIME ZONE DEFAULT (NOW() + INTERVAL '30 days'),
 ADD COLUMN IF NOT EXISTS daily_free_images_used INTEGER DEFAULT 0,
@@ -25,11 +25,11 @@ CREATE OR REPLACE FUNCTION public.get_tier_credits(tier TEXT)
 RETURNS INTEGER AS $$
 BEGIN
   CASE tier
-    WHEN 'free' THEN RETURN 5;      -- Free users start with 5 credits
+    WHEN 'free' THEN RETURN 10;     -- Free users start with 10 credits
     WHEN 'basic' THEN RETURN 500;   -- Basic tier
     WHEN 'pro' THEN RETURN 2000;    -- Pro tier
     WHEN 'ultra' THEN RETURN 5000;  -- Ultra tier
-    ELSE RETURN 5;
+    ELSE RETURN 10;
   END CASE;
 END;
 $$ LANGUAGE plpgsql IMMUTABLE;
@@ -326,7 +326,7 @@ BEGIN
     NEW.raw_user_meta_data->>'avatar_url',
     'free',
     'active',
-    5,  -- New users start with 5 credits
+    10, -- New users start with 10 credits
     0,
     NOW() + INTERVAL '30 days',
     0,
@@ -350,7 +350,7 @@ GRANT EXECUTE ON FUNCTION public.upgrade_user_tier TO service_role;
 UPDATE public.users
 SET 
   credits = CASE 
-    WHEN subscription_tier = 'free' THEN 5
+    WHEN subscription_tier = 'free' THEN 10
     ELSE public.get_tier_credits(COALESCE(subscription_tier, 'free'))
   END,
   credits_used = COALESCE(credits_used, 0),
@@ -364,7 +364,7 @@ WHERE credits IS NULL
 -- DONE! Credits System V2 is now ready.
 -- 
 -- Credit Allocations:
---   Free:  5 credits + 3 daily free images
+--   Free:  10 credits + 3 daily free images
 --   Basic: 500 credits + 10 daily free images
 --   Pro:   2,000 credits + 50 daily free images
 --   Ultra: 5,000 credits + unlimited daily images

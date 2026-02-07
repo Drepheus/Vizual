@@ -452,6 +452,39 @@ export default function VizualStudioApp() {
   const [uploadPopup, setUploadPopup] = useState<'image' | 'video' | null>(null);
   const [isInputFocused, setIsInputFocused] = useState(false);
 
+  // Handle Stripe checkout success redirect
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const isCheckoutSuccess = params.get('success') === 'true';
+      const planParam = params.get('plan');
+
+      if (isCheckoutSuccess) {
+        // Show congratulations modal
+        setUpgradedPlanName(planParam ? planParam.charAt(0).toUpperCase() + planParam.slice(1) : 'New');
+        setShowCongratsModal(true);
+
+        // Refresh credits data after a short delay (webhook may take a moment)
+        const refreshCredits = async () => {
+          if (user) {
+            // Wait a bit for webhook to process
+            await new Promise(r => setTimeout(r, 2000));
+            const usageData = await getUserCreditsAndUsage(user.id);
+            if (usageData) {
+              setAccountData(usageData);
+              setUserCredits(usageData.credits || 10);
+              setCreditsUsed(usageData.credits_used || 0);
+            }
+          }
+        };
+        refreshCredits();
+
+        // Clear the URL params
+        window.history.replaceState({}, '', '/vizual/studio');
+      }
+    }
+  }, [user]);
+
   // Handle remix from community page (URL params)
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -506,8 +539,12 @@ export default function VizualStudioApp() {
   // Welcome Modal State (first-time login)
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
 
+  // Congratulations Modal State (after successful Stripe checkout)
+  const [showCongratsModal, setShowCongratsModal] = useState(false);
+  const [upgradedPlanName, setUpgradedPlanName] = useState<string>('');
+
   // Credits System State
-  const [userCredits, setUserCredits] = useState<number>(5);
+  const [userCredits, setUserCredits] = useState<number>(10);
   const [creditsUsed, setCreditsUsed] = useState<number>(0);
   const [isLoadingCredits, setIsLoadingCredits] = useState(true);
   const [accountData, setAccountData] = useState<UserCreditsAndUsage | null>(null);
@@ -791,8 +828,8 @@ export default function VizualStudioApp() {
   useEffect(() => {
     const fetchCredits = async () => {
       if (!user) {
-        // Guest mode gets 5 free credits
-        setUserCredits(5);
+        // Guest mode gets 10 free credits
+        setUserCredits(10);
         setCreditsUsed(0);
         setAccountData(null);
         setIsLoadingCredits(false);
@@ -806,7 +843,7 @@ export default function VizualStudioApp() {
         const usageData = await getUserCreditsAndUsage(user.id);
         if (usageData) {
           setAccountData(usageData);
-          setUserCredits(usageData.credits || 5);
+          setUserCredits(usageData.credits || 10);
           setCreditsUsed(usageData.credits_used || 0);
           
           // Identify user in PostHog with their properties
@@ -829,7 +866,7 @@ export default function VizualStudioApp() {
           if (error) {
             // Users table may not have credits columns yet - use defaults
             console.warn('Credits query fallback:', error?.message || 'unknown');
-            setUserCredits(5);
+            setUserCredits(10);
             setCreditsUsed(0);
           } else if (data) {
             setUserCredits(data.credits || 5);
@@ -3158,6 +3195,78 @@ export default function VizualStudioApp() {
         )
       }
 
+      {/* Congratulations Modal - After Successful Plan Upgrade */}
+      {
+        showCongratsModal && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+            <div
+              className="absolute inset-0 bg-black/90 backdrop-blur-xl"
+              onClick={() => setShowCongratsModal(false)}
+            />
+            <div className="relative w-full max-w-md p-8 rounded-3xl bg-gradient-to-b from-[#1a1a1a] to-[#0d0d0d] border border-white/10 shadow-2xl overflow-hidden">
+              {/* Animated gradient border glow */}
+              <div className="absolute inset-0 rounded-3xl opacity-50" style={{ background: 'linear-gradient(135deg, rgba(34,197,94,0.15) 0%, rgba(59,130,246,0.15) 50%, rgba(168,85,247,0.15) 100%)' }} />
+              
+              {/* Close button */}
+              <button
+                onClick={() => setShowCongratsModal(false)}
+                className="absolute top-4 right-4 p-2 hover:bg-white/10 rounded-full text-gray-400 hover:text-white transition-colors z-10"
+              >
+                <X size={18} />
+              </button>
+
+              {/* Confetti-like icon */}
+              <div className="flex justify-center mb-6 relative z-10">
+                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-green-500/20 to-emerald-500/20 flex items-center justify-center border border-green-500/30 animate-pulse">
+                  <Sparkles size={36} className="text-green-400" />
+                </div>
+              </div>
+
+              {/* Title */}
+              <h2 className={`text-2xl font-bold text-white text-center mb-3 relative z-10 ${spaceGrotesk.className}`}>
+                🎉 Congratulations!
+              </h2>
+
+              {/* Description */}
+              <p className="text-gray-400 text-center mb-6 text-sm leading-relaxed relative z-10">
+                Welcome to <span className="text-white font-semibold">Vizual {upgradedPlanName}</span>! Your account has been upgraded successfully. Your new credits and features are now active.
+              </p>
+
+              {/* New plan benefits */}
+              <div className="bg-white/5 rounded-2xl p-4 mb-6 border border-green-500/10 relative z-10">
+                <div className="flex items-center gap-2 mb-3">
+                  <Crown size={14} className="text-green-400" />
+                  <span className="text-xs font-bold text-green-400 uppercase tracking-wider">Your New Benefits</span>
+                </div>
+                <ul className="space-y-2">
+                  <li className="flex items-center gap-2 text-sm text-gray-300">
+                    <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                    Increased credits loaded to your account
+                  </li>
+                  <li className="flex items-center gap-2 text-sm text-gray-300">
+                    <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                    Access to premium AI models unlocked
+                  </li>
+                  <li className="flex items-center gap-2 text-sm text-gray-300">
+                    <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                    Priority generation queue enabled
+                  </li>
+                </ul>
+              </div>
+
+              {/* CTA */}
+              <button
+                onClick={() => setShowCongratsModal(false)}
+                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold text-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2 relative z-10"
+              >
+                <Zap size={16} />
+                Start Creating
+              </button>
+            </div>
+          </div>
+        )
+      }
+
       {/* Limit Reached Modal - Vizual Dark Theme */}
       {
         showLimitModal && (
@@ -3184,12 +3293,15 @@ export default function VizualStudioApp() {
 
               {/* Title */}
               <h2 className={`text-2xl font-bold text-white text-center mb-3 ${spaceGrotesk.className}`}>
-                Daily Limit Reached
+                {creditsRemaining <= 0 ? 'Not Enough Credits' : 'Daily Limit Reached'}
               </h2>
 
               {/* Description */}
               <p className="text-gray-400 text-center mb-6 text-sm leading-relaxed">
-                You've used all your free image generations for today. Come back in 24 hours or upgrade to continue creating.
+                {creditsRemaining <= 0
+                  ? `You don't have enough credits to generate this task. You need at least ${calculateCreditCost()} credits but only have ${Math.max(0, creditsRemaining)} remaining.`
+                  : "You've used all your free image generations for today. Come back in 24 hours or upgrade to continue creating."
+                }
               </p>
 
               {/* Stats */}
@@ -3226,7 +3338,7 @@ export default function VizualStudioApp() {
                   onClick={() => setShowLimitModal(false)}
                   className="w-full py-3 rounded-xl bg-white/5 text-gray-400 font-medium text-sm hover:bg-white/10 transition-colors border border-white/5"
                 >
-                  Wait Until Tomorrow
+                  {creditsRemaining <= 0 ? 'Close' : 'Wait Until Tomorrow'}
                 </button>
               </div>
             </div>
@@ -3333,9 +3445,10 @@ export default function VizualStudioApp() {
                   <button 
                     onClick={() => {
                       const email = user?.email;
+                      const returnUrl = `${window.location.origin}/vizual/studio?success=true&plan=basic`;
                       const url = email 
-                        ? `https://buy.stripe.com/eVq3cvcypdVZ5UF4Y8dfG0f?prefilled_email=${encodeURIComponent(email)}`
-                        : 'https://buy.stripe.com/eVq3cvcypdVZ5UF4Y8dfG0f';
+                        ? `https://buy.stripe.com/eVq3cvcypdVZ5UF4Y8dfG0f?prefilled_email=${encodeURIComponent(email)}&redirect_url=${encodeURIComponent(returnUrl)}`
+                        : `https://buy.stripe.com/eVq3cvcypdVZ5UF4Y8dfG0f?redirect_url=${encodeURIComponent(returnUrl)}`;
                       window.location.href = url;
                     }}
                     className="w-full py-3 rounded-xl bg-white text-black font-semibold text-sm hover:bg-gray-100 hover:-translate-y-0.5 transition-all relative overflow-hidden group/btn">
@@ -3396,9 +3509,10 @@ export default function VizualStudioApp() {
                   <button 
                     onClick={() => {
                       const email = user?.email;
+                      const returnUrl = `${window.location.origin}/vizual/studio?success=true&plan=pro`;
                       const url = email 
-                        ? `https://buy.stripe.com/fZu14ndCtdVZfvf4Y8dfG0g?prefilled_email=${encodeURIComponent(email)}`
-                        : 'https://buy.stripe.com/fZu14ndCtdVZfvf4Y8dfG0g';
+                        ? `https://buy.stripe.com/fZu14ndCtdVZfvf4Y8dfG0g?prefilled_email=${encodeURIComponent(email)}&redirect_url=${encodeURIComponent(returnUrl)}`
+                        : `https://buy.stripe.com/fZu14ndCtdVZfvf4Y8dfG0g?redirect_url=${encodeURIComponent(returnUrl)}`;
                       window.location.href = url;
                     }}
                     className="w-full py-3 rounded-xl bg-white text-black font-semibold text-sm hover:bg-gray-100 hover:-translate-y-0.5 transition-all relative overflow-hidden group/btn">
@@ -3452,9 +3566,10 @@ export default function VizualStudioApp() {
                   <button 
                     onClick={() => {
                       const email = user?.email;
+                      const returnUrl = `${window.location.origin}/vizual/studio?success=true&plan=ultra`;
                       const url = email 
-                        ? `https://buy.stripe.com/eVa6oOglDdvL2GY7st?prefilled_email=${encodeURIComponent(email)}`
-                        : 'https://buy.stripe.com/eVa6oOglDdvL2GY7st';
+                        ? `https://buy.stripe.com/eVa6oOglDdvL2GY7st?prefilled_email=${encodeURIComponent(email)}&redirect_url=${encodeURIComponent(returnUrl)}`
+                        : `https://buy.stripe.com/eVa6oOglDdvL2GY7st?redirect_url=${encodeURIComponent(returnUrl)}`;
                       window.location.href = url;
                     }}
                     className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-black font-bold text-sm hover:shadow-[0_0_30px_rgba(251,191,36,0.3)] hover:-translate-y-0.5 transition-all relative overflow-hidden group/btn">
