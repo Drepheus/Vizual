@@ -997,6 +997,27 @@ export default function VizualStudioApp() {
       }
     }
 
+    // VIDEO credit check: verify user has enough credits for video cost
+    if (creationMode === 'VIDEO' && user) {
+      const freshData = await getUserCreditsAndUsage(user.id);
+      if (freshData) {
+        setAccountData(freshData);
+        setUserCredits(freshData.credits || 5);
+        setCreditsUsed(freshData.credits_used || 0);
+        const remaining = (freshData.credits || 0) - (freshData.credits_used || 0);
+        if (remaining < estimatedCost) {
+          setShowLimitModal(true);
+          trackCreditLimitReached({
+            subscription_tier: freshData?.subscription_tier || 'free',
+            credits_remaining: remaining,
+            daily_free_remaining: freshData?.daily_free_images_remaining || 0,
+          });
+          showToast(`Not enough credits! This video costs ${estimatedCost} credits but you only have ${remaining}.`, 'error', 5000);
+          return;
+        }
+      }
+    }
+
     // Check if Reference or Remix mode requires attachments
     const isReferenceMode = activeTab === 'REFERENCE' || activeTab === 'IMAGE REFERENCE';
     const isRemixMode = activeTab === 'REMIX';
@@ -1087,12 +1108,16 @@ export default function VizualStudioApp() {
           const data = await response.json();
 
           if (!response.ok) {
+            if (response.status === 403) {
+              await refreshCreditsFromDB();
+              setShowLimitModal(true);
+              showToast(data.message || 'Not enough credits for this generation.', 'error', 5000);
+              return;
+            }
             throw new Error(data.error || 'Failed to remix image');
           }
 
-          // Consume BEFORE setting result so credits are deducted even if user navigates away
-          await consumeImageGen();
-          // Refresh credits from DB to keep counter accurate
+          // Server already deducted credits — refresh UI to show updated balance
           await refreshCreditsFromDB();
 
           setGeneratedContent({
@@ -1129,6 +1154,12 @@ export default function VizualStudioApp() {
           const data = await response.json();
 
           if (!response.ok) {
+            if (response.status === 403) {
+              await refreshCreditsFromDB();
+              setShowLimitModal(true);
+              showToast(data.message || 'Not enough credits for this generation.', 'error', 5000);
+              return;
+            }
             throw new Error(data.error || 'Failed to generate image');
           }
 
@@ -1138,9 +1169,7 @@ export default function VizualStudioApp() {
           const appliedStyles = [styleNames, modeNames].filter(Boolean).join(' + ');
           const modeDescription = isReferenceMode ? ' (using reference)' : '';
 
-          // Consume BEFORE setting result so credits are deducted reliably
-          await consumeImageGen();
-          // Refresh credits from DB to keep counter accurate
+          // Server already deducted credits — refresh UI to show updated balance
           await refreshCreditsFromDB();
 
           setGeneratedContent({
@@ -1182,6 +1211,13 @@ export default function VizualStudioApp() {
         const data = await response.json();
 
         if (!response.ok) {
+          // If server returned 403, it means insufficient credits
+          if (response.status === 403) {
+            await refreshCreditsFromDB();
+            setShowLimitModal(true);
+            showToast(data.message || `Not enough credits! Need ${data.creditCost || estimatedCost}.`, 'error', 5000);
+            return;
+          }
           throw new Error(data.error || 'Failed to generate video');
         }
 
@@ -1209,8 +1245,8 @@ export default function VizualStudioApp() {
           style_names: styleNames ? [styleNames] : undefined,
         });
 
-        // Deduct credits after successful generation
-        await deductCredits(estimatedCost);
+        // Server already deducted credits — refresh UI to show updated balance
+        await refreshCreditsFromDB();
       }
     } catch (error: any) {
       console.error('Generation error:', error);
@@ -2170,12 +2206,14 @@ export default function VizualStudioApp() {
 
                           {/* Send Button */}
                           <button
-                            onClick={handleGenerate}
-                            disabled={!prompt.trim()}
+                            onClick={estimatedCost > creditsRemaining && user ? () => setShowLimitModal(true) : handleGenerate}
+                            disabled={!prompt.trim() || isGenerating}
                             className={`p-2 md:p-2.5 rounded-full transition-colors ${
-                              prompt.trim()
-                                ? 'bg-white text-black hover:bg-gray-200'
-                                : 'bg-white/10 text-gray-500 cursor-not-allowed'
+                              !prompt.trim() || isGenerating
+                                ? 'bg-white/10 text-gray-500 cursor-not-allowed'
+                                : estimatedCost > creditsRemaining && user
+                                  ? 'bg-red-500/80 text-white hover:bg-red-500'
+                                  : 'bg-white text-black hover:bg-gray-200'
                             }`}
                             title={estimatedCost > creditsRemaining ? 'Not enough credits — click to upgrade' : 'Generate'}
                           >

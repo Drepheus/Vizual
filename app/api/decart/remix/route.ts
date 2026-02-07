@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { trackUsage, logApiCall } from '@/lib/usage-tracking';
 import { getUserFromRequest, saveGeneratedMedia } from '@/lib/supabase-server';
+import { checkUserCredits, deductCreditsServer } from '@/lib/credit-check';
 
 // Decart API base URL
 const DECART_API_BASE = 'https://api.decart.ai/v1';
@@ -39,6 +40,39 @@ export async function POST(req: NextRequest) {
     const authUser = await getUserFromRequest(req);
     const userId = authUser?.userId;
     const accessToken = authUser?.accessToken;
+
+    // ==========================================
+    // SERVER-SIDE CREDIT CHECK — BEFORE generation
+    // ==========================================
+    if (userId) {
+      const creditCheck = await checkUserCredits(userId, 'image', 'p-image'); // Remix uses ~1 credit
+      if (!creditCheck.allowed) {
+        return NextResponse.json(
+          {
+            error: 'Insufficient credits',
+            message: creditCheck.message,
+            creditCost: creditCheck.creditCost,
+            creditsRemaining: creditCheck.creditsRemaining,
+          },
+          { status: 403 }
+        );
+      }
+
+      // Deduct credits BEFORE generation
+      if (creditCheck.creditCost > 0 && creditCheck.message !== 'Using daily free image') {
+        const deduction = await deductCreditsServer(userId, creditCheck.creditCost);
+        if (!deduction.success) {
+          return NextResponse.json(
+            {
+              error: 'Insufficient credits',
+              message: deduction.error || 'Failed to deduct credits',
+              creditsRemaining: deduction.newBalance,
+            },
+            { status: 403 }
+          );
+        }
+      }
+    }
 
     console.log(`[Decart Remix] Processing ${mode} request with prompt: "${prompt.substring(0, 50)}..."`);
 

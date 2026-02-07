@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Client } from 'wavespeed';
 import { trackUsage, logApiCall } from '@/lib/usage-tracking';
 import { getUserFromRequest, saveGeneratedMedia, createDraft, updateDraftStatus, deleteDraft } from '@/lib/supabase-server';
+import { checkUserCredits, deductCreditsServer, calculateCreditCost } from '@/lib/credit-check';
 
 // Model ID mapping - maps our internal IDs to Wavespeed model paths
 const MODEL_MAP: Record<string, string> = {
@@ -58,6 +59,39 @@ export async function POST(req: NextRequest) {
         const authUser = await getUserFromRequest(req);
         const userId = authUser?.userId;
         accessToken = authUser?.accessToken;
+
+        // ==========================================
+        // SERVER-SIDE CREDIT CHECK — BEFORE generation
+        // ==========================================
+        if (userId) {
+            const creditCheck = await checkUserCredits(userId, 'image', model);
+            if (!creditCheck.allowed) {
+                return NextResponse.json(
+                    {
+                        error: 'Insufficient credits',
+                        message: creditCheck.message,
+                        creditCost: creditCheck.creditCost,
+                        creditsRemaining: creditCheck.creditsRemaining,
+                    },
+                    { status: 403 }
+                );
+            }
+
+            // Deduct credits BEFORE generation (so user can't spam requests)
+            if (creditCheck.creditCost > 0 && creditCheck.message !== 'Using daily free image') {
+                const deduction = await deductCreditsServer(userId, creditCheck.creditCost);
+                if (!deduction.success) {
+                    return NextResponse.json(
+                        {
+                            error: 'Insufficient credits',
+                            message: deduction.error || 'Failed to deduct credits',
+                            creditsRemaining: deduction.newBalance,
+                        },
+                        { status: 403 }
+                    );
+                }
+            }
+        }
 
         // Create a draft to track this generation (if user is authenticated)
         if (userId) {
