@@ -3193,20 +3193,13 @@ export default function VizualStudioApp() {
                     return;
                   }
                   try {
-                    await fetch('https://discord.com/api/webhooks/1469869372435857613/SDnq814CswBn7f9tK5fe750F8dVfQBtYg6L-Eky2e7eyCyQ43xL3OaS9qauuj5BqEczB', {
+                    await fetch('/api/feedback', {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify({
-                        embeds: [{
-                          title: '📝 New Feedback',
-                          description: feedbackText,
-                          color: 0x5865F2,
-                          fields: [
-                            { name: 'User', value: user?.email || user?.user_metadata?.full_name || 'Guest', inline: true },
-                            { name: 'Plan', value: accountData?.subscription_tier || 'free', inline: true },
-                          ],
-                          timestamp: new Date().toISOString(),
-                        }],
+                        feedback: feedbackText,
+                        userEmail: user?.email || user?.user_metadata?.full_name || 'Guest',
+                        plan: accountData?.subscription_tier || 'free',
                       }),
                     });
                     showToast('Feedback submitted! Thank you.', 'success');
