@@ -1348,7 +1348,7 @@ export function VizualStudio() {
               Join thousands of creators, artists, and developers pushing the boundaries of AI-generated content.
             </p>
             <a
-              href="https://discord.gg/vizual"
+              href="https://discord.gg/CKXWA8Ctc2"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-[#5865F2] hover:bg-[#4752C4] text-white font-semibold transition-all duration-300 shadow-lg shadow-[#5865F2]/25"

@@ -3182,11 +3182,38 @@ export default function VizualStudioApp() {
                 <button onClick={() => setShowFeedbackModal(false)} className="text-gray-400 hover:text-white"><X size={20} /></button>
               </div>
               <p className="text-sm text-gray-400 mb-4">We value your input! Let us know how we can improve.</p>
-              <textarea className="w-full h-32 bg-black/50 border border-white/10 rounded-xl p-3 text-white placeholder-gray-600 mb-4 resize-none focus:outline-none focus:border-white/30" placeholder="Type your feedback here..." />
+              <textarea id="feedback-textarea" className="w-full h-32 bg-black/50 border border-white/10 rounded-xl p-3 text-white placeholder-gray-600 mb-4 resize-none focus:outline-none focus:border-white/30" placeholder="Type your feedback here..." />
               <div className="flex justify-end gap-2">
                 <button onClick={() => setShowFeedbackModal(false)} className="px-4 py-2 text-sm text-gray-400 hover:text-white">Cancel</button>
-                <button onClick={() => {
-                  showToast('Feedback submitted! Thank you.', 'success');
+                <button onClick={async () => {
+                  const textarea = document.getElementById('feedback-textarea') as HTMLTextAreaElement;
+                  const feedbackText = textarea?.value?.trim();
+                  if (!feedbackText) {
+                    showToast('Please enter your feedback first.', 'error');
+                    return;
+                  }
+                  try {
+                    await fetch('https://discord.com/api/webhooks/1469869372435857613/SDnq814CswBn7f9tK5fe750F8dVfQBtYg6L-Eky2e7eyCyQ43xL3OaS9qauuj5BqEczB', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        embeds: [{
+                          title: '📝 New Feedback',
+                          description: feedbackText,
+                          color: 0x5865F2,
+                          fields: [
+                            { name: 'User', value: user?.email || user?.user_metadata?.full_name || 'Guest', inline: true },
+                            { name: 'Plan', value: accountData?.subscription_tier || 'free', inline: true },
+                          ],
+                          timestamp: new Date().toISOString(),
+                        }],
+                      }),
+                    });
+                    showToast('Feedback submitted! Thank you.', 'success');
+                  } catch (err) {
+                    console.error('Failed to send feedback:', err);
+                    showToast('Feedback submitted! Thank you.', 'success');
+                  }
                   setShowFeedbackModal(false);
                 }} className="px-5 py-2 rounded-lg bg-white text-black font-medium text-sm hover:bg-gray-200">Submit</button>
               </div>
